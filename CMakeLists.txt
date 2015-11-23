@@ -5,6 +5,7 @@ option (WITH_WEB "Compile with Web support"               ON)
 option (WITH_HSM "Compile with HSM plugin"                ON)
 option (WITH_PLUGIN_GSL "Compile GSL plugin"              ON)
 option (WITH_PLUGIN_NLOPT "Compile NLOpt plugin"          ON)
+option (WITH_PLUGIN_HD5 "Compile HD5 plugin"              ON)
 option (WITH_FOREIGN_C "Compile with C API"               ON)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   ON)
 #option (WITH_FOREIGN_PYTHON "Compile with Python API" OFF)
@@ -15,6 +16,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set (SOFT_MAJOR_VERSION 5)
 set (SOFT_MINOR_VERSION 0)
 set (SOFT_MICRO_VERSION 1)
+
+
+# Install targets
+set(APPDIR lib/${PROJECT_NAME})
+set(STORAGE_DRIVER_INSTALL_DIR ${APPDIR}/storage)
+set(SCRIPT_MODULES_INSTALL_DIR ${APPDIR}/modules)
+set(SCRIPT_PLUGINS_INSTALL_DIR ${APPDIR}/plugins)
+set(INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
+
 
 # Core library
 add_subdirectory(core/src/kernel)
@@ -36,6 +46,10 @@ endif(WITH_PLUGIN_GSL)
 if (WITH_PLUGIN_NLOPT)
   add_subdirectory(tools/src/plugins/nlopt)
 endif(WITH_PLUGIN_NLOPT)
+
+if (WITH_PLUGIN_HD5)
+  add_subdirectory(tools/src/plugins/hdf5)
+endif(WITH_PLUGIN_HD5)
 
 if (WITH_HSM)
   add_subdirectory(tools/src/hsm)
@@ -63,3 +77,6 @@ endif (WITH_FOREIGN_PYTHON)
 if (WITH_FOREIGN_HASKELL)
   message("Haskell is currently not supported")
 endif (WITH_FOREIGN_HASKELL)
+
+
+

@@ -24,4 +24,5 @@ add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries(${PROJECT_NAME} Qt5::Core ${LINK_LIBS} soft-storage-mongo)
 
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/plugins)
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${SCRIPT_PLUGINS_INSTALL_DIR})
+

@@ -22,3 +22,4 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries (softshell soft-kernel Qt5::Core Qt5::Script Qt5::Concurrent Qt5::Network)
 
 install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+install (DIRECTORY modules DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
