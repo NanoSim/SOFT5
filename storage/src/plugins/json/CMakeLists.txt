@@ -1,6 +1,7 @@
 project (soft-storage-plugins-json C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set (CMAKE_AUTOMOC TRUE)
 find_package(Qt5Core REQUIRED)
 
 include_directories (${soft-kernel_INCLUDE_DIRS})

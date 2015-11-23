@@ -1,6 +1,7 @@
 project (soft-storage-plugins-mongo C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set (CMAKE_AUTOMOC TRUE)
 find_package(Qt5Core REQUIRED)
 find_package(BSON REQUIRED)
 find_package(MongoC REQUIRED)

@@ -2,7 +2,7 @@ project (soft-storage-mongo C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR    ON)
-set (CMAKE_AUTOMOC                ON)
+set (CMAKE_AUTOMOC                TRUE)
 
 find_package(Qt5Core   REQUIRED)
 find_package(BSON      REQUIRED)
