@@ -10,7 +10,10 @@ find_package(Qt5Network)
 find_package(Qt5Script)
 find_package(Qt5Concurrent)
 
-include_directories (${BSON_INCLUDE_DIR})
+# Generate config.h from config.h.in
+configure_file("config.h.in" "config.h")
+
+include_directories (${CMAKE_CURRENT_BINARY_DIR} ${BSON_INCLUDE_DIR})
 set (LIBS ${LIBS} ${BSON_LIBRARIES})
 
 aux_source_directory(. SRC_LIST)
@@ -20,8 +23,11 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network Qt5::Script Qt5::Concurrent )
 
 # Expose public includes to other subprojects
-set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
-    CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+set(${PROJECT_NAME}_INCLUDE_DIRS 
+  ${PROJECT_SOURCE_DIR} 
+  ${CMAKE_CURRENT_BINARY_DIR} 
+  ${BSON_INCLUDE_DIR}
+  CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 install(DIRECTORY . DESTINATION include/soft5 FILES_MATCHING PATTERN "*.h")

@@ -62,8 +62,8 @@ static bool registerDefaultStorage()
 
 static bool registerStoragePlugins()
 {
-  auto const softpath = QProcessEnvironment::systemEnvironment().value("SOFTBASE", qApp->applicationDirPath());  
-  auto const pluginPath = softpath + "/bin/" +  pluginDirectory; // TODO: FIX THIS!
+  auto const softpath = QProcessEnvironment::systemEnvironment().value("SOFTBASE", SOFTBASE);  
+  auto const pluginPath = softpath + "/storage"; // TODO: FIX THIS!
   QDir const pluginsDir(pluginPath);
   auto const files = pluginsDir.entryList (QDir::Files);
   foreach (auto const &file, files) {

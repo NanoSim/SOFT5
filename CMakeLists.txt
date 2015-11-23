@@ -24,10 +24,10 @@ if (WITH_TESTS)
 endif (WITH_TESTS)
 
 # Install targets
-set(APPDIR lib/${PROJECT_NAME})
-set(STORAGE_PLUGINS_INSTALL_DIR ${APPDIR}/storage)
-set(SCRIPT_MODULES_INSTALL_DIR ${APPDIR}/modules)
-set(SCRIPT_PLUGINS_INSTALL_DIR ${APPDIR}/plugins)
+set(SOFTBASE lib/${PROJECT_NAME})
+set(STORAGE_PLUGINS_INSTALL_DIR ${SOFTBASE}/storage)
+set(SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
+set(SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set(INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
 # Core library
@@ -42,7 +42,7 @@ add_subdirectory(storage/src/mongo)
 add_subdirectory(storage/src/plugins/mongo)
 add_subdirectory(storage/src/plugins/json)
 if (WITH_TESTS)
-add_subdirectory(storage/test/mongo)
+#add_subdirectory(storage/test/mongo)
 endif (WITH_TESTS)
 
 # Tools

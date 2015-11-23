@@ -1,5 +1,6 @@
 #ifndef SOFT_H_DEF
 #define SOFT_H_DEF
+#include "config.h"
 #include "softns.h"
 
 #include <string>
