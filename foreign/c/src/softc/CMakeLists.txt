@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
 project (softc C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)

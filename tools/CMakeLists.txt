@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
-
 option (WITH_WEB "Compile with Web support"               ON)
 option (WITH_HSM "Compile with HSM plugin"                ON)
 option (WITH_PLUGIN_GSL "Compile GSL plugin"              ON)
