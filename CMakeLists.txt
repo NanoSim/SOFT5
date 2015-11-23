@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
+project(soft5)
 
 option (WITH_WEB "Compile with Web support"               ON)
 option (WITH_HSM "Compile with HSM plugin"                ON)

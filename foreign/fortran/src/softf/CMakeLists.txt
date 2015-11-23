@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
-
 enable_language(Fortran)
 project (softf)
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
