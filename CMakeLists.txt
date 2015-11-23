@@ -25,7 +25,6 @@ set(SCRIPT_MODULES_INSTALL_DIR ${APPDIR}/modules)
 set(SCRIPT_PLUGINS_INSTALL_DIR ${APPDIR}/plugins)
 set(INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
-
 # Core library
 add_subdirectory(core/src/kernel)
 
