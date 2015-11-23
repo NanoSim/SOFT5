@@ -19,9 +19,14 @@ set (SOFT_MINOR_VERSION 0)
 set (SOFT_MICRO_VERSION 1)
 
 
+# Tests
+# Run them with "ctest -V" or "make check" to get verbose output.
 if (WITH_TESTS)
   enable_testing()
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose)
 endif (WITH_TESTS)
+
+
 
 # Install targets
 set(SOFTBASE lib/${PROJECT_NAME})
