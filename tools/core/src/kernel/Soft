@@ -1,0 +1,16 @@
+#ifndef SOFT_DEF_H
+#define SOFT_DEF_H
+
+#include<entity.h>
+#include<istrategyplugin.h>
+#include<soft.h>
+#include<storagestrategy.h>
+#include<idatamodel.h>
+#include<pluginloader.h>
+#include<softns.h>
+#include<transactor.h>
+#include<ientity.h>
+#include<scriptengine.h>
+#include<storagefactory.h>
+
+#endif // SOFT_DEF_H

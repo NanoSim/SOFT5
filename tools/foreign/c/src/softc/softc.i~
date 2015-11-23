@@ -1,0 +1,10 @@
+%module softc
+%{
+  #include "softc.h"
+  #include "softc-utils.h"
+  #include "softc-eventloop.h"
+  %}
+
+%include "softc.h"
+%include "softc-utils.h"
+%include "softc-eventloop.h"
