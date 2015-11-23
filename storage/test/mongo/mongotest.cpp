@@ -2,7 +2,7 @@
 #include <iostream>
 #include <mongoc.h>
 
-#include "qmongo"
+#include <QMongo>
 
 using soft::mongo::Client;
 using namespace soft;

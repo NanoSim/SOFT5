@@ -10,6 +10,7 @@ option (WITH_FOREIGN_C "Compile with C API"               ON)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   ON)
 #option (WITH_FOREIGN_PYTHON "Compile with Python API" OFF)
 #option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
+option (WITH_TESTS "Compile tests"                        ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -17,6 +18,10 @@ set (SOFT_MAJOR_VERSION 5)
 set (SOFT_MINOR_VERSION 0)
 set (SOFT_MICRO_VERSION 1)
 
+
+if (WITH_TESTS)
+  enable_testing()
+endif (WITH_TESTS)
 
 # Install targets
 set(APPDIR lib/${PROJECT_NAME})
@@ -27,12 +32,18 @@ set(INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
 # Core library
 add_subdirectory(core/src/kernel)
+if (WITH_TESTS)
+add_subdirectory(core/test/kernel)
+endif (WITH_TESTS)
 
 # Storage
 add_subdirectory(storage/src/hdf5)
 add_subdirectory(storage/src/mongo)
 add_subdirectory(storage/src/plugins/mongo)
 add_subdirectory(storage/src/plugins/json)
+if (WITH_TESTS)
+add_subdirectory(storage/test/mongo)
+endif (WITH_TESTS)
 
 # Tools
 add_subdirectory(tools/src/softshell)
