@@ -14,13 +14,14 @@ public:
    BsonModel();
    virtual ~BsonModel();
    IDataModel* createModel() override;
-   void appendInt32(const char *key, int value) override; 
+   void appendInt32(const char *key, int value) override;
+   void appendString(const char *key, const std::string &str) override;
    void appendDouble(const char *key, double value) override; 
    void appendBool(const char *key, bool value) override; 
    void appendArray(const char *key, IDataModel *model) override; 
    void appendModel(const char *key, IDataModel *model) override; 
    void appendDoubleArray(const char *key, size_t length, const double *value) override; 
-
+   void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
    const _bson_t *bson() const;
 private:
    class Private;

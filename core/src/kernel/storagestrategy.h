@@ -15,7 +15,8 @@ public:
   StorageStrategy &operator=(StorageStrategy const &) =delete;
   virtual ~StorageStrategy() = 0;
 
-  virtual IDataModel *dataModel ()                   = 0;
+  virtual const char *metaType() const               = 0;
+  virtual IDataModel *dataModel () const             = 0;
   virtual void        store     (IDataModel const *) = 0;
 };
 

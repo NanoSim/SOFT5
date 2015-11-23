@@ -1,4 +1,6 @@
 #include <bson.h>
+#include <QString>
+#include <QByteArray>
 #include "bsonmodel.h"
 
 SOFT_BEGIN_NAMESPACE
@@ -70,6 +72,17 @@ void BsonModel :: appendDoubleArray(const char *key, size_t length, const double
    }
    bson_append_array(d->bson, key, strlen(key), b);
    bson_destroy(b);   
+}
+
+void BsonModel :: appendByteArray(const char* key, const unsigned char *data, size_t size)
+{
+  BSON_APPEND_BINARY(d->bson, key, BSON_SUBTYPE_BINARY, data, size);
+}
+
+void BsonModel :: appendString(const char *key, const std::string &str)
+{
+  QByteArray utfStr = QString::fromStdString(str).toUtf8();
+  bson_append_utf8 (d->bson, key, strlen(key), utfStr.constData(), utfStr.length());
 }
 
 const _bson_t *BsonModel :: bson() const

@@ -4,33 +4,40 @@
 #include "ientity.h"
 SOFT_BEGIN_NAMESPACE
 
-const char *IEntity::staticMetaType = "Undefined:0.0";
-
 class IEntity::Private
 {
    friend class IEntity;
-   Private(const QString id)
-      : uuid(id)
-   {}
-
-   Private()
-      : uuid(QUuid::createUuid())
-   {}
-
-   QUuid uuid;
+  Private(std::string const &id)
+    : uuid(id.c_str())
+  {}
+  
+  Private()
+    : uuid(QUuid::createUuid())
+  {}
+  
+  QUuid uuid;
 };
 
 IEntity :: IEntity() 
    :d (new IEntity::Private())
 {}
 
-IEntity :: IEntity(const char *id) 
-   : d(new IEntity::Private(QString::fromLocal8Bit(id)))
+IEntity :: IEntity(std::string const &id) 
+   : d(new IEntity::Private(id))
+{}
+
+IEntity :: IEntity(IEntity const *other) 
+  : d(new IEntity::Private(other->id()))
 {}
 
 IEntity :: ~IEntity()
 {
    delete d;
+}
+
+IEntity* create (const std::string &)
+{
+  return NULL;
 }
 
 std::string IEntity :: id() const 

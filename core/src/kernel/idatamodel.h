@@ -2,6 +2,7 @@
 #define IDATAMODEL_H_DEF
 
 #include <cstddef>
+#include <string>
 #include "softns.h"
 
 SOFT_BEGIN_NAMESPACE
@@ -19,6 +20,11 @@ public:
    virtual void appendDoubleArray(const char *, size_t length, const double *value) = 0;
    virtual void appendArray(const char*, IDataModel *array) = 0;
    virtual void appendModel(const char*, IDataModel *model) = 0;
+   virtual void appendByteArray(const char*, const unsigned char *, size_t) = 0;
+   virtual void appendString(const char*, const std::string &str) = 0;
+
+  //   virtual int numDims() const;
+  //   virtual int numVars() const;  
 };
 
 SOFT_END_NAMESPACE

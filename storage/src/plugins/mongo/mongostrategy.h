@@ -16,10 +16,12 @@ public:
   MongoStrategy& operator= (MongoStrategy const &) =delete;  
   virtual ~MongoStrategy();
 
-  IDataModel* dataModel()         override;
+  IDataModel* dataModel() const   override;
   void store (IDataModel const *) override;
 
+  const char *metaType() const;
   static StorageStrategy* create(char const *uri, char const *opts);
+  static const char *staticMetaType;
 private:
    class Private;
    Private *d;

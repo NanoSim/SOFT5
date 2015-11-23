@@ -22,6 +22,7 @@ add_subdirectory(core/src/kernel)
 add_subdirectory(storage/src/hdf5)
 add_subdirectory(storage/src/mongo)
 add_subdirectory(storage/src/plugins/mongo)
+add_subdirectory(storage/src/plugins/json)
 
 # Tools
 add_subdirectory(tools/src/softshell)

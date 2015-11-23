@@ -2,6 +2,7 @@
 #include <QStringList>
 #include <QVariant>
 #include <QDir>
+#include <QUuid>
 #include <QLibrary>
 #include <QPluginLoader>
 #include <QScopedPointer>
@@ -116,9 +117,23 @@ std::shared_ptr<StorageStrategy> create(const char *name, const char *uri, const
   return retval;
 }
 
+StorageStrategy* createStrategy(const char *name, const char *uri, const char *options)
+{
+  if (QCoreApplication::instance() == nullptr) 
+    return nullptr;
+  
+  auto *factory = asPtr<StorageFactory>(qApp->property(storagefactoryid));
+  return factory->create(name, uri, options);
+}
+
 std::string applicationDirPath()
 {
    return QCoreApplication::applicationDirPath().toStdString();
+}
+
+std::string uuidGen()
+{
+  return QUuid::createUuid().toString().mid(1,36).toStdString();
 }
 
 std::list<std::string> arguments()

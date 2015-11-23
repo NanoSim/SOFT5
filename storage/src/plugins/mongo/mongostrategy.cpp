@@ -9,6 +9,13 @@
 
 SOFT_BEGIN_NAMESPACE
 
+const char *MongoStrategy::staticMetaType = "http://sintef.no/soft/TR/storage-strategy#mongo:0.1-SNAPSHOT-1";
+
+const char *MongoStrategy::metaType() const
+{
+  return MongoStrategy::staticMetaType;
+}
+
 class MongoStrategy::Private
 {
    friend class MongoStrategy;
@@ -63,9 +70,9 @@ MongoStrategy :: ~MongoStrategy()
    delete d;
 }
 
-IDataModel* MongoStrategy :: dataModel()
+IDataModel* MongoStrategy :: dataModel() const
 {
-   return new BsonModel();
+  return (IDataModel*)new BsonModel();
 }
 
 void MongoStrategy :: store (IDataModel const *model)
@@ -74,11 +81,11 @@ void MongoStrategy :: store (IDataModel const *model)
 
    bson_error_t error;
    auto retval = mongoc_collection_insert(d->collection, MONGOC_INSERT_NONE, bsonModel->bson(), 0, &error);
+   Q_UNUSED(retval);
 }
 
 StorageStrategy* MongoStrategy :: create(char const *uri, char const *opts)
 {
-  //   qDebug() << "MongoStrategy :: create" << uri << opts;
    auto s = new MongoStrategy(uri, opts);
    return s;
 }

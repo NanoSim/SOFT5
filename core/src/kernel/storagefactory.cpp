@@ -1,6 +1,7 @@
 #include <functional>
 #include <QMap>
 #include <QString>
+#include <QTextStream>
 #include <QDebug>
 
 #include "storagefactory.h"
@@ -31,8 +32,11 @@ bool StorageFactory :: registerStrategy(const char *name, StorageStrategy*(*crea
 
 StorageStrategy* StorageFactory :: create(const char *name, const char *uri, const char *options) const
 {
-  qDebug() << "StorageFactory :: create" << name << uri << options;
-  if (!d->map.contains(name)) return nullptr;
+  QTextStream(stdout) << "StorageFactory :: create (" << name << ", " << uri << ", "<< options << ")" << endl;;
+  if (!d->map.contains(name)) {
+    QTextStream(stderr) << "StorageFactory cannot create storage strategy: " << name << " " << uri << endl;
+    return nullptr;
+  }
   
   StorageStrategy*(*createFunc)(const char*, const char*) = d->map.value(name);
   return (*createFunc)(uri, options);
