@@ -1,0 +1,9 @@
+SimCoFlow = {}
+
+(function(base){
+    SimCoFlow = function(args) {
+
+    }
+
+    return base;
+})(exports);
