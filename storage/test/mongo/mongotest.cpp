@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <mongoc.h>
-
 #include <QMongo>
 
 using soft::mongo::Client;
@@ -12,7 +11,7 @@ using mongo::Uri;
 class MongoTest : public ::testing::Test {
 protected:
    static void SetUpTestCase() {
-      mongo::initialize();
+     Client::initialize();
       client = new mongo::Client("mongodb://localhost");
    }
 
