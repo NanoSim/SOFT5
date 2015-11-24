@@ -16,10 +16,10 @@ if(GTEST_FOUND)
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}")
+      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}")
   else(UNIX)
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "PATH=${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}")
+      PROPERTY ENVIRONMENT "PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}")
   endif(UNIX)
  
 else(GTEST_FOUND)
