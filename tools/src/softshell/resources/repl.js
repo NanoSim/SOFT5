@@ -5,14 +5,12 @@ repl.command = {};
 
 load(":/resources/core.js");
 
-soft_version = "SoftShell 0.2.12";
-soft_license = "Source license: LGPLv3";
+soft_version = "SOFT v" + version() + " ";
+soft_license = "GNU LESSER GENERAL PUBLIC LICENSE (v 2.1, February 1999)";
 
 function showHelp()
 {
-    var message = 
-	soft_version + "\n" +
-	soft_license + "\n\n" +
+    var message = soft_version + "(" + soft_license + ")\n\n" +
 	"Welcome to Soft Shell\n" +
 	"Shell commands:\n" +
 	":h                      This message\n"+
@@ -93,9 +91,7 @@ function mainrepl()
 }
 
 function __main__() {
-    var message = 
-	soft_version + "\n" +
-	soft_license + "\n\n" +
+    var message = soft_version + "(" + soft_license + ")\n\n" +
 	"For help, type :help\n";
     
     print(message);

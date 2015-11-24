@@ -15,9 +15,8 @@ option (WITH_TESTS "Compile tests"                        ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set (SOFT_MAJOR_VERSION 5)
-set (SOFT_MINOR_VERSION 0)
-set (SOFT_MICRO_VERSION 1)
-
+set (SOFT_MINOR_VERSION 1)
+set (SOFT_MICRO_VERSION 3)
 
 # Tests
 # Run them with "ctest -V" or "make check" to get verbose output.

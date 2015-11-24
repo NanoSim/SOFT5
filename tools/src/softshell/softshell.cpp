@@ -3,6 +3,7 @@
 #include <QtScript>
 #include <QtCore>
 
+#include "soft.h"
 #include "softns.h"
 
 ANONYMOUS_BEGIN_NAMESPACE
@@ -42,6 +43,15 @@ QScriptValue exceptionBacktrace(QScriptContext *, QScriptEngine *engine)
    return engine->undefinedValue();
 }
 
+QScriptValue version(QScriptContext *context, QScriptEngine *engine)
+{
+  Q_UNUSED(context);
+  QString versionString = QString("%1.%2.%3")
+    .arg(QString::number(SOFT_MAJOR_VERSION))
+    .arg(QString::number(SOFT_MINOR_VERSION))
+    .arg(QString::number(SOFT_MICRO_VERSION));
+  return engine->toScriptValue(versionString);
+}
 
 QScriptValue writeline(QScriptContext *context, QScriptEngine *engine)
 {
@@ -458,6 +468,7 @@ void registerBase(QScriptEngine *engine)
 {
    engine->globalObject().setProperty("__global__", engine->globalObject());
 
+   registerFunction(engine, "version", version);
    registerFunction(engine, "readline", readline);
    registerFunction(engine, "writeline", writeline);
    registerFunction(engine, "load", load);
