@@ -28,8 +28,9 @@ ScriptPlugins :: ~ScriptPlugins()
 
 void ScriptPlugins :: load(QScriptEngine *engine)
 {
-  QCoreApplication::addLibraryPath (qApp->applicationDirPath() + "/modules");
-  auto const pluginPath = qApp->applicationDirPath() + "/plugins";
+  auto const softpath = QProcessEnvironment::systemEnvironment().value("SOFTBASE", SOFTBASE);
+  QCoreApplication::addLibraryPath (softpath + "/modules");
+  auto const pluginPath = softpath + "/plugins";
   QDir pluginsDir(pluginPath);
   auto files = pluginsDir.entryList(QDir::Files);
   foreach( auto const &file, files ) {
