@@ -14,13 +14,13 @@ if(GTEST_FOUND)
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 
-  if(UNIX)
+  if (UNIX)
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
-  else(UNIX)
+      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-kernel_BINARY_DIR}:${soft-storage-hdf5_BINARY_DIR}:${soft-storage-mongo_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
+  else()
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}:$ENV{PATH}")
-  endif(UNIX)
+      PROPERTY ENVIRONMENT "PATH=${soft-kernel_BINARY_DIR}:${soft-storage-hdf5_BINARY_DIR}:${soft-storage-mongo_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}:$ENV{PATH}")
+  endif()
  
 else(GTEST_FOUND)
   message("Google test not found - skipping tests")
