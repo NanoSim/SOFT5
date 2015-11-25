@@ -49,41 +49,56 @@ std::list<std::string> registeredStorageDrivers()
   return retval;
 }
 
-/*
-static bool registerDefaultStorage()
+static bool registerPlugin(QString const &file)
 {
-  return registerStorage("default", [](const char *uri) -> soft::StorageStrategy*
-		  {
-		    auto d = new soft::DefaultStrategy(uri);
-		    return d;
-		  });  
+  if (QLibrary::isLibrary (file)) {
+    QScopedPointer<QPluginLoader> loader (new QPluginLoader (file));
+    auto isOk   = loader->load();
+    if (isOk) {
+      auto pluginPtr = qobject_cast<IStrategyPlugin*>(loader->instance());
+      if (pluginPtr) {
+	pluginPtr->registerStrategy();
+      }
+      else {
+	return false;
+      }
+    }
+    else {
+      QTextStream(stderr) << loader->errorString() << endl;
+      return false;
+    }
+  }
+  return false;
 }
-*/
 
-static bool registerStoragePlugins()
+static QList<QDir> pluginsDirList()
 {
   auto const softpath = QProcessEnvironment::systemEnvironment().value("SOFTBASE", SOFTBASE);  
   auto const pluginPath = softpath + "/storage"; // TODO: FIX THIS!
   QDir const pluginsDir(pluginPath);
-  auto const files = pluginsDir.entryList (QDir::Files);
-  foreach (auto const &file, files) {
-    if (QLibrary::isLibrary (file)) {
-      QScopedPointer<QPluginLoader> loader (new QPluginLoader (pluginsDir.absoluteFilePath(file)));
-      auto isOk   = loader->load();
-      if (isOk) {
-	auto pluginPtr = qobject_cast<IStrategyPlugin*>(loader->instance());
-	if (pluginPtr) {
-	  pluginPtr->registerStrategy();
-	}
-	else {
-	}
-      }
-      else {
-	QTextStream(stderr) << loader->errorString() << endl;
-      }
+  QList<QDir> list = QList<QDir>() << pluginsDir;
+
+  if (qApp->arguments().count() > 1 ) {
+    auto const argPaths = qApp->arguments().at(1).split(":");
+    for (auto path : argPaths) {
+      QDir const d(path);
+      list << d;
     }
   }
-  return true;
+  
+  return list;
+}
+
+static bool registerStoragePlugins()
+{
+  bool isOk = false;
+  for(auto pluginsDir : pluginsDirList()) {
+    auto const files = pluginsDir.entryList (QDir::Files);
+    foreach (auto const &file, files) {
+      isOk = registerPlugin (pluginsDir.absoluteFilePath(file));
+    }
+  }
+  return isOk;
 }
 
 static QCoreApplication* app = nullptr;
@@ -93,7 +108,6 @@ void init(int &argc, char *argv[])
     app = new QCoreApplication(argc, argv);
     auto storageFactory = new StorageFactory();
     app->setProperty(storagefactoryid, asQVariant(storageFactory));
-//    registerDefaultStorage();
     registerStoragePlugins();
   }
 }
