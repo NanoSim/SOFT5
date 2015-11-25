@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.2)
+include(CPack)
 project(soft5)
 
 option (WITH_WEB "Compile with Web support"               ON)
 option (WITH_HSM "Compile with HSM plugin"                ON)
+option (WITH_STORAGE_HD5 "HDF5 storage support"           ON)
+option (WITH_STORAGE_MONGO "MongoDB storage support"      ON)
+option (WITH_STORAGE_JSON "JSON storage support"          ON)
 option (WITH_PLUGIN_GSL "Compile GSL plugin"              ON)
 option (WITH_PLUGIN_NLOPT "Compile NLOpt plugin"          ON)
 option (WITH_PLUGIN_HD5 "Compile HD5 plugin"              ON)
+option (WITH_PLUGIN_MONGO "Compile HD5 plugin"            ON)
 option (WITH_FOREIGN_C "Compile with C API"               ON)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   ON)
 #option (WITH_FOREIGN_PYTHON "Compile with Python API" OFF)
@@ -13,6 +18,23 @@ option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   ON)
 option (WITH_TESTS "Compile tests"                        ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+find_package (BSON REQUIRED)
+find_package (Qt5Core REQUIRED)
+find_package (Qt5Network REQUIRED) 
+find_package (Qt5Script REQUIRED) 
+find_package (Qt5Concurrent REQUIRED)
+
+set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
+set (CMAKE_INCLUDE_CURRENT_DIR    ON)
+set (CMAKE_AUTOMOC                ON)
+
+if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
+  find_package(HDF5 REQUIRED)
+endif ()
+
+if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
+  find_package(MongoC REQUIRED)
+endif()
 
 set (SOFT_MAJOR_VERSION 5)
 set (SOFT_MINOR_VERSION 1)
@@ -41,17 +63,31 @@ add_subdirectory(core/test/kernel)
 endif (WITH_TESTS)
 
 # Storage
-add_subdirectory(storage/src/hdf5)
-add_subdirectory(storage/src/mongo)
-add_subdirectory(storage/src/plugins/mongo)
-add_subdirectory(storage/src/plugins/json)
+if (WITH_STORAGE_HD5)
+  add_subdirectory(storage/src/hdf5)
+endif (WITH_STORAGE_HD5)
+
+if (WITH_STORAGE_MONGO)
+  add_subdirectory(storage/src/mongo)
+endif (WITH_STORAGE_MONGO)
+
+if (WITH_STORAGE_MONGO)
+  add_subdirectory(storage/src/plugins/mongo)
+endif (WITH_STORAGE_MONGO)
+
+if (WITH_STORAGE_JSON)
+  add_subdirectory(storage/src/plugins/json)
+endif (WITH_STORAGE_JSON)
+
 if (WITH_TESTS)
 #add_subdirectory(storage/test/mongo)
 endif (WITH_TESTS)
 
 # Tools
 add_subdirectory(tools/src/softshell)
-add_subdirectory(tools/src/plugins/mongo)
+if (WITH_PLUGIN_MONGO)
+  add_subdirectory(tools/src/plugins/mongo)
+endif (WITH_PLUGIN_MONGO)
 
 if (WITH_PLUGIN_GSL)
   add_subdirectory(tools/src/plugins/gsl)

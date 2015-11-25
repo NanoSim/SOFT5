@@ -1,25 +1,35 @@
 project (soft-storage-hdf5 C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
-find_package(Qt5Core REQUIRED)
-find_package(HDF5 REQUIRED)
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-include_directories (${HDF5_INCLUDE_DIR} ${soft-kernel_INCLUDE_DIRS})
-set (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
+MESSAGE(STATUS "Using HDF5_INCLUDE_DIR: ${HDF5_INCLUDE_DIR}")
+MESSAGE(STATUS "Using HDF5_LIBRARIES: ${HDF5_LIBRARIES}")
+include_directories (
+  ${HDF5_INCLUDE_DIR}
+  ${soft-kernel_INCLUDE_DIRS}
+  )
+
+set (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES} ${soft-kernel_LIBS})
 
 aux_source_directory (. SRC_LIST)
 add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
-target_link_libraries(${PROJECT_NAME} Qt5::Core ${LINK_LIBS} soft-kernel)
+target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 
 # Expose public includes to other subprojects
-set(${PROJECT_NAME}_INCLUDE_DIR ${PROJECT_SOURCE_DIR}
-    CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+set(${PROJECT_NAME}_INCLUDE_DIRS
+  ${PROJECT_SOURCE_DIR}
+  ${HDF5_INCLUDE_DIR}
+  ${soft-kernel_INCLUDE_DIRS}
+  CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
+set(${PROJECT_NAME}_LIBS
+  ${PROJECT_NAME}
+  ${LINK_LIBS}
+  CACHE INTERNAL "${PROJECT_NAME}: Link Libs" FORCE)
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 install(DIRECTORY . DESTINATION include/soft5 FILES_MATCHING PATTERN "*.h")

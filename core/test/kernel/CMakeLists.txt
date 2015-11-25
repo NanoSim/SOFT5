@@ -9,17 +9,17 @@ if(GTEST_FOUND)
   aux_source_directory(. SRC_LIST)
   add_executable(${PROJECT_NAME} ${SRC_LIST})
   include_directories(${soft-kernel_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} soft-kernel ${GTEST_LIBRARIES}) 
+  target_link_libraries(${PROJECT_NAME} ${soft-kernel_LIBS} ${GTEST_LIBRARIES}) 
 
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}")
+      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
   else(UNIX)
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}")
+      PROPERTY ENVIRONMENT "PATH=${soft-kernel_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}:${soft-storage-plugins-mongo_BINARY_DIR}:$ENV{PATH}")
   endif(UNIX)
  
 else(GTEST_FOUND)
