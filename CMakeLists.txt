@@ -13,7 +13,7 @@ option (WITH_PLUGIN_HD5 "Compile HD5 plugin"              ON)
 option (WITH_PLUGIN_MONGO "Compile HD5 plugin"            ON)
 option (WITH_FOREIGN_C "Compile with C API"               ON)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   OFF)
-#option (WITH_FOREIGN_PYTHON "Compile with Python API" OFF)
+option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
 #option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
 
@@ -124,7 +124,7 @@ if (WITH_FOREIGN_FORTRAN)
 endif (WITH_FOREIGN_FORTRAN)
 
 if (WITH_FOREIGN_PYTHON)
-  message("Python is currently not supported")
+  add_subdirectory(foreign/python/src/softpy)
 endif (WITH_FOREIGN_PYTHON)
 
 if (WITH_FOREIGN_HASKELL)
