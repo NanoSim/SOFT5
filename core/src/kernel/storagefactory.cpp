@@ -32,7 +32,6 @@ bool StorageFactory :: registerStrategy(const char *name, StorageStrategy*(*crea
 
 StorageStrategy* StorageFactory :: create(const char *name, const char *uri, const char *options) const
 {
-  QTextStream(stdout) << "StorageFactory :: create (" << name << ", " << uri << ", "<< options << ")" << endl;;
   if (!d->map.contains(name)) {
     QTextStream(stderr) << "StorageFactory cannot create storage strategy: " << name << " " << uri << endl;
     return nullptr;

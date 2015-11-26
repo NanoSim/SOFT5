@@ -4,8 +4,9 @@ set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR    ON)
 set (CMAKE_AUTOMOC                TRUE)
 
-include_directories (${MongoC_INCLUDE_DIR} ${soft-kernel_INCLUDE_DIRS})
-set (LINK_LIBS ${LINK_LIBS} ${MongoC_LIBRARIES} ${soft-kernel_LIBS})
+message(status "KERNEL INCLUDES: ${soft-kernel_INCLUDE_DIRS}")
+include_directories (${MONGOC_INCLUDE_DIR} ${soft-kernel_INCLUDE_DIRS})
+set (LINK_LIBS ${LINK_LIBS} ${MONGOC_LIBRARIES} ${soft-kernel_LIBS})
 
 aux_source_directory (. SRC_LIST)
 add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
@@ -17,7 +18,7 @@ MESSAGE(STATUS "soft-storage-mongo libs: ${LINK_LIBS}")
 # Expose public includes to other subprojects
 set(${PROJECT_NAME}_INCLUDE_DIRS
   ${PROJECT_SOURCE_DIR}
-  ${MongoC_INCLUDE_DIR}
+  ${MONGOC_INCLUDE_DIR}
   ${soft-kernel_INCLUDE_DIRS}
   CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 

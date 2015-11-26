@@ -33,7 +33,7 @@ if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
 endif ()
 
 if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
-  find_package(MongoC REQUIRED)
+  find_package(MONGOC REQUIRED)
 endif()
 
 set (SOFT_MAJOR_VERSION 5)
@@ -44,7 +44,7 @@ set (SOFT_MICRO_VERSION 3)
 # Run them with "ctest -V" or "make check" to get verbose output.
 if (WITH_TESTS)
   enable_testing()
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose)
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
 endif (WITH_TESTS)
 
 
@@ -69,6 +69,9 @@ endif (WITH_STORAGE_HD5)
 
 if (WITH_STORAGE_MONGO)
   add_subdirectory(storage/src/mongo)
+  if (WITH_TESTS)	
+     add_subdirectory(storage/test/mongo)	
+  endif (WITH_TESTS)
 endif (WITH_STORAGE_MONGO)
 
 if (WITH_STORAGE_MONGO)
