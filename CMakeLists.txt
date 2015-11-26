@@ -65,17 +65,17 @@ endif (WITH_TESTS)
 # Storage
 if (WITH_STORAGE_HD5)
   add_subdirectory(storage/src/hdf5)
+  if (WITH_TESTS)
+    add_subdirectory(storage/test/hdf5)
+  endif (WITH_TESTS)
 endif (WITH_STORAGE_HD5)
 
 if (WITH_STORAGE_MONGO)
   add_subdirectory(storage/src/mongo)
+  add_subdirectory(storage/src/plugins/mongo)
   if (WITH_TESTS)	
      add_subdirectory(storage/test/mongo)	
   endif (WITH_TESTS)
-endif (WITH_STORAGE_MONGO)
-
-if (WITH_STORAGE_MONGO)
-  add_subdirectory(storage/src/plugins/mongo)
 endif (WITH_STORAGE_MONGO)
 
 if (WITH_STORAGE_JSON)
