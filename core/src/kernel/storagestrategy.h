@@ -18,6 +18,7 @@ public:
   virtual const char *metaType() const               = 0;
   virtual IDataModel *dataModel () const             = 0;
   virtual void        store     (IDataModel const *) = 0;
+  virtual void        retrieve  (IDataModel *) const = 0;
 };
 
 SOFT_END_NAMESPACE

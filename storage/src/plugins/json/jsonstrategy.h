@@ -16,8 +16,9 @@ public:
   JSONStrategy& operator= (JSONStrategy const& ) =delete;
   virtual ~JSONStrategy();
 
-  IDataModel *dataModel() const   override;
-  void store (IDataModel const *) override;
+  IDataModel      *dataModel   () const   override;
+  void             store       (IDataModel const *) override;
+  void             retrieve    (IDataModel *) const override;
 
   const char *metaType() const override;
   static StorageStrategy* create(char const *uri, char const *opts);

@@ -37,4 +37,11 @@ void Storage :: save (IEntity const *e)
   d->strategy->store(dataModel);
 }
 
+void Storage :: load (IEntity *e)
+{
+  auto dataModel = d->strategy->dataModel();
+  d->strategy->retrieve(dataModel);
+  e->load(dataModel);
+}
+
 SOFT_END_NAMESPACE

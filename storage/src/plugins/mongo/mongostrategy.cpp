@@ -84,6 +84,10 @@ void MongoStrategy :: store (IDataModel const *model)
    Q_UNUSED(retval);
 }
 
+void MongoStrategy :: retrieve (IDataModel *) const
+{
+}
+
 StorageStrategy* MongoStrategy :: create(char const *uri, char const *opts)
 {
    auto s = new MongoStrategy(uri, opts);

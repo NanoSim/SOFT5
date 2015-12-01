@@ -23,8 +23,11 @@ public:
    virtual void appendByteArray(const char*, const unsigned char *, size_t) = 0;
    virtual void appendString(const char*, const std::string &str) = 0;
 
-  //   virtual int numDims() const;
-  //   virtual int numVars() const;  
+  virtual bool getInt32(const char *, int *) const = 0;
+  virtual bool getDouble(const char *, double *) const = 0;
+  virtual bool getBool(const char *, bool *) const = 0;
+  virtual bool getDoubleArray(const char *, double **, size_t *len) const = 0;
+  virtual bool getString(const char *key, std::string &str) const = 0;
 };
 
 SOFT_END_NAMESPACE

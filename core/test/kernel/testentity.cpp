@@ -26,5 +26,15 @@ void TestEntity :: save(IDataModel *dataModel) const
 
 void TestEntity :: load(IDataModel const *dataModel)
 {
-  
+  dataModel->getDouble("a", &this->a);
+  double **vecptr = new double*;
+  size_t len;
+  dataModel->getDoubleArray("vec", vecptr, &len);
+  this->vec.clear();
+  this->vec.reserve(len);
+  double *ptr = *vecptr;
+  for (size_t i = 0; i < len; ++i){
+    this->vec.push_back(*ptr++);
+  }
+  dataModel->getString("text", this->text);
 }

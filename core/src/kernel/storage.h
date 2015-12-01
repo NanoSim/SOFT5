@@ -17,6 +17,7 @@ public:
   virtual ~Storage();
 
   void save (IEntity const *);
+  void load (IEntity *);
 
 private:
   class Private;

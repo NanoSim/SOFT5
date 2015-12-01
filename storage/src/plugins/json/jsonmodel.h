@@ -9,6 +9,7 @@ SOFT_BEGIN_NAMESPACE
 
 class JSONModel : public IDataModel
 {
+  friend class JSONStrategy;
 public:
   JSONModel();
   virtual ~JSONModel();
@@ -21,9 +22,16 @@ public:
   void appendModel(const char *key, IDataModel *model) override; 
   void appendDoubleArray(const char *key, size_t length, const double *value) override; 
   void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
-
-  const QJsonObject *json() const;
+  bool getInt32(const char *, int *) const override;
+  bool getDouble(const char *, double *) const override;
+  bool getBool(const char *, bool *) const override;
+  bool getDoubleArray(const char *, double **, size_t *len) const override;
+  bool getString(const char *key, std::string &str) const override;
+ 
 private:
+  void setJson(QJsonObject const &);
+  const QJsonObject *json() const;
+
   class Private;
   Private *d;
 };

@@ -90,4 +90,30 @@ const _bson_t *BsonModel :: bson() const
    return (_bson_t const*) d->bson;
 }
 
+bool BsonModel :: getInt32(const char *, int *) const
+{
+  return false;
+}
+
+bool BsonModel :: getDouble(const char *, double *) const
+{
+    return false;
+}
+
+bool BsonModel :: getBool(const char *, bool *) const
+{
+    return false;
+}
+
+bool BsonModel :: getDoubleArray(const char *, double **, size_t *len) const
+{
+    return false;
+}
+
+bool BsonModel :: getString(const char *key, std::string &str) const
+{
+    return false;
+}
+
+  
 SOFT_END_NAMESPACE

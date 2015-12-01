@@ -21,7 +21,13 @@ public:
    void appendArray(const char *key, IDataModel *model) override; 
    void appendModel(const char *key, IDataModel *model) override; 
    void appendDoubleArray(const char *key, size_t length, const double *value) override; 
-   void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
+  void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
+  bool getInt32(const char *, int *) const override;
+  bool getDouble(const char *, double *) const override;
+  bool getBool(const char *, bool *) const override;
+  bool getDoubleArray(const char *, double **, size_t *len) const override;
+  bool getString(const char *key, std::string &str) const override;
+  
    const _bson_t *bson() const;
 private:
    class Private;

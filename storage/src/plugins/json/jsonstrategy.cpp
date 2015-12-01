@@ -57,6 +57,21 @@ void JSONStrategy :: store (IDataModel const *model)
   file.write(doc.toJson());
 }
 
+void JSONStrategy :: retrieve (IDataModel *model) const
+{
+  JSONModel *jsonModel = dynamic_cast<JSONModel*>(model);
+  QFile file(d->uri);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QTextStream(stderr) << "Cannot read json data " << file.errorString() << endl;
+    return;
+  }
+  auto json = file.readAll();
+  QJsonParseError error;
+  auto jsonDoc = QJsonDocument::fromJson(json, &error);
+  auto jsonObj = jsonDoc.object();
+  jsonModel->setJson(jsonObj);
+}
+
 StorageStrategy* JSONStrategy :: create(char const *uri, char const *opts)
 {
   auto s = new JSONStrategy(uri, opts);
