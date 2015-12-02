@@ -14,6 +14,7 @@ public:
   JSONModel();
   virtual ~JSONModel();
   IDataModel *createModel() override;
+  void appendVariant(const char *, StdVariant const & value) override;
   void appendInt32(const char *key, int value) override;
   void appendString(const char *key, const std::string &str) override;
   void appendDouble(const char *key, double value) override; 
@@ -22,6 +23,7 @@ public:
   void appendModel(const char *key, IDataModel *model) override; 
   void appendDoubleArray(const char *key, size_t length, const double *value) override; 
   void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
+  bool getVariant(const char *, StdVariant &) const override;
   bool getInt32(const char *, int *) const override;
   bool getDouble(const char *, double *) const override;
   bool getBool(const char *, bool *) const override;

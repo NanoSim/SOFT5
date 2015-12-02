@@ -145,4 +145,41 @@ bool JSONModel :: getString(const char *key, std::string &str) const
   return true;    
 }
 
+void JSONModel :: appendVariant(const char *key, StdVariant const & value)
+{
+  switch (value.type()) {
+  case soft::StdTypes::String:
+    d->jsonObject.insert(key, QJsonValue(QString::fromStdString(value.get<StdString>())));
+    break;
+  case soft::StdTypes::Int:
+  case soft::StdTypes::UInt:
+  case soft::StdTypes::Int8:
+  case soft::StdTypes::UInt8:
+  case soft::StdTypes::Int64:
+  case soft::StdTypes::UInt64:
+    d->jsonObject.insert(key, QJsonValue(value.toInt()));
+    break;
+  case soft::StdTypes::Double:
+    d->jsonObject.insert(key, QJsonValue(value.get<StdDouble>()));
+    break;
+  case soft::StdTypes::DoubleArray:
+    QJsonArray array;
+    auto v = value.get<StdDoubleArray>();
+    for (StdDoubleArray::iterator it = v.begin(); it != v.end(); ++it) {
+      array.append(QJsonValue(*it));
+    }
+    d->jsonObject.insert(key, array);
+    break;
+  }  
+}
+
+bool JSONModel :: getVariant(const char *key, StdVariant &value) const
+{
+  auto it = d->jsonObject.find(key);
+  if (it == d->jsonObject.end()) return false;
+
+  
+  return true;
+}
+
 SOFT_END_NAMESPACE

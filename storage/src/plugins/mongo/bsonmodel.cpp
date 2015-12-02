@@ -115,5 +115,14 @@ bool BsonModel :: getString(const char *key, std::string &str) const
     return false;
 }
 
+void BsonModel :: appendVariant(const char *, StdVariant const & value)
+{
+}
+
+bool BsonModel :: getVariant(const char *, StdVariant &) const
+{
+  return false;
+}
+
   
 SOFT_END_NAMESPACE

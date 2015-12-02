@@ -109,3 +109,42 @@ TEST_F(VariantTest, stdVariantTest)
   myVariant.set<soft::StdIntArray>(array);
   ASSERT_EQ(myVariant.get<soft::StdIntArray>()[0], 1);
 }
+
+TEST_F(VariantTest, typeId)
+{
+  myVariant.set<soft::StdString>("en test");
+  ASSERT_EQ(myVariant.type(), soft::VariantType<soft::StdString>::value);
+  ASSERT_EQ(myVariant.type(), soft::StdTypes::String);
+
+  auto vtype = [](soft::StdVariant &variant) -> std::string{
+    switch(variant.type()) {
+    case soft::StdTypes::String:
+      return std::string("string");      
+    case soft::StdTypes::Int:
+      return std::string("int");
+    }
+  };
+
+  ASSERT_STREQ(vtype(myVariant).c_str(), "string");
+}
+
+
+int passAsConst(soft::StdVariant const &v)
+{
+  if (v.type() == soft::StdTypes::Int) {
+    return v.get<StdInt>();
+  }
+  return -1;
+}
+
+TEST_F(VariantTest, passingArg)
+{
+  myVariant.set<soft::StdInt>(3);
+  ASSERT_EQ(3, passAsConst(myVariant));
+}
+
+TEST_F(VariantTest, toInt)
+{
+  myVariant.set<soft::StdUInt8>(32);
+  ASSERT_EQ(32, myVariant.toInt());
+}

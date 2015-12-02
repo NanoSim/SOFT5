@@ -12,6 +12,14 @@
 
 #include "softns.h"
 
+SOFT_BEGIN_NAMESPACE
+template <typename T>
+struct VariantType
+{
+  enum {value = -1};
+};
+SOFT_END_NAMESPACE
+
 template <size_t arg1, size_t ...rest>
 struct staticMax;
 
@@ -83,10 +91,14 @@ private:
   }
   size_t typeId;
   DataType data;
-  
+  int typeNum;
+  bool isIntegral;
 public:
   Variant()
     : typeId(invalidType())
+    , typeNum(-1)
+    , isIntegral(false)
+   
   {}
   
   Variant(Variant<Ts...> const &old)
@@ -109,31 +121,53 @@ public:
   }
 
   template <typename T>
-  bool is() {
+  bool is() const {
     return (typeId == typeid(T).hash_code());
   }
 
-  bool valid() {
+  bool valid() const {
     return (typeId != invalidType());
   }
+
   
+  size_t typeHash() const {
+    return typeId;
+  }
+  
+
+  int type() const {
+    return typeNum;
+  }
+
+ 
   template <typename T, typename... Args>
   void set(Args&&... args)
   {
     Helper::destroy(typeId, &data);
     new (&data) T(std::forward<Args>(args)...);
     typeId = typeid(T).hash_code();
+    typeNum = VariantType<T>::value;
+    isIntegral = std::is_integral<T>::value;
   }
 
   template <typename T>
-  T &get()
+  const T &get() const
   {
     if (typeId == typeid(T).hash_code())
-      return *reinterpret_cast<T*>(&data);
+      return *reinterpret_cast<const T*>(&data);
     else
       throw std::bad_cast();  
   }
 
+
+  const int toInt() const
+  {
+    if (isIntegral) 
+      return *reinterpret_cast<const int*>(&data);
+    else
+      throw std::bad_cast();     
+  }
+  
   ~Variant()   
   {
     Helper::destroy(typeId, &data);
