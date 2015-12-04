@@ -4,7 +4,6 @@ set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR    ON)
 set (CMAKE_AUTOMOC                TRUE)
 
-message(status "KERNEL INCLUDES: ${soft-kernel_INCLUDE_DIRS}")
 include_directories (${MONGOC_INCLUDE_DIR} ${soft-kernel_INCLUDE_DIRS})
 set (LINK_LIBS ${LINK_LIBS} ${MONGOC_LIBRARIES} ${soft-kernel_LIBS})
 
