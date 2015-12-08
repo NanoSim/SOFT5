@@ -13,7 +13,7 @@ include_directories ("../plugins/common")
 set (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES} ${soft-kernel_LIBS})
 
 aux_source_directory (. SRC_LIST)
-add_executable(softshell ${SRC_LIST} ${QT_RESOURCE} softshell.qrc)
+add_executable(${PROJECT_NAME} ${SRC_LIST} ${QT_RESOURCE} softshell.qrc)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries (${PROJECT_NAME} ${LINK_LIBS})

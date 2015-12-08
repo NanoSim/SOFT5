@@ -100,6 +100,13 @@ public:
     , isIntegral(false)
    
   {}
+
+  Variant (Args&&... args)
+    : typeId (typeid(T).hash_code())
+    , typeNum (VariantType<T>::value)
+    , isIntegral (std::is_integral<T>::value     
+  {
+  }
   
   Variant(Variant<Ts...> const &old)
     : typeId (old.typeId)
