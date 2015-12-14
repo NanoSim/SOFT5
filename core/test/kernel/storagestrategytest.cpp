@@ -12,12 +12,6 @@ protected:
   virtual ~StorageStrategyTest() {
   }
 
-  virtual void SetUp(){
-  }
-  
-  virtual void TearDown(){
-  }
-			  
 };
 
 TEST_F(StorageStrategyTest, Foo)

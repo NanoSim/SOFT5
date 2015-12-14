@@ -5,6 +5,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 
 set (LINK_LIBS ${LINK_LIBS} ${soft-kernel_LIBS})
+include_directories(${soft-kernel_INCLUDE_DIRS})
 aux_source_directory(. SRC_LIST)
 add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})

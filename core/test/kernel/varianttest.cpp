@@ -149,9 +149,3 @@ TEST_F(VariantTest, toInt)
   ASSERT_EQ(32, myVariant.toInt());
 }
 
-TEST_F(VariantTest, ctorTemplate)
-{
-  using TestVar  = soft::Variant<StdString, StdInt, StdDouble, StdVector>;
-  TestVal a<StdInt>(3);
-  ASSERT_EQ(3, a.toInt());
-}

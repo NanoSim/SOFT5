@@ -2,7 +2,6 @@
 #define SOFT_DEF_H
 
 #include<entity.h>
-#include<istrategyplugin.h>
 #include<soft.h>
 #include<storagestrategy.h>
 #include<idatamodel.h>

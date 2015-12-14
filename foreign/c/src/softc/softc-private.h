@@ -13,4 +13,6 @@ struct _softc_t
 };
 
 EXTERNAL struct _softc_t *softc_private_init(int argc, char *argv[]);
+EXTERNAL int softc_private_registered_storage_driver_count();
+
 #endif /* SOFTC_PRIVATE_H_DEF */

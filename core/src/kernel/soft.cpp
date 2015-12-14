@@ -8,8 +8,9 @@
 #include <QScopedPointer>
 #include <QTextStream>
 #include <QProcessEnvironment>
-
+#include <QDebug>
 #include "soft.h"
+
 #include "storagefactory.h"
 #include "storagestrategy.h"
 #include "istrategyplugin.h"
@@ -49,6 +50,12 @@ std::list<std::string> registeredStorageDrivers()
   return retval;
 }
 
+int storageDriverCount()
+{
+  auto driver = registeredStorageDrivers();
+  return driver.size();
+}
+
 static bool registerPlugin(QString const &file)
 {
   if (QLibrary::isLibrary (file)) {
@@ -73,11 +80,14 @@ static bool registerPlugin(QString const &file)
 
 static QList<QDir> pluginsDirList()
 {
-  auto const softpath = QProcessEnvironment::systemEnvironment().value("SOFTBASE", SOFTBASE);  
-  auto const pluginPath = softpath + "/storage"; // TODO: FIX THIS!
-  QDir const pluginsDir(pluginPath);
-  QList<QDir> list = QList<QDir>() << pluginsDir;
-
+  QDir const configDir(QString("%1/storage").arg(SOFTBASE));
+  QList<QDir> list = QList<QDir>() << configDir;
+  if (QProcessEnvironment::systemEnvironment().contains("SOFTBASE")) {
+    auto const customDirString = QProcessEnvironment::systemEnvironment().value("SOFTBASE") + "/storage";
+    QDir const customDir(customDirString);
+    list << customDir;
+  }
+  
   if (qApp->arguments().count() > 1 ) {
     auto const argPaths = qApp->arguments().at(1).split(":");
     for (auto path : argPaths) {

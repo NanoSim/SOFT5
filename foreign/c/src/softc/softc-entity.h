@@ -2,6 +2,7 @@
 #define SOFTC_ENTITY_H
 
 #include "softc-macros.h"
+#include "softc-storage.h"
 
 SOFTC_BEGIN_DECLS
 
