@@ -24,12 +24,12 @@ class JSONStrategy::Private
 };
 
 JSONStrategy :: JSONStrategy()
-  : StorageStrategy()
+  : IStorageStrategy()
   , d (new JSONStrategy::Private(QString(),QString()))
 {}
 
 JSONStrategy :: JSONStrategy(const char *uri, const char *options)
-  : StorageStrategy()
+  : IStorageStrategy()
   , d (new JSONStrategy::Private(uri, options))
 {
 }
@@ -72,7 +72,7 @@ void JSONStrategy :: retrieve (IDataModel *model) const
   jsonModel->setJson(jsonObj);
 }
 
-StorageStrategy* JSONStrategy :: create(char const *uri, char const *opts)
+IStorageStrategy* JSONStrategy :: create(char const *uri, char const *opts)
 {
   auto s = new JSONStrategy(uri, opts);
   return s;

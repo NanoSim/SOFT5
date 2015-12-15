@@ -7,7 +7,7 @@
 
 SOFT_BEGIN_NAMESPACE
 
-class StorageStrategy;
+class IStorageStrategy;
 class StorageFactory
 {   
 public:
@@ -16,8 +16,8 @@ public:
    virtual ~StorageFactory();
    StorageFactory& operator= (StorageFactory const &) =delete;
   
-   bool registerStrategy(const char *name, StorageStrategy*(*createFunc)(const char*, const char*));
-   StorageStrategy* create(const char *name, const char *uri, const char *options) const;
+   bool registerStrategy(const char *name, IStorageStrategy*(*createFunc)(const char*, const char*));
+   IStorageStrategy* create(const char *name, const char *uri, const char *options) const;
    int driverCount() const;
    std::string driverName(int n) const;
 

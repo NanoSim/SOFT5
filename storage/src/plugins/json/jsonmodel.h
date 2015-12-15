@@ -21,7 +21,7 @@ public:
   void appendBool(const char *key, bool value) override; 
   void appendArray(const char *key, IDataModel *model) override; 
   void appendModel(const char *key, IDataModel *model) override; 
-  void appendDoubleArray(const char *key, size_t length, const double *value) override; 
+  void appendDoubleArray(const char *key, const double *value, size_t length) override; 
   void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
   bool getVariant(const char *, StdVariant &) const override;
   bool getInt32(const char *, int *) const override;

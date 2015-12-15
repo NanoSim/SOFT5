@@ -54,12 +54,12 @@ class MongoStrategy::Private
 };
 
 MongoStrategy :: MongoStrategy()
-   : StorageStrategy ()
+   : IStorageStrategy ()
    , d(new MongoStrategy::Private(QString(),QString()))
 {}
 
 MongoStrategy :: MongoStrategy(const char *uri, const char *options)
-   : StorageStrategy(uri, options)
+   : IStorageStrategy(uri, options)
    , d (new MongoStrategy::Private(uri, options))
 {
   // qDebug() << "MongoStrategy :: MongoStrategy" << uri << options;
@@ -88,7 +88,7 @@ void MongoStrategy :: retrieve (IDataModel *) const
 {
 }
 
-StorageStrategy* MongoStrategy :: create(char const *uri, char const *opts)
+IStorageStrategy* MongoStrategy :: create(char const *uri, char const *opts)
 {
    auto s = new MongoStrategy(uri, opts);
    return s;

@@ -7,9 +7,9 @@
 SOFT_BEGIN_NAMESPACE
 
 /*!
-  class Storage is a context class for the StorageStrategy
-
+  class Storage is a context class for the IStorageStrategy
  */
+class IStorageStrategy;
 class Storage
 {
 public:
@@ -19,6 +19,7 @@ public:
   void save (IEntity const *);
   void load (IEntity *);
 
+  IStorageStrategy *strategy();
 private:
   class Private;
   Private *d;

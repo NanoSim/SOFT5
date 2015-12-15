@@ -20,7 +20,7 @@ IEntity* create (const std::string &)
 void TestEntity :: save(IDataModel *dataModel) const
 {
   dataModel->appendDouble("a", this->a);
-  dataModel->appendDoubleArray("vec", this->vec.size(), vec.data());
+  dataModel->appendDoubleArray("vec", vec.data(), this->vec.size());
   dataModel->appendString("text", this->text.c_str());
 }
 

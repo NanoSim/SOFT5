@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <soft.h>
 #include <collection.h>
-#include <storagestrategy.h>
+#include <istoragestrategy.h>
 #include <idatamodel.h>
 
 //static const char * driver  = "mongo";
@@ -38,10 +38,10 @@ protected:
   virtual void TearDown(){
   }
 
-  static soft::StorageStrategy *storageStrategy_;
+  static soft::IStorageStrategy *storageStrategy_;
 };
 
-soft::StorageStrategy *CollectionTest::storageStrategy_ = nullptr;
+soft::IStorageStrategy *CollectionTest::storageStrategy_ = nullptr;
 
 TEST_F(CollectionTest, Constructor1) {
   soft::Collection *coll = new soft::Collection();

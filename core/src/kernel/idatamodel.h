@@ -1,7 +1,6 @@
 #ifndef IDATAMODEL_H_DEF
 #define IDATAMODEL_H_DEF
 
-#include <cstddef>
 #include <string>
 #include "softns.h"
 #include "softtypes.h"
@@ -19,7 +18,7 @@ public:
    virtual void appendInt32(const char *, int) = 0;
    virtual void appendDouble(const char *, double) = 0;
    virtual void appendBool(const char*, bool value) = 0;
-   virtual void appendDoubleArray(const char *, size_t length, const double *value) = 0;
+   virtual void appendDoubleArray(const char *, const double *value, size_t length) = 0;
    virtual void appendArray(const char*, IDataModel *array) = 0;
    virtual void appendModel(const char*, IDataModel *model) = 0;
    virtual void appendByteArray(const char*, const unsigned char *, size_t) = 0;

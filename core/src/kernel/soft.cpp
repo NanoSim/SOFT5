@@ -12,7 +12,7 @@
 #include "soft.h"
 
 #include "storagefactory.h"
-#include "storagestrategy.h"
+#include "istoragestrategy.h"
 #include "istrategyplugin.h"
 //#include "defaultstrategy.h"
 
@@ -122,7 +122,7 @@ void init(int &argc, char *argv[])
   }
 }
 
-bool registerStorage(const char *name, StorageStrategy*(*createFunc)(const char*, const char*))
+bool registerStorage(const char *name, IStorageStrategy*(*createFunc)(const char*, const char*))
 {
   if (QCoreApplication::instance() == nullptr) 
     return false;
@@ -131,17 +131,17 @@ bool registerStorage(const char *name, StorageStrategy*(*createFunc)(const char*
   return factory->registerStrategy(name, createFunc);
 }
 
-std::shared_ptr<StorageStrategy> create(const char *name, const char *uri, const char *options)
+std::shared_ptr<IStorageStrategy> create(const char *name, const char *uri, const char *options)
 {
   if (QCoreApplication::instance() == nullptr) 
-    return std::shared_ptr<StorageStrategy>();
+    return std::shared_ptr<IStorageStrategy>();
   
   auto *factory = asPtr<StorageFactory>(qApp->property(storagefactoryid));
-  std::shared_ptr<StorageStrategy> retval (factory->create(name, uri, options));
+  std::shared_ptr<IStorageStrategy> retval (factory->create(name, uri, options));
   return retval;
 }
 
-StorageStrategy* createStrategy(const char *name, const char *uri, const char *options)
+IStorageStrategy* createStrategy(const char *name, const char *uri, const char *options)
 {
   if (QCoreApplication::instance() == nullptr) 
     return nullptr;

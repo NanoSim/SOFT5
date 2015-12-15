@@ -6,14 +6,14 @@
 
 SOFT_BEGIN_NAMESPACE
 
-class StorageStrategy
+class IStorageStrategy
 {
 public:
-  StorageStrategy();
-  StorageStrategy(char const *uri, const char *options = nullptr);
-  StorageStrategy (StorageStrategy const &) =delete;
-  StorageStrategy &operator=(StorageStrategy const &) =delete;
-  virtual ~StorageStrategy() = 0;
+  IStorageStrategy();
+  IStorageStrategy(char const *uri, const char *options = nullptr);
+  IStorageStrategy (IStorageStrategy const &) =delete;
+  IStorageStrategy &operator=(IStorageStrategy const &) =delete;
+  virtual ~IStorageStrategy() = 0;
 
   virtual const char *metaType() const               = 0;
   virtual IDataModel *dataModel () const             = 0;

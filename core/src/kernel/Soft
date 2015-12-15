@@ -3,7 +3,7 @@
 
 #include<entity.h>
 #include<soft.h>
-#include<storagestrategy.h>
+#include<istoragestrategy.h>
 #include<idatamodel.h>
 #include<pluginloader.h>
 #include<softns.h>

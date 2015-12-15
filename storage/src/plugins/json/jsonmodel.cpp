@@ -75,7 +75,7 @@ void JSONModel :: setJson(QJsonObject const &obj)
   d->jsonObject = obj;
 }
 
-void JSONModel :: appendDoubleArray(const char *key, size_t length, const double *value)
+void JSONModel :: appendDoubleArray(const char *key, const double *value, size_t length)
 {
   QJsonArray jsonArray;
   double const *ptr = value;

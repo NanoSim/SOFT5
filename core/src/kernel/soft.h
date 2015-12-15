@@ -9,7 +9,7 @@
 
 SOFT_BEGIN_NAMESPACE
 
-class StorageStrategy;
+class IStorageStrategy;
 
 void                              init(int &argc, char *argv[]);
 std::string                       applicationDirPath();
@@ -17,9 +17,9 @@ std::string                       uuidGen(); /* TODO: Move this to a utils heade
 std::list<std::string>            arguments();
 int                               storageDriverCount();
 std::list<std::string>            registeredStorageDrivers();
-bool                              registerStorage(const char *name, StorageStrategy*(*createFunc)(const char*, const char *options));
-std::shared_ptr<StorageStrategy>  create(const char *name, const char *uri, const char *options);
-StorageStrategy*                  createStrategy(const char *name, const char *uri, const char *options);
+bool                              registerStorage(const char *name, IStorageStrategy*(*createFunc)(const char*, const char *options));
+std::shared_ptr<IStorageStrategy>  create(const char *name, const char *uri, const char *options);
+IStorageStrategy*                  createStrategy(const char *name, const char *uri, const char *options);
 
 SOFT_END_NAMESPACE
 

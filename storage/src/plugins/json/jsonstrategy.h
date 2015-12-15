@@ -3,11 +3,11 @@
 
 #include "softns.h"
 #include "idatamodel.h"
-#include "storagestrategy.h"
+#include "istoragestrategy.h"
 
 SOFT_BEGIN_NAMESPACE
 
-class JSONStrategy : public StorageStrategy
+class JSONStrategy : public IStorageStrategy
 {
 public:
   JSONStrategy();
@@ -21,7 +21,7 @@ public:
   void             retrieve    (IDataModel *) const override;
 
   const char *metaType() const override;
-  static StorageStrategy* create(char const *uri, char const *opts);
+  static IStorageStrategy* create(char const *uri, char const *opts);
   static const char *staticMetaType;
 private:
   class Private;

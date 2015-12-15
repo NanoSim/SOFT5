@@ -1,6 +1,6 @@
 #include "storage.h"
 #include "soft.h"
-#include "storagestrategy.h"
+#include "istoragestrategy.h"
 
 
 SOFT_BEGIN_NAMESPACE
@@ -18,7 +18,7 @@ class Storage::Private
     strategy = nullptr;
   }
     
-  StorageStrategy *strategy;
+  IStorageStrategy *strategy;
 };
 
 Storage :: Storage(char const* driver, char const *uri, const char *options)
@@ -42,6 +42,14 @@ void Storage :: load (IEntity *e)
   auto dataModel = d->strategy->dataModel();
   d->strategy->retrieve(dataModel);
   e->load(dataModel);
+}
+
+IStorageStrategy *Storage :: strategy()
+{
+  if (d != nullptr && d->strategy != nullptr) {
+    return d->strategy;
+  }
+  return nullptr;
 }
 
 SOFT_END_NAMESPACE

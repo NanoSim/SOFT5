@@ -4,7 +4,7 @@
 #include "soft.h"
 #include "ientity.h"
 #include "idatamodel.h"
-#include "storagestrategy.h"
+#include "istoragestrategy.h"
 #include "transactor.h"
 
 #include <QTextStream>
@@ -52,7 +52,7 @@ class Transactor :: Private
    QString const driver;
    QString const uri;
    QString const options;
-   std::shared_ptr<StorageStrategy> const storageStrategy;
+   std::shared_ptr<IStorageStrategy> const storageStrategy;
    QMap<QString, IEntity*> refmap;
 
 };

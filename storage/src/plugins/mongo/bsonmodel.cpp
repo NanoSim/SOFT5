@@ -63,7 +63,7 @@ void BsonModel :: appendModel(const char *key, IDataModel *model)
    bson_append_document (d->bson, key, strlen(key), m->d->bson);
 }
 
-void BsonModel :: appendDoubleArray(const char *key, size_t length, const double *value)
+void BsonModel :: appendDoubleArray(const char *key, const double *value, size_t length)
 {
    auto ptr = &value[0];
    auto b = bson_new();

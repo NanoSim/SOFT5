@@ -3,11 +3,11 @@
 
 #include "softns.h"
 #include "idatamodel.h"
-#include "storagestrategy.h"
+#include "istoragestrategy.h"
 
 SOFT_BEGIN_NAMESPACE
 
-class MongoStrategy : public StorageStrategy
+class MongoStrategy : public IStorageStrategy
 {
 public:
   MongoStrategy();
@@ -21,7 +21,7 @@ public:
   void retrieve (IDataModel *) const override;
 
   const char *metaType() const;
-  static StorageStrategy* create(char const *uri, char const *opts);
+  static IStorageStrategy* create(char const *uri, char const *opts);
   static const char *staticMetaType;
 private:
    class Private;
