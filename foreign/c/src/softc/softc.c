@@ -16,3 +16,8 @@ char ** softc_get_storage_drivers()
 {
   return softc_private_get_storage_drivers();
 }
+
+char * softc_uuidgen()
+{
+  return softc_private_uuidgen();
+}

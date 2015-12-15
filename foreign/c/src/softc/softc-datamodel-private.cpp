@@ -66,7 +66,7 @@ void softc_datamodel_private_append_blob         (softc_datamodel_t *model, cons
 {
 }
 
-void softc_datamodel_private_append_stringList   (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements)
+void softc_datamodel_private_append_string_list   (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements)
 {
 }
 
@@ -133,7 +133,7 @@ void softc_datamodel_private_get_blob            (softc_datamodel_t *model, cons
 {
 }
 
-void softc_datamodel_private_get_stringList      (softc_datamodel_t *model, const char *key, const char **value, size_t *n_elements)
+void softc_datamodel_private_get_string_list      (softc_datamodel_t *model, const char *key, const char **value, size_t *n_elements)
 {
 }
 

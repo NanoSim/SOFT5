@@ -22,7 +22,7 @@ void softc_datamodel_append_float        (softc_datamodel_t *model, const char *
 void softc_datamodel_append_double       (softc_datamodel_t *model, const char *key, double value);
 void softc_datamodel_append_bool         (softc_datamodel_t *model, const char *key, bool value);
 void softc_datamodel_append_blob         (softc_datamodel_t *model, const char *key, unsigned char *value, size_t length);
-void softc_datamodel_append_stringList   (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements);
+void softc_datamodel_append_string_list   (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements);
 void softc_datamodel_append_array_int32  (softc_datamodel_t *model, const char *key, int32_t *value, size_t size);
 void softc_datamodel_append_array_double (softc_datamodel_t *model, const char *key, double *value, size_t size);
 

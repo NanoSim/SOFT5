@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QUuid>
 #include <QDebug>
 #include <soft.h>
 #include "softc-private.h"
@@ -27,4 +28,12 @@ char **softc_private_get_storage_drivers()
     retval[++i] = NULL;	   
   }
   return retval;
+}
+
+char *softc_private_uuidgen()
+{
+  auto uuid = soft::uuidGen();
+  char *ret = (char *)malloc(sizeof (char) * uuid.length());;
+  strncpy(ret, uuid.data(), uuid.length());
+  return ret;	  
 }
