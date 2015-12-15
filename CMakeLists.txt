@@ -17,6 +17,19 @@ option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
 #option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
 
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+    "MinSizeRel" "RelWithDebInfo")
+endif()
+
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions("-DQT_NO_DEBUG_OUTPUT")
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package (BSON REQUIRED)
 find_package (Qt5Core REQUIRED)

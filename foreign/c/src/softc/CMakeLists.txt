@@ -9,6 +9,7 @@ include_directories(${soft-kernel_INCLUDE_DIRS})
 aux_source_directory(. SRC_LIST)
 add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 
 # Expose public includes to other subprojects
 set(${PROJECT_NAME}_INCLUDE_DIRS
