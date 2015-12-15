@@ -12,7 +12,7 @@ SOFTC_BEGIN_DECLS
 
 softc_t * softc_init(int argc, char *argv[]);
 int       softc_storage_driver_count();
-void      softc_application_dir_path(char **path, size_t *len);
+char   ** softc_get_storage_drivers();
 
 SOFTC_END_DECLS
 

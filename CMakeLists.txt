@@ -51,7 +51,7 @@ endif()
 
 set (SOFT_MAJOR_VERSION 5)
 set (SOFT_MINOR_VERSION 1)
-set (SOFT_MICRO_VERSION 3)
+set (SOFT_PATCH_VERSION 5)
 
 # Tests
 # Run them with "ctest -V" or "make check" to get verbose output.

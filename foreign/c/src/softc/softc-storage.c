@@ -1,10 +1,10 @@
 #include "softc-storage.h"
 #include "softc-storage-private.h"
 
-softc_storage_t * softc_storage_create (const char *driver, const char *uri)
+softc_storage_t * softc_storage_create (const char *driver, const char *uri, const char *options)
 {
   softc_storage_t *ret;
-  ret = softc_storage_private_create(driver, uri);
+  ret = softc_storage_private_create(driver, uri, options);
   return ret;
 }
 

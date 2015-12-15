@@ -49,7 +49,7 @@ QScriptValue version(QScriptContext *context, QScriptEngine *engine)
   QString versionString = QString("%1.%2.%3")
     .arg(QString::number(SOFT_MAJOR_VERSION))
     .arg(QString::number(SOFT_MINOR_VERSION))
-    .arg(QString::number(SOFT_MICRO_VERSION));
+    .arg(QString::number(SOFT_PATCH_VERSION));
   return engine->toScriptValue(versionString);
 }
 

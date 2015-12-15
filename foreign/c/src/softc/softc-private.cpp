@@ -16,3 +16,15 @@ int softc_private_registered_storage_driver_count()
 {
   return soft::storageDriverCount();
 }
+
+char **softc_private_get_storage_drivers()
+{
+  char **retval = (char**)malloc(sizeof(char*) * soft::storageDriverCount() + 1);
+  int i = 0;
+  for (auto &driver : soft::registeredStorageDrivers()) {
+    retval[i] = (char*)malloc (sizeof(char*) * driver.length());
+    strcpy(retval[i], driver.data());
+    retval[++i] = NULL;	   
+  }
+  return retval;
+}

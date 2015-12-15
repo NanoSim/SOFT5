@@ -1,20 +1,14 @@
 #ifndef SOFTC_STORAGE_PRIVATE_H_DEF
 #define SOFTC_STORAGE_PRIVATE_H_DEF
 
-struct _softc_storage_t
-{
-  char *driver;
-  char *uri;
-};
+#include "softc-storage.h"
+#include "softc-macros.h"
 
-softc_storage_t *softc_storage_private_create(const char *driver, const char *uri)
-{
-  return 0;
-}
+SOFTC_BEGIN_DECLS
+
+softc_storage_t *softc_storage_private_create(const char *driver, const char *uri, const char *options);
+void softc_storage_private_free(softc_storage_t *storage);
 
 
-void softc_storage_private_free(softc_storage_t *storage)
-{
-}
-
+SOFTC_END_DECLS
 #endif
