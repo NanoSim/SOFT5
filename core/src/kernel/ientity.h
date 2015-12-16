@@ -3,16 +3,17 @@
 
 #include "softns.h"
 #include <string>
+#include <vector>
 
 SOFT_BEGIN_NAMESPACE
 
 class IDataModel;
 
 #define SOFT_ENTITY_METADATA(name,ns,ver)	\
-  virtual const char * metaType() const {return #name;}						  \
-  virtual const char * metaName() const {return #name;}   \
-  virtual const char * metaNamespace() const {return #ns;} \
-  virtual const char * metaVersion() const {return #ver;}
+  virtual const char * metaType() const override {return #name;}						  \
+  virtual const char * metaName() const override {return #name;}   \
+  virtual const char * metaNamespace() const override {return #ns;} \
+  virtual const char * metaVersion() const override {return #ver;}
 
 class IEntity
 {
@@ -31,6 +32,7 @@ public:
   virtual const char* metaName()                        const = 0;
   virtual const char* metaNamespace()                   const = 0;
   virtual const char* metaVersion()                     const = 0;
+  virtual std::vector<std::string> dimensions()         const = 0;
 
 private:
   class Private;

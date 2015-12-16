@@ -278,6 +278,13 @@ std::list<DimMap> Collection :: dimMapList() const
   return d->dimMapList;
 }
 
+std::vector<std::string> Collection :: dimensions() const
+{
+  // TODO: Implement this function
+  std::vector<std::string> retval;
+  return retval;
+}
+
 std::list<RelationTriplet> Collection :: relationList() const
 {
   return d->relationList;

@@ -38,3 +38,10 @@ void TestEntity :: load(IDataModel const *dataModel)
   }
   dataModel->getString("text", this->text);
 }
+
+std::vector<std::string> TestEntity :: dimensions() const
+{
+  std::vector<std::string> ret;
+  return ret;
+			       
+}

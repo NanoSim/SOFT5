@@ -77,7 +77,8 @@ public:
 
   virtual void save (IDataModel *) const override;
   virtual void load (IDataModel const *) override;
-
+  virtual std::vector<std::string> dimensions() const override;
+  
  protected:
   std::list<DimMap> dimMapList() const;
   std::list<RelationTriplet> relationList() const;

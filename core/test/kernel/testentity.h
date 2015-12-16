@@ -13,9 +13,10 @@ public:
   TestEntity();
   virtual ~TestEntity();
 
-  void save(soft::IDataModel *) const;
-  void load(soft::IDataModel const *);
+  void save(soft::IDataModel *) const override;
+  void load(soft::IDataModel const *) override;
   static IEntity* create (const std::string &uuid);
+  virtual std::vector<std::string> dimensions() const override;
 
   double a;
   std::vector<double> vec;
