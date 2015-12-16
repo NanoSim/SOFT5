@@ -51,7 +51,7 @@ public:
   bool getInt32Array    (const char *, std::vector<int32_t> &) const override;
   bool getDoubleArray   (const char *, std::vector<double> &) const override;
   bool getByteArray     (const char *, std::vector<unsigned char> &) const override;
-  bool appendStringArray(const char *, std::vector<std::string> &) const override;
+  bool getStringArray   (const char *, std::vector<std::string> &) const override;
   bool getArray         (const char *, IDataModel *) const override;
   bool getModel         (const char *, IDataModel *) const override;
 

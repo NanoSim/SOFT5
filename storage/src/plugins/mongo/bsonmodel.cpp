@@ -36,6 +36,11 @@ IDataModel* BsonModel :: createModel()
    return new BsonModel;
 }
 
+bool BsonModel :: appendVariant (const char *, StdVariant const &)
+{
+  return false;
+}
+
 bool BsonModel :: appendInt8(const char *key, int8_t value) 
 {
   return BSON_APPEND_INT32(d->bson, key, (int32_t)value);
@@ -239,7 +244,7 @@ bool BsonModel :: getByteArray (const char *, std::vector<unsigned char> &) cons
   return false;
 }
 
-bool BsonModel :: appendStringArray (const char *, std::vector<std::string> &) const
+bool BsonModel :: getStringArray   (const char *, std::vector<std::string> &) const
 {
   return false;
 }

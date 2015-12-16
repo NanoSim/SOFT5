@@ -26,14 +26,14 @@ TEST_F(StorageTest, construct2)
   auto storage = new soft::Storage("json", qPrintable(filename), "");
   
   ASSERT_TRUE(nullptr != storage);
-
+  
   TestEntity test;
   test.a = 42.0;
-  std::vector<double> v = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};  
+  std::vector<double> v = {1.0, 2.0, 3.0, 4.0, 5.0};  
   test.vec = v;
   test.text = "This is a test";
   storage->save(&test);
-
+  
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     ASSERT_TRUE(false);
@@ -42,7 +42,7 @@ TEST_F(StorageTest, construct2)
   QJsonDocument vfy = QJsonDocument::fromJson(json);
   QJsonObject obj = vfy.object();
   QString val = obj.value("text").toString();
-  ASSERT_TRUE(val == "This is a test");  
+  ASSERT_TRUE(val == "This is a test");    
 }
 
 TEST_F(StorageTest, construct3)
@@ -54,7 +54,7 @@ TEST_F(StorageTest, construct3)
   storage->load(&test);
 
   ASSERT_DOUBLE_EQ(test.a, 42.0);
-  ASSERT_TRUE(test.text == "This is a test");
+  ASSERT_STREQ(test.text.c_str(), "This is a test");
   ASSERT_DOUBLE_EQ(test.vec[0], 1.0);
   ASSERT_DOUBLE_EQ(test.vec[1], 2.0);
   ASSERT_DOUBLE_EQ(test.vec[2], 3.0);

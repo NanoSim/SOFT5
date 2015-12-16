@@ -37,3 +37,8 @@ char *softc_private_uuidgen()
   strncpy(ret, uuid.data(), uuid.length());
   return ret;	  
 }
+
+void softc_private_cleanup()
+{
+  // TODO: Implement this
+}

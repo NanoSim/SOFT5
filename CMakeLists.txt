@@ -79,7 +79,7 @@ endif (WITH_TESTS)
 if (WITH_STORAGE_HD5)
   add_subdirectory(storage/src/hdf5)
   if (WITH_TESTS)
-    add_subdirectory(storage/test/hdf5)
+#    add_subdirectory(storage/test/hdf5) !!!
   endif (WITH_TESTS)
 endif (WITH_STORAGE_HD5)
 
@@ -87,17 +87,13 @@ if (WITH_STORAGE_MONGO)
   add_subdirectory(storage/src/mongo)
   add_subdirectory(storage/src/plugins/mongo)
   if (WITH_TESTS)	
-     add_subdirectory(storage/test/mongo)	
+    #     add_subdirectory(storage/test/mongo)	!!!
   endif (WITH_TESTS)
 endif (WITH_STORAGE_MONGO)
 
 if (WITH_STORAGE_JSON)
   add_subdirectory(storage/src/plugins/json)
 endif (WITH_STORAGE_JSON)
-
-if (WITH_TESTS)
-#add_subdirectory(storage/test/mongo)
-endif (WITH_TESTS)
 
 # Tools
 add_subdirectory(tools/src/softshell)
@@ -130,6 +126,9 @@ endif(WITH_WEB)
 
 if (WITH_FOREIGN_C)
   add_subdirectory(foreign/c/src/softc)
+  if (WITH_TESTS)
+    add_subdirectory(foreign/c/test/softc)
+  endif (WITH_TESTS)
 endif (WITH_FOREIGN_C)
 
 if (WITH_FOREIGN_FORTRAN)

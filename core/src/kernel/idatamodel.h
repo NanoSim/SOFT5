@@ -52,7 +52,7 @@ public:
   virtual bool getInt32Array    (const char *, std::vector<int32_t> &) const = 0;
   virtual bool getDoubleArray   (const char *, std::vector<double> &) const = 0;
   virtual bool getByteArray     (const char *, std::vector<unsigned char> &) const = 0;
-  virtual bool appendStringArray(const char *, std::vector<std::string> &) const = 0;
+  virtual bool getStringArray   (const char *, std::vector<std::string> &) const = 0;
   virtual bool getArray         (const char *, IDataModel *) const = 0;
   virtual bool getModel         (const char *, IDataModel *) const = 0;
 };

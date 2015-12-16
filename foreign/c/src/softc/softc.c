@@ -21,3 +21,8 @@ char * softc_uuidgen()
 {
   return softc_private_uuidgen();
 }
+
+void softc_cleanup()
+{
+  softc_private_cleanup();
+}

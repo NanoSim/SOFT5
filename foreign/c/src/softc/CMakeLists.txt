@@ -13,7 +13,7 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 
 # Expose public includes to other subprojects
 set(${PROJECT_NAME}_INCLUDE_DIRS
-  ${PROJECT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR}/..
   CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 set(${PROJECT_NAME}_LIBS
