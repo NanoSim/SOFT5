@@ -146,12 +146,12 @@ void softc_datamodel_get_stringList   (const softc_datamodel_t *model, const cha
   softc_datamodel_get_stringList   (model, key, value, n_elements);
 }
 
-void softc_datamodel_get_array_int32  (const softc_datamodel_t *model, const char *key, int32_t *value, size_t *size)
+void softc_datamodel_get_array_int32  (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size)
 {
   softc_datamodel_get_array_int32  (model, key, value, size);
 }
 
-void softc_datamodel_get_array_double (const softc_datamodel_t *model, const char *key, double *value, size_t *size)
+void softc_datamodel_get_array_double (const softc_datamodel_t *model, const char *key, double **value, size_t *size)
 {
   softc_datamodel_get_array_double (model, key, value, size);
 }

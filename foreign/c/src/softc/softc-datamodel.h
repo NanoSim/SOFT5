@@ -40,8 +40,8 @@ void softc_datamodel_get_double          (const softc_datamodel_t *model, const 
 void softc_datamodel_get_bool            (const softc_datamodel_t *model, const char *key, bool *value);
 void softc_datamodel_get_blob            (const softc_datamodel_t *model, const char *key, unsigned char *value, size_t *length);
 void softc_datamodel_get_stringList      (const softc_datamodel_t *model, const char *key, const char **value, size_t *n_elements);
-void softc_datamodel_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t *value, size_t *size);
-void softc_datamodel_get_array_double    (const softc_datamodel_t *model, const char *key, double *value, size_t *size);
+void softc_datamodel_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
+void softc_datamodel_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
 
 SOFTC_END_DECLS
 #endif 

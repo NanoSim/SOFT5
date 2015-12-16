@@ -20,22 +20,14 @@ IEntity* create (const std::string &)
 void TestEntity :: save(IDataModel *dataModel) const
 {
   dataModel->appendDouble("a", this->a);
-  dataModel->appendDoubleArray("vec", vec.data(), this->vec.size());
+  dataModel->appendDoubleArray("vec", vec);
   dataModel->appendString("text", this->text.c_str());
 }
 
 void TestEntity :: load(IDataModel const *dataModel)
 {
-  dataModel->getDouble("a", &this->a);
-  double **vecptr = new double*;
-  size_t len;
-  dataModel->getDoubleArray("vec", vecptr, &len);
-  this->vec.clear();
-  this->vec.reserve(len);
-  double *ptr = *vecptr;
-  for (size_t i = 0; i < len; ++i){
-    this->vec.push_back(*ptr++);
-  }
+  dataModel->getDouble("a", this->a);
+  dataModel->getDoubleArray("vec", this->vec);
   dataModel->getString("text", this->text);
 }
 
