@@ -78,8 +78,9 @@ endif (WITH_TESTS)
 # Storage
 if (WITH_STORAGE_HD5)
   add_subdirectory(storage/src/hdf5)
+  add_subdirectory(storage/src/plugins/hdf5)
   if (WITH_TESTS)
-#    add_subdirectory(storage/test/hdf5) !!!
+    add_subdirectory(storage/test/hdf5)
   endif (WITH_TESTS)
 endif (WITH_STORAGE_HD5)
 

@@ -1,10 +1,10 @@
-project (soft-storage-plugins-mongo C CXX)
+project (soft-storage-plugins-hdf5 C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set (CMAKE_AUTOMOC TRUE)
 
-include_directories (${soft-storage-mongo_INCLUDE_DIRS})
-set (LINK_LIBS ${LINK_LIBS} ${soft-storage-mongo_LIBS})
+include_directories (${soft-storage-hdf5_INCLUDE_DIRS})
+set (LINK_LIBS ${LINK_LIBS} ${soft-storage-hdf5_LIBS})
 
 aux_source_directory (. SRC_LIST)
 add_definitions(-DQT_PLUGIN)

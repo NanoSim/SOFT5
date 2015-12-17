@@ -15,7 +15,7 @@ protected:
   }
   
   virtual void TearDown() {
-  }
+  }  
 };
 
 TEST_F (HDF5Test, create)
