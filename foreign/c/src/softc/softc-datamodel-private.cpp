@@ -125,7 +125,10 @@ bool softc_datamodel_private_append_array_int32  (softc_datamodel_t *model, cons
 bool softc_datamodel_private_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size)
 {
   if (model->ref) {
-    //    return model->ref->appendDoubleArray(key, value, size);
+    std::vector<double> valueVec;
+    valueVec.reserve(size);
+    valueVec.assign (value, value+size);
+    return model->ref->appendDoubleArray(key, valueVec);
   }
   return false;
 }
