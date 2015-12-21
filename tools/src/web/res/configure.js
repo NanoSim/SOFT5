@@ -1,11 +1,11 @@
 with (configure) {
     setListenPort(8080);
-    setDocumentRoot("/home/thomash/Project/soft-webserver/src/www");
+    setDocumentRoot("/var/www");
     setServerName("localhost:8080");
     setServerAdmin("admin@localhost");
     setErrorLog("error.log");
 
-    action("soft-script", "/home/thomash/Project/soft-webserver/src/cgi-bin/soft-cgi");
+    action("soft-script", "/var/www/cgi-bin/soft-cgi");
     addHandler("soft-script", ["jscript"]);    
     addType("text/html",  ["html", "htm"]);
     addType("text/plain", ["txt"]);
