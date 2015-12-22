@@ -1,6 +1,7 @@
 #include <Soft>
 #include <QScriptValue>
 #include <QScriptEngine>
+
 #include "utils.h"
 #include "procs.h"
 #include "application.h"
@@ -9,6 +10,8 @@
 #include "console.h"
 #include "filesystem.h"
 #include "filesystemwatcher.h"
+#include "networkaccessmanager.h"
+#include "networkreply.h"
 #include "httpd.h"
 #include "hostinfo.h"
 #include "concurrent.h"
@@ -35,6 +38,8 @@ class Utils::Private
       , async       (new AsyncInterface (engine))
       , base64      (new Base64      (engine))
       , state       (new State       (engine))
+      , networkAccessManager (new NetworkAccessManager (engine))
+      , networkReply (new NetworkReply (engine))
    {}
   
    QScopedPointer<Process>     procs;
@@ -50,12 +55,15 @@ class Utils::Private
    QScopedPointer<AsyncInterface> async;
    QScopedPointer<Base64>       base64;
    QScopedPointer<State>        state;
+  QScopedPointer<NetworkAccessManager> networkAccessManager;
+  QScopedPointer<NetworkReply> networkReply;
 };
 
 Utils :: Utils (ScriptEngine const &engine, QObject *parent)
    : QObject (parent)
    , d (new Utils::Private (static_cast<QScriptEngine*>(engine.ref())))
 {
+  //QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
 }
 
 Utils :: ~Utils()

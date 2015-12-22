@@ -15,7 +15,7 @@ class FileSystemWatcher::Private
    Private() {
    }
 
-   FileSystemWatcherPrototype *proto;
+  FileSystemWatcherPrototype *proto;
 };
 
 static QScriptValue createFileSystemWatcher(QScriptContext *context, QScriptEngine *engine)
@@ -57,4 +57,5 @@ FileSystemWatcher :: FileSystemWatcher (QScriptEngine *engine)
 
 FileSystemWatcher :: ~FileSystemWatcher()
 {
+  delete d->proto;
 }
