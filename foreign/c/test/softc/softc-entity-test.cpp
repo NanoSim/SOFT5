@@ -31,11 +31,11 @@ TEST_F(SoftC_EntityTest, construct)
   foo_property_get_n(foo, &ret_n);
   ASSERT_EQ(ret_n, 42);
 
-  soft_string ret_str;
+  soft_string ret_str = NULL;
   foo_property_get_str(foo, &ret_str);
   ASSERT_STREQ(ret_str, "Dette er en test");
 
-  soft_double_array arr;
+  soft_double_array arr = NULL;
   size_t arr_len;
   foo_property_get_array(foo, &arr, &arr_len);
   for (unsigned int i = 0; i < arr_len; ++i) {
