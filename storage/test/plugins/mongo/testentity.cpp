@@ -19,10 +19,6 @@ IEntity* create (const std::string &)
 
 void TestEntity :: save(IDataModel *dataModel) const
 {
-  dataModel->setId(this->id());
-  dataModel->setMetaName(this->metaName());
-  dataModel->setMetaNamespace(this->metaNamespace());
-  dataModel->setMetaVersion(this->metaVersion());
   dataModel->appendDouble("a", this->a);
   dataModel->appendDoubleArray("vec", vec);
   dataModel->appendString("text", this->text.c_str());

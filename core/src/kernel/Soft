@@ -10,6 +10,7 @@
 #include<transactor.h>
 #include<ientity.h>
 #include<scriptengine.h>
+#include<storage.h>
 #include<storagefactory.h>
 
 #endif // SOFT_DEF_H

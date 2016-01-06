@@ -84,8 +84,11 @@ void MongoStrategy :: store (IDataModel const *model)
    Q_UNUSED(retval);
 }
 
-void MongoStrategy :: retrieve (IDataModel *) const
+void MongoStrategy :: retrieve (IDataModel *model) const
 {
+   auto bsonModel = dynamic_cast<BsonModel const*>(model);
+
+   bson_error_t error;
 }
 
 IStorageStrategy* MongoStrategy :: create(char const *uri, char const *opts)

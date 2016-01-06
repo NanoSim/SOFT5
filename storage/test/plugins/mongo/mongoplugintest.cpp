@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 #include <Soft>
+#include "testentity.h"
 
 class MongoPluginTest : public ::testing::Test {
 protected:
@@ -20,5 +21,13 @@ TEST_F(MongoPluginTest, checkRegistered)
 
 TEST_F(MongoPluginTest, storeData)
 {
+  auto storage = new soft::Storage("mongo", "mongodb://localhost", "db=test;coll=coll");
+  ASSERT_TRUE (nullptr != storage);
+  TestEntity test;
+  test.text = "Test";
+  test.a = 3.14;
+  storage->save(&test);
 
+  TestEntity cpy;
+  storage->load(&cpy);
 }

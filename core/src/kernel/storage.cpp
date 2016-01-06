@@ -41,6 +41,7 @@ void Storage :: load (IEntity *e)
 {
   auto dataModel = d->strategy->dataModel();
   d->strategy->retrieve(dataModel);
+
   e->load(dataModel);
 }
 

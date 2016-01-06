@@ -55,6 +55,21 @@ public:
   virtual bool getStringArray   (const char *, std::vector<std::string> &) const = 0;
   virtual bool getArray         (const char *, IDataModel *) const = 0;
   virtual bool getModel         (const char *, IDataModel *) const = 0;
+
+  virtual void setId(const std::string &id) {_id = id;}
+  virtual void setMetaName(const std::string &metaName){_metaName = metaName;}
+  virtual void setMetaVersion(const std::string &metaVersion) {_metaVersion = metaVersion;}
+  virtual void setMetaNamespace(const std::string &metaNamespace) {_metaNamespace = metaNamespace;}
+
+  virtual std::string id() const {return _id;}
+  virtual std::string metaName() const {return _metaName;}
+  virtual std::string metaVersion() const {return _metaVersion;}
+  virtual std::string metaNamespace() const {return _metaNamespace;}
+private:
+  std::string _id;
+  std::string _metaName;
+  std::string _metaVersion;
+  std::string _metaNamespace;
 };
 
 SOFT_END_NAMESPACE
