@@ -19,14 +19,18 @@ include_directories(
 
 set(CMAKE_SWIG_FLAGS "")
 
+set_source_files_properties(entity.i PROPERTIES CPLUSPLUS OFF)
+if(USE_PYTHON3)
+  set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3")
+endif()
 set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-includeall")
 swig_add_module(softpy python softpy.i)
 swig_link_libraries(softpy softc ${PYTHON_LIBRARIES})
 
-set_source_files_properties(entity.i PROPERTIES CPLUSPLUS ON)
-set_source_files_properties(entity.i PROPERTIES SWIG_FLAGS "-includeall")
-swig_add_module(entity python entity.i)
-swig_link_libraries(entity soft-kernel ${PYTHON_LIBRARIES})
+#set_source_files_properties(entity.i PROPERTIES CPLUSPLUS ON)
+#set_source_files_properties(entity.i PROPERTIES SWIG_FLAGS "-includeall")
+#swig_add_module(entity python entity.i)
+#swig_link_libraries(entity soft-kernel ${PYTHON_LIBRARIES})
 
 
 
