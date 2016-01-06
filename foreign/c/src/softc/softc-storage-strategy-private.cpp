@@ -10,6 +10,7 @@ softc_datamodel_t * softc_storage_strategy_private_get_datamodel(softc_storage_s
   softc_datamodel_t *datamodel;
   datamodel = (softc_datamodel_t *)malloc(sizeof *datamodel);
   datamodel->ref = self->ref->dataModel();
+  return datamodel;
 }
 
 void softc_storage_strategy_private_store(softc_storage_strategy_t *self,
