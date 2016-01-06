@@ -139,6 +139,9 @@ endif (WITH_FOREIGN_FORTRAN)
 
 if (WITH_FOREIGN_PYTHON)
   add_subdirectory(foreign/python/src/softpy)
+  if (WITH_TESTS)
+    add_subdirectory(foreign/python/test/softpy)
+  endif (WITH_TESTS)
 endif (WITH_FOREIGN_PYTHON)
 
 if (WITH_FOREIGN_HASKELL)
