@@ -104,7 +104,6 @@ static QList<QDir> pluginsDirList()
     }
   }
 
-  qDebug() << "PLUGINS LIST: " << list;
   return list;
 }
 

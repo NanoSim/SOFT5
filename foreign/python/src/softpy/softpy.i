@@ -22,6 +22,7 @@
 
 /*
 %init %{
+  PyObject *sys = PyImport_ImportModule()
   softc_init();
   %}
 */
