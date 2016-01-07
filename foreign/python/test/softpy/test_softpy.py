@@ -12,11 +12,12 @@ import softpy
 
 class TestSoftpy(unittest.TestCase):
     def test_softpy(self):
+        softpy.init(sys.argv)
         storage = softpy.storage_create(
-            'json', 'file://teststorage.json')
+            'hdf5', 'file://teststorage.json')
         strategy = softpy.storage_get_storage_strategy(storage)
-        #datamodel = softpy.storage_strategy_get_datamodel(strategy)
-
+        datamodel = softpy.storage_strategy_get_datamodel(strategy)
+        softpy.storage.write
 
 
 if __name__ == "__main__":

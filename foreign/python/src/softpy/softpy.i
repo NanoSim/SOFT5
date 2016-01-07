@@ -19,10 +19,54 @@
  
 %}
 
-
+/*
+%init %{
+  softc_init();
+  %}
+*/
 
 /* Remove the softc_ prefix from the python bindings */
 %rename("%(strip:[softc_])s") "";
+
+%module argv
+
+%typemap(in) (int argc, char *argv[]) {
+  int i;
+  if (!PyList_Check($input)) {
+    PyErr_SetString(PyExc_ValueError, "Expecting a list");
+    return NULL;
+  }
+  $1 = PyList_Size($input);
+  printf("*** arg1 = %d\n", $1);
+  $2 = (char **) malloc(($1+1)*sizeof(char *));
+  /*  for (i = 0; i < $1; i++) {
+    PyObject *s = PyList_GetItem($input, i);
+    printf("*** arg2 = %s\n", PyString_AsString(s));
+    if (!PyString_Check(s)) {
+        free($2);
+        PyErr_SetString(PyExc_ValueError, "List items must be strings");
+        return NULL;
+    }
+    $2[i] = PyString_AsString(s);
+    }*/
+  $2[0] = "pytest";
+  $2[1] = 0;
+}
+
+%typemap(freearg) (int argc, char *argv[]) {
+   free($2); // If here is uneeded, free(NULL) is legal
+}
+
+
+/**********************************************
+ ** softc
+ **********************************************/
+softc_t * softc_init(int argc, char *argv[]);
+int       softc_storage_driver_count();
+char   ** softc_get_storage_drivers();
+char    * softc_uuidgen();
+void      softc_cleanup();
+
 
 
 /**********************************************
@@ -61,6 +105,7 @@ bool softc_datamodel_get_blob            (const softc_datamodel_t *model, const 
 bool softc_datamodel_get_array_string    (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements);
 bool softc_datamodel_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
 bool softc_datamodel_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
+
 
 
 /**********************************************

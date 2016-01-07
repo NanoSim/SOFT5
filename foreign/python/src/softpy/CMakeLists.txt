@@ -19,7 +19,7 @@ include_directories(
 
 set(CMAKE_SWIG_FLAGS "")
 
-set_source_files_properties(entity.i PROPERTIES CPLUSPLUS OFF)
+#set_source_files_properties(entity.i PROPERTIES CPLUSPLUS OFF)
 if(USE_PYTHON3)
   set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3")
 endif()
