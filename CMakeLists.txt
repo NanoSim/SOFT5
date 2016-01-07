@@ -132,6 +132,7 @@ if (WITH_FOREIGN_C)
   add_subdirectory(foreign/c/src/softc)
   if (WITH_TESTS)
     add_subdirectory(foreign/c/test/softc)
+    add_subdirectory(foreign/c/test/storage)	
   endif (WITH_TESTS)
 endif (WITH_FOREIGN_C)
 

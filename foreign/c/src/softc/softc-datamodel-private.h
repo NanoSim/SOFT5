@@ -38,5 +38,14 @@ bool softc_datamodel_private_get_array_string    (const softc_datamodel_t *model
 bool softc_datamodel_private_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
 bool softc_datamodel_private_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
 
+bool softc_datamodel_private_set_id              (softc_datamodel_t* model, const char *id);
+bool softc_datamodel_private_set_meta_name       (softc_datamodel_t* model, const char *meta_name);
+bool softc_datamodel_private_set_meta_version    (softc_datamodel_t* model, const char *meta_version);
+bool softc_datamodel_private_set_meta_namespace  (softc_datamodel_t* model, const char *meta_namespace);
+const char * softc_datamodel_private_get_id            (const softc_datamodel_t* model);
+const char * softc_datamodel_private_get_meta_name     (const softc_datamodel_t* model);
+const char * softc_datamodel_private_get_meta_version  (const softc_datamodel_t* model);
+const char * softc_datamodel_private_get_meta_namespace(const softc_datamodel_t* model);
+
 SOFTC_END_DECLS
 #endif

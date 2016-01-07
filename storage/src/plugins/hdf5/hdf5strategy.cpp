@@ -41,7 +41,8 @@ HDF5Strategy :: ~HDF5Strategy()
 
 IDataModel* HDF5Strategy :: dataModel() const
 {
-  return (IDataModel*) new JSONModel();
+  IDataModel* ret = (IDataModel*)new JSONModel();
+  return ret;
 }
 
 void HDF5Strategy :: store (IDataModel const *model)
@@ -52,16 +53,21 @@ void HDF5Strategy :: store (IDataModel const *model)
 
   soft::hdf5::QH5 h5;
   h5.create(d->uri);
-  h5.createGroup("properties");
+  auto id = QString::fromStdString(model->id());
+  h5.createGroup(id);
+  h5.createGroup(QString("%1/properties").arg(id));
+  h5.createGroup(QString("%1/meta").arg(id));
 
   if (doc.isObject()) {
     auto jsonObject = doc.object();
     for (auto key: jsonObject.keys()) {
       auto value = jsonObject.value(key);
-      h5.write(QString("properties/%1").arg(key), value.toVariant());
+      h5.write(QString("%1/properties/%2").arg(id).arg(key), value.toVariant());
     }    
   }
-
+  h5.write(QString("%1/meta/name").arg(id), QString::fromStdString(model->metaName()));
+  h5.write(QString("%1/meta/version").arg(id), QString::fromStdString(model->metaVersion()));
+  h5.write(QString("%1/meta/namespace").arg(id), QString::fromStdString(model->metaNamespace()));
   h5.close();
 }
 

@@ -213,3 +213,61 @@ bool softc_datamodel_private_get_array_double (const softc_datamodel_t *model, c
   return false;
 }
 
+bool softc_datamodel_private_set_id              (softc_datamodel_t* model, const char *id)
+{
+  if (!model) return false;
+  model->ref->setId(id);
+  return true;
+}
+
+bool softc_datamodel_private_set_meta_name       (softc_datamodel_t* model, const char *meta_name)
+{
+  if (!model) return false;
+  model->ref->setMetaName(meta_name);
+  return true;
+}
+
+bool softc_datamodel_private_set_meta_version    (softc_datamodel_t* model, const char *meta_version)
+{
+  if (!model) return false;
+  model->ref->setMetaVersion(meta_version);
+  return true;
+
+}
+
+bool softc_datamodel_private_set_meta_namespace  (softc_datamodel_t* model, const char *meta_namespace)
+{
+  if (!model) return false;
+  model->ref->setMetaNamespace(meta_namespace);
+  return true;
+
+}
+
+const char * softc_datamodel_private_get_id            (const softc_datamodel_t* model)
+{
+  if (!model) return NULL;
+  auto std_id = model->ref->id();
+  return std_id.c_str();
+}
+
+const char * softc_datamodel_private_get_meta_name     (const softc_datamodel_t* model)
+{
+  if (!model) return NULL;
+  auto ret = model->ref->metaName();
+  return ret.c_str();
+}
+
+const char * softc_datamodel_private_get_meta_version  (const softc_datamodel_t* model)
+{
+  if (!model) return NULL;
+  auto ret = model->ref->metaVersion();
+  return ret.c_str();
+}
+
+const char * softc_datamodel_private_get_meta_namespace(const softc_datamodel_t* model)
+{
+  if (!model) return NULL;
+  auto ret = model->ref->metaNamespace();
+  return ret.c_str();
+}
+

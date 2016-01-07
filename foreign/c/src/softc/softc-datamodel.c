@@ -155,3 +155,43 @@ bool softc_datamodel_get_array_double (const softc_datamodel_t *model, const cha
 {
   return softc_datamodel_private_get_array_double (model, key, value, size);
 }
+
+bool softc_datamodel_set_id (softc_datamodel_t* model, const char *id)
+{
+  return softc_datamodel_private_set_id (model, id);
+}
+
+bool softc_datamodel_set_meta_name       (softc_datamodel_t* model, const char *meta_name)
+{
+  return softc_datamodel_private_set_meta_name(model, meta_name);
+}
+
+bool softc_datamodel_set_meta_version    (softc_datamodel_t* model, const char *meta_version)
+{
+  return softc_datamodel_private_set_meta_version(model, meta_version);
+}
+
+bool softc_datamodel_set_meta_namespace  (softc_datamodel_t* model, const char *meta_namespace)
+{
+  return softc_datamodel_private_set_meta_namespace(model, meta_namespace);
+}
+
+const char * softc_datamodel_get_id              (const softc_datamodel_t* model)
+{
+  return softc_datamodel_private_get_id (model);
+}
+
+const char * softc_datamodel_get_meta_name       (const softc_datamodel_t* model)
+{
+  return softc_datamodel_private_get_meta_name (model);
+}
+
+const char * softc_datamodel_get_meta_version    (const softc_datamodel_t* model)
+{
+  return softc_datamodel_private_get_meta_version (model);
+}
+
+const char * softc_datamodel_get_meta_namespace  (const softc_datamodel_t* model)
+{
+  return softc_datamodel_private_get_meta_namespace (model);
+}
