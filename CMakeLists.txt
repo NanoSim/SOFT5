@@ -14,6 +14,7 @@ option (WITH_PLUGIN_MONGO "Compile HD5 plugin"            ON)
 option (WITH_FOREIGN_C "Compile with C API"               ON)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   OFF)
 option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
+option (WITH_NUMERICS "Compile with SOFT Numerics"        ON)
 #option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
 
@@ -63,11 +64,12 @@ endif (WITH_TESTS)
 
 
 # Install targets
-set(SOFTBASE lib/${PROJECT_NAME})
-set(STORAGE_PLUGINS_INSTALL_DIR ${SOFTBASE}/storage)
-set(SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
-set(SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
-set(INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
+set (SOFTBASE lib/${PROJECT_NAME})
+set (STORAGE_PLUGINS_INSTALL_DIR ${SOFTBASE}/storage)
+set (SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
+set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
+set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
+set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
 # Core library
 add_subdirectory(core/src/kernel)
@@ -149,4 +151,6 @@ if (WITH_FOREIGN_HASKELL)
 endif (WITH_FOREIGN_HASKELL)
 
 
-
+if (WITH_NUMERICS)
+  add_subdirectory(numerics/src/sim)
+endif (WITH_NUMERICS)
