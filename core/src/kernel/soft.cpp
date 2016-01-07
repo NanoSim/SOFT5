@@ -87,6 +87,14 @@ static QList<QDir> pluginsDirList()
     QDir const customDir(customDirString);
     list << customDir;
   }
+  if (QProcessEnvironment::systemEnvironment().contains("SOFTSTORAGE")) {
+    auto const customDirString = QProcessEnvironment::systemEnvironment().value("SOFTSTORAGE");
+    auto const customDirStringPaths = customDirString.split(":");
+    for (auto p : customDirStringPaths) {
+      QDir const customDir(p);
+      list << customDir;
+    }
+  }
   
   if (qApp->arguments().count() > 1 ) {
     auto const argPaths = qApp->arguments().at(1).split(":");
@@ -95,7 +103,8 @@ static QList<QDir> pluginsDirList()
       list << d;
     }
   }
-  
+
+  qDebug() << "PLUGINS LIST: " << list;
   return list;
 }
 

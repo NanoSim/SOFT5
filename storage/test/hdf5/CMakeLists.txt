@@ -16,11 +16,15 @@ if(GTEST_FOUND)
 
   if (UNIX)
     set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-kernel_BINARY_DIR}:${soft-storage-hdf5_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
+      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${soft-storage-plugins-hdf5_BINARY_DIR}:${soft-kernel_BINARY_DIR}:${soft-storage-hdf5_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
   else()
     set_property(TEST ${PROJECT_NAME}
       PROPERTY ENVIRONMENT "PATH=${soft-kernel_BINARY_DIR}:${soft-storage-hdf5_BINARY_DIR}:$ENV{PATH}")
   endif()
+
+  set_property(TEST ${PROJECT_NAME} APPEND PROPERTY
+    ENVIRONMENT "SOFTSTORAGE=${soft-storage-plugins-hdf5_BINARY_DIR}:$ENV{SOFTSTORAGE}")
+
  
 else(GTEST_FOUND)
   message("Google test not found - skipping tests")
