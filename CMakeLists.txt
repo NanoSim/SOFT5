@@ -15,7 +15,7 @@ option (WITH_FOREIGN_C "Compile with C API"               ON)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   OFF)
 option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
 option (WITH_NUMERICS "Compile with SOFT Numerics"        ON)
-option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" ON)
+option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
 #option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
 

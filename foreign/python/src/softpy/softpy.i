@@ -29,12 +29,20 @@
   PyObject *argv_obj = PyMapping_GetItemString(sys_dict, "argv");  // new ref
   int argc = PySequence_Length(argv_obj);
   char **argv = malloc(argc * sizeof(char *));
+  PyObject **items = calloc(argc, sizeof(PyObject *));
   for (i=0; i<argc; i++) {
-    PyObject *s = PySequence_GetItem(argv_obj, i);  // new ref
-    argv[i] = PyString_AsString(s);
-    Py_DECREF(s);
+    items[i] = PySequence_GetItem(argv_obj, i);  // new ref
+#if PY_MAJOR_VERSION <= 2
+    argv[i] = PyBytes_AsString(items[i]);  // borrowed memory
+#else
+    argv[i] = PyUnicode_AsUTF8(items[i]);  // borrowed memory
+#endif
   }
   softc_init(argc, argv);
+  // Cleanup, can the strings pointed to by argv be free'ed?
+  //for (i=0; i<argc; i++) if (items[i]) Py_DECREF(items[i]);
+  free(items);
+  free(argv);
   Py_DECREF(argv_obj);
   Py_DECREF(sys);
 %}
@@ -60,6 +68,16 @@
 /* 
  * softc
  */
+%typemap(out) char ** {
+  char **p;
+  $result = PyList_New(0);
+  for (p=$1; *p; p++) {
+    PyList_Append($result, PyString_FromString(*p));
+    free(*p);
+  }
+  free($1);
+}
+
 /* softc_init() is called automatically in module initialisation */
 //softc_t * softc_init(int argc, char *argv[]);
 int       softc_storage_driver_count();
@@ -411,7 +429,11 @@ class BaseEntity(object):
         """Loads data from `uri` into self using `driver`."""
         load_entity_data(self, driver, uri, options=None)
 
-
+    def _initialized(self):
+        """Returns true if all properties are initialized. False is returned
+        otherwise."""
+        return all(self[p['name']] is not Uninitialized
+                   for p in self._meta['properties'])
   
 def entity(metadata):
     """Factory fuction for creating an Entity.

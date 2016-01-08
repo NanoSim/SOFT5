@@ -21,9 +21,9 @@ set(CMAKE_SWIG_FLAGS "")
 
 #set_source_files_properties(entity.i PROPERTIES CPLUSPLUS OFF)
 if(USE_PYTHON3)
-  set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3")
+  set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3 -Wall")
 endif()
-set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-includeall")
+set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-Wall")
 swig_add_module(softpy python softpy.i)
 swig_link_libraries(softpy softc ${PYTHON_LIBRARIES})
 

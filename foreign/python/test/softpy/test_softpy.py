@@ -6,11 +6,8 @@ from __future__ import print_function
 import os
 import sys
 import unittest
-import json
 
 import softpy
-
-
 
 
 
@@ -37,7 +34,7 @@ class TestSoftpy(unittest.TestCase):
         #v = softpy.datamodel_get_double(datamodel, 'food')
         #print('*** food =', v)
 
-    def test_extraction(self):
+    def test_manual_initialization(self):
         metafile = os.path.join(
             os.path.dirname(__file__), 'eu.nanosim.vasp.extraction.json')
 
@@ -52,9 +49,13 @@ class TestSoftpy(unittest.TestCase):
         e.frequencies = 0.0  # XXX
         e.cell = 0.0         # XXX
         e.positions = 0.0    # XXX
+        self.assertFalse(e._initialized())
         e.info = ''
+        self.assertTrue(e._initialized())
         e._save('hdf5', 'extraction.h5')
-        print(e)
+        self.assertTrue('cell' in e)
+        self.assertFalse('cellx' in e)
+        #print(e)
         
 if __name__ == "__main__":
     unittest.main()
