@@ -1,0 +1,76 @@
+{
+    "name": "Extraction",
+    "version": "0.1",
+    "namespace": "eu.nanosim.vasp",
+    "description": "",
+    "dimensions": [
+        {
+            "name": "nAtoms",
+            "description": "Number of atoms"
+        }
+    ],
+    "properties": [
+        {
+            "name": "surface_name",
+            "type": "string",
+            "description": "The name of the surface - atom types (and orientation)"
+        },
+        {
+            "name": "atoms",
+            "type": "string",
+            "description": "List of atom type(s) (chemical symbol)  and number of this this type excluding the surface atoms"
+        },
+        {
+            "name": "atom_species",
+            "type": "string",
+            "description": "Chemical formula excluding surface atoms in alphabetical order with H and C placed first "
+        },
+        {
+            "name": "state",
+            "type": "string",
+            "description": "Refers to the state of the molecule system - surface, gasphase, adsorbed state, transition state"
+        },
+        {
+            "name": "site_name",
+            "type": "string",
+            "description": "The adsorption or transition site(s) of the atom(s) or molecule(s)  for the adsorbed or transition state"
+        },
+        {
+            "name": "total_energy",
+            "type": "float",
+            "unit": "eV",
+            "description": "The total energy of the system from the DFT calculation"
+        },
+        {
+            "name": "frequencies",
+            "type": "float",
+            "unit": "cm^(-1)",
+            "description": "List of the frequencies calculated for the system"
+        },
+        {
+            "name": "cell",
+            "type": "float",
+            "unit": "a",
+            "dims": [
+                3,
+                3
+            ],
+            "description": "3x3 array with the lattice parameters of the system corresponding to the x, y and z directions"
+        },
+        {
+            "name": "positions",
+            "type": "float",
+            "unit": "-/a",
+            "dims": [
+                "nAtoms",
+                4
+            ],
+            "description": "List  of the atom type followed by its position in the x, y and z direction."
+        },
+        {
+            "name": "info",
+            "type": "string",
+            "description": "Optional - any relevant info can be added here"
+        }
+    ]
+}

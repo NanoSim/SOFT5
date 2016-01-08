@@ -6,8 +6,12 @@ from __future__ import print_function
 import os
 import sys
 import unittest
+import json
 
 import softpy
+
+
+
 
 
 class TestSoftpy(unittest.TestCase):
@@ -32,6 +36,24 @@ class TestSoftpy(unittest.TestCase):
                          'http://sintef.no/meta/soft')
         #v = softpy.datamodel_get_double(datamodel, 'food')
         #print('*** food =', v)
+
+    def test_extraction(self):
+        metafile = os.path.join(
+            os.path.dirname(__file__), 'eu.nanosim.vasp.extraction.json')
+
+        Extraction = softpy.entity(open(metafile))
+        Extraction.surface_name = '111'
+        Extraction.atoms = "CH4"
+        Extraction.atom_species = 'H C'
+        Extraction.state = 'surface'
+        Extraction.site_name = 'on_top'
+        Extraction.total_energy = 543.2
+        Extraction.frequencies = 0.0  # XXX
+        Extraction.cell = 0.0         # XXX
+        Extraction.positions = 0.0    # XXX
+        Extraction.info = ''
+        Extraction._save('hdf5', 'extraction.h5')
+        
         
 if __name__ == "__main__":
     unittest.main()
