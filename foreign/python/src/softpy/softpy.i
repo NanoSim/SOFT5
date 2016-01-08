@@ -231,101 +231,206 @@ class Uninitialized(object):
     instanciated..."""
     pass
 
-
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return self.fget.__get__(None, owner)()
     
 def _get_prop_data(cls, property_name, dataname, default=None):
+    """Help function used by MetaEntity."""
     for p in cls._meta['properties']:
         if p['name'] == property_name:
             return p.get(dataname, default)
     raise NameError('%s has no property named "%s"' % (
         cls._name, dataname))
+    
+    
+def save_entity(entity, driver, uri, options=None):
+    """Stores `entity` to `uri` using `driver`."""
+    storage = storage_create(driver, uri, options)
+    strategy = storage_get_storage_strategy(storage)
+    datamodel = storage_strategy_get_datamodel(strategy)
+    # Hmm, shouldn't we always create a new id when storing?
+    datamodel_set_id(datamodel, uuidgen())
+    datamodel_set_meta_name(datamodel, str(entity._name))
+    datamodel_set_meta_version(datamodel, str(entity._version))
+    datamodel_set_meta_namespace(datamodel, str(entity._namespace))
+    #datamodel_set_meta_description(datamodel, entity._description)
+    #datamodel_set_meta_dimensions(datamodel, entity._dimensions)
+    for key in entity._keys():
+        value = getattr(entity, key)
+        type = entity._get_property_type(key)
+        if value is Uninitialized:
+            raise SoftUninitializedError(
+                'Uninitialized data for "%s" in %s' % (
+                    key, entity.__class__.__name__))
+        if type == 'string':
+            value = str(value)
+        setter = getattr(_softpy, 'datamodel_append_' + type)
+        setter(datamodel, str(key), value)
+    storage_strategy_store(strategy, datamodel)
 
-    
-class MetaEntity(type):
-    _id = property(lambda self: self._instanceid)
-    _name = property(lambda self: self._meta['name'])
-    _version = property(lambda self: self._meta['version'])
-    _namespace = property(lambda self: self._meta['namespace'])
-    _description = property(lambda self: self._meta['description'])
-    _dimensions = property(lambda self: self._meta['dimensions'])
-    
-    def _keys(self):
-        return [p['name'] for p in self._meta['properties']]
-    
-    def _get_unit(self, property_name):
-        """Returns unit `property_name`, or None if `property_name` has no 
-        unit."""
-        return _get_prop_data(self, property_name, 'unit')
-    
-    def _get_type(self, property_name):
-        """Returns the type of `property_name`."""
-        return _get_prop_data(self, property_name, 'type')
-    
-    def _get_description(self, property_name):
-        """Returns description of `property_name`."""
-        return _get_prop_data(self, property_name, 'description', '')
-    
-    def _get_dims(self, property_name):
-        """Return a list with the dimensions of `property_name`."""
-        return _get_prop_data(self, property_name, 'dims', [1])
-    
-    def _save(self, driver, uri, options=None):
-        """Stores this entity to `uri` using `driver`."""
-        storage = storage_create(driver, uri, options)
-        strategy = storage_get_storage_strategy(storage)
-        datamodel = storage_strategy_get_datamodel(strategy)
-        # Hmm, shouldn't we always create a new id when storing?
-        datamodel_set_id(datamodel, uuidgen())
-        datamodel_set_meta_name(datamodel, str(self._name))
-        datamodel_set_meta_version(datamodel, str(self._version))
-        datamodel_set_meta_namespace(datamodel, str(self._namespace))
-        #datamodel_set_meta_description(datamodel, self._description)
-        for key in self._keys():
-            value = getattr(self, key)
-            type = self._get_type(key)
-            if value is Uninitialized:
-                raise SoftUninitializedError(
-                    'Uninitialized data for "%s" in %s' % (
-                        key, self.__class__.__name__))
-            if type == 'string':
-                value = str(value)
-            setter = getattr(_softpy, 'datamodel_append_' + type)
-            setter(datamodel, str(key), value)
-        storage_strategy_store(strategy, datamodel)
+def load_entity_data(entity, driver, uri, options=None):
+    """Loads data into `entity` from `uri` using `driver`."""
+    storage = softpy.storage_create(driver, uri, options)
+    strategy = softpy.storage_get_storage_strategy(storage)
+    datamodel = softpy.storage_strategy_get_datamodel(strategy)
+    softpy.storage_strategy_retrieve(strategy, datamodel)
+    entity._instanceid = softc_datamodel_get_id(datamodel)
+    entity._meta['name'] = softc_datamodel_get_name(datamodel)
+    entity._meta['version'] = softc_datamodel_get_version(datamodel)
+    entity._meta['namespace'] = softc_datamodel_get_namespace(datamodel)
+    #entity._meta['description'] = softc_datamodel_get_description(datamodel)
+    #entity._meta['dimensions'] = softc_datamodel_get_dimensions(datamodel)
+    for key in entity._keys():
+        getter = getattr(
+            _softpy, 'datamodel_get_' + entity._get_property_type(key))
+        setattr(entity, key, getter(datamodel, str(key)))
 
-    def _load(self, driver, uri, options=None):
-        """Loads data into self."""
-        storage = softpy.storage_create(driver, uri, options)
-        strategy = softpy.storage_get_storage_strategy(storage)
-        datamodel = softpy.storage_strategy_get_datamodel(strategy)
-        softpy.storage_strategy_retrieve(strategy, datamodel)
-        self._instanceid = softc_datamodel_get_id(datamodel)
-        self._meta['name'] = softc_datamodel_get_name(datamodel)
-        self._meta['version'] = softc_datamodel_get_version(datamodel)
-        self._meta['namespace'] = softc_datamodel_get_namespace(datamodel)
-        #self._meta['description'] = softc_datamodel_get_description(datamodel)
-        for key in self._keys():
-            getter = getattr(_softpy, 'datamodel_get_' + self._get_type(key))
-            setattr(self, key, getter(datamodel, str(key)))
 
-  
-def entity(metadata, default=None):
-    """Factory fuction for creating an Entity.
+def _init_entity(entity, driver='json', uri=None, options=None, dimensions=()):
+    """Initiates the entity.
 
     Parameters
     ----------
-    metadata : string | file_like
-        The metadata description of the entity to create in json format. 
-    default : ???
+    driver : "json" | "hdf5" | "mongo"...
+        The driver to use for loading initial values.
+    uri : None | string
+        Where the initial values are stored.  If None, all property values
+        are set to softpy.Uninitialized.
+    options : string
+        Additional options passed to the driver.
+    dimensions : sequence | dict
+        Dimensions if entity is kept uninitialised (i.e. `uri` is None).
+        Can be given either as "[3, 5]" or "{'I=3, 'J'=5'}" provided that
+        the entity has dimensions I and J.
     """
+    for p in entity._meta['properties']:
+        setattr(entity, p['name'], Uninitialized)
+    if uri:
+        load_entity_data(entity, driver, uri, options)
+    else:
+        if len(dimensions) != len(entity._dimension_names):
+            raise TypeError('Length of `dimensions` must be %d for %s objects'
+                            % (len(entity._dimension_names), entity._name))
+        if hasattr(dimensions, 'keys'):
+            entity._instancedata['dimensions'] = [
+                dimensions[dname] for dname in entity._dimension_names]
+        else:
+            entity._instancedata['dimensions'] = [int(d) for d in dimensions]
+
+class EntityIter(object):
+    def __init__(self, entity):
+        self.n = 0
+        self.entity = entity
+    def __next__(self):
+        if self.n >= len(self.entity):
+            raise StopIteration
+        self.n += 1
+        return self.entity._meta['properties'][self.n - 1]['name']
+    next = __next__  # for Python 2
+
+class BaseEntity(object):
+    """Base class for all entities.  Intented to be used through the
+    entity() factory function.
+    """
+    def __str__(self):
+        s = []
+        s.append('Entity %s' % self._name)
+        s.append('  id: %s' % self._id)
+        s.append('  version: %s' % self._version)
+        s.append('  namespace: %s' % self._namespace)
+        s.append('  dimensions: %s' % ', '.join(
+            '%s=%d' % (d, n) for d, n in zip(
+                self._dimension_names, self._dimensions)))
+        s.append('  description: %s' % self._description)
+        s.append('  properties:')
+        for key in self._keys():
+             s.append('    %s: %r %s' % (
+                 key, self[key], self._get_property_unit(key)))
+        return '\n'.join(s)
+    
+    def __getitem__(self, name):
+        return self.__dict__[name]
+
+    def __len__(self):
+        return len(self._meta['properties'])
+
+    def __contains__(self, name):
+        return name in self._keys()
+
+    def __iter__(self):
+        return EntityIter(self)
+    
+    _name = classproperty(
+        classmethod(lambda cls: cls._meta['name']))
+    _version = classproperty(
+        classmethod(lambda cls: cls._meta['version']))
+    _namespace = classproperty(
+        classmethod(lambda cls: cls._meta['namespace']))
+    _description = classproperty(
+        classmethod(lambda cls: cls._meta['description']))
+    _dimension_names = classproperty(
+        classmethod(lambda cls:
+                    [str(d['name']) for d in cls._meta['dimensions']]))
+
+    # The instance is mutable - should it really have an id?
+    # Wouldn't it be more natural to assign a new id to the stored instance?
+    _id = property(lambda cls: cls._instancedata['id'])
+    _dimensions = property(lambda self: self._instancedata['dimensions'])
+    
+    @classmethod
+    def _keys(cls):
+        return [p['name'] for p in cls._meta['properties']]
+
+    @classmethod
+    def _get_property_unit(cls, name):
+        """Returns unit for property `name`, or and empty string if
+        `property_name` has no unit."""
+        return _get_prop_data(cls, name, 'unit', '')
+
+    @classmethod
+    def _get_property_type(cls, name):
+        """Returns the type of property `name`."""
+        return _get_prop_data(cls, name, 'type')
+    
+    @classmethod
+    def _get_property_description(cls, name):
+        """Returns description of property `name`."""
+        return _get_prop_data(cls, property_name, 'description', '')
+    
+    @classmethod
+    def _get_property_dims(cls, name):
+        """Return a list with the dimensions of property `name`."""
+        return _get_prop_data(cls, property_name, 'dims', [1])
+
+    def _save(self, driver, uri, options=None):
+        """Stores this entity to `uri` using `driver`."""
+        save_entity(self, driver, uri, options=None)
+
+    def _load(self, driver, uri, options=None):
+        """Loads data from `uri` into self using `driver`."""
+        load_entity_data(self, driver, uri, options=None)
+
+
+  
+def entity(metadata):
+    """Factory fuction for creating an Entity.
+
+    The `metadata` argument is a metadata description (in json format)
+    of the entity to create.  It should either be a string or a
+    file-like object."""
     if hasattr(metadata, 'read'):
         meta = json.load(metadata)
     else:
         meta = json.loads(metadata)
-    attr = dict(__metaclass__=MetaEntity, _meta=meta, _instanceid=None)
-    for p in meta['properties']:
-        attr[p['name']] = Uninitialized
-    return MetaEntity(str(meta['name']), (), attr)
+    instancedata = {
+        'id': None,  # XXX
+        'dimensions': [0] * len(meta['dimensions']),
+    }
+    attr = dict(__init__=_init_entity, _meta=meta, _instancedata=instancedata)
+    #for p in meta['properties']:
+    #    attr[p['name']] = Uninitialized
+    return type(str(meta['name']), (BaseEntity,), attr)
     
     
 %}

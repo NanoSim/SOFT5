@@ -42,18 +42,19 @@ class TestSoftpy(unittest.TestCase):
             os.path.dirname(__file__), 'eu.nanosim.vasp.extraction.json')
 
         Extraction = softpy.entity(open(metafile))
-        Extraction.surface_name = '111'
-        Extraction.atoms = "CH4"
-        Extraction.atom_species = 'H C'
-        Extraction.state = 'surface'
-        Extraction.site_name = 'on_top'
-        Extraction.total_energy = 543.2
-        Extraction.frequencies = 0.0  # XXX
-        Extraction.cell = 0.0         # XXX
-        Extraction.positions = 0.0    # XXX
-        Extraction.info = ''
-        Extraction._save('hdf5', 'extraction.h5')
-        
+        e = Extraction(dimensions=[5])
+        e.surface_name = '111'
+        e.atoms = "CH4"
+        e.atom_species = 'H C'
+        e.state = 'surface'
+        e.site_name = 'on_top'
+        e.total_energy = 543.2
+        e.frequencies = 0.0  # XXX
+        e.cell = 0.0         # XXX
+        e.positions = 0.0    # XXX
+        e.info = ''
+        e._save('hdf5', 'extraction.h5')
+        print(e)
         
 if __name__ == "__main__":
     unittest.main()
