@@ -19,6 +19,8 @@ public:
   IDataModel* dataModel() const   override;
   void store (IDataModel const *) override;
   void retrieve (IDataModel *) const override;
+  void startRetrieve (IDataModel *) const;
+  void endRetrieve (IDataModel *) const;
 
   const char *metaType() const;
   static IStorageStrategy* create(char const *uri, char const *opts);

@@ -1,6 +1,7 @@
 #ifndef JSONMODEL_H_DEF
 #define JSONMODEL_H_DEF
 
+#include <functional>
 #include "softns.h"
 #include "idatamodel.h"
 
@@ -59,6 +60,24 @@ private:
   void setJson(QJsonObject const &);
   const QJsonObject *json() const;
 
+  void registerGetStringFn(std::function<bool(const char *,std::string&)> &fn);
+  void registerGetInt8Fn(std::function<bool(const char *,int8_t&)> &fn);
+  void registerGetUInt8Fn(std::function<bool(const char *,uint8_t&)> &fn);
+  void registerGetInt16Fn(std::function<bool(const char *, int16_t &)> &fn);
+  void registerGetUInt16Fn(std::function<bool(const char *, uint16_t &)> &fn);
+  void registerGetInt32Fn(std::function<bool(const char *, int32_t &)> &fn);
+  void registerGetUInt32Fn(std::function<bool(const char *, uint32_t &)> &fn);
+  void registerGetInt64Fn(std::function<bool(const char *, int64_t &)> &fn);
+  void registerGetUInt64Fn(std::function<bool(const char *, uint64_t &)> &fn);
+  void registerGetFloatFn(std::function<bool(const char *, float &)> &fn);
+  void registerGetDoubleFn(std::function<bool(const char *, double &)> &fn);
+  void registerGetBoolFn(std::function<bool(const char *, bool &)> &fn);
+  void registerGetInt32ArrayFn(std::function<bool(const char *, std::vector<int32_t> &)> &fn);
+  void registerGetDoubleArrayFn(std::function<bool(const char *, std::vector<double> &)> &fn);
+  void registerGetByteArrayFn(std::function<bool(const char *, std::vector<unsigned char>&)> &fn);
+  void registerGetStringArrayFn(std::function<bool(const char *, std::vector<std::string> &)> &fn);
+  
+  void *data;
   class Private;
   Private *d;
 };

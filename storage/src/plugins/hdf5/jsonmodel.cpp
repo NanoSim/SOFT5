@@ -1,4 +1,5 @@
 #include <QtCore>
+#include <cstdint>
 #include "jsonmodel.h"
 
 SOFT_BEGIN_NAMESPACE
@@ -10,10 +11,27 @@ class JSONModel :: Private
   {}
 
   QJsonObject jsonObject;
+  std::function<bool(const char *, std::string&)>          getString;
+  std::function<bool(const char *, int8_t&)>               getInt8;
+  std::function<bool(const char *, uint8_t&)>              getUInt8;
+  std::function<bool(const char *, int16_t &)>             getInt16;
+  std::function<bool(const char *, uint16_t &)>            getUInt16;
+  std::function<bool(const char *, int32_t &)>             getInt32;
+  std::function<bool(const char *, uint32_t &)>            getUInt32;
+  std::function<bool(const char *, int64_t &)>             getInt64;
+  std::function<bool(const char *, uint64_t &)>            getUInt64;
+  std::function<bool(const char *, float &)>               getFloat;
+  std::function<bool(const char *, double &)>              getDouble;
+  std::function<bool(const char *, bool &)>                getBool;
+  std::function<bool(const char *, std::vector<int32_t>&)> getInt32Array;
+  std::function<bool(const char *, std::vector<double>&)>  getDoubleArray;
+  std::function<bool(const char *, std::vector<unsigned char>&)> getByteArray;
+  std::function<bool(const char *, std::vector<std::string> &)> getStringArray;
 };
 
 JSONModel :: JSONModel()
   : IDataModel()
+  , data (nullptr)
   , d (new JSONModel::Private)
 {}
 
@@ -21,6 +39,88 @@ JSONModel :: ~JSONModel()
 {
   delete d;
 }
+
+void JSONModel :: registerGetInt8Fn(std::function<bool(const char *,int8_t&)> &fn)
+{
+  d->getInt8 = fn;
+}
+
+void JSONModel :: registerGetUInt8Fn(std::function<bool(const char *,uint8_t&)> &fn)
+{
+  d->getUInt8 = fn;
+}
+
+void JSONModel :: registerGetStringFn(std::function<bool(const char *,std::string&)> &fn)
+{
+  d->getString = fn;
+}
+
+void JSONModel :: registerGetInt16Fn(std::function<bool(const char *, int16_t &)> &fn)
+{
+  d->getInt16 = fn;
+}
+
+void JSONModel :: registerGetUInt16Fn(std::function<bool(const char *, uint16_t &)> &fn)
+{
+  d->getUInt16 = fn;
+}
+
+void JSONModel :: registerGetInt32Fn(std::function<bool(const char *, int32_t &)> &fn)
+{
+  d->getInt32 = fn;
+}
+
+void JSONModel :: registerGetUInt32Fn(std::function<bool(const char *, uint32_t &)> &fn)
+{
+  d->getUInt32 = fn;
+}
+
+void JSONModel :: registerGetInt64Fn(std::function<bool(const char *, int64_t &)> &fn)
+{
+  d->getInt64 = fn;
+}
+
+void JSONModel :: registerGetUInt64Fn(std::function<bool(const char *, uint64_t &)> &fn)
+{
+  d->getUInt64 = fn;
+}
+
+void JSONModel :: registerGetFloatFn(std::function<bool(const char *, float &)> &fn)
+{
+  d->getFloat = fn;
+}
+
+void JSONModel :: registerGetDoubleFn(std::function<bool(const char *, double &)> &fn)
+{
+  d->getDouble = fn;
+}
+
+void JSONModel :: registerGetBoolFn(std::function<bool(const char *, bool &)> &fn)
+{
+  d->getBool = fn;
+}
+
+void JSONModel :: registerGetInt32ArrayFn(std::function<bool(const char *, std::vector<int32_t> &)> &fn)
+{
+  d->getInt32Array = fn;
+}
+
+void JSONModel :: registerGetDoubleArrayFn(std::function<bool(const char *, std::vector<double> &)> &fn)
+{
+  d->getDoubleArray = fn;
+}
+
+void JSONModel :: registerGetByteArrayFn(std::function<bool(const char *, std::vector<unsigned char>&)> &fn)
+{
+  d->getByteArray = fn;
+}
+
+void JSONModel :: registerGetStringArrayFn(std::function<bool(const char *, std::vector<std::string> &)> &fn)
+{
+  d->getStringArray = fn;
+}
+
+
 
 IDataModel *JSONModel :: createModel()
 {
@@ -64,8 +164,8 @@ bool JSONModel :: appendString     (const char* key, const std::string &value)
 
 bool JSONModel :: appendInt8       (const char *key, int8_t value)
 {
-  QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+    QJsonValue jsonValue(value);
+    return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
 }
 
 bool JSONModel :: appendUInt8      (const char *key, uint8_t value)
@@ -122,11 +222,20 @@ bool JSONModel :: appendDouble     (const char *key, double value)
   return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
 }
 
-bool JSONModel :: appendBool       (const char *, bool)
-{}
+bool JSONModel :: appendBool       (const char *key, bool value)
+{
+  QJsonValue jsonValue(value);
+  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+}
 
-bool JSONModel :: appendInt32Array (const char *, const std::vector<int32_t> &)
-{}
+bool JSONModel :: appendInt32Array (const char *key, const std::vector<int32_t> &value)
+{
+  QJsonArray jsonArray;
+  for (auto &v: value) {
+    jsonArray.append(QJsonValue(v));
+  }
+  d->jsonObject.insert(key, jsonArray);
+}
 
 bool JSONModel :: appendDoubleArray(const char *key, const std::vector<double> &value)
 {
@@ -152,90 +261,111 @@ bool JSONModel :: appendModel      (const char *, const IDataModel *)
 bool JSONModel :: getVariant       (const char *, StdVariant &) const
 {}
 
-bool JSONModel :: getString (const char *key, std::string &str) const
+bool JSONModel :: getString (const char *key, std::string &value) const
 {
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  if (!(*it).isString()) return false;
-  auto qstr = (*it).toString();
-  str.resize(qstr.length());
-  str = qstr.toStdString();
-
-  return true;    
+  if (!d->getString) return false;
+  return d->getString(key, value);
 }
 
-bool JSONModel :: getInt8          (const char *, int8_t &) const
-{}
+bool JSONModel :: getInt8          (const char *key, int8_t &value) const
+{
+  if (!d->getInt8) return false;
+  return d->getInt8(key,value);
+}
 
-bool JSONModel :: getUInt8         (const char *, uint8_t &) const
-{}
+bool JSONModel :: getUInt8         (const char *key, uint8_t &value) const
+{
+  if (!d->getUInt8) return false;
+  return d->getUInt8(key, value);
+}
 
-bool JSONModel :: getInt16         (const char *, int16_t &) const
-{}
+bool JSONModel :: getInt16         (const char *key, int16_t &value) const
+{
+  if (!d->getInt16) return false;
+  return d->getInt16(key, value);
+}
 
-bool JSONModel :: getUInt16        (const char *, uint16_t &) const
-{}
+bool JSONModel :: getUInt16        (const char *key, uint16_t &value) const
+{
+  if (!d->getUInt16) return false;
+  return d->getUInt16(key, value);
+}
 
-bool JSONModel :: getInt32         (const char *, int32_t &) const
-{}
+bool JSONModel :: getInt32         (const char *key, int32_t &value) const
+{
+  if (!d->getInt32) return false;
+  return d->getInt32(key, value);
+}
 
-bool JSONModel :: getUInt32        (const char *, uint32_t &) const
-{}
+bool JSONModel :: getUInt32        (const char *key, uint32_t &value) const
+{
+  if (!d->getUInt32) return false;
+  return d->getUInt32(key, value);
+}
 
-bool JSONModel :: getInt64         (const char *, int64_t &) const
-{}
+bool JSONModel :: getInt64         (const char *key, int64_t &value) const
+{
+  if (!d->getInt64) return false;
+  return d->getInt64(key, value);
+}
 
-bool JSONModel :: getUInt64        (const char *, uint64_t &) const
-{}
+bool JSONModel :: getUInt64        (const char *key, uint64_t &value) const
+{
+  if (!d->getUInt64) return false;
+  return d->getUInt64(key, value);
+}
 
-bool JSONModel :: getFloat         (const char *, float &) const
-{}
+bool JSONModel :: getFloat         (const char *key, float &value) const
+{
+  if (!d->getFloat) return false;
+  return d->getFloat(key, value);
+}
 
 bool JSONModel :: getDouble        (const char *key, double &value) const
 {
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  if (!(*it).isDouble()) return false;
-  value = (*it).toDouble();
-  return true;
+  if (!d->getDouble) return false;
+  return d->getDouble(key, value);
 }
 
-bool JSONModel :: getBool          (const char *, bool &) const
-{}
+bool JSONModel :: getBool          (const char *key, bool &value) const
+{
+  if (!d->getBool) return false;
+  return d->getBool(key, value);
+}
 
-bool JSONModel :: getInt32Array    (const char *, std::vector<int32_t> &) const
-{}
+bool JSONModel :: getInt32Array    (const char *key, std::vector<int32_t> &value) const
+{
+  if (!d->getInt32Array) return false;
+  return d->getInt32Array(key, value);
+}
 
 bool JSONModel :: getDoubleArray   (const char *key, std::vector<double> &value) const
 {
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-  if (!(*it).isArray()) return false;
-  QJsonArray array = (*it).toArray();
-  value.resize(array.size());
-
-  auto array_it = array.constBegin();
-  auto value_it = value.begin();
-  while (array_it !=array.constEnd() && value_it != value.end()) {
-    (*value_it++) = (*array_it++).toDouble();
-  }
-
-  return true;
+  if (!d->getDoubleArray) return false;
+  return d->getDoubleArray(key, value);
 }
 
-bool JSONModel :: getByteArray     (const char *, std::vector<unsigned char> &) const
-{}
+bool JSONModel :: getByteArray     (const char *key, std::vector<unsigned char> &value) const
+{
+  if (!d->getByteArray) return false;
+  return d->getByteArray(key, value);
+}
 
-bool JSONModel :: getStringArray(const char *, std::vector<std::string> &) const
-{}
+bool JSONModel :: getStringArray(const char *key, std::vector<std::string> &value) const
+{
+  if (!d->getStringArray) return false;
+  return d->getStringArray(key, value);
+}
 
 bool JSONModel :: getArray         (const char *, IDataModel *) const
-{}
+{
+  return false;
+}
 
 bool JSONModel :: getModel         (const char *, IDataModel *) const
-{}
+{
+  return false;
+}
 
 const QJsonObject *JSONModel :: json() const
 {
@@ -247,151 +377,4 @@ void JSONModel :: setJson(QJsonObject const &obj)
   d->jsonObject = obj;
 }
 
-
-/*
-void JSONModel :: appendInt32(const char *key, int value)
-{
-  QJsonValue jsonValue(value);
-  d->jsonObject.insert(key, jsonValue);
-}
-
-void JSONModel :: appendString(const char *key, const std::string &str)
-{
-  QJsonValue jsonValue(QString::fromStdString(str));
-  d->jsonObject.insert(key, jsonValue);
-}
-
-void JSONModel :: appendDouble(const char *key, double value)
-{
-  QJsonValue jsonValue(value);
-  d->jsonObject.insert(key, jsonValue);
-}
-
-void JSONModel :: appendBool(const char *key, bool value)
-{
-  QJsonValue jsonValue(value);
-  d->jsonObject.insert(key, jsonValue);
-}
-
-void JSONModel :: appendArray(const char *key, IDataModel *model)
-{
-  auto m = dynamic_cast<JSONModel*>(model);
-  QJsonValue jsonValue(m->d->jsonObject);
-  d->jsonObject.insert(key, jsonValue);
-}
-
-void JSONModel :: appendModel(const char *key, IDataModel *model)
-{
-  auto m = dynamic_cast<JSONModel*>(model);
-  QJsonValue jsonValue(m->d->jsonObject);
-  d->jsonObject.insert(key, jsonValue);
-}
-
-void JSONModel :: appendDoubleArray(const char *key, const double *value, size_t length)
-{
-  QJsonArray jsonArray;
-  double const *ptr = value;
-  for (size_t idx = 0; idx < length; ++idx) {
-    jsonArray.append(QJsonValue(*(ptr++)));;
-  }
-  d->jsonObject.insert(key, jsonArray);
-}
-
-void JSONModel :: appendByteArray(const char* key, const unsigned char *data, size_t size)
-{}
-
-bool JSONModel :: getInt32(const char *key, int *value) const
-{
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  if (!(*it).isDouble()) return false;
-  *value = (*it).toInt();
-  return true;
-}
-
-bool JSONModel :: getDouble(const char *key, double *value) const
-{
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  if (!(*it).isDouble()) return false;
-  *value = (*it).toDouble();
-  return true;
-}
-
-bool JSONModel :: getBool(const char *key, bool *value) const
-{
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  if (!(*it).isBool()) return false;
-  *value = (*it).toBool();
-  return true;
-}
-
-bool JSONModel :: getDoubleArray(const char *key, double **valueptr, size_t *len) const
-{
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-  if (!(*it).isArray()) return false;
-  QJsonArray array = (*it).toArray();
-  *len = array.size();
-  valueptr[0] = new double[*len];
-  double *ptr = valueptr[0];
-  for (auto v : array) {
-    *ptr++ = v.toDouble();
-  }
-
-  return true;
-}
-
-bool JSONModel :: getString(const char *key, std::string &str) const 
-{
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  if (!(*it).isString()) return false;
-  str = (*it).toString().toStdString();
-
-  return true;    
-}
-
-void JSONModel :: appendVariant(const char *key, StdVariant const & value)
-{
-  switch (value.type()) {
-  case soft::StdTypes::String:
-    d->jsonObject.insert(key, QJsonValue(QString::fromStdString(value.get<StdString>())));
-    break;
-  case soft::StdTypes::Int:
-  case soft::StdTypes::UInt:
-  case soft::StdTypes::Int8:
-  case soft::StdTypes::UInt8:
-  case soft::StdTypes::Int64:
-  case soft::StdTypes::UInt64:
-    d->jsonObject.insert(key, QJsonValue(value.toInt()));
-    break;
-  case soft::StdTypes::Double:
-    d->jsonObject.insert(key, QJsonValue(value.get<StdDouble>()));
-    break;
-  case soft::StdTypes::DoubleArray:
-    QJsonArray array;
-    auto v = value.get<StdDoubleArray>();
-    for (StdDoubleArray::iterator it = v.begin(); it != v.end(); ++it) {
-      array.append(QJsonValue(*it));
-    }
-    d->jsonObject.insert(key, array);
-    break;
-  }  
-}
-
-bool JSONModel :: getVariant(const char *key, StdVariant &value) const
-{
-  auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-
-  
-  return true;
-}
-*/
 SOFT_END_NAMESPACE
