@@ -18,6 +18,13 @@ protected:
     , text( "This is a text")
     , intVec({1,2,3,4,5,6,7})
     , doubleVec({1.1, 2.2, 3.3, 4.4, 5.5, 6.6})
+    , doubleVec2D({{1.0, 1.1, 1.2},
+	  {2.0, 2.1, 2.2},
+	    {3.0, 3.1, 3.2}})
+    , doubleVec3D(
+		  {{{1.0, 0.1, 0.2},{0.0, 1.1, 0.2},{3.0, 3.1, 3.2}},
+		      {{1.0, 1.1, 1.2},{2.0, 2.1, 2.2},{3.0, 3.1, 3.2}},
+			{{1.0, 1.1, 4.2},{2.0, 2.1, 3.2},{3.0, 3.1, 3.2}}})
   {}
   
   static void SetUpTestCase()
@@ -37,6 +44,8 @@ protected:
   std::string text;
   std::vector<int32_t> intVec;
   std::vector<double> doubleVec;
+  std::vector<std::vector<double> > doubleVec2D;
+  std::vector<std::vector<std::vector<double> > > doubleVec3D;
   std::string id;
 };
 
@@ -73,8 +82,9 @@ TEST_F(Hdf5PluginTest, writeTest)
   model->appendBool("no", no);
   model->appendInt32Array("intArray", intVec);
   model->appendDoubleArray("doubleArray", doubleVec);
+  model->appendDoubleArray2D("doubleArray2D", doubleVec2D);
+  model->appendDoubleArray3D("doubleArray3D", doubleVec3D);
   strategy->store(model);
-
 }
 
 TEST_F(Hdf5PluginTest, readInt)

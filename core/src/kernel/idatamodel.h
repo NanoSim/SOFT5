@@ -31,6 +31,8 @@ public:
   virtual bool appendBool       (const char *, bool) = 0;
   virtual bool appendInt32Array (const char *, const std::vector<int32_t> &) = 0;
   virtual bool appendDoubleArray(const char *, const std::vector<double> &) = 0;
+  virtual bool appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) = 0;
+  virtual bool appendDoubleArray3D (const char *, const std::vector<std::vector<std::vector<double> > >&) = 0;
   virtual bool appendByteArray  (const char *, const std::vector<unsigned char> &) = 0;
   virtual bool appendStringArray(const char *, const std::vector<std::string> &) = 0;
   virtual bool appendArray      (const char *, const IDataModel *) = 0;
@@ -51,6 +53,8 @@ public:
   virtual bool getBool          (const char *, bool &) const = 0;
   virtual bool getInt32Array    (const char *, std::vector<int32_t> &) const = 0;
   virtual bool getDoubleArray   (const char *, std::vector<double> &) const = 0;
+  virtual bool getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const = 0;
+  virtual bool getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const = 0;
   virtual bool getByteArray     (const char *, std::vector<unsigned char> &) const = 0;
   virtual bool getStringArray   (const char *, std::vector<std::string> &) const = 0;
   virtual bool getArray         (const char *, IDataModel *) const = 0;

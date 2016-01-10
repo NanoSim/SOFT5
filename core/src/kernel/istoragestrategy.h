@@ -19,8 +19,8 @@ public:
   virtual IDataModel *dataModel () const             = 0;
   virtual void        store     (IDataModel const *) = 0;
   virtual void        retrieve  (IDataModel *) const = 0;
-  virtual void        startRetrieve (IDataModel *) const {}
-  virtual void        endRetrieve (IDataModel*) const {}
+  virtual void        startRetrieve (IDataModel *m) const;
+  virtual void        endRetrieve (IDataModel*) const;
 };
 
 SOFT_END_NAMESPACE

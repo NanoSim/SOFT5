@@ -235,6 +235,7 @@ bool JSONModel :: appendInt32Array (const char *key, const std::vector<int32_t> 
     jsonArray.append(QJsonValue(v));
   }
   d->jsonObject.insert(key, jsonArray);
+  return true;
 }
 
 bool JSONModel :: appendDoubleArray(const char *key, const std::vector<double> &value)
@@ -244,22 +245,72 @@ bool JSONModel :: appendDoubleArray(const char *key, const std::vector<double> &
     jsonArray.append(QJsonValue(v));
   }
   d->jsonObject.insert(key, jsonArray);
+  return true;
 }
 
-bool JSONModel :: appendByteArray  (const char *, const std::vector<unsigned char> &)
-{}
+bool JSONModel :: appendDoubleArray2D (const char *key, const std::vector<std::vector<double> >& value) 
+{
+  QJsonArray jsonArray;
+  for (auto &v: value) {
+    QJsonArray array;
+    for (auto &d: v) {
+      array.append(QJsonValue(d));
+    }    
+    jsonArray.append(array);
+  }
+  d->jsonObject.insert(key, jsonArray);
+  return true;
+}
 
-bool JSONModel :: appendStringArray(const char *, const std::vector<std::string> &)
-{}
+bool JSONModel :: appendDoubleArray3D (const char *key, const std::vector<std::vector<std::vector<double> > >& value)
+{
+  QJsonArray jsonArray;
+  for (auto &v: value) {
+    QJsonArray aa;
+    for (auto &a: v) {
+      QJsonArray array;
+      for (auto &d: a) {
+	array.append(QJsonValue(d));
+      }    
+      aa.append(array);
+    }
+    jsonArray.append(aa);
+  }
+  d->jsonObject.insert(key, jsonArray);
+
+  return true;
+}
+
+
+bool JSONModel :: appendByteArray  (const char *, const std::vector<unsigned char> &)
+{
+  return false;
+}
+
+bool JSONModel :: appendStringArray(const char *key, const std::vector<std::string> &value)
+{
+  QJsonArray jsonArray;
+  for (auto &v: value) {
+    jsonArray.append(QJsonValue(QString::fromStdString(v)));
+  }
+  d->jsonObject.insert(key, jsonArray);
+  return true;
+}
 
 bool JSONModel :: appendArray      (const char *, const IDataModel *)
-{}
+{
+  return false;
+}
 
 bool JSONModel :: appendModel      (const char *, const IDataModel *)
-{}
+{
+  return false;
+}
 
 bool JSONModel :: getVariant       (const char *, StdVariant &) const
-{}
+{
+  return false;
+}
 
 bool JSONModel :: getString (const char *key, std::string &value) const
 {
@@ -375,6 +426,16 @@ const QJsonObject *JSONModel :: json() const
 void JSONModel :: setJson(QJsonObject const &obj)
 {
   d->jsonObject = obj;
+}
+
+bool JSONModel :: getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const
+{
+  return false;
+}
+
+bool JSONModel :: getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const
+{
+  return false;
 }
 
 SOFT_END_NAMESPACE

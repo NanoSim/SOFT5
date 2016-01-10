@@ -265,5 +265,25 @@ const _bson_t *BsonModel :: bson() const
 }
 
 
+bool BsonModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) 
+{
+  return false;
+}
+
+bool BsonModel :: appendDoubleArray3D (const char *, const std::vector<std::vector<std::vector<double> > >&)
+{
+  return false;
+}
+
+bool BsonModel :: getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const
+{
+  return false;
+}
+
+bool BsonModel :: getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const
+{
+  return false;
+}
+
   
 SOFT_END_NAMESPACE

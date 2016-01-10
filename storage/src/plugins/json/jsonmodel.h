@@ -30,6 +30,9 @@ public:
   bool appendBool       (const char *, bool) override;
   bool appendInt32Array (const char *, const std::vector<int32_t> &) override;
   bool appendDoubleArray(const char *, const std::vector<double> &) override;
+  bool appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) override;
+  bool appendDoubleArray3D (const char *, const std::vector<std::vector<std::vector<double> > >&) override;
+
   bool appendByteArray  (const char *, const std::vector<unsigned char> &) override;
   bool appendStringArray(const char *, const std::vector<std::string> &) override;
   bool appendArray      (const char *, const IDataModel *) override;
@@ -50,6 +53,9 @@ public:
   bool getBool          (const char *, bool &) const override;
   bool getInt32Array    (const char *, std::vector<int32_t> &) const override;
   bool getDoubleArray   (const char *, std::vector<double> &) const override;
+  bool getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const override;
+  bool getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const override;
+
   bool getByteArray     (const char *, std::vector<unsigned char> &) const override;
   bool getStringArray(const char *, std::vector<std::string> &) const override;
   bool getArray         (const char *, IDataModel *) const override;
