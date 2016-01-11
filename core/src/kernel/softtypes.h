@@ -13,6 +13,8 @@ using StdInt         = std::int32_t;
 using StdUInt        = std::uint32_t;
 using StdInt8        = std::int8_t;
 using StdUInt8       = std::uint8_t;
+using StdInt16       = std::int16_t;
+using StdUInt16      = std::uint16_t;
 using StdInt64       = std::int64_t;
 using StdUInt64      = std::uint64_t;
 using StdFloat       = float;
@@ -25,28 +27,32 @@ using StdDoubleArray = std::vector<StdDouble>;
 using StdDoubleArray2D = std::vector<StdDoubleArray>;
 using StdDoubleArray3D = std::vector<StdDoubleArray2D>;
 
-template <> struct VariantType<StdString>      {enum {value = 0};};
-template <> struct VariantType<StdInt>         {enum {value = 1};};  
-template <> struct VariantType<StdUInt>        {enum {value = 2};};
-template <> struct VariantType<StdInt8>        {enum {value = 3};};
-template <> struct VariantType<StdUInt8>       {enum {value = 4};};
-template <> struct VariantType<StdInt64>       {enum {value = 5};};
-template <> struct VariantType<StdUInt64>      {enum {value = 6};};
-template <> struct VariantType<StdFloat>       {enum {value = 7};};
-template <> struct VariantType<StdDouble>      {enum {value = 8};};
-template <> struct VariantType<StdBool>        {enum {value = 9};};
-template <> struct VariantType<StdBlob>        {enum {value = 10};};
-template <> struct VariantType<StdStringList>  {enum {value = 11};};
-template <> struct VariantType<StdIntArray>    {enum {value = 12};};
-template <> struct VariantType<StdDoubleArray> {enum {value = 13};};
-template <> struct VariantType<StdDoubleArray2D> {enum {value = 14};};
-template <> struct VariantType<StdDoubleArray3D> {enum {value = 15};};
+template <> struct VariantType<StdString>        {enum {value = 0};};
+template <> struct VariantType<StdInt>           {enum {value = 1};};  
+template <> struct VariantType<StdUInt>          {enum {value = 2};};
+template <> struct VariantType<StdInt8>          {enum {value = 3};};
+template <> struct VariantType<StdUInt8>         {enum {value = 4};};
+template <> struct VariantType<StdInt16>         {enum {value = 5};};
+template <> struct VariantType<StdUInt16>        {enum {value = 6};};
+template <> struct VariantType<StdInt64>         {enum {value = 7};};
+template <> struct VariantType<StdUInt64>        {enum {value = 8};};
+template <> struct VariantType<StdFloat>         {enum {value = 9};};
+template <> struct VariantType<StdDouble>        {enum {value = 10};};
+template <> struct VariantType<StdBool>          {enum {value = 11};};
+template <> struct VariantType<StdBlob>          {enum {value = 12};};
+template <> struct VariantType<StdStringList>    {enum {value = 13};};
+template <> struct VariantType<StdIntArray>      {enum {value = 14};};
+template <> struct VariantType<StdDoubleArray>   {enum {value = 15};};
+template <> struct VariantType<StdDoubleArray2D> {enum {value = 16};};
+template <> struct VariantType<StdDoubleArray3D> {enum {value = 17};};
 
 enum StdTypes { String = VariantType<StdString>::value,
 		Int = VariantType<StdInt>::value,
 		UInt = VariantType<StdUInt>::value,
 		Int8 = VariantType<StdInt8>::value,
 		UInt8 = VariantType<StdUInt8>::value,
+		Int16 = VariantType<StdInt16>::value,
+		UInt16 = VariantType<StdUInt16>::value,
 		Int64 = VariantType<StdInt64>::value,
 		UInt64 = VariantType<StdUInt64>::value,
 		Float = VariantType<StdFloat>::value,
@@ -66,6 +72,8 @@ using StdVariant = Variant<StdString,
 			   StdUInt,
 			   StdInt8,
 			   StdUInt8,
+			   StdInt16,
+			   StdUInt16,
 			   StdInt64,
 			   StdUInt64,
 			   StdFloat,

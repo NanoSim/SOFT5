@@ -16,64 +16,64 @@ public:
   virtual ~IDataModel() = 0;
 
   virtual IDataModel* createModel() = 0;
-  virtual bool appendVariant    (const char *, StdVariant const &) = 0;
-  virtual bool appendString     (const char*, const std::string &) = 0;
-  virtual bool appendInt8       (const char *, int8_t) = 0;
-  virtual bool appendUInt8      (const char *, uint8_t) = 0;
-  virtual bool appendInt16      (const char *, int16_t) = 0;
-  virtual bool appendUInt16     (const char *, uint16_t) = 0;
-  virtual bool appendInt32      (const char *, int32_t) = 0;
-  virtual bool appendUInt32     (const char *, uint32_t) = 0;
-  virtual bool appendInt64      (const char *, int64_t) = 0;
-  virtual bool appendUInt64     (const char *, uint64_t) = 0;
-  virtual bool appendFloat      (const char *, float) = 0;
-  virtual bool appendDouble     (const char *, double) = 0;
-  virtual bool appendBool       (const char *, bool) = 0;
-  virtual bool appendInt32Array (const char *, const std::vector<int32_t> &) = 0;
-  virtual bool appendDoubleArray(const char *, const std::vector<double> &) = 0;
-  virtual bool appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) = 0;
-  virtual bool appendDoubleArray3D (const char *, const std::vector<std::vector<std::vector<double> > >&) = 0;
-  virtual bool appendByteArray  (const char *, const std::vector<unsigned char> &) = 0;
-  virtual bool appendStringArray(const char *, const std::vector<std::string> &) = 0;
-  virtual bool appendArray      (const char *, const IDataModel *) = 0;
-  virtual bool appendModel      (const char *, const IDataModel *) = 0;
+  virtual bool appendVariant       (const char *, StdVariant const &) = 0;
+  virtual bool appendString        (const char*, const StdString &) = 0;
+  virtual bool appendInt8          (const char *, StdInt8) = 0;
+  virtual bool appendUInt8         (const char *, StdUInt8) = 0;
+  virtual bool appendInt16         (const char *, StdInt16) = 0;
+  virtual bool appendUInt16        (const char *, StdUInt16) = 0;
+  virtual bool appendInt32         (const char *, StdInt) = 0;
+  virtual bool appendUInt32        (const char *, StdUInt) = 0;
+  virtual bool appendInt64         (const char *, StdInt64) = 0;
+  virtual bool appendUInt64        (const char *, StdUInt64) = 0;
+  virtual bool appendFloat         (const char *, StdFloat) = 0;
+  virtual bool appendDouble        (const char *, StdDouble) = 0;
+  virtual bool appendBool          (const char *, bool) = 0;
+  virtual bool appendInt32Array    (const char *, StdIntArray const &) = 0;
+  virtual bool appendDoubleArray   (const char *, StdDoubleArray const &) = 0;
+  virtual bool appendDoubleArray2D (const char *, StdDoubleArray2D const&) = 0;
+  virtual bool appendDoubleArray3D (const char *, StdDoubleArray3D const&) = 0;
+  virtual bool appendByteArray     (const char *, StdBlob const &) = 0;
+  virtual bool appendStringArray   (const char *, StdStringList const &) = 0;
+  virtual bool appendArray         (const char *, IDataModel const *) = 0;
+  virtual bool appendModel         (const char *, IDataModel const *) = 0;
 
-  virtual bool getVariant       (const char *, StdVariant &) const = 0;
-  virtual bool getString        (const char *, std::string &str) const = 0;
-  virtual bool getInt8          (const char *, int8_t &) const = 0;
-  virtual bool getUInt8         (const char *, uint8_t &) const = 0;
-  virtual bool getInt16         (const char *, int16_t &) const = 0;
-  virtual bool getUInt16        (const char *, uint16_t &) const = 0;
-  virtual bool getInt32         (const char *, int32_t &) const = 0;
-  virtual bool getUInt32        (const char *, uint32_t &) const = 0;
-  virtual bool getInt64         (const char *, int64_t &) const = 0;
-  virtual bool getUInt64        (const char *, uint64_t &) const = 0;
-  virtual bool getFloat         (const char *, float &) const = 0;
-  virtual bool getDouble        (const char *, double &) const = 0;
-  virtual bool getBool          (const char *, bool &) const = 0;
-  virtual bool getInt32Array    (const char *, std::vector<int32_t> &) const = 0;
-  virtual bool getDoubleArray   (const char *, std::vector<double> &) const = 0;
-  virtual bool getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const = 0;
-  virtual bool getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const = 0;
-  virtual bool getByteArray     (const char *, std::vector<unsigned char> &) const = 0;
-  virtual bool getStringArray   (const char *, std::vector<std::string> &) const = 0;
-  virtual bool getArray         (const char *, IDataModel *) const = 0;
-  virtual bool getModel         (const char *, IDataModel *) const = 0;
+  virtual bool getVariant          (const char *, StdVariant &) const = 0;
+  virtual bool getString           (const char *, StdString &str) const = 0;
+  virtual bool getInt8             (const char *, StdInt8 &) const = 0;
+  virtual bool getUInt8            (const char *, StdUInt8 &) const = 0;
+  virtual bool getInt16            (const char *, StdInt16 &) const = 0;
+  virtual bool getUInt16           (const char *, StdUInt16 &) const = 0;
+  virtual bool getInt32            (const char *, StdInt &) const = 0;
+  virtual bool getUInt32           (const char *, StdUInt &) const = 0;
+  virtual bool getInt64            (const char *, StdInt64 &) const = 0;
+  virtual bool getUInt64           (const char *, StdUInt64 &) const = 0;
+  virtual bool getFloat            (const char *, StdFloat &) const = 0;
+  virtual bool getDouble           (const char *, StdDouble &) const = 0;
+  virtual bool getBool             (const char *, StdBool &) const = 0;
+  virtual bool getInt32Array       (const char *, StdIntArray &) const = 0;
+  virtual bool getDoubleArray      (const char *, StdDoubleArray &) const = 0;
+  virtual bool getDoubleArray2D    (const char *, StdDoubleArray2D &) const = 0;
+  virtual bool getDoubleArray3D    (const char *, StdDoubleArray3D &) const = 0;
+  virtual bool getByteArray        (const char *, StdBlob &) const = 0;
+  virtual bool getStringArray      (const char *, StdStringList &) const = 0;
+  virtual bool getArray            (const char *, IDataModel *) const = 0;
+  virtual bool getModel            (const char *, IDataModel *) const = 0;
 
-  virtual void setId(const std::string &id) {_id = id;}
-  virtual void setMetaName(const std::string &metaName){_metaName = metaName;}
-  virtual void setMetaVersion(const std::string &metaVersion) {_metaVersion = metaVersion;}
-  virtual void setMetaNamespace(const std::string &metaNamespace) {_metaNamespace = metaNamespace;}
+  virtual void setId               (const StdString &id) {_id = id;}
+  virtual void setMetaName         (const StdString &metaName){_metaName = metaName;}
+  virtual void setMetaVersion      (const StdString &metaVersion) {_metaVersion = metaVersion;}
+  virtual void setMetaNamespace    (const StdString &metaNamespace) {_metaNamespace = metaNamespace;}
 
-  virtual std::string id() const {return _id;}
-  virtual std::string metaName() const {return _metaName;}
-  virtual std::string metaVersion() const {return _metaVersion;}
-  virtual std::string metaNamespace() const {return _metaNamespace;}
+  virtual StdString id() const {return _id;}
+  virtual StdString metaName() const {return _metaName;}
+  virtual StdString metaVersion() const {return _metaVersion;}
+  virtual StdString metaNamespace() const {return _metaNamespace;}
 private:
-  std::string _id;
-  std::string _metaName;
-  std::string _metaVersion;
-  std::string _metaNamespace;
+  StdString _id;
+  StdString _metaName;
+  StdString _metaVersion;
+  StdString _metaNamespace;
 };
 
 SOFT_END_NAMESPACE
