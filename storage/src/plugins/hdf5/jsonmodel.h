@@ -79,6 +79,8 @@ private:
   void registerGetBoolFn(std::function<bool(const char *, bool &)> &fn);
   void registerGetInt32ArrayFn(std::function<bool(const char *, std::vector<int32_t> &)> &fn);
   void registerGetDoubleArrayFn(std::function<bool(const char *, std::vector<double> &)> &fn);
+  void registerGetDoubleArray2DFn(std::function<bool(const char *, std::vector<std::vector<double> > &)> &fn);
+  void registerGetDoubleArray3DFn(std::function<bool(const char *, std::vector<std::vector<std::vector<double> > > &)> &fn);
   void registerGetByteArrayFn(std::function<bool(const char *, std::vector<unsigned char>&)> &fn);
   void registerGetStringArrayFn(std::function<bool(const char *, std::vector<std::string> &)> &fn);
   

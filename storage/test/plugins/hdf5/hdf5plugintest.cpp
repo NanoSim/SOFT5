@@ -225,3 +225,39 @@ TEST_F(Hdf5PluginTest, readDoubleArray)
     ASSERT_EQ(compare[i], doubleVec[i]);
   }
 }
+
+TEST_F(Hdf5PluginTest, readDoubleArray2D)
+{
+  std::vector<std::vector<double> > compare;
+  soft::Storage storage("hdf5", "test_f.h5");
+  auto strategy = storage.strategy();
+  ASSERT_TRUE(nullptr != strategy);
+  
+  auto model    = strategy->dataModel();
+  ASSERT_TRUE(nullptr != model);
+  
+  model->setId(id);
+  strategy->startRetrieve(model);
+  model->getDoubleArray2D("doubleArray2D", compare);
+  strategy->endRetrieve(model);
+
+  ASSERT_TRUE(compare == doubleVec2D);
+}
+
+TEST_F(Hdf5PluginTest, readDoubleArray3D)
+{
+  std::vector<std::vector<std::vector<double> > > compare;
+  soft::Storage storage("hdf5", "test_f.h5");
+  auto strategy = storage.strategy();
+  ASSERT_TRUE(nullptr != strategy);
+  
+  auto model    = strategy->dataModel();
+  ASSERT_TRUE(nullptr != model);
+  
+  model->setId(id);
+  strategy->startRetrieve(model);
+  model->getDoubleArray3D("doubleArray3D", compare);
+  strategy->endRetrieve(model);
+
+  ASSERT_TRUE(compare == doubleVec3D);
+}

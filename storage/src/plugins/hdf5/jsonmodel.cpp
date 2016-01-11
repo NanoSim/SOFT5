@@ -25,6 +25,8 @@ class JSONModel :: Private
   std::function<bool(const char *, bool &)>                getBool;
   std::function<bool(const char *, std::vector<int32_t>&)> getInt32Array;
   std::function<bool(const char *, std::vector<double>&)>  getDoubleArray;
+  std::function<bool(const char *, std::vector<std::vector<double> >&)>  getDoubleArray2D;
+  std::function<bool(const char *, std::vector<std::vector<std::vector<double> > > &)>  getDoubleArray3D;
   std::function<bool(const char *, std::vector<unsigned char>&)> getByteArray;
   std::function<bool(const char *, std::vector<std::string> &)> getStringArray;
 };
@@ -108,6 +110,16 @@ void JSONModel :: registerGetInt32ArrayFn(std::function<bool(const char *, std::
 void JSONModel :: registerGetDoubleArrayFn(std::function<bool(const char *, std::vector<double> &)> &fn)
 {
   d->getDoubleArray = fn;
+}
+
+void JSONModel :: registerGetDoubleArray2DFn(std::function<bool(const char *, std::vector<std::vector<double> > &)> &fn)
+{
+  d->getDoubleArray2D = fn;
+}
+
+void JSONModel :: registerGetDoubleArray3DFn(std::function<bool(const char *, std::vector<std::vector<std::vector<double> > > &)> &fn)
+{
+  d->getDoubleArray3D = fn;
 }
 
 void JSONModel :: registerGetByteArrayFn(std::function<bool(const char *, std::vector<unsigned char>&)> &fn)
@@ -428,14 +440,16 @@ void JSONModel :: setJson(QJsonObject const &obj)
   d->jsonObject = obj;
 }
 
-bool JSONModel :: getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const
+bool JSONModel :: getDoubleArray2D (const char *key, std::vector<std::vector<double> > &value) const
 {
-  return false;
+  if (!d->getDoubleArray2D) return false;
+  return d->getDoubleArray2D(key, value);
 }
 
-bool JSONModel :: getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const
+bool JSONModel :: getDoubleArray3D (const char *key, std::vector<std::vector<std::vector<double> > > &value) const
 {
-  return false;
+  if (!d->getDoubleArray3D) return false;
+  return d->getDoubleArray3D(key, value);
 }
 
 SOFT_END_NAMESPACE

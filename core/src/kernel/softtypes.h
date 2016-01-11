@@ -22,6 +22,8 @@ using StdBlob        = std::vector<unsigned char>;
 using StdStringList  = std::vector<StdString>;
 using StdIntArray    = std::vector<StdInt>;
 using StdDoubleArray = std::vector<StdDouble>;
+using StdDoubleArray2D = std::vector<StdDoubleArray>;
+using StdDoubleArray3D = std::vector<StdDoubleArray2D>;
 
 template <> struct VariantType<StdString>      {enum {value = 0};};
 template <> struct VariantType<StdInt>         {enum {value = 1};};  
@@ -37,6 +39,8 @@ template <> struct VariantType<StdBlob>        {enum {value = 10};};
 template <> struct VariantType<StdStringList>  {enum {value = 11};};
 template <> struct VariantType<StdIntArray>    {enum {value = 12};};
 template <> struct VariantType<StdDoubleArray> {enum {value = 13};};
+template <> struct VariantType<StdDoubleArray2D> {enum {value = 14};};
+template <> struct VariantType<StdDoubleArray3D> {enum {value = 15};};
 
 enum StdTypes { String = VariantType<StdString>::value,
 		Int = VariantType<StdInt>::value,
@@ -51,23 +55,28 @@ enum StdTypes { String = VariantType<StdString>::value,
 		Blob = VariantType<StdBlob>::value,
 		StringList = VariantType<StdStringList>::value,
 		IntArray = VariantType<StdIntArray>::value,
-		DoubleArray = VariantType<StdDoubleArray>::value
+		DoubleArray = VariantType<StdDoubleArray>::value,
+		DoubleArray2D = VariantType<StdDoubleArray2D>::value,
+		DoubleArray3D = VariantType<StdDoubleArray2D>::value
+
 };
 
 using StdVariant = Variant<StdString,
-  StdInt,
-  StdUInt,
-  StdInt8,
-  StdUInt8,
-  StdInt64,
-  StdUInt64,
-  StdFloat,
-  StdDouble,
-  StdBool,
-  StdBlob,
-  StdStringList,
-  StdIntArray,
-  StdDoubleArray>;
+			   StdInt,
+			   StdUInt,
+			   StdInt8,
+			   StdUInt8,
+			   StdInt64,
+			   StdUInt64,
+			   StdFloat,
+			   StdDouble,
+			   StdBool,
+			   StdBlob,
+			   StdStringList,
+			   StdIntArray,
+			   StdDoubleArray,
+			   StdDoubleArray2D,
+			   StdDoubleArray3D>;
 
 SOFT_END_NAMESPACE
 
