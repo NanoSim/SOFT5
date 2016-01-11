@@ -15,3 +15,13 @@ void softc_storage_strategy_retrieve(softc_storage_strategy_t *s, softc_datamode
 {
   softc_storage_strategy_private_retrieve(s, m);
 }
+
+void softc_storage_strategy_start_retrieve(softc_storage_strategy_t *s, softc_datamodel_t *m)
+{
+  softc_storage_strategy_private_start_retrieve(s, m);
+}
+
+void softc_storage_strategy_end_retrieve(softc_storage_strategy_t *s, softc_datamodel_t *m)
+{
+  softc_storage_strategy_private_end_retrieve(s, m);
+}

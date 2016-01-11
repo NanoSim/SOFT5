@@ -19,8 +19,23 @@ void softc_storage_strategy_private_store(softc_storage_strategy_t *self,
   self->ref->store(model->ref);
 }
 
+/*
+  This method is deprecated. Use .._start_retrieve/.._end_retrieve instead.
+ */
 void softc_storage_strategy_private_retrieve(softc_storage_strategy_t *self,
 					     softc_datamodel_t *model)
 {
   self->ref->retrieve(model->ref);
+}
+
+void softc_storage_strategy_private_start_retrieve(softc_storage_strategy_t *self,
+						   softc_datamodel_t *model)
+{
+  self->ref->startRetrieve(model->ref);
+}
+
+void softc_storage_strategy_private_end_retrieve(softc_storage_strategy_t *self,
+						 softc_datamodel_t *model)
+{
+  self->ref->endRetrieve(model->ref);
 }
