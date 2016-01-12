@@ -1,3 +1,5 @@
+#include <cstring>
+#include "softtypes.h"
 #include "softc-datamodel-private.h"
 #include "softc-datamodel-private.hpp"
 
@@ -101,7 +103,10 @@ bool softc_datamodel_private_append_bool (softc_datamodel_t *model, const char *
 bool softc_datamodel_private_append_blob (softc_datamodel_t *model, const char *key, const unsigned char *value, size_t length)
 {
   if (model->ref) {
-    //  return model->ref->appendByteArray(key, value, length);
+    soft::StdBlob blob;
+    blob.reserve(length);
+    blob.assign(value, value+length);
+    return model->ref->appendByteArray(key, blob);
   }
   return false;
 }
@@ -109,7 +114,12 @@ bool softc_datamodel_private_append_blob (softc_datamodel_t *model, const char *
 bool softc_datamodel_private_append_string_list (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements)
 {
   if (model->ref) {
-    //   return model->ref->appendStringList(key, value, n_elements);
+    soft::StdStringList stringList;
+    stringList.reserve(n_elements);
+    for (size_t i = 0; i < n_elements; ++i) {
+      stringList[i].assign(value[i]);
+      return model->ref->appendStringArray(key, stringList);
+    }
   }
   return false;
 }
@@ -117,7 +127,8 @@ bool softc_datamodel_private_append_string_list (softc_datamodel_t *model, const
 bool softc_datamodel_private_append_array_int32  (softc_datamodel_t *model, const char *key, const int32_t *value, size_t size)
 {
   if (model->ref) {
-    //    return model->ref->appendInt32Array(key, value, size);
+    soft::StdIntArray valueVec(value, value+size);
+    return model->ref->appendInt32Array(key, valueVec);
   }
   return false;
 }
@@ -125,7 +136,7 @@ bool softc_datamodel_private_append_array_int32  (softc_datamodel_t *model, cons
 bool softc_datamodel_private_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size)
 {
   if (model->ref) {
-    std::vector<double> valueVec;
+    soft::StdDoubleArray valueVec;
     valueVec.reserve(size);
     valueVec.assign (value, value+size);
     return model->ref->appendDoubleArray(key, valueVec);
@@ -133,8 +144,46 @@ bool softc_datamodel_private_append_array_double (softc_datamodel_t *model, cons
   return false;
 }
 
+bool softc_datamodel_private_append_array_double_2d (softc_datamodel_t *model, const char *key, const double **value, size_t size_i, size_t size_j)
+{
+  if (model->ref) {
+    soft::StdDoubleArray2D valueVec2D(size_i);
+    for (size_t i = 0; i < size_i; ++i) {
+      soft::StdDoubleArray valueVec(size_j);
+      std::copy(value[i], value[i]+size_j, valueVec.begin());
+      valueVec2D[i] = valueVec;      
+    }
+    return model->ref->appendDoubleArray2D(key, valueVec2D);
+  }
+  return false;
+}
+
+bool softc_datamodel_private_append_array_double_3d (softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k)
+{
+  return false;
+}
+
+bool softc_datamodel_private_get_array_double_2d (const softc_datamodel_t *model, const char *key, double ***value, size_t *size_i, size_t *size_j)
+{
+  return false;
+}
+
+bool softc_datamodel_private_get_array_double_3d (const softc_datamodel_t *model, const char *key, double ****value, size_t *size_i, size_t *size_j, size_t *size_k)
+{
+  return false;
+}
+
 bool softc_datamodel_private_get_string (const softc_datamodel_t *model, const char *key, char **value)
 {
+  if (model->ref) {
+    soft::StdString str;
+    if (model->ref->getString(key, str)) {
+      *value = new char[str.size()+1];
+      std::copy(str.begin(), str.end(), *value);
+      (*value)[str.size()] = '\0';
+      return true;
+    }
+  }
   return false;
 }
 
@@ -205,11 +254,29 @@ bool softc_datamodel_private_get_array_string (const softc_datamodel_t *model, c
 
 bool softc_datamodel_private_get_array_int32 (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size)
 {
+  if (model->ref) {
+    soft::StdIntArray res;
+    if (model->ref->getInt32Array(key, res)) {
+      *size = res.size();
+      *value = (int32_t*)malloc(sizeof(int32_t)*res.size());
+      std::memcpy(*value, res.data(), sizeof(int32_t)*res.size());
+      return true;
+    }
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_array_double (const softc_datamodel_t *model, const char *key, double **value, size_t *size)
 {
+  if (model->ref) {
+    soft::StdDoubleArray res;
+    if (model->ref->getDoubleArray(key, res)) {
+      *size = res.size();
+      *value = (double*)malloc(sizeof(double)*res.size());
+      std::memcpy(*value, res.data(), sizeof(double)*res.size());
+      return true;
+    }
+  }
   return false;
 }
 

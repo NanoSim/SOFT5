@@ -71,9 +71,24 @@ bool softc_datamodel_append_string_list   (softc_datamodel_t *model, const char 
   return softc_datamodel_private_append_string_list(model, key, value, n_elements);
 }
 
+bool softc_datamodel_append_array_int32  (softc_datamodel_t *model, const char *key, const int32_t *value, size_t size)
+{
+  return softc_datamodel_private_append_array_int32(model, key, value, size);
+}
+
 bool softc_datamodel_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size)
 {
   return softc_datamodel_private_append_array_double(model, key, value, size);
+}
+
+bool softc_datamodel_append_array_double_2d (softc_datamodel_t *model, const char *key, const double **value, size_t size_i, size_t size_j)
+{
+  return softc_datamodel_private_append_array_double_2d(model, key, value, size_i, size_j);
+}
+
+bool softc_datamodel_append_array_double_3d (softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k)
+{
+  return softc_datamodel_private_append_array_double_3d(model, key, value, size_i, size_j, size_k);
 }
 
 bool softc_datamodel_get_string      (const softc_datamodel_t *model, const char *key, char **value)

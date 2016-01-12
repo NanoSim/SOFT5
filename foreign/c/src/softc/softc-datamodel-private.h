@@ -21,6 +21,8 @@ bool softc_datamodel_private_append_blob         (softc_datamodel_t *model, cons
 bool softc_datamodel_private_append_string_list  (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements);
 bool softc_datamodel_private_append_array_int32  (softc_datamodel_t *model, const char *key, const int32_t *value, size_t size);
 bool softc_datamodel_private_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size);
+bool softc_datamodel_private_append_array_double_2d (softc_datamodel_t *model, const char *key, const double **value, size_t size_i, size_t size_j);
+bool softc_datamodel_private_append_array_double_3d (softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k);
 bool softc_datamodel_private_get_string          (const softc_datamodel_t *model, const char *key, char **value);
 bool softc_datamodel_private_get_int8            (const softc_datamodel_t *model, const char *key, int8_t *value);
 bool softc_datamodel_private_get_uint8           (const softc_datamodel_t *model, const char *key, uint8_t *value);
@@ -37,6 +39,8 @@ bool softc_datamodel_private_get_blob            (const softc_datamodel_t *model
 bool softc_datamodel_private_get_array_string    (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements);
 bool softc_datamodel_private_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
 bool softc_datamodel_private_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
+bool softc_datamodel_private_get_array_double_2d (const softc_datamodel_t *model, const char *key, double ***value, size_t *size_i, size_t *size_j);
+bool softc_datamodel_private_get_array_double_3d (const softc_datamodel_t *model, const char *key, double ****value, size_t *size_i, size_t *size_j, size_t *size_k);
 
 bool softc_datamodel_private_set_id              (softc_datamodel_t* model, const char *id);
 bool softc_datamodel_private_set_meta_name       (softc_datamodel_t* model, const char *meta_name);
