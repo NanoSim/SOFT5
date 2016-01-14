@@ -183,6 +183,31 @@ struct StrategyFtor {
     return false;
   }
 
+  bool getDoubleArray3D(const char *key, std::vector<std::vector<std::vector<double> > >&retValue) {
+    auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
+    if (ret.isValid() && ret.canConvert(QMetaType::QVariantList)) {
+      auto zs = ret.value<QVariantList>();
+      const int NK = zs.size();
+      retValue.resize(NK);
+      for (int k = 0; k < NK; ++k) {
+	auto ys = zs.value(k).toList();
+	const int NJ = ys.size();
+        retValue[k].resize(NJ);
+	for (int j = 0; j < NJ; ++j) {
+	  auto xs = ys[j].toList();
+	  auto NI = xs.size();
+          retValue[k][j].resize(NI);
+	  for (int i = 0; i < NI; ++i) {
+	    retValue[k][j][i] = xs[i].toDouble();
+	  }
+	}
+      }
+
+      return true;      
+    }
+    return false;
+  }
+
   QString uuid;
   soft::hdf5::QH5 h5;  
 };
@@ -276,6 +301,7 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   std::function<bool(const char*, std::vector<int32_t> &)>getInt32Array = std::bind(&StrategyFtor::getInt32Array, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<double> &)>getDoubleArray = std::bind(&StrategyFtor::getDoubleArray, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<std::vector<double> >&)>getDoubleArray2D = std::bind(&StrategyFtor::getDoubleArray2D, &(*ftor), _1, _2);
+  std::function<bool(const char*, std::vector<std::vector<std::vector<double> > >&)>getDoubleArray3D = std::bind(&StrategyFtor::getDoubleArray3D, &(*ftor), _1, _2);
 										   
   jsonModel->registerGetStringFn(getString);
   jsonModel->registerGetInt8Fn(getInt8);
@@ -292,6 +318,7 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   jsonModel->registerGetInt32ArrayFn(getInt32Array);
   jsonModel->registerGetDoubleArrayFn(getDoubleArray);
   jsonModel->registerGetDoubleArray2DFn(getDoubleArray2D);
+  jsonModel->registerGetDoubleArray3DFn(getDoubleArray3D);
 }
 
 void HDF5Strategy :: endRetrieve (IDataModel *model) const

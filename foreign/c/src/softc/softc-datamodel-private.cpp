@@ -43,8 +43,7 @@ void ptrToArray(std::vector<std::vector<T>> &dest, const T **src, size_t i, size
 {
   dest.resize(j);
   for (size_t idx = 0; idx < j; ++idx) {
-    dest[idx].resize(i);
-    dest[idx].assign(src[idx], src[idx]+i);
+    ptrToArray(dest[idx], src[idx], i);
   }
 }
 
@@ -52,12 +51,8 @@ template <typename T>
 void ptrToArray(std::vector<std::vector<std::vector<T> > > &dest, const T ***src, size_t i, size_t j, size_t k)
 {
   dest.resize(k);
-  for (size_t ki = 0; ki < k; ++ki) {
-    dest[ki].resize(j);
-    for (size_t ji = 0; ji < j; ++ji) {
-      dest[ki][ji].resize(i);
-      dest[ki][ji].assign(src[ki][ji], src[ki][ji]+i);
-    }
+  for (size_t idx = 0; idx < k; ++idx) {
+      ptrToArray(dest[idx], src[idx], i, j);
   }
 }
 
@@ -162,8 +157,6 @@ bool softc_datamodel_private_append_blob (softc_datamodel_t *model, const char *
   if (model->ref) {
     soft::StdBlob blob;
     ptrToArray(blob, value, length);
-  //    blob.reserve(length);
-  //    blob.assign(value, value+length);
     return model->ref->appendByteArray(key, blob);
   }
   return false;
@@ -187,7 +180,6 @@ bool softc_datamodel_private_append_array_int32  (softc_datamodel_t *model, cons
   if (model->ref) {
     soft::StdIntArray valueVec;
     ptrToArray(valueVec, value, size);
-    //(value, value+size);
     return model->ref->appendInt32Array(key, valueVec);
   }
   return false;
@@ -248,6 +240,7 @@ bool softc_datamodel_private_get_array_double_3d (const softc_datamodel_t *model
       *size_i = ret[0][0].size();
       *size_j = ret[0].size();
       *size_k = ret.size();
+      return true;
     }
   }
   return false;
@@ -269,66 +262,177 @@ bool softc_datamodel_private_get_string (const softc_datamodel_t *model, const c
 
 bool softc_datamodel_private_get_int8 (const softc_datamodel_t *model, const char *key, int8_t *value)
 {
+  if (!model->ref) {
+    soft::StdInt8 ret;
+    auto isOk = model->ref->getInt8(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }
+  }
+    
   return false;
 }
 
 bool softc_datamodel_private_get_uint8 (const softc_datamodel_t *model, const char *key, uint8_t *value)
 {
+  if (!model->ref) {
+    soft::StdUInt8 ret;
+    auto isOk = model->ref->getUInt8(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_int16 (const softc_datamodel_t *model, const char *key, int16_t *value)
 {
+  if (!model->ref) {
+    soft::StdInt16 ret;
+    auto isOk = model->ref->getInt16(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_uint16 (const softc_datamodel_t *model, const char *key, uint16_t *value)
 {
+  if (!model->ref) {
+    soft::StdUInt16 ret;
+    auto isOk = model->ref->getUInt16(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_int32 (const softc_datamodel_t *model, const char *key, int32_t *value)
 {
+  if (!model->ref) {
+    soft::StdInt ret;
+    auto isOk = model->ref->getInt32(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_uint32 (const softc_datamodel_t *model, const char *key, uint32_t *value)
 {
+  if (!model->ref) {
+    soft::StdUInt ret;
+    auto isOk = model->ref->getUInt32(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_int64 (const softc_datamodel_t *model, const char *key, int64_t *value)
 {
+  if (!model->ref) {
+    soft::StdInt64 ret;
+    auto isOk = model->ref->getInt64(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_uint64 (const softc_datamodel_t *model, const char *key, uint64_t *value)
 {
+  if (!model->ref) {
+    soft::StdUInt64 ret;
+    auto isOk = model->ref->getUInt64(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_float (const softc_datamodel_t *model, const char *key, float *value)
 {
+  if (!model->ref) {
+    soft::StdFloat ret;
+    auto isOk = model->ref->getFloat(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_double (const softc_datamodel_t *model, const char *key, double *value)
 {
+  if (!model->ref) {
+    soft::StdDouble ret;
+    auto isOk = model->ref->getDouble(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_bool (const softc_datamodel_t *model, const char *key, bool *value)
 {
+  if (!model->ref) {
+    soft::StdBool ret;
+    auto isOk = model->ref->getBool(key, ret);
+    if (isOk) {
+      *value = ret;
+      return true;
+    }	       
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_blob (const softc_datamodel_t *model, const char *key, unsigned char **value, size_t *length)
 {
+  if (model->ref) {
+    soft::StdBlob ret;
+    auto isOk = model->ref->getByteArray(key, ret);
+    if (isOk) {
+      arrayToPtr(value, ret);
+      *length = ret.size();
+    }
+  }
   return false;
 }
 
 bool softc_datamodel_private_get_array_string (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
 {
+  if (model->ref) {
+    soft::StdStringList source;
+    auto isOk = model->ref->getStringArray(key, source);
+    if (isOk) {
+      *value = new char*[source.size()];
+      for (size_t i = 0; i < source.size(); ++i) {
+	(*value)[i] = new char[source[i].size()+1];
+	strncpy((*value)[i], source[i].c_str(), source[i].size());
+	(*value)[i][source[i].size()] = '\0';
+	*n_elements = source.size();
+	return true;
+      }      
+    }
+  }
   return false;
 }
 

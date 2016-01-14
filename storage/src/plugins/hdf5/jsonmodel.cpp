@@ -169,7 +169,9 @@ bool JSONModel :: appendVariant (const char *key, StdVariant const &value)
 bool JSONModel :: appendString     (const char* key, const StdString &value)
 {
   QJsonValue jsonValue(QString::fromStdString(value));
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendInt8       (const char *key, StdInt8 value)
