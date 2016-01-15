@@ -30,7 +30,14 @@ void softc_storage_private_load(softc_storage_t *storage, void *ptr)
   softc_storage_strategy_t * strategy = softc_storage_private_get_storage_strategy(storage);
   softc_datamodel_t * datamodel = softc_storage_strategy_get_datamodel(strategy);
   softc_entity_t * entity = (softc_entity_t*) ptr;
+  softc_datamodel_set_id(datamodel, softc_entity_get_id(entity));
+  softc_datamodel_set_meta_name(datamodel, softc_entity_get_meta_name(entity));
+  softc_datamodel_set_meta_version(datamodel, softc_entity_get_meta_version(entity));
+  softc_datamodel_set_meta_namespace(datamodel, softc_entity_get_meta_namespace(entity));
+
+  softc_storage_strategy_start_retrieve(strategy, datamodel);
   softc_entity_load (entity, datamodel);
+  softc_storage_strategy_end_retrieve(strategy, datamodel);
 }
 
 void softc_storage_private_save(softc_storage_t *storage, void *ptr)
@@ -38,6 +45,10 @@ void softc_storage_private_save(softc_storage_t *storage, void *ptr)
   softc_storage_strategy_t * strategy = softc_storage_private_get_storage_strategy(storage);
   softc_datamodel_t * datamodel = softc_storage_strategy_get_datamodel(strategy);
   softc_entity_t * entity = (softc_entity_t*) ptr;
+  softc_datamodel_set_id(datamodel, softc_entity_get_id(entity));
+  softc_datamodel_set_meta_name(datamodel, softc_entity_get_meta_name(entity));
+  softc_datamodel_set_meta_version(datamodel, softc_entity_get_meta_version(entity));
+  softc_datamodel_set_meta_namespace(datamodel, softc_entity_get_meta_namespace(entity));
   softc_entity_store (entity, datamodel);
   softc_storage_strategy_store(strategy, datamodel);
 }

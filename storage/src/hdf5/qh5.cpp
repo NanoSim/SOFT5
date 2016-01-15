@@ -350,10 +350,10 @@ bool QH5 :: create(QString const &filename, QVariantMap const &map)
   return true;
 }
 
-bool QH5 :: open (QString const &filename)
+bool QH5 :: open (QString const &filename, bool readonly)
 {
   d->file = new QH5File(this);
-  d->file->open(filename);
+  d->file->open(filename, readonly);
   return true;
 }
 

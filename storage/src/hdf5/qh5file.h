@@ -24,7 +24,7 @@ public:
 				       
 public slots:
   bool create(QString const &filename);
-  bool open(QString const &filename);
+  bool open(QString const &filename, bool readonly = true);
   bool create();
   HandleFlag intent() const;
   bool flush();

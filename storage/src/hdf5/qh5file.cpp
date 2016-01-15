@@ -49,10 +49,10 @@ bool QH5File :: create(QString const &filename)
   return true;
 }
 
-bool QH5File :: open (QString const &filename)
+bool QH5File :: open (QString const &filename, bool readonly)
 {
   fileId = H5Fopen(qPrintable(filename),
-		   H5F_ACC_RDONLY,
+		   (readonly ? H5F_ACC_RDONLY : H5F_ACC_RDWR),
 		   H5P_DEFAULT);
   return (fileId >= 0);
 }

@@ -23,7 +23,7 @@ public:
 		
 public slots:
   bool create(QString const &name, QVariantMap const &map = QVariantMap());
-  bool open(QString const &name);
+  bool open(QString const &name, bool readonly=true);
   QH5Dataspace *createSimpleDataspace(QVector<int> const &dims);
   QH5Dataset *createDataset(QString const &path, QH5Dataspace *dataspace, QH5Datatype::Type dtype);
   QH5Dataset *createDataset(QString const &path, QH5Group *group, QH5Dataspace *dataspace, QH5Datatype::Type dtype);

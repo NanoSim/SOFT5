@@ -218,11 +218,24 @@ class HDF5Strategy::Private
   Private (QString const &uri, QString const &options)
     : uri(uri)
     , options (options)
-  {}
+    , append(false)
+  {
+    for (auto &s : options.split(";")) {
+      auto o = s.split("=");
+      if (o.size() > 1) {
+	auto keyword = o[0];
+	auto value = o[1];
+	if (keyword.compare("append", Qt::CaseInsensitive ) == 0) {
+	  auto isYes = (value.compare("yes", Qt::CaseInsensitive) == 0) || (value.compare("true", Qt::CaseInsensitive) == 0);
+	  append = isYes;
+	}
+      }
+    }
+  }
 
   QString uri;
   QString options;
-  
+  bool append;
 };
 
 HDF5Strategy :: HDF5Strategy()
@@ -253,7 +266,12 @@ void HDF5Strategy :: store (IDataModel const *model)
   QJsonDocument doc(*jsonObj);
 
   soft::hdf5::QH5 h5;
-  h5.create(d->uri);
+  if (!QFileInfo::exists(d->uri) || !d->append) {
+    h5.create(d->uri);
+  } else {
+    h5.open(d->uri, false);
+  }
+    
   auto id = QString::fromStdString(model->id());
   h5.createGroup(id);
   h5.createGroup(QString("%1/properties").arg(id));
