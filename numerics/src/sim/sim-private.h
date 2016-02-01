@@ -11,7 +11,9 @@ struct _sim_application_t
   void (*user_cleanup)     (sim_context_t*, void*);
   void (*user_begin_iter)  (sim_context_t*, void*);
   void (*user_end_iter)    (sim_context_t*, void*);
+  void (*user_finalize)    (sim_context_t*, void*);
   void (*user_time_stepper)(sim_context_t*, void (*)(sim_context_t*, void*), void (*)(sim_context_t*, void*), void (*)(sim_context_t*, void*), void*);
+  
 };
 
 #endif

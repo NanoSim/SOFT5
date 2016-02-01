@@ -6,26 +6,26 @@
 #include "config.h"
 
 namespace {
-  using SCF_fn_prototype          = void(*)(sim_context_t*,
+  using SIM_fn_prototype          = void(*)(sim_context_t*,
 					    void*);
-  using SCF_timestepper_prototype = void(*)(sim_context_t*,
-					    SCF_fn_prototype,
-					    SCF_fn_prototype,
-					    SCF_fn_prototype,
+  using SIM_timestepper_prototype = void(*)(sim_context_t*,
+					    SIM_fn_prototype,
+					    SIM_fn_prototype,
+					    SIM_fn_prototype,
 					    void*);
 
-  class SCFCommon
+  class SIMCommon
   {
   public:
-    SCFCommon(){}
-    ~SCFCommon(){}
+    SIMCommon(){}
+    ~SIMCommon(){}
 
     void loadPlugins() {      
       QDir pluginDir(PLUGIN_DIR);
       foreach (auto const &file, pluginDir.entryList (QDir::Files)) {
 	if (QLibrary::isLibrary (file)) {
 	  auto lib = QSharedPointer <QLibrary>(new QLibrary(pluginDir.absoluteFilePath(file)));
-	  if (lib->resolve("SCF_init") != nullptr) {
+	  if (lib->resolve("SIM_init") != nullptr) {
 	    libList.push_back(lib);	    
 	  } else {
 	    qDebug() << lib->errorString();
@@ -42,10 +42,11 @@ namespace {
     {
       qDebug() << "#Registering simulation: " << libList.count();
       foreach (auto lib, libList) {
-	SCF_fn_prototype initFunction                 = (SCF_fn_prototype) lib->resolve("SCF_init");
-	SCF_fn_prototype computeFunction              = (SCF_fn_prototype) lib->resolve("SCF_compute");
-	SCF_timestepper_prototype timeStepperFunction = (SCF_timestepper_prototype) lib->resolve("SCF_time_stepper");
-	SCF_fn_prototype cleanupFunction              = (SCF_fn_prototype) lib->resolve("SCF_cleanup");
+	SIM_fn_prototype initFunction                 = (SIM_fn_prototype) lib->resolve("SIM_init");
+	SIM_fn_prototype computeFunction              = (SIM_fn_prototype) lib->resolve("SIM_compute");
+	SIM_timestepper_prototype timeStepperFunction = (SIM_timestepper_prototype) lib->resolve("SIM_time_stepper");
+	SIM_fn_prototype cleanupFunction              = (SIM_fn_prototype) lib->resolve("SIM_cleanup");
+
 	if (initFunction && computeFunction && timeStepperFunction && cleanupFunction) {
 	  sim_register_init(app, initFunction);
 	  sim_register_compute(app, computeFunction);
@@ -62,7 +63,7 @@ namespace {
   };
   
   static softc_t *softapp = nullptr;  
-  static SCFCommon *scfCommon = nullptr;
+  static SIMCommon *simCommon = nullptr;
 }
 
 sim_application_t* sim_init(int *argc, char **argv)
@@ -78,6 +79,7 @@ sim_application_t* sim_init(int *argc, char **argv)
     ret->user_cleanup = NULL;
     ret->user_begin_iter = NULL;
     ret->user_end_iter = NULL;
+    ret->user_finalize = NULL;
 
     return ret;
   }
@@ -87,9 +89,9 @@ sim_application_t* sim_init(int *argc, char **argv)
 
 void sim_load (sim_application_t* handle)
 {
-  scfCommon = new SCFCommon();
-  scfCommon->loadPlugins();
-  scfCommon->reg(handle);
+  simCommon = new SIMCommon();
+  simCommon->loadPlugins();
+  simCommon->reg(handle);
 }
 
 
@@ -113,6 +115,12 @@ void sim_run (sim_application_t* handle, void *user_data)
   } else {
     fprintf(stderr, "warning - user_compute function is not defined\n");
   }
+
+  if (handle->user_finalize != NULL) {
+    (*handle->user_finalize)(handle->ctx, user_data);
+  } else {
+    fprintf(stderr, "warning - user_finalize function is not defined\n");
+  }
   
   if (handle->user_cleanup != NULL) {
     (*handle->user_cleanup)(handle->ctx, user_data);  
@@ -121,32 +129,37 @@ void sim_run (sim_application_t* handle, void *user_data)
   }
 }
 
-void sim_register_init    (sim_application_t* handle, SCF_fn_prototype fn)
+void sim_register_init    (sim_application_t* handle, SIM_fn_prototype fn)
 {
   handle->user_init = fn;
 }
 
-void sim_register_compute (sim_application_t* handle, SCF_fn_prototype fn)
+void sim_register_compute (sim_application_t* handle, SIM_fn_prototype fn)
 {
   handle->user_compute = fn;
 }
 
-void sim_register_time_stepper (sim_application_t* handle, SCF_timestepper_prototype fn)
+void sim_register_time_stepper (sim_application_t* handle, SIM_timestepper_prototype fn)
 {
   handle->user_time_stepper = fn;
 }
 
-void sim_register_cleanup(sim_application_t* handle, SCF_fn_prototype fn)
+void sim_register_cleanup(sim_application_t* handle, SIM_fn_prototype fn)
 {
   handle->user_cleanup = fn;
 }
 
-void sim_register_begin_iter(sim_application_t* handle, SCF_fn_prototype fn)
+void sim_register_begin_iter(sim_application_t* handle, SIM_fn_prototype fn)
 {
   handle->user_begin_iter = fn;
 }
 
-void sim_register_end_iter(sim_application_t* handle, SCF_fn_prototype fn)
+void sim_register_end_iter(sim_application_t* handle, SIM_fn_prototype fn)
 {
   handle->user_end_iter = fn;
+}
+
+void sim_register_finalize(sim_application_t* handle, SIM_fn_prototype fn)
+{
+  handle->user_finalize = fn;
 }
