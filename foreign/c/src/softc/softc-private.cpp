@@ -30,15 +30,16 @@ char **softc_private_get_storage_drivers()
   return retval;
 }
 
-char *softc_private_uuidgen()
+const char *softc_private_uuidgen()
 {
   auto uuid = soft::uuidGen();
   char *ret = (char *)malloc(sizeof (char) * uuid.length());;
   strncpy(ret, uuid.data(), uuid.length());
-  return ret;	  
+  return (const char*) ret;	  
 }
 
-void softc_private_cleanup()
+void softc_private_cleanup(struct _softc_t *self)
 {
+  free (self);
   // TODO: Implement this
 }

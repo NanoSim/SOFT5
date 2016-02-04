@@ -83,7 +83,7 @@
 int       softc_storage_driver_count();
 char   ** softc_get_storage_drivers();
 char    * softc_uuidgen();
-void      softc_cleanup();
+void      softc_cleanup(softc_t *);
 
 /*
  * datamodel

@@ -17,12 +17,12 @@ char ** softc_get_storage_drivers()
   return softc_private_get_storage_drivers();
 }
 
-char * softc_uuidgen()
+const char * softc_uuidgen()
 {
   return softc_private_uuidgen();
 }
 
-void softc_cleanup()
+void softc_cleanup(softc_t* self)
 {
-  softc_private_cleanup();
+  softc_private_cleanup(self);
 }

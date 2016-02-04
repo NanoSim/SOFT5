@@ -100,10 +100,10 @@ protected:
   const std::vector<std::string> strlist;
 
 public:
-  static char *uuid_string;
+  static const char *uuid_string;
 };
 
-char *SoftC_StorageTest::uuid_string = softc_uuidgen();
+const char *SoftC_StorageTest::uuid_string = softc_uuidgen();
 
 typedef char* soft_string;
 typedef double* soft_double_array;

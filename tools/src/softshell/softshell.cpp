@@ -101,7 +101,6 @@ QString findModule(const QString &module)
       QString const file = path + "/" + copyStr.replace(QChar('.'), QChar('/')) + ".js";
 
       if( QFile::exists(file) ) {
-	 qDebug() << "loading" << file;
 	 return file;
       }
    }
@@ -430,7 +429,6 @@ void loadSoftModule()
       QChar const separator(':');
 #endif
       foreach( QString const & p, env.value("SOFT_MODULES").split(separator) ) {
-	 qDebug() << "MODULES:" << p;
 	 qApp->addLibraryPath(p);
       }
    }

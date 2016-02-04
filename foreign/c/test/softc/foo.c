@@ -13,7 +13,7 @@ static const char FOO_META_NAMESPACE[] = "http://sintef.no/TR/metadata/simcoflow
 
 struct _foo_s {
   const struct softc_entity_vtable_ *vtable_;
-  char *id;
+  const char *id;
   foo_dimensions dims;
   foo_properties props;
 };

@@ -107,6 +107,8 @@ if (WITH_PLUGIN_MONGO)
   add_subdirectory(tools/src/plugins/mongo)
 endif (WITH_PLUGIN_MONGO)
 
+add_subdirectory(tools/src/forge)
+
 if (WITH_PLUGIN_GSL)
   add_subdirectory(tools/src/plugins/gsl)
 endif(WITH_PLUGIN_GSL)

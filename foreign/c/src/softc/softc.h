@@ -13,8 +13,8 @@ SOFTC_BEGIN_DECLS
 softc_t * softc_init(int argc, char *argv[]);
 int       softc_storage_driver_count();
 char   ** softc_get_storage_drivers();
-char    * softc_uuidgen();
-void      softc_cleanup();
+const char * softc_uuidgen();
+void      softc_cleanup(softc_t*);
 
 SOFTC_END_DECLS
 

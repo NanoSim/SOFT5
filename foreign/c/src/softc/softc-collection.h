@@ -4,10 +4,13 @@
 #include "softc-macros.h"
 
 SOFTC_BEGIN_DECLS
-typedef struct _softc_collection_t softc_collection_t;
 
-softc_collection_t * softc_collection_new();
-void                 softc_collection_delete(softc_collection_t *coll);
+typedef struct _softc_collection_s softc_collection_s;
+
+softc_collection_s * softc_collection_create(const char *id);
+void                 softc_collection_free(softc_collection_s *self);
+void                 softc_collection_register_entity(softc_collection_s *self, const char *label, const softc_entity_t *entity);
+
 SOFTC_END_DECLS
 
 #endif /* SOFTC_COLLECTION_H_DEF */
