@@ -110,10 +110,11 @@ bool softc_datamodel_append_double       (softc_datamodel_t *model, const char *
 bool softc_datamodel_append_bool         (softc_datamodel_t *model, const char *key, bool value);
 bool softc_datamodel_append_blob         (softc_datamodel_t *model, const char *key, unsigned char *value, size_t length);
 bool softc_datamodel_append_string_list  (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements);
-//bool softc_datamodel_append_array_int32  (softc_datamodel_t *model, const char *key, const int32_t *value, size_t size);
+bool softc_datamodel_append_array_int32  (softc_datamodel_t *model, const char *key, const int32_t *value, size_t size);
 bool softc_datamodel_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size);
 
 %typemap(in,numinputs=0) char **value (char *temp)        { $1 = &temp; };
+//%typemap(argout)         char **value                     { $result = PyString_FromString(*$1); };
 %typemap(argout)         char **value                     { $result = PyString_FromString(*$1); };
 
 %typemap(in,numinputs=0) int8_t *value (int8_t temp)      { $1 = &temp; };
@@ -151,6 +152,7 @@ bool softc_datamodel_append_array_double (softc_datamodel_t *model, const char *
 
 // XXX Add typemaps for get_blob, get_array_*
 
+// XXX something wrong with softc_datamodel_get_string()!!!
 bool softc_datamodel_get_string          (const softc_datamodel_t *model, const char *key, char **value);
 bool softc_datamodel_get_int8            (const softc_datamodel_t *model, const char *key, int8_t *value);
 bool softc_datamodel_get_uint8           (const softc_datamodel_t *model, const char *key, uint8_t *value);
@@ -268,7 +270,7 @@ def save_entity(entity, driver, uri, options=None):
     strategy = storage_get_storage_strategy(storage)
     datamodel = storage_strategy_get_datamodel(strategy)
     # Hmm, shouldn't we always create a new id when storing?
-    datamodel_set_id(datamodel, uuidgen())
+    datamodel_set_id(datamodel, str(entity._id))
     datamodel_set_meta_name(datamodel, str(entity._name))
     datamodel_set_meta_version(datamodel, str(entity._version))
     datamodel_set_meta_namespace(datamodel, str(entity._namespace))
@@ -289,23 +291,24 @@ def save_entity(entity, driver, uri, options=None):
 
 def load_entity_data(entity, driver, uri, options=None):
     """Loads data into `entity` from `uri` using `driver`."""
-    storage = softpy.storage_create(driver, uri, options)
-    strategy = softpy.storage_get_storage_strategy(storage)
-    datamodel = softpy.storage_strategy_get_datamodel(strategy)
-    softpy.storage_strategy_retrieve(strategy, datamodel)
-    entity._instanceid = softc_datamodel_get_id(datamodel)
-    entity._meta['name'] = softc_datamodel_get_name(datamodel)
-    entity._meta['version'] = softc_datamodel_get_version(datamodel)
-    entity._meta['namespace'] = softc_datamodel_get_namespace(datamodel)
-    #entity._meta['description'] = softc_datamodel_get_description(datamodel)
-    #entity._meta['dimensions'] = softc_datamodel_get_dimensions(datamodel)
+    storage = storage_create(driver, uri, options)
+    strategy = storage_get_storage_strategy(storage)
+    datamodel = storage_strategy_get_datamodel(strategy)
+    storage_strategy_retrieve(strategy, datamodel)
+    entity._instanceid = datamodel_get_id(datamodel)
+    entity._meta['name'] = datamodel_get_meta_name(datamodel)
+    entity._meta['version'] = datamodel_get_meta_version(datamodel)
+    entity._meta['namespace'] = datamodel_get_meta_namespace(datamodel)
+    #entity._meta['description'] = datamodel_get_meta_description(datamodel)
+    #entity._meta['dimensions'] = datamodel_get_dimensions(datamodel)
     for key in entity._keys():
         getter = getattr(
             _softpy, 'datamodel_get_' + entity._get_property_type(key))
         setattr(entity, key, getter(datamodel, str(key)))
 
 
-def _init_entity(entity, driver='json', uri=None, options=None, dimensions=()):
+def _init_entity(entity, driver='json', uri=None, options=None, dimensions=(),
+                 uuid=None):
     """Initiates the entity.
 
     Parameters
@@ -321,13 +324,19 @@ def _init_entity(entity, driver='json', uri=None, options=None, dimensions=()):
         Dimensions if entity is kept uninitialised (i.e. `uri` is None).
         Can be given either as "[3, 5]" or "{'I=3, 'J'=5'}" provided that
         the entity has dimensions I and J.
+    uuid : None | string
+        If given, it should be an unique uuid for the newly initiated instance.
+        Default is to generate it.
     """
+    if uuid is None:
+        uuid = uuidgen()
+    entity._instancedata['id'] = uuid
     for p in entity._meta['properties']:
         setattr(entity, p['name'], Uninitialized)
     if uri:
         load_entity_data(entity, driver, uri, options)
     else:
-        if len(dimensions) != len(entity._dimension_names):
+        if len(dimensions) != len(entity._meta['dimensions']):
             raise TypeError('Length of `dimensions` must be %d for %s objects'
                             % (len(entity._dimension_names), entity._name))
         if hasattr(dimensions, 'keys'):
@@ -336,7 +345,20 @@ def _init_entity(entity, driver='json', uri=None, options=None, dimensions=()):
         else:
             entity._instancedata['dimensions'] = [int(d) for d in dimensions]
 
+
+class MetaEntity(type):
+    """Metaclass for BaseEntity providing some functionality to Entity
+    classes that is not inherited by their instances."""
+    def __str__(self):
+        return json.dumps(self._meta, indent=2, sort_keys=True)
+
+    def __repr__(self):
+        return '<class %s version=%r, namespace=%r)>' % (
+            self._meta['name'], self._meta['version'], self._meta['namespace'])
+
+
 class EntityIter(object):
+    """For iterating over property names of Entity instances."""
     def __init__(self, entity):
         self.n = 0
         self.entity = entity
@@ -347,10 +369,13 @@ class EntityIter(object):
         return self.entity._meta['properties'][self.n - 1]['name']
     next = __next__  # for Python 2
 
+
 class BaseEntity(object):
     """Base class for all entities.  Intented to be used through the
     entity() factory function.
     """
+    __metaclass__ = MetaEntity
+    
     def __str__(self):
         s = []
         s.append('Entity %s' % self._name)
@@ -380,11 +405,11 @@ class BaseEntity(object):
         return EntityIter(self)
     
     _name = classproperty(
-        classmethod(lambda cls: cls._meta['name']))
+        classmethod(lambda cls: str(cls._meta['name'])))
     _version = classproperty(
-        classmethod(lambda cls: cls._meta['version']))
+        classmethod(lambda cls: str(cls._meta['version'])))
     _namespace = classproperty(
-        classmethod(lambda cls: cls._meta['namespace']))
+        classmethod(lambda cls: str(cls._meta['namespace'])))
     _description = classproperty(
         classmethod(lambda cls: cls._meta['description']))
     _dimension_names = classproperty(
@@ -450,8 +475,6 @@ def entity(metadata):
         'dimensions': [0] * len(meta['dimensions']),
     }
     attr = dict(__init__=_init_entity, _meta=meta, _instancedata=instancedata)
-    #for p in meta['properties']:
-    #    attr[p['name']] = Uninitialized
     return type(str(meta['name']), (BaseEntity,), attr)
     
     
