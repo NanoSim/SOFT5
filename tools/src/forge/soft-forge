@@ -2,7 +2,6 @@
 
 __main__ = function (args)
 {
-    print (args.length);
     if (args.length < 4) {
 	console.raw("usage: " + args[0] + " [schema] [template] [output]\n");
 	return 1;
