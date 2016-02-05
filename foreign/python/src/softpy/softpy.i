@@ -15,6 +15,13 @@
  #include "softc.h"
  #include <stdint.h>
  #include <stdbool.h>
+
+  softc_t *softc = NULL;
+
+  /* Wrapper for softc_cleanup() */
+  void cleanup(void) {
+    softc_cleanup(softc);
+  }
 %}
 
 
@@ -38,8 +45,8 @@
     argv[i] = PyUnicode_AsUTF8(items[i]);  // borrowed memory
 #endif
   }
-  softc_init(argc, argv);
-  // Cleanup, can the strings pointed to by argv be free'ed?
+  softc = softc_init(argc, argv);
+  // Cleanup, can the strings pointed to by argv be free()ed?
   //for (i=0; i<argc; i++) if (items[i]) Py_DECREF(items[i]);
   free(items);
   free(argv);
@@ -78,12 +85,15 @@
   free($1);
 }
 
-/* softc_init() is called automatically in module initialisation */
+/* softc_init() is called automatically in module initialisation, and
+ * softc_cleanup() is called via wrapper */
 //softc_t * softc_init(int argc, char *argv[]);
-int       softc_storage_driver_count();
-char   ** softc_get_storage_drivers();
-char    * softc_uuidgen();
-void      softc_cleanup(softc_t *);
+//void      softc_cleanup(softc_t *softc);
+void    cleanup();
+int     softc_storage_driver_count();
+char ** softc_get_storage_drivers();
+char  * softc_uuidgen();
+
 
 /*
  * datamodel
@@ -269,7 +279,7 @@ def save_entity(entity, driver, uri, options=None):
     storage = storage_create(driver, uri, options)
     strategy = storage_get_storage_strategy(storage)
     datamodel = storage_strategy_get_datamodel(strategy)
-    # Hmm, shouldn't we always create a new id when storing?
+    # Hmm, should we not always create a new id when storing?
     datamodel_set_id(datamodel, str(entity._id))
     datamodel_set_meta_name(datamodel, str(entity._name))
     datamodel_set_meta_version(datamodel, str(entity._version))
@@ -322,7 +332,7 @@ def _init_entity(entity, driver='json', uri=None, options=None, dimensions=(),
         Additional options passed to the driver.
     dimensions : sequence | dict
         Dimensions if entity is kept uninitialised (i.e. `uri` is None).
-        Can be given either as "[3, 5]" or "{'I=3, 'J'=5'}" provided that
+        Can be given either as ``[3, 5]`` or ``{'I'=3, 'J'=5}`` provided that
         the entity has dimensions I and J.
     uuid : None | string
         If given, it should be an unique uuid for the newly initiated instance.
@@ -415,9 +425,6 @@ class BaseEntity(object):
     _dimension_names = classproperty(
         classmethod(lambda cls:
                     [str(d['name']) for d in cls._meta['dimensions']]))
-
-    # The instance is mutable - should it really have an id?
-    # Wouldn't it be more natural to assign a new id to the stored instance?
     _id = property(lambda cls: cls._instancedata['id'])
     _dimensions = property(lambda self: self._instancedata['dimensions'])
     
@@ -461,11 +468,11 @@ class BaseEntity(object):
                    for p in self._meta['properties'])
   
 def entity(metadata):
-    """Factory fuction for creating an Entity.
+    """Factory fuction for creating an Entity class object for `metadata`.
 
-    The `metadata` argument is a metadata description (in json format)
-    of the entity to create.  It should either be a string or a
-    file-like object."""
+    Here `metadata` is a metadata description (in json format) of the
+    entity to create.  It should either be a string or a file-like
+    object."""
     if hasattr(metadata, 'read'):
         meta = json.load(metadata)
     else:

@@ -7,6 +7,8 @@ import os
 import sys
 import unittest
 
+import numpy as np
+
 import softpy
 
 
@@ -39,7 +41,7 @@ class TestSoftpy(unittest.TestCase):
             os.path.dirname(__file__), 'eu.nanosim.vasp.extraction.json')
 
         Extraction = softpy.entity(open(metafile))
-        e = Extraction(dimensions=[5])
+        e = Extraction(dimensions={'nAtoms': 5})
         e.surface_name = '111'
         e.atoms = "CH4"
         e.atom_species = 'H C'
@@ -47,7 +49,7 @@ class TestSoftpy(unittest.TestCase):
         e.site_name = 'on_top'
         e.total_energy = 543.2
         e.frequencies = 0.0  # XXX
-        e.cell = 0.0         # XXX
+        #e.cell = 4.05 * np.eye(3)
         e.positions = 0.0    # XXX
         self.assertFalse(e._initialized())
         e.info = ''
