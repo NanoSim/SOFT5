@@ -62,6 +62,27 @@ if (WITH_TESTS)
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
 endif (WITH_TESTS)
 
+# Define content of PATH (Windows), LD_LIBRARY_PATH (Unix) and SOFTSTORAGE
+# environment variables needed for running the tests without installation.
+set (library_path
+  ${soft-kernel_BINARY_DIR}
+  ${soft-storage-hdf5_BINARY_DIR}
+  ${soft-storage-mongo_BINARY_DIR}
+  ${soft-storage-plugins-hdf5_BINARY_DIR}
+  ${soft-storage-plugins-json_BINARY_DIR}
+  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${softc_BINARY_DIR}
+)
+set (SOFTSTORAGE
+  ${soft-storage-plugins-hdf5_BINARY_DIR}
+  ${soft-storage-plugins-json_BINARY_DIR}
+  ${soft-storage-plugins-mongo_BINARY_DIR}
+)
+if (UNIX)
+  string(REPLACE ";" ":" LD_LIBRARY_PATH "${library_path}")
+else ()
+  set(PATH "${library_path}")
+endif()
 
 
 # Install targets
@@ -71,6 +92,7 @@ set (SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
 set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
+
 
 # Core library
 add_subdirectory(core/src/kernel)

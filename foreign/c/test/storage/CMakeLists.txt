@@ -13,13 +13,17 @@ if(GTEST_FOUND)
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 
-  if (UNIX)
-    set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${softc_BINARY_DIR}:${soft-kernel_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
+  if(UNIX)
+    set_property(TEST ${PROJECT_NAME} PROPERTY
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}")
   else()
-    set_property(TEST ${PROJECT_NAME}
-      PROPERTY ENVIRONMENT "PATH=${softc_BINARY_DIR}:${soft-kernel_BINARY_DIR}:$ENV{PATH}")
+    set_property(TEST ${PROJECT_NAME} PROPERTY
+      ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
   endif()
+
+  set_property(TEST ${PROJECT_NAME} APPEND PROPERTY
+    ENVIRONMENT "SOFTSTORAGE=${SOFTSTORAGE}:$ENV{SOFTSTORAGE}")
+
  
 else(GTEST_FOUND)
   message("Google test not found - skipping tests")
