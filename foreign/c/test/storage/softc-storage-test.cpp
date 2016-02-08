@@ -67,22 +67,24 @@ class SoftC_StorageTest : public ::testing::Test {
 protected:
   SoftC_StorageTest()
     : hello_string("Hello softc")
+    , int32_number(42)
+    , double_number(3.14)
     , intvec({0,1,2,3,4,5,6,7,8,9})
     , doublevec({0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9})
     , doublevec2d({{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9},
-	  {1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09},
-	    {2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9},
-	      {3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9}})
+	           {1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09},
+	           {2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9},
+	           {3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9}})
     , doublevec3d({
 	{{0.1, 0.2, 0.3},
-	    {0.1, 0.2, 0.3},
-	      {0.1, 0.2, 0.3}},
-	  {{1.1, 0.2, 0.3},
-	      {1.1, 0.2, 0.3},
-		{1.1, 0.2, 0.3}},
-	    {{2.1, 0.2, 0.3},
-		{2.1, 0.2, 0.3},
-		  {2.1, 0.2, 0.3}}})
+	 {0.1, 0.2, 0.3},
+	 {0.1, 0.2, 0.3}},
+	{{1.1, 0.2, 0.3},
+	 {1.1, 0.2, 0.3},
+	 {1.1, 0.2, 0.3}},
+	{{2.1, 0.2, 0.3},
+	 {2.1, 0.2, 0.3},
+	 {2.1, 0.2, 0.3}}})
     , strlist({"this is", "a test"})
       
   {}
@@ -93,6 +95,8 @@ protected:
   static void TearDownTestCase() {}
 
   const char *hello_string;
+  const int32_t int32_number;
+  const double double_number;
   const std::vector<int32_t> intvec;
   const std::vector<double> doublevec;
   const std::vector<std::vector<double> > doublevec2d;
@@ -125,10 +129,14 @@ TEST_F(SoftC_StorageTest, writeData)
   softc_datamodel_set_meta_namespace(model, "meta");
 
   isOk = softc_datamodel_append_string(model, "message", hello_string); ASSERT_TRUE(isOk);
+  isOk = softc_datamodel_append_int32(model, "int32-number", int32_number); ASSERT_TRUE(isOk);
+  isOk = softc_datamodel_append_int32(model, "double-number", double_number); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_int32(model, "int-array", intvec.data(), intvec.size()); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_double(model, "double-array", doublevec.data(), doublevec.size()); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_double_2d(model, "double-array-2d", (const double**)v2d, doublevec2d[0].size(), doublevec2d.size()); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_double_3d(model, "double-array-3d", (const double***)v3d, doublevec3d[0][0].size(), doublevec3d[0].size(), doublevec3d.size()); ASSERT_TRUE(isOk);
+  isOk = softc_datamodel_append_string_list(model, "string-list", (const char **)strlist.data(), strlist.size()); ASSERT_TRUE(isOk);
+
   softc_storage_strategy_store(strategy, model);  
 }
 
@@ -150,6 +158,46 @@ TEST_F(SoftC_StorageTest, readString)
   softc_storage_strategy_end_retrieve(strategy, model);
 
   ASSERT_STREQ(message, hello_string);
+}
+
+TEST_F(SoftC_StorageTest, readInt32)
+{
+  int32_t x;
+
+  auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  auto strategy = softc_storage_get_storage_strategy(storage);
+  auto model    = softc_storage_strategy_get_datamodel(strategy);
+
+  softc_datamodel_set_id (model, uuid_string);
+  softc_datamodel_set_meta_name(model, "meta");
+  softc_datamodel_set_meta_version(model, "meta");
+
+  softc_storage_strategy_start_retrieve(strategy, model);
+  auto isOk = softc_datamodel_get_int32(model, "int32-number", &x);
+  ASSERT_TRUE(isOk);
+  softc_storage_strategy_end_retrieve(strategy, model);
+
+  ASSERT_EQ(x, int32_number);
+}
+
+TEST_F(SoftC_StorageTest, readDouble)
+{
+  double x;
+
+  auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  auto strategy = softc_storage_get_storage_strategy(storage);
+  auto model    = softc_storage_strategy_get_datamodel(strategy);
+
+  softc_datamodel_set_id (model, uuid_string);
+  softc_datamodel_set_meta_name(model, "meta");
+  softc_datamodel_set_meta_version(model, "meta");
+
+  softc_storage_strategy_start_retrieve(strategy, model);
+  auto isOk = softc_datamodel_get_double(model, "double-number", &x);
+  ASSERT_TRUE(isOk);
+  softc_storage_strategy_end_retrieve(strategy, model);
+
+  ASSERT_EQ(x, double_number);
 }
 
 TEST_F(SoftC_StorageTest, readIntVec)
@@ -243,4 +291,28 @@ TEST_F(SoftC_StorageTest, doubleVec3D)
   softc_storage_strategy_end_retrieve(strategy, model);
   ptrToArray(doublevec3d_cmp, (const double***)da3, da3_i, da3_j, da3_k);
   ASSERT_EQ(doublevec3d, doublevec3d_cmp);
+}
+
+TEST_F(SoftC_StorageTest, strList)
+{
+  char **slist;
+  size_t n_elements;
+  const std::vector<std::string> strlist_cmp;
+
+  auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  auto strategy = softc_storage_get_storage_strategy(storage);
+  auto model    = softc_storage_strategy_get_datamodel(strategy);
+
+  softc_datamodel_set_id (model, uuid_string);
+  softc_datamodel_set_meta_name(model, "meta");
+  softc_datamodel_set_meta_version(model, "meta");
+
+  softc_storage_strategy_start_retrieve(strategy, model);
+  auto isOk = softc_datamodel_get_array_string(model, "string-list", &slist, &n_elements);
+  ASSERT_TRUE(isOk);
+  softc_storage_strategy_end_retrieve(strategy, model);
+  ASSERT_EQ(n_elements, strlist.size());
+  // Hmm, not sure how to do this in C++
+  //ptrToArray(strlist_cmp, (const char **)slist, n_elements);
+  //ASSERT_EQ(strlist, strlist_cmp);
 }
