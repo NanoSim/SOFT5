@@ -2,13 +2,12 @@
 #include <softc/softc.h>
 #include "sim.h"
 #include "sim-private.h"
-#include "sim-context.h"
+#include "sim-handle.h"
 #include "config.h"
 
 namespace {
-  using SIM_fn_prototype          = void(*)(sim_context_t*,
-					    void*);
-  using SIM_timestepper_prototype = void(*)(sim_context_t*,
+  using SIM_fn_prototype          = void(*)(sim_handle_t*,void*);
+  using SIM_timestepper_prototype = void(*)(sim_handle_t*,
 					    SIM_fn_prototype,
 					    SIM_fn_prototype,
 					    SIM_fn_prototype,
@@ -72,8 +71,10 @@ sim_application_t* sim_init(int *argc, char **argv)
     softapp = softc_init(*argc, argv);
     sim_application_t * ret;
     ret = new sim_application_t;
-    ret->ctx = sim_context_create();
+    ret->ctx = sim_handle_create();
     ret->user_init = NULL;
+    ret->user_pre_init = NULL;
+    ret->user_post_init = NULL;
     ret->user_compute = NULL;
     ret->user_time_stepper = NULL;
     ret->user_cleanup = NULL;
@@ -87,79 +88,97 @@ sim_application_t* sim_init(int *argc, char **argv)
   return NULL;
 }
 
-void sim_load (sim_application_t* handle)
+void sim_load (sim_application_t* application)
 {
   simCommon = new SIMCommon();
   simCommon->loadPlugins();
-  simCommon->reg(handle);
+  simCommon->reg(application);
 }
 
 
-void sim_run (sim_application_t* handle, void *user_data)
+void sim_run (sim_application_t* application, void *user_data)
 {
-  if (handle == NULL) {
+  if (application == NULL) {
     fprintf(stderr, "sim_init (int*, char**) needs to be called first\n");
     return;
   }
-  
-  if (handle->user_init != NULL) {
-    (*handle->user_init)(handle->ctx, user_data);
+
+  if (application->user_pre_init != NULL) {
+    (*application->user_pre_init)(application->ctx, user_data);
+  }
+
+  if (application->user_init != NULL) {
+    (*application->user_init)(application->ctx, user_data);
   } else {
     fprintf(stderr, "warning - user_init function is not defined\n");
   }
+
+  if (application->user_post_init != NULL) {
+    (*application->user_post_init)(application->ctx, user_data);
+  }
   
-  if (handle->user_time_stepper != NULL && handle->user_compute != NULL) {
-    (*handle->user_time_stepper)(handle->ctx, handle->user_compute, handle->user_begin_iter, handle->user_end_iter, user_data);
-  } else if (handle->user_compute != NULL) {
-    (*handle->user_compute)(handle->ctx, user_data);
+  if (application->user_time_stepper != NULL && application->user_compute != NULL) {
+    (*application->user_time_stepper)(application->ctx, application->user_compute, application->user_begin_iter, application->user_end_iter, user_data);
+  } else if (application->user_compute != NULL) {
+    (*application->user_compute)(application->ctx, user_data);
   } else {
     fprintf(stderr, "warning - user_compute function is not defined\n");
   }
 
-  if (handle->user_finalize != NULL) {
-    (*handle->user_finalize)(handle->ctx, user_data);
+  if (application->user_finalize != NULL) {
+    (*application->user_finalize)(application->ctx, user_data);
   } else {
     fprintf(stderr, "warning - user_finalize function is not defined\n");
   }
   
-  if (handle->user_cleanup != NULL) {
-    (*handle->user_cleanup)(handle->ctx, user_data);  
+  if (application->user_cleanup != NULL) {
+    (*application->user_cleanup)(application->ctx, user_data);  
   } else {
     fprintf(stderr, "warning - user_cleanup function is not defined\n");
   }
 }
 
-void sim_register_init    (sim_application_t* handle, SIM_fn_prototype fn)
+void sim_register_pre_init    (sim_application_t* application, SIM_fn_prototype fn)
 {
-  handle->user_init = fn;
+  application->user_pre_init = fn;
 }
 
-void sim_register_compute (sim_application_t* handle, SIM_fn_prototype fn)
+void sim_register_post_init    (sim_application_t* application, SIM_fn_prototype fn)
 {
-  handle->user_compute = fn;
+  application->user_post_init = fn;
 }
 
-void sim_register_time_stepper (sim_application_t* handle, SIM_timestepper_prototype fn)
+void sim_register_init    (sim_application_t* application, SIM_fn_prototype fn)
 {
-  handle->user_time_stepper = fn;
+  application->user_init = fn;
 }
 
-void sim_register_cleanup(sim_application_t* handle, SIM_fn_prototype fn)
+void sim_register_compute (sim_application_t* application, SIM_fn_prototype fn)
 {
-  handle->user_cleanup = fn;
+  application->user_compute = fn;
 }
 
-void sim_register_begin_iter(sim_application_t* handle, SIM_fn_prototype fn)
+void sim_register_time_stepper (sim_application_t* application, SIM_timestepper_prototype fn)
 {
-  handle->user_begin_iter = fn;
+  application->user_time_stepper = fn;
 }
 
-void sim_register_end_iter(sim_application_t* handle, SIM_fn_prototype fn)
+void sim_register_cleanup(sim_application_t* application, SIM_fn_prototype fn)
 {
-  handle->user_end_iter = fn;
+  application->user_cleanup = fn;
 }
 
-void sim_register_finalize(sim_application_t* handle, SIM_fn_prototype fn)
+void sim_register_begin_iter(sim_application_t* application, SIM_fn_prototype fn)
 {
-  handle->user_finalize = fn;
+  application->user_begin_iter = fn;
+}
+
+void sim_register_end_iter(sim_application_t* application, SIM_fn_prototype fn)
+{
+  application->user_end_iter = fn;
+}
+
+void sim_register_finalize(sim_application_t* application, SIM_fn_prototype fn)
+{
+  application->user_finalize = fn;
 }

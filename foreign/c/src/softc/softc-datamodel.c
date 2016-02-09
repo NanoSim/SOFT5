@@ -181,7 +181,6 @@ bool softc_datamodel_get_array_double_3d (const softc_datamodel_t *model, const 
   return softc_datamodel_private_get_array_double_3d(model, key, value, size_i, size_j, size_k);
 }
 
-
 bool softc_datamodel_set_id (softc_datamodel_t* model, const char *id)
 {
   return softc_datamodel_private_set_id (model, id);
