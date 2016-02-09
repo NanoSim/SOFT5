@@ -1,4 +1,4 @@
-project(forign-test-softpy C CXX)
+project(softpy-test C CXX)
 
 find_package(PythonLibs)
 message("PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
@@ -11,8 +11,7 @@ if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
   add_test(${PROJECT_NAME}
-    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_softpy.py)
-    #"${soft-storage-plugins-mongo_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}")
+    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/softpy-test.py)
 
   # Set environment
   if(UNIX)

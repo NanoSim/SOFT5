@@ -12,8 +12,16 @@ import numpy as np
 import softpy
 
 
+# Wrap softpy-test-datamodel in a TestCase
+def test_datamodel():
+    execfile(os.path.join(os.path.dirname(__file__), 
+                          'softpy-test-datamodel.py'))
+TestDatamodel = unittest.FunctionTestCase(test_datamodel)
+
+
 
 class TestSoftpy(unittest.TestCase):
+
     def test_softpy(self):
         storage = softpy.storage_create(
             'hdf5', 'teststorage.h5')
@@ -42,6 +50,10 @@ class TestSoftpy(unittest.TestCase):
 
         Extraction = softpy.entity(open(metafile))
         e = Extraction(dimensions={'nAtoms': 5})
+
+        nAtoms = e._get_dimension_size('nAtoms')
+        assert(nAtoms == 5)
+
         e.surface_name = '111'
         e.atoms = "CH4"
         e.atom_species = 'H C'
@@ -49,15 +61,19 @@ class TestSoftpy(unittest.TestCase):
         e.site_name = 'on_top'
         e.total_energy = 543.2
         e.frequencies = 0.0  # XXX
-        #e.cell = 4.05 * np.eye(3)
-        e.positions = 0.0    # XXX
+        e.cell = 4.05 * np.eye(3).flatten()
+        e.symbols = ['H', 'H', 'H', 'H', 'C']
+        e.positions = np.random.rand(nAtoms, 3).flatten()
         self.assertFalse(e._initialized())
         e.info = ''
         self.assertTrue(e._initialized())
-        e._save('hdf5', 'extraction.h5')
         self.assertTrue('cell' in e)
         self.assertFalse('cellx' in e)
-        #print(e)
+
+        with softpy.Storage('hdf5', 'extraction.h5') as s:
+            s.save(e)
+
+
         
 if __name__ == "__main__":
     unittest.main()

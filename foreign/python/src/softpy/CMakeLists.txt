@@ -27,7 +27,6 @@ endif()
 swig_add_module(softpy python softpy.i)
 swig_link_libraries(softpy softc ${PYTHON_LIBRARIES})
 
-
 #install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 #install(DIRECTORY . DESTINATION include/soft5/softc FILES_MATCHING PATTERN "*.h")
 

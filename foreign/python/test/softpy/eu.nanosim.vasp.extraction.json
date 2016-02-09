@@ -1,6 +1,6 @@
 {
     "name": "Extraction",
-    "version": "0.1",
+    "version": "0.2",
     "namespace": "eu.nanosim.vasp",
     "description": "",
     "dimensions": [
@@ -18,7 +18,7 @@
         {
             "name": "atoms",
             "type": "string",
-            "description": "List of atom type(s) (chemical symbol)  and number of this this type excluding the surface atoms"
+            "description": "List of atom type(s) (chemical symbol) and number of this type excluding the surface atoms"
         },
         {
             "name": "atom_species",
@@ -33,39 +33,45 @@
         {
             "name": "site_name",
             "type": "string",
-            "description": "The adsorption or transition site(s) of the atom(s) or molecule(s)  for the adsorbed or transition state"
+            "description": "The adsorption or transition site(s) of the atom(s) or molecule(s) for the adsorbed or transition state"
         },
         {
             "name": "total_energy",
-            "type": "float",
+            "type": "double",
             "unit": "eV",
             "description": "The total energy of the system from the DFT calculation"
         },
         {
             "name": "frequencies",
-            "type": "float",
+            "type": "double",
             "unit": "cm^(-1)",
             "description": "List of the frequencies calculated for the system"
         },
         {
             "name": "cell",
-            "type": "float",
+            "type": "double",
             "unit": "a",
             "dims": [
-                3,
-                3
+                "3 * 3"
             ],
             "description": "3x3 array with the lattice parameters of the system corresponding to the x, y and z directions"
         },
         {
-            "name": "positions",
-            "type": "float",
-            "unit": "-/a",
+            "name": "symbols",
+            "type": "string",
             "dims": [
-                "nAtoms",
-                4
+                "nAtoms"
             ],
-            "description": "List  of the atom type followed by its position in the x, y and z direction."
+            "description": "Chemical symbols."
+        },
+        {
+            "name": "positions",
+            "type": "double",
+            "unit": "Angstrom",
+            "dims": [
+                "nAtoms * 3"
+            ],
+            "description": "Atom positions (x, y, z)."
         },
         {
             "name": "info",
