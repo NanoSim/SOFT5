@@ -176,7 +176,7 @@ bool softc_datamodel_get_float           (const softc_datamodel_t *model, const 
 bool softc_datamodel_get_double          (const softc_datamodel_t *model, const char *key, double *value);
 bool softc_datamodel_get_bool            (const softc_datamodel_t *model, const char *key, bool *value);
 bool softc_datamodel_get_blob            (const softc_datamodel_t *model, const char *key, unsigned char **value, size_t *length);
-bool softc_datamodel_get_array_string    (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements);
+bool softc_datamodel_get_string_list    (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements);
 bool softc_datamodel_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
 bool softc_datamodel_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
 
