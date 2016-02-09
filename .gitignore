@@ -39,3 +39,4 @@ ui_*.h
 *.Release
 *~
 moc_*.cpp
+CMakeCache*

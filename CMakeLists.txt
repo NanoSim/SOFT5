@@ -84,7 +84,6 @@ else ()
   set(PATH "${library_path}")
 endif()
 
-
 # Install targets
 set (SOFTBASE lib/${PROJECT_NAME})
 set (STORAGE_PLUGINS_INSTALL_DIR ${SOFTBASE}/storage)
@@ -182,7 +181,9 @@ if (WITH_FOREIGN_HASKELL)
   message("Haskell is currently not supported")
 endif (WITH_FOREIGN_HASKELL)
 
-
 if (WITH_NUMERICS)
   add_subdirectory(numerics/src/sim)
 endif (WITH_NUMERICS)
+
+# Documentation
+add_subdirectory(doc)
