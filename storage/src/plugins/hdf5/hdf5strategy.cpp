@@ -208,6 +208,21 @@ struct StrategyFtor {
     return false;
   }
 
+  bool getStringArray(const char *key, std::vector<std::string> &retValue) {
+    auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
+    if (ret.isValid() && ret.canConvert(QMetaType::QVariantList)) {
+      auto variantList = ret.value<QVariantList>();
+      retValue.resize(variantList.size());
+      auto it = variantList.constBegin();
+      auto retIt = retValue.begin();
+      while (it != variantList.constEnd()) {
+	(*retIt++) = (*it++).toString().toStdString();
+      }
+      return true;
+    }
+    return false;
+  }
+
   QString uuid;
   soft::hdf5::QH5 h5;  
 };
@@ -320,6 +335,7 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   std::function<bool(const char*, std::vector<double> &)>getDoubleArray = std::bind(&StrategyFtor::getDoubleArray, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<std::vector<double> >&)>getDoubleArray2D = std::bind(&StrategyFtor::getDoubleArray2D, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<std::vector<std::vector<double> > >&)>getDoubleArray3D = std::bind(&StrategyFtor::getDoubleArray3D, &(*ftor), _1, _2);
+  std::function<bool(const char*, std::vector<std::string> &)>getStringArray = std::bind(&StrategyFtor::getStringArray, &(*ftor), _1, _2);
 										   
   jsonModel->registerGetStringFn(getString);
   jsonModel->registerGetInt8Fn(getInt8);
@@ -337,6 +353,7 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   jsonModel->registerGetDoubleArrayFn(getDoubleArray);
   jsonModel->registerGetDoubleArray2DFn(getDoubleArray2D);
   jsonModel->registerGetDoubleArray3DFn(getDoubleArray3D);
+  jsonModel->registerGetStringArrayFn(getStringArray);
 }
 
 void HDF5Strategy :: endRetrieve (IDataModel *model) const

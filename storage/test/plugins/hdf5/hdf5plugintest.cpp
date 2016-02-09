@@ -24,7 +24,8 @@ protected:
     , doubleVec3D(
 		  {{{1.0, 0.1, 0.2},{0.0, 1.1, 0.2},{3.0, 3.1, 3.2}},
 		      {{1.0, 1.1, 1.2},{2.0, 2.1, 2.2},{3.0, 3.1, 3.2}},
-			{{1.0, 1.1, 4.2},{2.0, 2.1, 3.2},{3.0, 3.1, 3.2}}})
+            {{1.0, 1.1, 4.2},{2.0, 2.1, 3.2},{3.0, 3.1, 3.2}}})
+    , stringVec({"This", "is", "a", "test"})
   {}
   
   static void SetUpTestCase()
@@ -46,6 +47,7 @@ protected:
   std::vector<double> doubleVec;
   std::vector<std::vector<double> > doubleVec2D;
   std::vector<std::vector<std::vector<double> > > doubleVec3D;
+  std::vector<std::string> stringVec;
   std::string id;
 };
 
@@ -84,6 +86,7 @@ TEST_F(Hdf5PluginTest, writeTest)
   model->appendDoubleArray("doubleArray", doubleVec);
   model->appendDoubleArray2D("doubleArray2D", doubleVec2D);
   model->appendDoubleArray3D("doubleArray3D", doubleVec3D);
+  model->appendStringArray("stringList", stringVec);
   strategy->store(model);
 }
 
@@ -261,3 +264,22 @@ TEST_F(Hdf5PluginTest, readDoubleArray3D)
 
   ASSERT_TRUE(compare == doubleVec3D);
 }
+
+TEST_F(Hdf5PluginTest, readStringList)
+{
+    std::vector<std::string> compare;
+    soft::Storage storage("hdf5", "test_f.h5");
+    auto strategy = storage.strategy();
+    ASSERT_TRUE(nullptr != strategy);
+
+    auto model    = strategy->dataModel();
+    ASSERT_TRUE(nullptr != model);
+
+    model->setId(id);
+    strategy->startRetrieve(model);
+    model->getStringArray("stringList", compare);
+    strategy->endRetrieve(model);
+
+    ASSERT_TRUE(compare == stringVec);
+}
+

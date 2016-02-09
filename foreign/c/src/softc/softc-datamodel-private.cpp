@@ -165,12 +165,11 @@ bool softc_datamodel_private_append_blob (softc_datamodel_t *model, const char *
 bool softc_datamodel_private_append_string_list (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements)
 {
   if (model->ref) {
-    soft::StdStringList stringList;
-    stringList.reserve(n_elements);
+    soft::StdStringList stringList(n_elements);
     for (size_t i = 0; i < n_elements; ++i) {
-      stringList[i].assign(value[i]);
-      return model->ref->appendStringArray(key, stringList);
+      stringList[i].assign(value[i]);      
     }
+    return model->ref->appendStringArray(key, stringList);
   }
   return false;
 }
@@ -262,7 +261,7 @@ bool softc_datamodel_private_get_string (const softc_datamodel_t *model, const c
 
 bool softc_datamodel_private_get_int8 (const softc_datamodel_t *model, const char *key, int8_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdInt8 ret;
     auto isOk = model->ref->getInt8(key, ret);
     if (isOk) {
@@ -276,7 +275,7 @@ bool softc_datamodel_private_get_int8 (const softc_datamodel_t *model, const cha
 
 bool softc_datamodel_private_get_uint8 (const softc_datamodel_t *model, const char *key, uint8_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdUInt8 ret;
     auto isOk = model->ref->getUInt8(key, ret);
     if (isOk) {
@@ -289,7 +288,7 @@ bool softc_datamodel_private_get_uint8 (const softc_datamodel_t *model, const ch
 
 bool softc_datamodel_private_get_int16 (const softc_datamodel_t *model, const char *key, int16_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdInt16 ret;
     auto isOk = model->ref->getInt16(key, ret);
     if (isOk) {
@@ -302,7 +301,7 @@ bool softc_datamodel_private_get_int16 (const softc_datamodel_t *model, const ch
 
 bool softc_datamodel_private_get_uint16 (const softc_datamodel_t *model, const char *key, uint16_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdUInt16 ret;
     auto isOk = model->ref->getUInt16(key, ret);
     if (isOk) {
@@ -315,7 +314,7 @@ bool softc_datamodel_private_get_uint16 (const softc_datamodel_t *model, const c
 
 bool softc_datamodel_private_get_int32 (const softc_datamodel_t *model, const char *key, int32_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdInt ret;
     auto isOk = model->ref->getInt32(key, ret);
     if (isOk) {
@@ -328,7 +327,7 @@ bool softc_datamodel_private_get_int32 (const softc_datamodel_t *model, const ch
 
 bool softc_datamodel_private_get_uint32 (const softc_datamodel_t *model, const char *key, uint32_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdUInt ret;
     auto isOk = model->ref->getUInt32(key, ret);
     if (isOk) {
@@ -341,7 +340,7 @@ bool softc_datamodel_private_get_uint32 (const softc_datamodel_t *model, const c
 
 bool softc_datamodel_private_get_int64 (const softc_datamodel_t *model, const char *key, int64_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdInt64 ret;
     auto isOk = model->ref->getInt64(key, ret);
     if (isOk) {
@@ -354,7 +353,7 @@ bool softc_datamodel_private_get_int64 (const softc_datamodel_t *model, const ch
 
 bool softc_datamodel_private_get_uint64 (const softc_datamodel_t *model, const char *key, uint64_t *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdUInt64 ret;
     auto isOk = model->ref->getUInt64(key, ret);
     if (isOk) {
@@ -367,7 +366,7 @@ bool softc_datamodel_private_get_uint64 (const softc_datamodel_t *model, const c
 
 bool softc_datamodel_private_get_float (const softc_datamodel_t *model, const char *key, float *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdFloat ret;
     auto isOk = model->ref->getFloat(key, ret);
     if (isOk) {
@@ -380,7 +379,7 @@ bool softc_datamodel_private_get_float (const softc_datamodel_t *model, const ch
 
 bool softc_datamodel_private_get_double (const softc_datamodel_t *model, const char *key, double *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdDouble ret;
     auto isOk = model->ref->getDouble(key, ret);
     if (isOk) {
@@ -393,7 +392,7 @@ bool softc_datamodel_private_get_double (const softc_datamodel_t *model, const c
 
 bool softc_datamodel_private_get_bool (const softc_datamodel_t *model, const char *key, bool *value)
 {
-  if (!model->ref) {
+  if (model->ref) {
     soft::StdBool ret;
     auto isOk = model->ref->getBool(key, ret);
     if (isOk) {
@@ -417,7 +416,7 @@ bool softc_datamodel_private_get_blob (const softc_datamodel_t *model, const cha
   return false;
 }
 
-bool softc_datamodel_private_get_array_string (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
+bool softc_datamodel_private_get_string_list (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
 {
   if (model->ref) {
     soft::StdStringList source;

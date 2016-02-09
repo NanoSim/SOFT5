@@ -156,9 +156,9 @@ bool softc_datamodel_get_blob (const softc_datamodel_t *model, const char *key, 
   return softc_datamodel_private_get_blob (model, key, value, length);
 }
 
-bool softc_datamodel_get_array_string   (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
+bool softc_datamodel_get_string_list   (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
 {
-  return softc_datamodel_private_get_array_string (model, key, value, n_elements);
+  return softc_datamodel_private_get_string_list (model, key, value, n_elements);
 }
 
 bool softc_datamodel_get_array_int32  (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size)
