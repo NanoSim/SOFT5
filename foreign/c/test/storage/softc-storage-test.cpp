@@ -321,7 +321,7 @@ TEST_F(SoftC_StorageTest, strList)
   ASSERT_EQ(n_elements, strlist.size());
   for (int i = 0; i < strlist.size(); ++i) {
     ASSERT_STREQ(slist[i], (char *)strlist[i].c_str());
-    free(slist[i]);
+/*    free(slist[i]);*/
   }
   free(slist);
 }

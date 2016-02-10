@@ -422,14 +422,15 @@ bool softc_datamodel_private_get_string_list (const softc_datamodel_t *model, co
     soft::StdStringList source;
     auto isOk = model->ref->getStringArray(key, source);
     if (isOk) {
-      *value = new char*[source.size()];
-      for (size_t i = 0; i < source.size(); ++i) {
+      auto siz = source.size();
+      *value = new char*[siz];
+      for (size_t i = 0; i < siz; ++i) {
 	(*value)[i] = new char[source[i].size()+1];
 	strncpy((*value)[i], source[i].c_str(), source[i].size());
-	(*value)[i][source[i].size()] = '\0';
-	*n_elements = source.size();
-	return true;
+	(*value)[i][source[i].size()] = '\0';	
       }      
+      *n_elements = source.size();
+      return true;
     }
   }
   return false;
