@@ -302,9 +302,9 @@ TEST_F(SoftC_StorageTest, doubleVec3D)
 
 TEST_F(SoftC_StorageTest, strList)
 {
+  int i;
   char **slist;
   size_t n_elements;
-  const std::vector<std::string> strlist_cmp;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
   auto strategy = softc_storage_get_storage_strategy(storage);
@@ -319,7 +319,9 @@ TEST_F(SoftC_StorageTest, strList)
   ASSERT_TRUE(isOk);
   softc_storage_strategy_end_retrieve(strategy, model);
   ASSERT_EQ(n_elements, strlist.size());
-  // Hmm, not sure how to do this in C++
-  //ptrToArray(strlist_cmp, (const char **)slist, n_elements);
-  //ASSERT_EQ(strlist, strlist_cmp);
+  for (int i = 0; i < strlist.size(); ++i) {
+    ASSERT_STREQ(slist[i], (char *)strlist[i].c_str());
+    free(slist[i]);
+  }
+  free(slist);
 }
