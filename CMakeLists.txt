@@ -71,6 +71,7 @@ set (library_path
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
   ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-numerics-sim_BINARY_DIR}
   ${softc_BINARY_DIR}
 )
 set (SOFTSTORAGE
@@ -183,6 +184,9 @@ endif (WITH_FOREIGN_HASKELL)
 
 if (WITH_NUMERICS)
   add_subdirectory(numerics/src/sim)
+  if (WITH_TESTS)
+    add_subdirectory(numerics/test/sim)
+  endif(WITH_TESTS)  
 endif (WITH_NUMERICS)
 
 # Documentation

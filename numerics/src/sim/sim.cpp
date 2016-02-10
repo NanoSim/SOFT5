@@ -44,13 +44,13 @@ namespace {
 	SIM_fn_prototype initFunction                 = (SIM_fn_prototype) lib->resolve("SIM_init");
 	SIM_fn_prototype computeFunction              = (SIM_fn_prototype) lib->resolve("SIM_compute");
 	SIM_timestepper_prototype timeStepperFunction = (SIM_timestepper_prototype) lib->resolve("SIM_time_stepper");
-	SIM_fn_prototype cleanupFunction              = (SIM_fn_prototype) lib->resolve("SIM_cleanup");
+	SIM_fn_prototype cleanupFunction              = (SIM_fn_prototype) lib->resolve("SIM_finalize");
 
 	if (initFunction && computeFunction && timeStepperFunction && cleanupFunction) {
 	  sim_register_init(app, initFunction);
 	  sim_register_compute(app, computeFunction);
 	  sim_register_time_stepper(app, timeStepperFunction);
-	  sim_register_cleanup(app, cleanupFunction);
+	  sim_register_finalize(app, cleanupFunction);
 	} else {
 	  qDebug() << "Unable to run example";
 	}
@@ -77,10 +77,11 @@ sim_application_t* sim_init(int *argc, char **argv)
     ret->user_post_init = NULL;
     ret->user_compute = NULL;
     ret->user_time_stepper = NULL;
-    ret->user_cleanup = NULL;
     ret->user_begin_iter = NULL;
     ret->user_end_iter = NULL;
     ret->user_finalize = NULL;
+    ret->user_pre_finalize = NULL;
+    ret->user_post_finalize = NULL;
 
     return ret;
   }
@@ -125,17 +126,19 @@ void sim_run (sim_application_t* application, void *user_data)
     fprintf(stderr, "warning - user_compute function is not defined\n");
   }
 
+  if (application->user_pre_finalize != NULL) {
+    (*application->user_pre_finalize)(application->ctx, user_data);
+  }
+
   if (application->user_finalize != NULL) {
     (*application->user_finalize)(application->ctx, user_data);
   } else {
     fprintf(stderr, "warning - user_finalize function is not defined\n");
   }
   
-  if (application->user_cleanup != NULL) {
-    (*application->user_cleanup)(application->ctx, user_data);  
-  } else {
-    fprintf(stderr, "warning - user_cleanup function is not defined\n");
-  }
+  if (application->user_post_finalize != NULL) {
+    (*application->user_post_finalize)(application->ctx, user_data);
+  }    
 }
 
 void sim_register_pre_init    (sim_application_t* application, SIM_fn_prototype fn)
@@ -163,11 +166,6 @@ void sim_register_time_stepper (sim_application_t* application, SIM_timestepper_
   application->user_time_stepper = fn;
 }
 
-void sim_register_cleanup(sim_application_t* application, SIM_fn_prototype fn)
-{
-  application->user_cleanup = fn;
-}
-
 void sim_register_begin_iter(sim_application_t* application, SIM_fn_prototype fn)
 {
   application->user_begin_iter = fn;
@@ -181,4 +179,14 @@ void sim_register_end_iter(sim_application_t* application, SIM_fn_prototype fn)
 void sim_register_finalize(sim_application_t* application, SIM_fn_prototype fn)
 {
   application->user_finalize = fn;
+}
+
+void sim_register_pre_finalize(sim_application_t* application, SIM_fn_prototype fn)
+{
+  application->user_pre_finalize = fn;
+}
+
+void sim_register_post_finalize(sim_application_t* application, SIM_fn_prototype fn)
+{
+  application->user_post_finalize = fn;
 }
