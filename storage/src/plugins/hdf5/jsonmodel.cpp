@@ -176,68 +176,90 @@ bool JSONModel :: appendString     (const char* key, const StdString &value)
 
 bool JSONModel :: appendInt8       (const char *key, StdInt8 value)
 {
-    QJsonValue jsonValue(value);
-    return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  QJsonValue jsonValue(value);
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendUInt8      (const char *key, StdUInt8 value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendInt16      (const char *key, StdInt16 value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendUInt16     (const char *key, StdUInt16 value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendInt32      (const char *key, StdInt value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendUInt32     (const char *key, StdUInt value)
 {
   QJsonValue jsonValue((int)value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendInt64      (const char *key, StdInt64 value)
 {
   QJsonValue jsonValue((int)value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendUInt64     (const char *key, StdUInt64 value)
 {
   QJsonValue jsonValue((int)value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendFloat      (const char *key, StdFloat value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendDouble     (const char *key, StdDouble value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendBool       (const char *key, bool value)
 {
   QJsonValue jsonValue(value);
-  return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendInt32Array (const char *key, const StdIntArray &value)
@@ -246,8 +268,9 @@ bool JSONModel :: appendInt32Array (const char *key, const StdIntArray &value)
   for (auto &v: value) {
     jsonArray.append(QJsonValue(v));
   }
-  d->jsonObject.insert(key, jsonArray);
-  return true;
+  auto it = d->jsonObject.insert(key, jsonArray);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendDoubleArray(const char *key, const StdDoubleArray &value)
@@ -256,8 +279,9 @@ bool JSONModel :: appendDoubleArray(const char *key, const StdDoubleArray &value
   for (auto &v: value) {
     jsonArray.append(QJsonValue(v));
   }
-  d->jsonObject.insert(key, jsonArray);
-  return true;
+  auto it = d->jsonObject.insert(key, jsonArray);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendDoubleArray2D (const char *key, const StdDoubleArray2D& value) 
@@ -270,8 +294,9 @@ bool JSONModel :: appendDoubleArray2D (const char *key, const StdDoubleArray2D& 
     }    
     jsonArray.append(array);
   }
-  d->jsonObject.insert(key, jsonArray);
-  return true;
+  auto it = d->jsonObject.insert(key, jsonArray);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendDoubleArray3D (const char *key, const StdDoubleArray3D& value)
@@ -288,9 +313,9 @@ bool JSONModel :: appendDoubleArray3D (const char *key, const StdDoubleArray3D& 
     }
     jsonArray.append(aa);
   }
-  d->jsonObject.insert(key, jsonArray);
-
-  return true;
+  auto it = d->jsonObject.insert(key, jsonArray);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 
@@ -305,8 +330,9 @@ bool JSONModel :: appendStringArray(const char *key, const std::vector<StdString
   for (auto &v: value) {
     jsonArray.append(QJsonValue(QString::fromStdString(v)));
   }
-  d->jsonObject.insert(key, jsonArray);
-  return true;
+  auto it = d->jsonObject.insert(key, jsonArray);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
 }
 
 bool JSONModel :: appendArray      (const char *, const IDataModel *)
