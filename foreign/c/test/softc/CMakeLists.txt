@@ -1,4 +1,4 @@
-project(softc-test C CXX)
+project(foreign-softc-test C CXX)
 
 find_package(GTest)
 

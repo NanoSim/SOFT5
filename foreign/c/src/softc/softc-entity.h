@@ -29,9 +29,7 @@ typedef struct softc_entity_vtable_
 #define SOFTC_ENTITY_VTABLE(name) \
   static const softc_entity_vtable SOFTC_ENTITY_VTABLE_NAME(name)[] = { \
     {store, load, get_dimensions, get_dimension_size, get_meta_type, get_meta_name, get_meta_namespace, get_meta_version}}
-
     
-
 const char *  softc_entity_get_id (const void *self);
 void *        softc_entity_new (const char *uri);
 const char *  softc_entity_get_meta_type(const void *self);
