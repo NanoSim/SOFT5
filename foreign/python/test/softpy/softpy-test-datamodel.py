@@ -28,7 +28,7 @@ m.double_array = np.arange(6.0)
 m.string_list = ['this', 'is', 'a', 'test', 'string-list']
 
 # Store
-storage = softpy.storage_create('hdf5', 'lowlevel.h5')
+storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 
@@ -52,7 +52,7 @@ softpy.storage_free(storage)
 
 
 # Load
-storage = softpy.storage_create('hdf5', 'lowlevel.h5')
+storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 

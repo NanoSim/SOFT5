@@ -18,6 +18,13 @@ include_directories(
 
 set(CMAKE_SWIG_FLAGS "")
 
+set(SWIG_MODULE_softpy_EXTRA_DEPS
+  numpy.i
+  softpy-entity.i
+  softpy-datamodel.i
+  softpy-python.i
+)
+
 if(USE_PYTHON3)
   set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3 -Wall")
 else()
@@ -26,6 +33,8 @@ endif()
 
 swig_add_module(softpy python softpy.i)
 swig_link_libraries(softpy softc ${PYTHON_LIBRARIES})
+
+
 
 #install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 #install(DIRECTORY . DESTINATION include/soft5/softc FILES_MATCHING PATTERN "*.h")

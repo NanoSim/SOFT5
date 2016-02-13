@@ -11,23 +11,19 @@ import numpy as np
 
 import softpy
 
+thisdir = os.path.dirname(__file__)
 
-# Wrap softpy-test-datamodel in a TestCase
-#def test_datamodel():
-#    execfile(os.path.join(os.path.dirname(__file__), 
-#                          'softpy-test-datamodel.py'))
-#TestDatamodel = unittest.FunctionTestCase(test_datamodel)
-
-
-
+# Wrap tests in a unittest TestCase
 class TestSoftpy(unittest.TestCase):
     def test_datamodel(self):
-        execfile(os.path.join(os.path.dirname(__file__), 
-                              'softpy-test-datamodel.py'))
+        execfile(os.path.join(thisdir, 'softpy-test-datamodel.py'))
 
     def test_factory(self):
-        execfile(os.path.join(os.path.dirname(__file__), 
-                              'softpy-test-factory.py'))
+        execfile(os.path.join(thisdir, 'softpy-test-factory.py'))
+
+    def test_entity(self):
+        execfile(os.path.join(thisdir, 'softpy-test-entity.py'))
+                              
 
     #def test_softpy(self):
     #    storage = softpy.storage_create(
