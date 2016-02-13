@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include "softc-block.h"
 #include "softc-block-private.h"
 #include "softc-vector.h"

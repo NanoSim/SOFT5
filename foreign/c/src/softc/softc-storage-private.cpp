@@ -66,3 +66,8 @@ softc_storage_strategy_t * softc_storage_private_get_storage_strategy(softc_stor
 
   return storage_strategy;
 }
+
+void softc_storage_private_free_storage_strategy(softc_storage_strategy_t *strategy)
+{
+  free(strategy);
+}

@@ -6,8 +6,17 @@
 %{
 #define CK_ALLOC(alloc) if (!(alloc)) do {	 \
     PyErr_SetString(PyExc_MemoryError, # alloc); \
+    softpy_entity_error = 1;			 \
     goto fail;					 \
   } while (0)
+
+#define ENTITY_ERROR(PyType, msg) do {		\
+    softpy_entity_error = 1;			\
+    fprintf(stderr, "ERROR: %s\n", msg);	\
+    PyErr_SetString(PyType, msg);		\
+    goto fail;					\
+  } while (0)
+
   
   /* Mirror the opaque definition in softc-entity.c */
   typedef struct _softpy_entity_t {
@@ -16,7 +25,8 @@
     struct softc_entity_vtable_ *vtable_;
     const char *id;
 
-    PyObject *this;  // Reference to python pointer object to this entity
+    PyObject *this;       // Reference to Python pointer object to this entity
+    PyObject *user_data;  // Reference to user-provided Python object
 
     /* References to Python callables */
     PyObject *get_meta_name;
@@ -36,6 +46,9 @@
     size_t *dim_sizes;
   } softpy_entity_t;
 
+
+  /* Flag indicating that an error has occured */
+  static int softpy_entity_error = 0;
   
 
   /* Help function setting self->ndims and self->dims.  Returns
@@ -54,10 +67,8 @@
 
     for (self->ndims=0; self->ndims < n; self->ndims++) {
       if (!(label = PySequence_GetItem(seq, self->ndims))) goto fail;
-      if (!PyString_Check(label)) {
-	PyErr_SetString(PyExc_TypeError,"dimension labels must be strings");
-	goto fail;
-      }
+      if (!PyString_Check(label))
+	ENTITY_ERROR(PyExc_TypeError,"dimension labels must be strings");
       CK_ALLOC(self->dims[self->ndims] = strdup(PyString_AsString(label)));
       Py_DECREF(label);
       label = NULL;
@@ -65,6 +76,7 @@
     assert(self->ndims == n);
     return 0;
   fail:
+    softpy_entity_error = 1;
     if (label) Py_DECREF(label);
     return 1;
   }
@@ -78,41 +90,70 @@
 
     assert(PySequence_Check(seq));
     n = PySequence_Length(seq);
-    if ((!self->get_dimensions) && self->ndims != n) {
-	PyErr_SetString(PyExc_TypeError,
-			"length of sequence must match number of dimensions");
-	goto fail;
-    }
+    if ((!self->get_dimensions) && self->ndims != n)
+      ENTITY_ERROR(PyExc_TypeError, 
+	    "length of sequence must match number of dimensions");
     CK_ALLOC(self->dim_sizes = realloc(self->dim_sizes, n * sizeof(char *)));
     for (i=0; i<n; i++) {
       if (!(item = PySequence_GetItem(seq, i))) goto fail;
-      if (!PyInt_Check(item)) {
-	PyErr_SetString(PyExc_TypeError,"dimension sizes must be ints");
-	goto fail;
-      }
+      if (!PyInt_Check(item))
+	ENTITY_ERROR(PyExc_TypeError,"dimension sizes must be ints");
       self->dim_sizes[i] = PyInt_AsLong(item);
     }
     return 0;
   fail:
+    softpy_entity_error = 1;
     if (item) Py_DECREF(item);
     return 1;
   }
 
-
-
-  //const char *softpy_get_meta_name(const softc_entity_t *self) {
-  //  return self->meta_name;
-  //}
-  static const char *softpy_get_meta_name() {
-    return "XXX";
+  /* Help function. Calls `callable` and return the string returned by it */
+  const char *get_string(const softpy_entity_t *self, PyObject *callable, char *s)
+  {
+    int n;
+    const char *string;
+    PyObject *args=NULL, *pystring=NULL;
+    if (!(args = Py_BuildValue("(O)", self->this))) goto fail;
+    assert(PyTuple_Check(args));
+    if (!(pystring = PyObject_CallObject(callable, args))) goto fail;
+    string = PyString_AsString(pystring);
+    n = strlen(string);
+    CK_ALLOC(s = realloc(s, n + 1));
+    memcpy(s, string, n);
+    s[n] = '\0';
+    Py_DECREF(pystring);
+    Py_DECREF(args);
+    return s;
+ fail:
+    softpy_entity_error = 1;
+    if (pystring) Py_DECREF(pystring);
+    if (args) Py_DECREF(args);
+    return NULL;
   }
 
-  static const char *softpy_get_meta_version() {
-    return "XXX";
+
+  static const char *softpy_get_meta_name(const softc_entity_t *ptr) {
+    const softpy_entity_t *self = (const softpy_entity_t *)ptr;
+    if (self->get_meta_name)
+      return get_string(self, self->get_meta_name, (char *)self->name);
+    else
+      return self->name;
   }
 
-  static const char *softpy_get_meta_namespace() {
-    return "XXX";
+  static const char *softpy_get_meta_version(const softc_entity_t *ptr) {
+    const softpy_entity_t *self = (const softpy_entity_t *)ptr;
+    if (self->get_meta_version)
+      return get_string(self, self->get_meta_version, (char *)self->version);
+    else
+      return self->version;
+  }
+
+  static const char *softpy_get_meta_namespace(const softc_entity_t *ptr) {
+    const softpy_entity_t *self = (const softpy_entity_t *)ptr;
+    if (self->get_meta_namespace)
+      return get_string(self, self->get_meta_namespace, (char *)self->namespace);
+    else
+      return self->namespace;
   }
 
 
@@ -133,11 +174,9 @@
       assert(PyTuple_Check(args));
       
       if (!(seq = PyObject_CallObject(self->get_dimensions, args))) goto fail;
-      if (!PySequence_Check(seq)) {
-	PyErr_SetString(PyExc_TypeError, "callable must return a sequence "
-			"of dimension labels");
-	goto fail;
-      }
+      if (!PySequence_Check(seq))
+	ENTITY_ERROR(PyExc_TypeError, "callable must return a sequence "
+		     "of dimension labels");
       softpy_set_dimensions(self, seq);
       Py_DECREF(seq);
       Py_DECREF(args);
@@ -147,6 +186,7 @@
     return self->dims;
 
  fail:
+    softpy_entity_error = 1;
     if (seq) Py_DECREF(seq);
     if (args) Py_DECREF(args);
     return NULL;
@@ -169,10 +209,8 @@
 
       if (!(pysize = PyObject_CallObject(self->get_dimension_size, args))) 
 	goto fail;
-      if (!PyInt_Check(pysize)) {
-	PyErr_SetString(PyExc_TypeError, "callable must return an int");
-	goto fail;
-      }
+      if (!PyInt_Check(pysize))
+	ENTITY_ERROR(PyExc_TypeError, "callable must return an int");
       size = PyInt_AsLong(pysize);
       Py_DECREF(pysize);
       Py_DECREF(args);
@@ -188,6 +226,7 @@
     }
 
   fail:
+    softpy_entity_error = 1;
     if (pysize) Py_DECREF(pysize);
     if (args) Py_DECREF(args);
     return -1;
@@ -195,14 +234,15 @@
   
 
   static void softpy_store_or_load(const softc_entity_t *ptr,
-				   softc_datamodel_t *model, int storing) 
+				   softc_datamodel_t *datamodel, int storing) 
   {
     const softpy_entity_t *self = (const softpy_entity_t *)ptr;
     PyObject *args=NULL, *pymodel=NULL, *retval=NULL;
 
-    if ((pymodel = SWIG_NewPointerObj(SWIG_as_voidptr(model),
-				      SWIGTYPE_p_softc_datamodel_t, 0))) 
-      goto fail;
+    if (!(pymodel = SWIG_NewPointerObj(SWIG_as_voidptr(datamodel),
+				       SWIGTYPE_p_softc_datamodel_t, 0))) 
+      ENTITY_ERROR(PyExc_TypeError, 
+		   "Cannot create new reference to `datamodel`");
     if (!(args = Py_BuildValue("OO", self->this, pymodel))) goto fail;
     assert(PyTuple_Check(args));
 
@@ -211,38 +251,49 @@
     } else {
       if (!(retval = (PyObject_CallObject(self->load, args)))) goto fail;
     }
-    
+    Py_DECREF(retval);
+    Py_DECREF(args);
+    Py_DECREF(pymodel);
+    return;
+
   fail:
-    if (retval) Py_DECREF(retval);
+    softpy_entity_error = 1;
     if (pymodel) Py_DECREF(pymodel);
     if (args) Py_DECREF(args);
     if (retval) Py_DECREF(pymodel);
   }
 
 
-  static void softpy_store(const softc_entity_t *ptr, softc_datamodel_t *model)
+  static void softpy_store(const softc_entity_t *ptr, 
+			   softc_datamodel_t *datamodel)
   {
     const softpy_entity_t *self = (const softpy_entity_t *)ptr;
     assert(self->store);
-    if (!PyCallable_Check(self->store)) {
-      PyErr_SetString(PyExc_TypeError,"`store` must be callable");
-      return;
-    }
-    softpy_store_or_load(ptr, model, 1);
+    if (!PyCallable_Check(self->store))
+      ENTITY_ERROR(PyExc_TypeError,"`store` must be callable");
+    softpy_store_or_load(ptr, datamodel, 1);
+    return;
+  fail:
+    softpy_entity_error = 1;
   }
 
-  static void softpy_load(softc_entity_t *ptr, const softc_datamodel_t *model)
+  static void softpy_load(const softc_entity_t *ptr, 
+			  const softc_datamodel_t *datamodel)
   {
     const softpy_entity_t *self = (const softpy_entity_t *)ptr;
     assert(self->load);
-    if (!PyCallable_Check(self->load)) {
-      PyErr_SetString(PyExc_TypeError,"`load` must be callable");
-      return;
-    }
-    softpy_store_or_load(ptr, (softc_datamodel_t *)model, 0);
+    if (!PyCallable_Check(self->load))
+      ENTITY_ERROR(PyExc_TypeError,"`load` must be callable");
+    softpy_store_or_load(ptr, (softc_datamodel_t *)datamodel, 0);
+    return;
+  fail:
+    softpy_entity_error = 1;
   }
 
 
+  /*
+   * Functions for the extended API
+   */
   softc_entity_t *new_softc_entity_t(PyObject *meta_name,
 				     PyObject *meta_version,
 				     PyObject *meta_namespace,
@@ -250,7 +301,8 @@
 				     PyObject *dimension_size, 
 				     PyObject *store, 
 				     PyObject *load,
-				     const char *id) 
+				     const char *id,
+				     PyObject *user_data)
   {
     softpy_entity_t *self=NULL;
     CK_ALLOC(self = calloc(1, sizeof(softpy_entity_t)));
@@ -264,11 +316,15 @@
     self->vtable_->store = softpy_store;
     self->vtable_->load = softpy_load;
 
-    self->id = (id) ? id : softc_uuidgen();
+    self->id = (id) ? strdup(id) : softc_uuidgen();
 
     self->this = SWIG_NewPointerObj(SWIG_as_voidptr(self), 
     				    SWIGTYPE_p_softc_entity_t, 0);
-    
+    if (user_data) {
+      Py_INCREF(user_data);
+      self->user_data = user_data;
+    }
+
     if (PyCallable_Check(meta_name)) {
       self->get_meta_name = meta_name;
       Py_INCREF(meta_name);
@@ -296,9 +352,8 @@
     } else if (PySequence_Check(dimensions)) {
       if (softpy_set_dimensions(self, dimensions)) goto fail;
     } else {
-      PyErr_SetString(PyExc_TypeError, 
-		      "`dimensions` must be a callable or sequence");
-      goto fail;
+      ENTITY_ERROR(PyExc_TypeError, 
+		   "`dimensions` must be a callable or sequence");
     }
 
     if (PyCallable_Check(dimension_size)) {
@@ -307,30 +362,28 @@
     } else if (PySequence_Check(dimension_size)) {
       if (softpy_set_dimension_size(self, dimension_size)) goto fail;
     } else {
-      PyErr_SetString(PyExc_TypeError, 
+      ENTITY_ERROR(PyExc_TypeError, 
 		      "`dimension_size` must be a callable or sequence");
-      goto fail;
     }
 
     if (PyCallable_Check(store)) {
       self->store = store;
       Py_INCREF(store);
     } else {
-      PyErr_SetString(PyExc_TypeError, "`store` must be callable");
-      goto fail;
+      ENTITY_ERROR(PyExc_TypeError, "`store` must be callable");
     }
 
     if (PyCallable_Check(load)) {
       self->load = load;
       Py_INCREF(load);
     } else {
-      PyErr_SetString(PyExc_TypeError, "`load` must be callable");
-      goto fail;
+      ENTITY_ERROR(PyExc_TypeError, "`load` must be callable");
     }
 
     return (softc_entity_t *)self;
 
   fail:
+    softpy_entity_error = 1;
     if (self) {
       if (self->vtable_) free(self->vtable_);
       free(self);
@@ -353,6 +406,7 @@
     free(self->vtable_);
     free((char *)self->id);
     Py_DECREF(self->this);  
+    if (self->user_data) Py_DECREF(self->user_data);
 
     if (self->name) free((char *)self->name);
     if (self->version) free((char *)self->version);
@@ -368,36 +422,70 @@
   }
 
   static const char *softc_entity_t_id_get(softc_entity_t *self) {
-    return ((softpy_entity_t *)self)->id;
+    return softc_entity_get_id(self);
   }
 
   static const char *softc_entity_t_name_get(softc_entity_t *self) {
-    //return softc_entity_get_meta_name(self);
-    return ((softpy_entity_t *)self)->name;
+    return softc_entity_get_meta_name(self);
   }
 
   static const char *softc_entity_t_version_get(softc_entity_t *self) {
-    //return softc_entity_get_meta_version(self);
-    return ((softpy_entity_t *)self)->version;
+    return softc_entity_get_meta_version(self);
   }
 
   static const char *softc_entity_t_namespace_get(softc_entity_t *self) {
-    //return softc_entity_get_meta_namespace(self);
-    return ((softpy_entity_t *)self)->namespace;
+    return softc_entity_get_meta_namespace(self);
   }
 
-  // Wrapper for softc_entity_get_dimensions() that returns a NULL-terminates
-  // string list.
+  PyObject *softc_entity_t_user_data_get(softc_entity_t *self) {
+    PyObject *user_data = ((softpy_entity_t *)self)->user_data;
+    Py_INCREF(user_data);
+    return user_data;
+  }
+
+  /* Wrapper for softc_entity_get_dimensions() that returns a NULL-terminates
+   * string list. */
   const char **entity_get_dimensions(const softc_entity_t *ptr)
   {
     int i;
     size_t size;
-    const char **s = softc_entity_get_dimensions(ptr, &size);
-    const char **new = malloc((size + 1) * sizeof(char *));
-    for (i=0; i<size; i++) new[i] = strdup(s[i]);
+    const char **new=NULL, **labels=softc_entity_get_dimensions(ptr, &size);
+    if (!labels) goto fail;
+    CK_ALLOC(new = calloc(size + 1, sizeof(char *)));
+    for (i=0; i<size; i++) CK_ALLOC(new[i] = strdup(labels[i]));
+    //const char **new = malloc((size + 1) * sizeof(char *));
+    //for (i=0; i<size; i++) new[i] = strdup(s[i]);
     new[size] = NULL;
     return new;
+  fail:
+    softpy_entity_error = 1;
+    for (i=0; i<size; i++) if (new[i]) free((char *)new[i]);
+    if (new) free((char **)new);
+    return NULL;
   }
+
+  static const char **softc_entity_t_dimensions_get(softc_entity_t *self) {
+    return entity_get_dimensions(self);
+  }
+
+  /* A convinience function returning the dimension sizes as a newly
+   * allocated array (INT_LIST) of int's with size as the first element. */
+  static int *softc_entity_t_dimension_sizes_get(softc_entity_t *self) {
+    int i, *list=NULL;
+    size_t size;
+    const char **labels = softc_entity_get_dimensions(self, &size);
+    if (!labels) goto fail;
+    CK_ALLOC(list = calloc(size + 1, sizeof(int)));
+    list[0] = size;
+    for (i=0; i<size; i++) 
+      list[i+1] = softc_entity_get_dimension_size(self, labels[i]);
+    return list;
+  fail:
+    softpy_entity_error = 1;
+    if (list) free(list);
+    return NULL;
+  }
+
 
 %}
 
@@ -406,12 +494,40 @@
  * SWIG declarations
  */    
 
+%exception {
+  softpy_entity_error = 0;
+  $action
+  if (softpy_entity_error) SWIG_fail;
+}
 %exception softc_entity_t {
   $action
   if (!result) SWIG_fail;
 }
 
-/* Keep softc_entity_t opaque, also to python */
+%feature("docstring", "\
+Creates a SOFT entity.") softc_entity_t;
+%typemap("doc") (PyObject *) \
+  "$1_name : string | callable(self) -> string" 
+%typemap("doc") (PyObject *get_dimensions) \
+  "$1_name : sequence | callable(self) -> sequence\n" \
+  "        Dimension labels."
+%typemap("doc") (PyObject *get_dimension_size) \
+  "$1_name : sequence | callable(self, label) -> int\n" \
+  "        Dimension size(s)."
+%typemap("doc") (PyObject *store) \
+  "$1_name : callable(self, datamodel)\n" \
+  "        Stores entity data to `datamodel`."
+%typemap("doc") (PyObject *load) \
+  "$1_name : callable(self, datamodel)\n" \
+  "        Loads entity data from `datamodel`."
+%typemap("doc") (const char *id) \
+  "$1_name : None | string\n" \
+  "        Entity id.  Generated if None."
+%typemap("doc") (PyObject *user_data) \
+  "$1_name : any object\n" \
+  "        Optional user object typically containing the entity data."
+
+/* Keep softc_entity_t opaque, but add a set of specialised attributes. */
 typedef struct {
   %extend {
     softc_entity_t(PyObject *get_meta_name,
@@ -421,7 +537,8 @@ typedef struct {
 		   PyObject *get_dimension_size, 
 		   PyObject *store, 
 		   PyObject *load,
-		   const char *id=NULL);
+		   const char *id=NULL,
+		   PyObject *user_data=NULL);
     ~softc_entity_t();
 
     %immutable;
@@ -429,11 +546,15 @@ typedef struct {
     const char *name;
     const char *version;
     const char *namespace;
+    const char **dimensions;
+    INT_LIST dimension_sizes;
+    PyObject *user_data;
     %mutable;
   }
 } softc_entity_t;
 
 
+%typemap("doc") (PyObject *) ""
 
 
 //softc_entity_t *softc_entity_new(const char *uri);
@@ -445,9 +566,9 @@ const char  *softc_entity_get_meta_version(const softc_entity_t *self);
 int          softc_entity_get_dimension_size(const softc_entity_t *self, 
 					     const char *label);
 void         softc_entity_store(const softc_entity_t *self, 
-				softc_datamodel_t *model);
+				softc_datamodel_t *datamodel);
 void         softc_entity_load(softc_entity_t *self, 
-			       const softc_datamodel_t *model);
+			       const softc_datamodel_t *datamodel);
 
 /* Special handeling of softc_entity_get_dimensions() */
 const char **entity_get_dimensions(const softc_entity_t *self);

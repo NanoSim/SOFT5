@@ -30,6 +30,11 @@ softc_storage_strategy_t * softc_storage_get_storage_strategy(softc_storage_t *s
   return softc_storage_private_get_storage_strategy(storage);
 }
 
+void softc_storage_free_storage_strategy(softc_storage_strategy_t *strategy)
+{
+  softc_storage_private_free_storage_strategy(strategy);
+}
+
 /*
 void softc_storage_load (softc_entity_t *entity)
 {

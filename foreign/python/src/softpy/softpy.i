@@ -27,53 +27,66 @@ exposing the softc interface in a more pythonic way.  This includes:
 
 The entity() factory function
 -----------------------------
-Finally softpy also defines the entity() factory function, that
-creates an entity class based on a metadata description.  See the
-entity() docstring for more infomation.
+Softpy also provides an entity() factory function, that creates an
+entity class based on a metadata description.  
+
+    # Create a new MyEntity class
+    >>> MyEntity = softpy.entity(metadata)
+    
+    # Load an instance of this class from a storage
+    >>> m = MyEntity(uuid='39fad2c3-edd9-408d-93a0-924e4817a35e',
+    ...              driver='hdf5',
+    ...              uri='mydatafile.h5')
+
+    # Alternatively, you can create an uninitialized instance
+    >>> m2 = MyEntity(dimensions=(3, ))
+    >>> m2.myvalue = 42
+
+See the entity() docstring for more infomation.
 
 
 User-defined entities
 ---------------------
-You can also convert your own classes to entities that you can work
-with through the layer of convenience classes described above, by
-ensuring they have the following methods:
+You can also turn your own classes into entities by adding a
+``__soft_entity__`` attribute created with softpy.entity_t().
+Assume you have the following class:
 
-    get_id()
-        Returns the uuid of the current instance.  A new uuid can
-        be generated with softpy.uuidgen().
+    >>> class Person(object):
+    ...     def __init__(self, name, age, distances):
+    ...         self.name = name
+    ...         self.age = age
+    ...         self.distances = distances  # km walked the last n days
 
-    get_meta_type()
-        ???
+This can be turned into a entity by adding a __soft_entity__ attribute
+and provide store() and load() methods.  Your updated class might look
+like this:
 
-    get_meta_name()
-        Returns the entity name.
+    >>> class Person(object):
+    ...     def __init__(self, name, age, distances):
+    ...         self.name = name
+    ...         self.age = age
+    ...         self.distances = distances  # km walked the last n days
+    ...         self.__soft_entity__ = softpy.entity_t(
+    ...             get_meta_name='Person',
+    ...             get_meta_version='0.1',
+    ...             get_meta_namespace='http://sintef.no/meta/soft',
+    ...             get_dimensions=['ndays'],
+    ...             get_dimension_size=[len(distances)],
+    ...             load=self.load,
+    ...             store=self.store)
+    ...
+    ...     def store(self, e, datamodel):
+    ...         softpy.datamodel_append_string(datamodel, 'name', self.name)
+    ...         softpy.datamodel_append_int32(datamodel, 'age', self.age)
+    ...         softpy.datamodel_append_array_double(
+    ...             datamodel, 'distances', self.distances)
+    ...
+    ...     def load(self, e, datamodel):
+    ...         self.name = softpy.datamodel_get_string(datamodel, 'name')
+    ...         self.age = softpy.datamodel_get_string(datamodel, 'age')
+    ...         self.distances = softpy.datamodel_get_string(
+    ...             datamodel, 'distances')
 
-    get_meta_version()
-        Returns the entity version.
-
-    get_meta_namespace()
-        Returns the entity namespace.
-
-    get_dimensions()
-        Returns a list with dimension labels.
-
-    get_dimension_size(label)
-        Returns the size of dimension `label` for this instance.
-
-    store(datamodel)
-        Stores all property values to `datamodel` by using the
-        softpy.datamodel_append_*() functions.  It is important that
-        this is consistent with the load() method.
-
-    load(datamodel)
-        Sets all property values from `datamodel` by using the
-        softpy.datamodel_get_*() functions.  It is important that this
-        is consistent with the store() method.
-
-The convinient classes also allows that you prefix these methods with
-an underscore.  The reason for this is that the entities created with the
-entity() factory prefix all methods with an underscore in order to avoid
-conflicts with property names.
 """
 %enddef
 
@@ -154,12 +167,14 @@ conflicts with property names.
 %include "numpy.i"  // slightly changed to fit out needs, search for "XXX"
 
 %{
-/* typedef bool status_t; */
-typedef char const_char;
+  typedef bool status_t;
+  typedef char const_char;
+  typedef int * INT_LIST;
 %}
 
 
-// Converts Python sequence of strings to (char **, size_t)
+/* Converts Python sequence of strings to (char **, size_t) */
+%typemap("doc") (char **STRING_LIST, size_t LEN) "Sequence of strings."
 %typemap(in,numinputs=1) (char **STRING_LIST, size_t LEN) {
   // typemap(in,numinputs=1) (char **STRING_LIST, size_t LEN)
   if (PySequence_Check($input)) {
@@ -185,7 +200,8 @@ typedef char const_char;
   free((char *) $1);
 }
 
-// Converts (char **) return value to a python list of strings
+/* Converts (char **) return value to a python list of strings */
+%typemap("doc") char ** "List of strings."
 %typemap(out) char ** {
   // typemap(out) char **
   char **p;
@@ -198,7 +214,8 @@ typedef char const_char;
   free($1);
 }
 
-// Converts (const char **) return value to a python list of strings
+/* Converts (const char **) return value to a python list of strings */
+%typemap("doc") const_char ** "List of strings."
 %typemap(out) const_char ** {
   // typemap(out) const_char **
   char **p;
@@ -209,7 +226,8 @@ typedef char const_char;
   }
 }
 
-// Converts (char ***, size_t) to sqeuence of strings
+/* Converts (char ***, size_t) to sqeuence of strings */
+%typemap("doc") (char ***OUT_STRING_LIST, size_t *LEN) "List of strings."
 %typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN) (char **s, size_t len) {
   // typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN)
   $1 = &s;
@@ -226,8 +244,23 @@ typedef char const_char;
   free(*$1);
 }
 
-// Convert false return value to RuntimeError exception
-// Consider to replace a general bool with a ``typedef bool status_t;``
+/* Converts a return integer array (with size given by first element)
+ * to a python list of ints */
+%typemap("doc") INT_LIST "List of integers."
+%typemap(out) INT_LIST {
+  // typemap(out) INT_LIST
+  int i, size;
+  if (!$1) SWIG_fail;
+  size = $1[0];
+  $result = PyList_New(0);
+  for (i=1; i<=size; i++)
+    PyList_Append($result, PyInt_FromLong($1[i]));
+  free($1);
+}
+
+
+/* Convert false return value to RuntimeError exception
+ * Consider to replace a general bool with a ``typedef bool status_t;`` */
 %typemap(out) bool {
   // typemap(out) bool
   if (!$1) SWIG_exception(SWIG_RuntimeError,
@@ -243,7 +276,7 @@ typedef char const_char;
  **********************************************/
 
 /* Remove the softc_ prefix from the python bindings */
-%feature("autodoc","1");
+%feature("autodoc","2");
 %feature("keyword");
 %rename("%(strip:[softc_])s") "";
 %include <stdint.i>
@@ -287,12 +320,15 @@ void              softc_storage_free (softc_storage_t *);
 void              softc_storage_load (softc_storage_t *, void *entity);
 void              softc_storage_save (softc_storage_t *, void *entity);
 softc_storage_strategy_t * softc_storage_get_storage_strategy(softc_storage_t *);
+void softc_storage_free_storage_strategy(softc_storage_strategy_t *strategy);
+
 
 
 /*
  * storage strategy
  */
 softc_datamodel_t * softc_storage_strategy_get_datamodel(softc_storage_strategy_t *);
+void softc_storage_strategy_free_datamodel(softc_datamodel_t *datamodel);
 void                softc_storage_strategy_store(softc_storage_strategy_t *, const softc_datamodel_t *);
 void                softc_storage_strategy_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);
 void                softc_storage_strategy_start_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);

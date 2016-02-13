@@ -423,10 +423,10 @@ bool softc_datamodel_private_get_string_list (const softc_datamodel_t *model, co
     auto isOk = model->ref->getStringArray(key, source);
     if (isOk) {
       auto siz = source.size();
-      *value = new char*[siz];
+      *value = (char **)malloc(siz*sizeof(char *));
       for (size_t i = 0; i < siz; ++i) {
-	(*value)[i] = new char[source[i].size()+1];
-	strncpy((*value)[i], source[i].c_str(), source[i].size());
+	(*value)[i] = (char *)malloc((source[i].size() + 1)*sizeof(char));
+	memcpy((*value)[i], source[i].c_str(), source[i].size());
 	(*value)[i][source[i].size()] = '\0';	
       }      
       *n_elements = source.size();

@@ -32,68 +32,6 @@ class Uninitialized(object):
     pass
 
 
-
-#def create_softc_entity(obj, name, version, namespace, dimensions, 
-#                        dimension_size, store, load):
-#    """Returns a new C-level entity.
-#
-#    The main purpose of fhis function is to turn normal Python-objects into
-#    entities.  This is done by adding a __softc_entity__ attribute to you
-#    object set to the return value of this function.  Hence
-#
-#        obj.__softc_entity__ = create_softc_entity(obj, name=...)
-#
-#    will turn `obj` into an entity.
-#    """
-#    e = softpy.entity_t(name, version, namespace, dimensions,
-#                        dimension_size, store, load)
-#    e.set_self(obj)
-#    return e
-
-
-#class Entity(object):
-#    """Class representing a C entity at Python level.
-#    """
-#    def __init__(self, name, version, namespace, dimensions, dimension_size, 
-#                 load, store):
-#        self.this = softpy.entity_t(name, version, namespace, dimensions,
-#                                    dimension_size, load, store)
-#        self.this.set_self(self)
-#
-#    id = property(
-#        lambda self: softpy.entity_get_id(self.this),
-#        doc='Entity id.')
-#    meta_name = property(
-#        lambda self: softpy.entity_get_meta_name(self.this),
-#        doc='Entity name.')
-#    meta_version = property(
-#        lambda self: softpy.entity_get_meta_version(self.this),
-#        doc='Entity version.')
-#    meta_namespace = property(
-#        lambda self: softpy.entity_get_meta_namespace(self.this),
-#        doc='Entity namespace.')
-#    dimensions = property(
-#        lambda self: softpy.entity_get_dimensions(self.this),
-#        doc='List of dimension labels.')
-#    dimension_sizes = property(
-#        lambda self: [softpy.entity_get_dimension_size(self.this, label)
-#                      for label in softpy.entity_get_dimensions(self.this)],
-#        doc='List of dimension sizes.')
-#    
-#    def get_dimension_size(self, label):
-#        """Returns the size of dimension with this label."""
-#        return softpy.entity_get_dimension_size(self.this, label)
-#
-#    def store(self, datamodel):
-#        """Stores data into datamodel."""
-#        softpy.entity_store(self.this, datamodel)
-#
-#    def load(self, datamodel):
-#        """Reads data from datamodel."""
-#        softpy.entity_load(self.this, datamodel)
-#
-
-
     
 class Storage(object):
     """Class for connecting to a storage.
@@ -121,31 +59,36 @@ class Storage(object):
         """Saves entity in this storage."""
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
+        e = get_c_entity(entity)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asBytes(entity._id))
-        datamodel_set_meta_name(datamodel, asBytes(entity._name))
-        datamodel_set_meta_version(datamodel, asBytes(entity._version))
-        datamodel_set_meta_namespace(datamodel, asBytes(entity._namespace))
-        entity._store(datamodel)   # Ask the entity to fill out the datamodel
+        datamodel_set_id(datamodel, asBytes(e.id))
+        datamodel_set_meta_name(datamodel, asBytes(e.name))
+        datamodel_set_meta_version(datamodel, asBytes(e.version))
+        datamodel_set_meta_namespace(datamodel, asBytes(e.namespace))
+        entity_store(e, datamodel)   # Ask the entity to fill out the datamodel
         storage_strategy_store(self.strategy, datamodel)
+        storage_strategy_free_datamodel(datamodel)
 
     def load(self, entity):
         """Fills `entity` with data loaded from this storage."""
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
+        e = get_c_entity(entity)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asBytes(entity._id))
-        datamodel_set_meta_name(datamodel, asBytes(entity._name))
-        datamodel_set_meta_version(datamodel, asBytes(entity._version))
-        datamodel_set_meta_namespace(datamodel, asBytes(entity._namespace))
+        datamodel_set_id(datamodel, asBytes(e.id))
+        datamodel_set_meta_name(datamodel, asBytes(e.name))
+        datamodel_set_meta_version(datamodel, asBytes(e.version))
+        datamodel_set_meta_namespace(datamodel, asBytes(e.namespace))
         storage_strategy_start_retrieve(self.strategy, datamodel)
-        entity._load(datamodel)   # Ask the entity to fill out itself
+        entity_load(e, datamodel)  # Ask the entity to fill out itself
         storage_strategy_end_retrieve(self.strategy, datamodel)
+        storage_strategy_free_datamodel(datamodel)
 
     def close(self):
         """Closes current storage."""
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
+        storage_free_storage_strategy(self.strategy)
         storage_free(self.storage)
         self._closed = True
 
@@ -169,6 +112,17 @@ class Storage(object):
                 self.driver, self.uri, self.options)
         else:
             return "Storage(%r, %r)" % (self.driver, self.uri)
+
+
+def get_c_entity(entity):
+    """Returns a reference to the underlying C-level entity_t."""
+    if hasattr(entity, '__soft_entity__'):
+        e = entity.__soft_entity__
+    else:
+        e = entity
+    if not isinstance(e, entity_t):
+        raise TypeError('Not a proper entity')
+    return e
 
 
 def arithmetic_eval(s):
@@ -296,18 +250,17 @@ class BaseFactoryEntity(object):
         options : None | string
             Additional options passed to the driver.
         """
-        self._instancedata = {}
-        self._instancedata['id'] = uuidgen() if uuid is None else uuid
+        meta = self._meta
+        dims = [str(d['name']) for d in meta['dimensions']]
 
         if dimensions:
-            if len(dimensions) != len(self._meta['dimensions']):
+            if len(dimensions) != len(dims):
                 raise TypeError('Entity "%s" has %d dimensions, %d given' % (
-                    self._name, len(self._dimensions), len(dimensions)))
+                    self._name, len(dims), len(dimensions)))
             if hasattr(dimensions, 'keys'):
-                self._instancedata['dimensions'] = [
-                    dimensions[label] for label in self._dimensions]
+                dim_sizes = [dimensions[label] for label in dims]
             else:
-                self._instancedata['dimensions'] = [int(d) for d in dimensions]
+                dim_sizes = [int(size) for size in dimensions]
             for key in self._keys():
                 setattr(self, key, Uninitialized)
 
@@ -318,30 +271,54 @@ class BaseFactoryEntity(object):
             if driver is None:
                 raise TypeError('`driver` must be provided when initialising '
                                 'an entity from storage')
+            # We should be able to queue the storage about the size of 
+            # each dimensions...
+            # A workaround is to create a temporary entity and try to extract
+            # the dimension sizes from the loaded data...
+            def get_dimension_size(e, label):
+                raise RuntimeError('dimension sizes are not available...')
+            self.__soft_entity__ = entity_t(
+                get_meta_name=meta['name'],
+                get_meta_version=meta['version'],
+                get_meta_namespace=meta['namespace'],
+                get_dimensions=dims,
+                get_dimension_size=get_dimension_size,
+                load=self._load,
+                store=self._store,
+                id=uuid,
+                user_data=self)
             with Storage(driver, uri, options) as s:
                 s.load(self)
             if dimensions is None:
-                dims = {}
+                sizes = {}
                 for label in self._get_dimensions():
                     for key in self._keys():
                         value = getattr(self, key)
                         for i, name in enumerate(self._get_property_dims(key)):
                             if name == label:
                                 if isinstance(value, np.ndarray):
-                                    dims[label] = value.shape[i]
+                                    sizes[label] = value.shape[i]
                                 elif i == 0:
-                                    dims[label] = len(value)
+                                    sizes[label] = len(value)
                             break
-                    if not label in dims:
+                    if not label in sizes:
                         raise SoftMissingDimensionsError(
                             'cannot determine dimension with label "%s"' % 
                             label)
-                self._instancedata['dimensions'] = [
-                    dims[label] for label in self._get_dimensions()]
+                dim_sizes = [sizes[label] for label in dims]
 
-        assert (len(self._instancedata['dimensions']) == len(
-            self._get_dimensions()))
+        assert len(dim_sizes) == len(dims)
 
+        self.__soft_entity__ = entity_t(
+            get_meta_name=meta['name'],
+            get_meta_version=meta['version'],
+            get_meta_namespace=meta['namespace'],
+            get_dimensions=dims,
+            get_dimension_size=dim_sizes,
+            load=lambda e, model: self._load(model),
+            store=lambda e, model: self._store(model),
+            id=uuid,
+            user_data=self)
 
     def __str__(self):
         s = []
@@ -391,10 +368,12 @@ class BaseFactoryEntity(object):
     _dimensions = classproperty(
         classmethod(lambda cls: cls._get_dimensions()),
                     doc='List with dimension names.')
-    _dimension_sizes = property(lambda self: self._instancedata['dimensions'],
-                                doc='Dict with dimension lengths.')
-    _id = property(lambda cls: cls._instancedata['id'],
-                   doc='UUID of Entity instance.')
+    _dimension_sizes = property(
+        lambda self: self.__soft_entity__.dimension_sizes,
+        doc='List with dimension sizes.')
+    _id = property(
+        lambda self: self.__soft_entity__.id,
+        doc='UUID of Entity instance.')
 
     @classmethod
     def _keys(cls):
@@ -424,7 +403,8 @@ class BaseFactoryEntity(object):
     def _get_property_dim_sizes(self, name):
         """Returns a list with the dimensions of property `name` evaluated
         to integers."""
-        sizes = zip(self._get_dimensions(), self._instancedata['dimensions'])
+        e = self.__soft_entity__
+        sizes = zip(e.dimensions, e.dimension_sizes)
         dims = []
         for label in _get_prop_data(self, asBytes(name), 'dims', []):
             for dname, dsize in sizes:
@@ -463,8 +443,7 @@ class BaseFactoryEntity(object):
 
     def _get_dimension_size(self, label):
         """Returns the length of dimension `label`."""
-        i = self._get_dimensions().index(label)
-        return self._instancedata['dimensions'][i]
+        return entity_get_dimension_size(self.__soft_entity__, label)
 
     def _store(self, datamodel):
         """Stores property values to `datamodel`, raising SoftUnitializedError
@@ -492,7 +471,7 @@ class BaseFactoryEntity(object):
                     vtype, len(dims)))
             setter(datamodel, asBytes(key), value)
 
-    def _load(self, datamodel):
+    def _load(self, e, datamodel):
         """Loads property values from `datamodel` into self.  Normally you
         would not call this function directly, but instead through
         Storage.load()."""
@@ -523,13 +502,9 @@ def entity(metadata):
         meta = json.load(metadata)
     else:
         meta = json.loads(metadata)
-    instancedata = {
-        'id': None,  # is set in __init__()
-        'dimensions': [0] * len(meta['dimensions']),
-    }
-    attr = dict(_meta=meta, _instancedata=None)
+    attr = dict(_meta=meta)
     return type(str(meta['name']), (BaseFactoryEntity,), attr)
 
 
-    
+   
 %}

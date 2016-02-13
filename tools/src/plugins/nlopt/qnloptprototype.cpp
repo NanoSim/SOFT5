@@ -26,7 +26,7 @@ double testF (QScriptValue callback, QScriptValue act, unsigned n, const double 
 {
   QTextStream (stdout) << "testF called: n = " << n << '\n';
   QScriptValueList args;
-  for (int i = 0; i < n; ++i) {
+  for (unsigned i = 0; i < n; ++i) {
     args << arr[i];
   }
   auto ret = callback.call(act, args);

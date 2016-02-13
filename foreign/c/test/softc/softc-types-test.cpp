@@ -33,7 +33,7 @@ TEST_F(SoftC_TypesTest, double_array_value)
   const double compare = 1.23;
   softc_double_array_resize_val(da, 10, compare);
   
-  for (int i = 0; i < softc_double_array_size(da); ++i) {
+  for (size_t i = 0; i < softc_double_array_size(da); ++i) {
     ASSERT_EQ(softc_double_array_at(da, i), compare);
   }
   softc_double_array_free(&da);
