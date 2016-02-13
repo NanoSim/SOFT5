@@ -10,15 +10,15 @@ SOFTC_BEGIN_DECLS
 typedef struct _softc_entity_t softc_entity_t;
 typedef struct softc_entity_vtable_
 {
-  void (*store)(const softc_entity_t *self, softc_datamodel_t *data_model);
-  void (*load) (softc_entity_t *self, const softc_datamodel_t *data_model);
+  void (*store)(const softc_entity_t *self, softc_datamodel_t *model);
+  void (*load) (const softc_entity_t *self, const softc_datamodel_t *model);
   const char **(*get_dimensions)(const softc_entity_t *self, size_t *size);
   int (*get_dimension_size)(const softc_entity_t *self, const char *label);
  
-  const char * (*get_meta_type)();
-  const char * (*get_meta_name)();
-  const char * (*get_meta_namespace)();
-  const char * (*get_meta_version)();  
+  const char * (*get_meta_type)(const softc_entity_t *self);
+  const char * (*get_meta_name)(const softc_entity_t *self);
+  const char * (*get_meta_namespace)(const softc_entity_t *self);
+  const char * (*get_meta_version)(const softc_entity_t *self);
 } softc_entity_vtable;
 
 
@@ -30,16 +30,16 @@ typedef struct softc_entity_vtable_
   static const softc_entity_vtable SOFTC_ENTITY_VTABLE_NAME(name)[] = { \
     {store, load, get_dimensions, get_dimension_size, get_meta_type, get_meta_name, get_meta_namespace, get_meta_version}}
     
-const char *  softc_entity_get_id (const void *self);
-void *        softc_entity_new (const char *uri);
-const char *  softc_entity_get_meta_type(const void *self);
-const char *  softc_entity_get_meta_name(const void *self);
-const char *  softc_entity_get_meta_namespace(const void *self);
-const char *  softc_entity_get_meta_version(const void *self);  
-const char ** softc_entity_get_dimensions (const void *self, size_t *size);
-int           softc_entity_get_dimension_size (const void *self, const char *label);
-void          softc_entity_store  (const void *self, softc_datamodel_t *data_model);
-void          softc_entity_load   (void *self, const softc_datamodel_t *data_model);
+softc_entity_t *softc_entity_new(const char *uri);
+const char *    softc_entity_get_id(const softc_entity_t *self);
+const char *    softc_entity_get_meta_type(const softc_entity_t *self);
+const char *    softc_entity_get_meta_name(const softc_entity_t *self);
+const char *    softc_entity_get_meta_namespace(const softc_entity_t *self);
+const char *    softc_entity_get_meta_version(const softc_entity_t *self);
+const char **   softc_entity_get_dimensions (const softc_entity_t *self, size_t *size);
+int             softc_entity_get_dimension_size(const softc_entity_t *self, const char *label);
+void            softc_entity_store(const softc_entity_t *self, softc_datamodel_t *model);
+void            softc_entity_load(const softc_entity_t *self, const softc_datamodel_t *model);
 
 SOFTC_END_DECLS
 

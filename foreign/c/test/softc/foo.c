@@ -27,7 +27,7 @@ static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
   printf("storing...\n");
 }
 
-static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
+static void load (const softc_entity_t *ptr, const softc_datamodel_t *data_model)
 {
   foo_s *self = (foo_s*)ptr;
   size_t new_i_size;
@@ -38,7 +38,7 @@ static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
 
 static const char ** get_dimensions(const softc_entity_t *ptr, size_t *size)
 {
-  const foo_s *self = (const foo_s*)ptr;
+  //const foo_s *self = (const foo_s*)ptr;
   return NULL;
 }
 
@@ -48,22 +48,22 @@ static int get_dimension_size(const softc_entity_t *ptr, const char *label)
   return self->dims.i_size;
 }
 
-static const char * get_meta_type()
+static const char * get_meta_type(const softc_entity_t *self)
 {
   return FOO_META_TYPE;
 }
 
-static const char * get_meta_name()
+static const char * get_meta_name(const softc_entity_t *self)
 {
   return FOO_META_NAME;
 }
 
-static const char * get_meta_namespace()
+static const char * get_meta_namespace(const softc_entity_t *self)
 {
   return FOO_META_NAMESPACE;
 }
 
-static const char * get_meta_version()
+static const char * get_meta_version(const softc_entity_t *self)
 {
   return FOO_META_VERSION;
 }
