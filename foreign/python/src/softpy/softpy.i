@@ -155,7 +155,7 @@ conflicts with property names.
 
 
 // Converts Python sequence of strings to (char **, size_t)
-%typemap(in,numinputs=1) (char **STRING_ARRAY, size_t LEN) {
+%typemap(in,numinputs=1) (char **STRING_LIST, size_t LEN) {
   if (PySequence_Check($input)) {
     $2 = PySequence_Length($input);
     int i = 0;
@@ -175,13 +175,14 @@ conflicts with property names.
     return NULL;
   }
 }
-%typemap(freearg) (char **STRING_ARRAY, size_t LEN) {
+%typemap(freearg) (char **STRING_LIST, size_t LEN) {
   free((char *) $1);
 }
 
 // Converts (char **) return value to a python list of strings
 %typemap(out) char ** {
   char **p;
+  if (!$1) SWIG_fail;
   $result = PyList_New(0);
   for (p=$1; *p; p++) {
     PyList_Append($result, PyString_FromString(*p));
@@ -191,29 +192,28 @@ conflicts with property names.
 }
 
 // Converts (char ***, size_t) to sqeuence of strings
-%typemap(in,numinputs=0) (char ***OUT_STRING_ARRAY, size_t *LEN) (char **s, size_t len) {
+%typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN) (char **s, size_t len) {
   $1 = &s;
   $2 = &len;
 }
-%typemap(argout) (char ***OUT_STRING_ARRAY, size_t *LEN) {
+%typemap(argout) (char ***OUT_STRING_LIST, size_t *LEN) {
   int i;
   $result = PyList_New(0);
   for (i=0; i<*$2; i++) {
     PyList_Append($result, PyString_FromString((*$1)[i]));
     free((*$1)[i]);
   }
-  free($1);
+  free(*$1);
 }
 
 // Convert false return value to RuntimeError exception
+// Consider to replace a general bool with a ``typedef bool status_t;``
 %typemap(out) bool %{
-  /*
   if (!$1) SWIG_exception(SWIG_RuntimeError,
 			  "false return value in softc_$symname()");
   $result = Py_None;
   Py_INCREF(Py_None); // Py_None is a singleton so increment its reference if used.
-  */
-  if (!$1) fprintf(stderr, "Warning: False return value in softc_$symname()\n");
+  //if (!$1) fprintf(stderr, "Warning: False return value in softc_$symname()\n");
   $result = PyBool_FromLong($1);
 %}
 
@@ -251,8 +251,6 @@ char  *softc_uuidgen();
 /*
  * datamodel
  */
-
-
 %typemap(argout,
          fragment="NumPy_Backward_Compatibility,NumPy_Utilities")
   (DATA_TYPE** ARGOUTVIEWM_ARRAY1, DIM_TYPE* DIM1)
@@ -287,7 +285,7 @@ char  *softc_uuidgen();
 %numpy_typemaps(double,        NPY_DOUBLE, size_t)
 
 // Wrap softc_datamodel_append_*()
-%apply (char      **STRING_ARRAY, size_t LEN)                            {(const char    **value, size_t n_elements)};
+%apply (char       **STRING_LIST, size_t LEN)                            {(const char    **value, size_t n_elements)};
 %apply (unsigned char *IN_ARRAY1, size_t DIM1)                           {(unsigned char  *value, size_t length)};
 %apply (int32_t       *IN_ARRAY1, size_t DIM1)                           {(const int32_t  *value, size_t size)};
 %apply (double        *IN_ARRAY1, size_t DIM1)                           {(const double   *value, size_t size)};
@@ -356,7 +354,7 @@ bool softc_datamodel_append_array_double   (softc_datamodel_t *model, const char
 %typemap(argout)         bool *value                      { $result = PyBool_FromLong(*$1); };
 
 
-%apply (char           ***OUT_STRING_ARRAY, size_t *LEN)  {(char         ***value, size_t *n_elements)};
+%apply (char            ***OUT_STRING_LIST, size_t *LEN)  {(char         ***value, size_t *n_elements)};
 %apply (unsigned char **ARGOUTVIEWM_ARRAY1, size_t *DIM1) {(unsigned char **value, size_t *size)};
 %apply (int32_t       **ARGOUTVIEWM_ARRAY1, size_t *DIM1) {(int32_t       **value, size_t *size)};
 %apply (double        **ARGOUTVIEWM_ARRAY1, size_t *DIM1) {(double        **value, size_t *size)};
@@ -399,6 +397,7 @@ bool softc_datamodel_get_array_double    (const softc_datamodel_t *model, const 
 //%clear (double ****value, size_t *size_i, size_t *size_j, size_t *size_k);
 
 
+
 bool softc_datamodel_set_id              (softc_datamodel_t* model, const char *id);
 bool softc_datamodel_set_meta_name       (softc_datamodel_t* model, const char *meta_name);
 bool softc_datamodel_set_meta_version    (softc_datamodel_t* model, const char *meta_version);
@@ -434,16 +433,187 @@ void                softc_storage_strategy_end_retrieve(softc_storage_strategy_t
 /*
  * entity
  */
-//void *        softc_entity_new (const char *uri);
-//const char *  softc_entity_get_id (const void *self);
-//const char *  softc_entity_get_meta_type(const void *self);
-//const char *  softc_entity_get_meta_name(const void *self);
-//const char *  softc_entity_get_meta_namespace(const void *self);
-//const char *  softc_entity_get_meta_version(const void *self);  
-//const char ** softc_entity_get_dimensions (const void *self, size_t *size);
-//int           softc_entity_get_dimension_size (const void *self, const char *label);
-//void          softc_entity_store  (const void *self, softc_datamodel_t *data_model);
-//void          softc_entity_load   (void *self, const softc_datamodel_t *data_model);
+/* Questions:
+ *   - What is the `size` argument of get_dimensions() used to? Should
+ *     it not be removed?
+ */
+
+%{
+  /* Mirror the opaque definition in softc-entity.c */
+  typedef struct _softpy_entity_t {
+
+    /* Header common to all softc-entity_t, see softc-entity.c */
+    struct softc_entity_vtable_ *vtable_;
+    const char *id;
+
+    PyObject *this;  // Reference to python object for this entity
+
+    /* Python callables */
+    PyObject *get_meta_name;
+    PyObject *get_meta_version;
+    PyObject *get_meta_namespace;
+    PyObject *get_dimensions;
+    PyObject *get_dimension_size;
+    PyObject *store;
+    PyObject *load;
+
+    /* Entity data*/
+    const char *name;
+    const char *version;
+    const char *namespace;
+    size_t ndims;
+    const char **dims;
+    size_t *dim_sizes;
+  } softpy_entity_t;
+  
+  //const char *softpy_get_meta_name(const softc_entity_t *self) {
+  //  return self->meta_name;
+  //}
+  static const char *softpy_get_meta_name() {
+    return "XXX";
+  }
+  static const char **softpy_get_dimensions(const softc_entity_t *ptr, 
+					    size_t *size) {
+    int i, n=0;
+    const softpy_entity_t *self = (const softpy_entity_t *)ptr;
+    PyObject *args=NULL, *list=NULL, *label=NULL;
+    char **s = NULL;
+    //if (!self->dims) {
+    //}
+    //*size = self->dim_size;
+    if (!PyCallable_Check(self->get_dimensions)) {
+      PyErr_SetString(PyExc_TypeError,"object is not callable");
+      return NULL;
+    }
+
+    if (!(args = Py_BuildValue("(O)", self->this))) goto fail;
+    assert(PyTuple_Check(args));
+    if (!(list = PyObject_CallObject(self->get_dimensions, args))) goto fail;
+    if (!PySequence_Check(list)) {
+      PyErr_SetString(PyExc_TypeError, "callable must return a sequence "
+		      "of dimension labels");
+      goto fail;
+    }
+    n = PySequence_Length(list);
+    s = calloc(n, sizeof(char *));
+    for (i=0; i<n; i++) {
+      if (!(label = PySequence_GetItem(list, i))) goto fail;
+      if (!PyString_Check(label)) {
+	PyErr_SetString(PyExc_TypeError,"dimension labels must be strings");
+	goto fail;
+      }
+      s[i] = strdup(PyString_AsString(label));
+      Py_DECREF(label);
+      label = NULL;
+    }
+    Py_DECREF(list);
+    Py_DECREF(args);
+    return (const char **)s;
+  fail:
+    if (s) {
+      for (i=0; i<n; i++) if (s[i]) free(s[i]);
+      free(s);
+    }
+    if (label) Py_DECREF(label);
+    if (list) Py_DECREF(list);
+    if (args) Py_DECREF(args);
+    return NULL;
+  }
+  static int softpy_get_dimension_size(const softc_entity_t *ptr, 
+				       const char *label) {
+    return 3;
+  }
+  static void softpy_store(const softc_entity_t *ptr,
+			   softc_datamodel_t *model) {
+    const softpy_entity_t *self = (const softpy_entity_t *)ptr;
+    assert(self->store);
+    if (!PyCallable_Check(self->store)) {
+      PyErr_SetString(PyExc_TypeError,"`store` must be callable");
+      return NULL;
+    }
+    
+    if (!(list = PyObject_CallObject(self->get_dimensions, args))) goto fail;    
+  }
+  
+%}
+
+/* Keep softc_entity_t opaque, also to python */
+typedef struct {
+} softc_entity_t;
+
+
+%extend softc_entity_t {
+  void set_self(PyObject *this) {
+    ((softpy_entity_t *)$self)->this = this;
+  }
+  softc_entity_t(PyObject *get_meta_name,
+		 PyObject *get_meta_version,
+		 PyObject *get_meta_namespace,
+		 PyObject *get_dimensions, 
+		 PyObject *get_dimension_size, 
+		 PyObject *store, 
+		 PyObject *load) {
+    softpy_entity_t *self = calloc(1, sizeof(softpy_entity_t));
+    self->vtable_ = calloc(1, sizeof(softc_entity_vtable));
+    self->vtable_->get_meta_name = softpy_get_meta_name;
+    //self->vtable_->get_meta_version = softpy_get_meta_version;
+    //self->vtable_->get_meta_namespace = softpy_get_meta_namespace;
+    self->vtable_->get_dimensions = softpy_get_dimensions;
+    self->vtable_->get_dimension_size = softpy_get_dimension_size;
+    //self->vtable_->store = softpy_store;
+    //self->vtable_->load = softpy_load;
+    self->id = softc_uuidgen();
+    Py_INCREF(get_meta_name);
+    Py_INCREF(get_meta_version);
+    Py_INCREF(get_meta_namespace);
+    Py_INCREF(get_dimensions);
+    Py_INCREF(get_dimension_size);
+    Py_INCREF(store);
+    Py_INCREF(load);
+    self->get_meta_name = get_meta_name;
+    self->get_meta_version = get_meta_version;
+    self->get_meta_namespace = get_meta_namespace;
+    self->get_dimensions = get_dimensions;
+    self->get_dimension_size = get_dimension_size;
+    self->store = store;
+    self->load = load;
+    return (softc_entity_t *)self;
+  }
+  ~softc_entity_t() {
+    softpy_entity_t *e = (softpy_entity_t *)$self;
+    free(e->vtable_);
+    free((char *)e->id);
+    Py_DECREF(e->get_meta_name);
+    //Py_DECREF(e->get_meta_version);
+    //Py_DECREF(e->get_meta_namespace);
+    Py_DECREF(e->get_dimensions);
+    Py_DECREF(e->get_dimension_size);
+    //Py_DECREF(e->store);
+    //Py_DECREF(e->load);
+    if (e->this) Py_DECREF(e->this);
+    //if (e->dims) {
+    //  int i;
+    //  for (i=0; i<e->dim_size; i++) free((char *)e->dims[i]);
+    //  free(e->dims);
+    //}
+    //free(e);
+  }
+};
+
+
+
+%typemap(in,numinputs=0) (size_t *IGNORED) {};
+
+//softc_entity_t *softc_entity_new(const char *uri);
+const char  *softc_entity_get_id(const softc_entity_t *self);
+const char  *softc_entity_get_meta_type(const softc_entity_t *self);
+const char  *softc_entity_get_meta_name(const softc_entity_t *self);
+const char  *softc_entity_get_meta_namespace(const softc_entity_t *self);
+const char  *softc_entity_get_meta_version(const softc_entity_t *self);  
+const char **softc_entity_get_dimensions(const softc_entity_t *self, size_t *IGNORED);
+int          softc_entity_get_dimension_size (const softc_entity_t *self, const char *label);
+void         softc_entity_store(const softc_entity_t *self, softc_datamodel_t *model);
+void         softc_entity_load(softc_entity_t *self, const softc_datamodel_t *model);
 
 
 /*
@@ -498,12 +668,79 @@ class SoftStorageClosedError(SoftError):
     """Raised when working on a closed storage."""
     pass
 
+class SoftMissingDimensionsError(SoftError):
+    """Raised if dimensions are missing or cannot be derived."""
+    pass
+
 class Uninitialized(object):
     """Class representing uninitialized values. Not intended to be
     instanciated..."""
     pass
 
 
+
+def create_softc_entity(obj, name, version, namespace, dimensions, 
+                        dimension_size, store, load):
+    """Returns a new C-level entity.
+
+    The main purpose of fhis function is to turn normal Python-objects into
+    entities.  This is done by adding a __softc_entity__ attribute to you
+    object set to the return value of this function.  Hence
+
+        obj.__softc_entity__ = create_softc_entity(obj, name=...)
+
+    will turn `obj` into an entity.
+    """
+    e = softpy.entity_t(name, version, namespace, dimensions,
+                        dimension_size, store, load)
+    e.set_self(obj)
+    return e
+
+
+#class Entity(object):
+#    """Class representing a C entity at Python level.
+#    """
+#    def __init__(self, name, version, namespace, dimensions, dimension_size, 
+#                 load, store):
+#        self.this = softpy.entity_t(name, version, namespace, dimensions,
+#                                    dimension_size, load, store)
+#        self.this.set_self(self)
+#
+#    id = property(
+#        lambda self: softpy.entity_get_id(self.this),
+#        doc='Entity id.')
+#    meta_name = property(
+#        lambda self: softpy.entity_get_meta_name(self.this),
+#        doc='Entity name.')
+#    meta_version = property(
+#        lambda self: softpy.entity_get_meta_version(self.this),
+#        doc='Entity version.')
+#    meta_namespace = property(
+#        lambda self: softpy.entity_get_meta_namespace(self.this),
+#        doc='Entity namespace.')
+#    dimensions = property(
+#        lambda self: softpy.entity_get_dimensions(self.this),
+#        doc='List of dimension labels.')
+#    dimension_sizes = property(
+#        lambda self: [softpy.entity_get_dimension_size(self.this, label)
+#                      for label in softpy.entity_get_dimensions(self.this)],
+#        doc='List of dimension sizes.')
+#    
+#    def get_dimension_size(self, label):
+#        """Returns the size of dimension with this label."""
+#        return softpy.entity_get_dimension_size(self.this, label)
+#
+#    def store(self, datamodel):
+#        """Stores data into datamodel."""
+#        softpy.entity_store(self.this, datamodel)
+#
+#    def load(self, datamodel):
+#        """Reads data from datamodel."""
+#        softpy.entity_load(self.this, datamodel)
+#
+
+
+    
 class Storage(object):
     """Class for connecting to a storage.
 
@@ -531,10 +768,10 @@ class Storage(object):
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, str(entity._id))
-        datamodel_set_meta_name(datamodel, str(entity._name))
-        datamodel_set_meta_version(datamodel, str(entity._version))
-        datamodel_set_meta_namespace(datamodel, str(entity._namespace))
+        datamodel_set_id(datamodel, asBytes(entity._id))
+        datamodel_set_meta_name(datamodel, asBytes(entity._name))
+        datamodel_set_meta_version(datamodel, asBytes(entity._version))
+        datamodel_set_meta_namespace(datamodel, asBytes(entity._namespace))
         entity._store(datamodel)   # Ask the entity to fill out the datamodel
         storage_strategy_store(self.strategy, datamodel)
 
@@ -543,10 +780,10 @@ class Storage(object):
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, str(entity._id))
-        datamodel_set_meta_name(datamodel, str(entity._name))
-        datamodel_set_meta_version(datamodel, str(entity._version))
-        datamodel_set_meta_namespace(datamodel, str(entity._namespace))
+        datamodel_set_id(datamodel, asBytes(entity._id))
+        datamodel_set_meta_name(datamodel, asBytes(entity._name))
+        datamodel_set_meta_version(datamodel, asBytes(entity._version))
+        datamodel_set_meta_namespace(datamodel, asBytes(entity._namespace))
         storage_strategy_start_retrieve(self.strategy, datamodel)
         entity._load(datamodel)   # Ask the entity to fill out itself
         storage_strategy_end_retrieve(self.strategy, datamodel)
@@ -614,6 +851,13 @@ def arithmetic_eval(s):
     return _eval(node.body)
 
 
+def asBytes(s):
+    """Returns `s` as bytes using the default encoding - works for Python
+    2.7 and 3.x."""
+    if hasattr(s, 'encode'):
+        return s.encode()
+    return s
+
 
 def _get_entity_method(entity, name):
     """Returns a reference to method `name` in `entity`.
@@ -664,41 +908,44 @@ class EntityIter(object):
 
 
 class BaseFactoryEntity(object):
-    """Base class for entities created with the entity() factory function."""
-
+    """Base class for entities created with the entity() factory function.
+    """
     __metaclass__ = MetaFactoryEntity
 
-    def __init__(self, driver='json', uri=None, options=None, dimensions=(),
-                     uuid=None):
-        """Initializing entity.
+    def __init__(self, dimensions=None, uuid=None, driver=None, uri=None, 
+                 options=None):
+        """Initialize a new entity.  
+
+        If only `dimensions` is given, an new empty entity will be created.
+
+        If `uuid`, `driver` and `uri` are given, initial property
+        values of the new entity will be loaded from dataset `uuid` is
+        storage `uri`.  In `dimensions` is not given, it will be
+        derived from the loaded data (if possible, otherwise a
+        SoftMissingDimensionsError is raised).
 
         Parameters
         ----------
-        driver : "json" | "hdf5" | "mongo"...
+        dimensions : None | sequence | dict
+            Dimensions if entity is kept uninitialised (i.e. `uri` is None).
+            Can be given either as ``[3, 5]`` or ``{'I'=3, 'J'=5}`` provided
+            that the entity has dimensions I and J.
+            If None, it will be attempted derived from 
+        uuid : None | string
+            If given, it should be an unique uuid for the new instance.
+            The default is to generate it.
+        driver : None | "json" | "hdf5" | "mongo" | ...
             The driver to use for loading initial values.
         uri : None | string
             Where the initial values are stored.  If None, all property values
             are set to softpy.Uninitialized.
-        options : string
+        options : None | string
             Additional options passed to the driver.
-        dimensions : sequence | dict
-            Dimensions if entity is kept uninitialised (i.e. `uri` is None).
-            Can be given either as ``[3, 5]`` or ``{'I'=3, 'J'=5}`` provided that
-            the entity has dimensions I and J.
-        uuid : None | string
-            If given, it should be an unique uuid for the new instance.
-            The default is to generate it.
         """
-        if uuid is None:
-            uuid = uuidgen()
-        self._instancedata['id'] = uuid
-        for p in self._meta['properties']:
-            setattr(self, p['name'], Uninitialized)
-        if uri:
-            storage = Storage(driver, uri, options)
-            storage.load(self)
-            storage.close()
-        else:
+        self._instancedata = {}
+        self._instancedata['id'] = uuidgen() if uuid is None else uuid
+
+        if dimensions:
             if len(dimensions) != len(self._meta['dimensions']):
                 raise TypeError('Entity "%s" has %d dimensions, %d given' % (
                     self._name, len(self._dimensions), len(dimensions)))
@@ -707,7 +954,40 @@ class BaseFactoryEntity(object):
                     dimensions[label] for label in self._dimensions]
             else:
                 self._instancedata['dimensions'] = [int(d) for d in dimensions]
-    
+            for key in self._keys():
+                setattr(self, key, Uninitialized)
+
+        if uri:
+            if uuid is None:
+                raise TypeError('`uuid` must be provided when initialising '
+                                'an entity from storage')
+            if driver is None:
+                raise TypeError('`driver` must be provided when initialising '
+                                'an entity from storage')
+            with Storage(driver, uri, options) as s:
+                s.load(self)
+            if dimensions is None:
+                dims = {}
+                for label in self._get_dimensions():
+                    for key in self._keys():
+                        value = getattr(self, key)
+                        for i, name in enumerate(self._get_property_dims(key)):
+                            if name == label:
+                                if isinstance(value, np.ndarray):
+                                    dims[label] = value.shape[i]
+                                elif i == 0:
+                                    dims[label] = len(value)
+                            break
+                    if not label in dims:
+                        raise SoftMissingDimensionsError(
+                            'cannot determine dimension with label "%s"' % 
+                            label)
+                self._instancedata['dimensions'] = [
+                    dims[label] for label in self._get_dimensions()]
+
+        assert (len(self._instancedata['dimensions']) == len(
+            self._get_dimensions()))
+
 
     def __str__(self):
         s = []
@@ -727,6 +1007,11 @@ class BaseFactoryEntity(object):
     
     def __getitem__(self, name):
         return self.__dict__[name]
+
+    def __setitem__(self, name, value):
+        if name not in self.__dict__:
+            raise KeyError('No property named "%s"' % (name, ))
+        self.__dict__[name] = value
 
     def __len__(self):
         return len(self._meta['properties'])
@@ -765,24 +1050,29 @@ class BaseFactoryEntity(object):
     def _get_property_unit(cls, name):
         """Returns unit for property `name`, or and empty string if
         `property_name` has no unit."""
-        return _get_prop_data(cls, name, 'unit', '')
+        return _get_prop_data(cls, asBytes(name), 'unit', '')
 
     @classmethod
     def _get_property_type(cls, name):
         """Returns the type of property `name`."""
-        return _get_prop_data(cls, name, 'type')
+        return _get_prop_data(cls, asBytes(name), 'type')
     
     @classmethod
     def _get_property_description(cls, name):
         """Returns description of property `name`."""
-        return _get_prop_data(cls, name, 'description', '')
-    
-    def _get_property_dims(self, name):
-        """Returns a list with the dimensions of property `name` evaluated to
-        integers."""
+        return _get_prop_data(cls, asBytes(name), 'description', '')
+
+    @classmethod
+    def _get_property_dims(cls, name):
+        """Returns a list with the dimensions of property `name`."""
+        return _get_prop_data(cls, asBytes(name), 'dims', [])
+
+    def _get_property_dim_sizes(self, name):
+        """Returns a list with the dimensions of property `name` evaluated
+        to integers."""
         sizes = zip(self._get_dimensions(), self._instancedata['dimensions'])
         dims = []
-        for label in _get_prop_data(self, name, 'dims', []):
+        for label in _get_prop_data(self, asBytes(name), 'dims', []):
             for dname, dsize in sizes:
                 label = label.replace(dname, str(dsize))
             dims.append(arithmetic_eval(label))
@@ -791,8 +1081,7 @@ class BaseFactoryEntity(object):
     def _initialized(self):
         """Returns true if all properties are initialized. False is returned
         otherwise."""
-        return all(self[p['name']] is not Uninitialized
-                   for p in self._meta['properties'])
+        return all(self[key] is not Uninitialized for key in self._keys())
 
     # ------------ methods modelled after the softc-entity API -----------
 
@@ -847,7 +1136,7 @@ class BaseFactoryEntity(object):
             else:
                 setter = getattr(_softpy, 'datamodel_append_array_%s_%dd' % (
                     vtype, len(dims)))
-            setter(datamodel, str(key), value)
+            setter(datamodel, asBytes(key), value)
 
     def _load(self, datamodel):
         """Loads property values from `datamodel` into self.  Normally you
@@ -856,19 +1145,17 @@ class BaseFactoryEntity(object):
         for key in self._keys():
             vtype = self._get_property_type(key)
             dims = self._get_property_dims(key)
-
             if not dims:
                 getter = getattr(_softpy, 'datamodel_get_' + vtype)
             elif vtype == 'string':
                 assert len(dims) == 1
                 getter = getattr(_softpy, 'datamodel_get_string_list')
             elif len(dims) == 1:
-                setter = getattr(_softpy, 'datamodel_get_array_' + vtype)
+                getter = getattr(_softpy, 'datamodel_get_array_' + vtype)
             else:
-                setter = getattr(_softpy, 'datamodel_get_array_%s_%dd' % (
+                getter = getattr(_softpy, 'datamodel_get_array_%s_%dd' % (
                     vtype, len(dims)))
-            value = getter(datamodel, str(key))
-            print('    value=%r' % (value, ))
+            value = getter(datamodel, asBytes(key))
             setattr(self, key, value)
 
 
@@ -886,7 +1173,7 @@ def entity(metadata):
         'id': None,  # is set in __init__()
         'dimensions': [0] * len(meta['dimensions']),
     }
-    attr = dict(_meta=meta, _instancedata=instancedata)
+    attr = dict(_meta=meta, _instancedata=None)
     return type(str(meta['name']), (BaseFactoryEntity,), attr)
 
 

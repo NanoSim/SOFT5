@@ -1,3 +1,6 @@
+*.pyc
+
 softpy-test-datamodel.h5
-extraction.h5
+softpy-test-structure.h5
+softpy-test-entity.h5
 

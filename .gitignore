@@ -40,3 +40,5 @@ ui_*.h
 *~
 moc_*.cpp
 CMakeCache*
+
+build

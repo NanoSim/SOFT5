@@ -78,8 +78,8 @@ assert(np.all(int32_array == m.int32_array))
 double_array = softpy.datamodel_get_array_double(model, 'double_array')
 assert(np.all(double_array == m.double_array))
 
-#string_list = softpy.datamodel_get_string_list(model, 'string_list')
-#assert(string_list == m.string_list)
+string_list = softpy.datamodel_get_string_list(model, 'string_list')
+assert(string_list == m.string_list)
 
 softpy.storage_strategy_end_retrieve(strategy, model)
 softpy.storage_free(storage)
