@@ -16,6 +16,7 @@ softc_storage_t *softc_storage_private_create(const char *driver, const char *ur
   softc_storage_t *storage;
   storage = (softc_storage_t *)malloc(sizeof *storage);
   storage->ref = new soft::Storage(driver, uri, options);
+  return storage;
 }
 
 void softc_storage_private_free(softc_storage_t *storage)
