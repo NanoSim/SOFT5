@@ -40,5 +40,8 @@ ui_*.h
 *~
 moc_*.cpp
 CMakeCache*
-
-build
+*.txt.user
+*.pro.user
+[Bb]uild/
+.\#*
+\#*\#
