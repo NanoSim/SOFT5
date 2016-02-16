@@ -22,7 +22,7 @@ struct StrategyFtor {
   ~StrategyFtor()
   {}
 
-  bool getString(const char *key, std::string& retValue) {
+  bool getString(const char *key, std::string &retValue) {
     auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
     if (ret.isValid() && ret.canConvert(QMetaType::QString)) {
       retValue = ret.value<QString>().toStdString();

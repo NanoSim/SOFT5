@@ -28,22 +28,22 @@ struct _softc_collection_s {
   softc_collection_properties_s props;
 };
  
-static const char * get_meta_type()
+static const char * get_meta_type(const softc_entity_t *ptr)
 {
   return SOFTC_COLLECTION_META_TYPE;
 }
 
-static const char * get_meta_name()
+static const char * get_meta_name(const softc_entity_t *ptr)
 {
   return SOFTC_COLLECTION_META_NAME;
 }
 
-static const char * get_meta_namespace()
+static const char * get_meta_namespace(const softc_entity_t *ptr)
 {
   return SOFTC_COLLECTION_META_NAMESPACE;
 }
 
-static const char * get_meta_version()
+static const char * get_meta_version(const softc_entity_t *ptr)
 {
   return SOFTC_COLLECTION_META_VERSION;
 }
@@ -51,7 +51,7 @@ static const char * get_meta_version()
 static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
 {}
 
-static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
+static void load (const softc_entity_t *ptr, const softc_datamodel_t *data_model)
 {}
 
 static const char ** get_dimensions(const softc_entity_t *ptr, size_t *size)

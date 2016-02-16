@@ -1,3 +1,7 @@
-softpy-test-datamodel.h5
-extraction.h5
+*.pyc
 
+softpy-test-datamodel.h5
+softpy-test-factory.h5
+softpy-test-entity.h5
+
+.gdb_history

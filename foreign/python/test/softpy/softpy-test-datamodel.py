@@ -28,7 +28,7 @@ m.double_array = np.arange(6.0)
 m.string_list = ['this', 'is', 'a', 'test', 'string-list']
 
 # Store
-storage = softpy.storage_create('hdf5', 'lowlevel.h5')
+storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 
@@ -52,7 +52,7 @@ softpy.storage_free(storage)
 
 
 # Load
-storage = softpy.storage_create('hdf5', 'lowlevel.h5')
+storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 
@@ -78,8 +78,8 @@ assert(np.all(int32_array == m.int32_array))
 double_array = softpy.datamodel_get_array_double(model, 'double_array')
 assert(np.all(double_array == m.double_array))
 
-#string_list = softpy.datamodel_get_string_list(model, 'string_list')
-#assert(string_list == m.string_list)
+string_list = softpy.datamodel_get_string_list(model, 'string_list')
+assert(string_list == m.string_list)
 
 softpy.storage_strategy_end_retrieve(strategy, model)
 softpy.storage_free(storage)

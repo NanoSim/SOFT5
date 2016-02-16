@@ -13,6 +13,11 @@ softc_datamodel_t * softc_storage_strategy_private_get_datamodel(softc_storage_s
   return datamodel;
 }
 
+void softc_storage_strategy_private_free_datamodel(softc_datamodel_t *datamodel)
+{
+  free(datamodel);
+}
+
 void softc_storage_strategy_private_store(softc_storage_strategy_t *self,
 					  const softc_datamodel_t *model)
 {

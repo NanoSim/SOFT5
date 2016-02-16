@@ -12,6 +12,7 @@ void softc_storage_private_free(softc_storage_t *storage);
 void softc_storage_private_load(softc_storage_t *storage, void *entity);
 void softc_storage_private_save(softc_storage_t *storage, void *entity);
 softc_storage_strategy_t * softc_storage_private_get_storage_strategy(softc_storage_t *storage);
+void softc_storage_private_free_storage_strategy(softc_storage_strategy_t *strategy);
 
 SOFTC_END_DECLS
 #endif

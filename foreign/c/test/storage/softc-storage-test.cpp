@@ -139,7 +139,7 @@ TEST_F(SoftC_StorageTest, writeData)
   isOk = softc_datamodel_append_array_double_3d(model, "double-array-3d", (const double***)v3d, doublevec3d[0][0].size(), doublevec3d[0].size(), doublevec3d.size()); ASSERT_TRUE(isOk);
 
   strList_stdc = (char**)malloc(sizeof(char*) * strlist.size());
-  for (int i = 0; i < strlist.size(); ++i) {
+  for (int i = 0; i < (int)strlist.size(); ++i) {
     strList_stdc[i] = (char*)strlist[i].c_str();
   }
   
@@ -302,7 +302,6 @@ TEST_F(SoftC_StorageTest, doubleVec3D)
 
 TEST_F(SoftC_StorageTest, strList)
 {
-  int i;
   char **slist;
   size_t n_elements;
 
@@ -319,7 +318,7 @@ TEST_F(SoftC_StorageTest, strList)
   ASSERT_TRUE(isOk);
   softc_storage_strategy_end_retrieve(strategy, model);
   ASSERT_EQ(n_elements, strlist.size());
-  for (int i = 0; i < strlist.size(); ++i) {
+  for (int i = 0; i < (int)strlist.size(); ++i) {
     ASSERT_STREQ(slist[i], (char *)strlist[i].c_str());
 /*    free(slist[i]);*/
   }
