@@ -81,6 +81,7 @@ softc_collection_s * softc_collection_create(const char *id)
 
 void softc_collection_free(softc_collection_s *self)
 {
+  free ((char*)self->id);
   free (self);
 }
 

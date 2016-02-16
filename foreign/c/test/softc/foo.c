@@ -106,6 +106,9 @@ void foo_free(foo_s *foo)
 {
   free(foo->props.str);
   free(foo->props.array);
+  free((char*)foo->id);
+  free(foo);
+       
 }
 
 void foo_property_set_n (foo_s* self, int value)

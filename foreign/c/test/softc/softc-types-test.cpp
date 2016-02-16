@@ -62,4 +62,7 @@ TEST_F(SoftC_TypesTest, double_array_foreach)
   
   ASSERT_EQ(f->count, 10);
   ASSERT_DOUBLE_EQ(f->sum, v*10.0);
+
+  softc_double_array_free(&da);
+  delete f;
 }

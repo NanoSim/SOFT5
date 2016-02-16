@@ -28,5 +28,5 @@ TEST_F (SoftC_CollectionTest, store1)
 
   softc_collection_register_entity(coll, "foo", (const softc_entity_t*)foo);
   softc_collection_free(coll);
-  
+  foo_free(foo);
 }
