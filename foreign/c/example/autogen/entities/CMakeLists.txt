@@ -3,33 +3,43 @@ project (entities C CXX)
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set (GEN_HEADERS ${GEN_HEADERS})
+set (SRC_LIST ${SRC_LIST})
 
-function (add_forge entity)
+# Run a json entity through the soft-forge code generator to create
+# a header and source file
+function (add_forge entity output_src output_hdr)
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${entity}.h
-    COMMAND soft-forge ${CMAKE_CURRENT_SOURCE_DIR}/${entity}.json ${C_HEADER_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/${entity}.h
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${entity}.json ${C_HEADER_TEMPLATE}
+    OUTPUT ${output_hdr}
+    COMMAND soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}
+    DEPENDS ${entity} ${C_HEADER_TEMPLATE}
     )
 
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${entity}.c
-    COMMAND soft-forge ${CMAKE_CURRENT_SOURCE_DIR}/${entity}.json ${C_SOURCE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/${entity}.c
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${entity}.json ${C_SOURCE_TEMPLATE} ${entity}.h
-    )
-  
-  LIST(APPEND GEN_HEADERS ${entity}.h)
-  
+    OUTPUT ${output_src}
+    COMMAND soft-forge ${entity} ${C_SOURCE_TEMPLATE} ${output_src}
+    DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr}
+    )  
 endfunction()
 
-add_forge(data)
+
+# Find all .json files in current source dir and run through
+# soft-forge
+FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.json)
+foreach(JSON_SRC ${json-sources})
+  string(REGEX REPLACE "\.json$" ".c" GEN_SRC ${JSON_SRC})
+  string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
+  add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR})
+  list(APPEND SRC_LIST ${GEN_SRC})  
+endforeach(JSON_SRC ${json-sources})
 
 include_directories(${SOFT5_INCLUDE_DIR})
 set (LINK_LIBS ${LINK_LIBS}
   ${SOFT5_KERNEL_LIBRARY}
   ${SOFT5_SOFTC_LIBRARY})
 
-add_library(${PROJECT_NAME} SHARED data.c)
+add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 
 # Expose public includes to other subprojects
@@ -42,5 +52,3 @@ set(${PROJECT_NAME}_LIBS
   ${PROJECT_NAME}
   ${LINK_LIBS}
   CACHE INTERNAL "${PROJECT_NAME}: Link Libs" FORCE)
-
-message("Generated headers: ${GEN_HEADERS}")

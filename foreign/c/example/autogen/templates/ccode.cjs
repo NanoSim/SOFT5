@@ -120,7 +120,20 @@
 	});
 	return as;
     })();
-    
+
+    newAttrInitList = (function(){
+	var as = [];
+	attributes.forEach(function(entry){
+	    if (entry.rank == 0) {
+		as.push("0");
+	    } else {
+		as.push("softc_allocatable_allocatev(" + entry.rank + ", " + paren(entry.dims).join(",") + ")");
+//              as.push("malloc(" + paren(entry.dims).join('*') + "*sizeof(" + entry.type + "))");
+	    }
+	});
+	return as;
+    })();
+	
     attrDeclList = (function(){
 	var as = [];
 	attributes.forEach(function(entry){
@@ -175,6 +188,7 @@
 #include <softc/softc.h>
 #include <softc/softc-entity.h>
 #include <softc/softc-datamodel.h>
+#include <softc/softc-allocatable.h>    
 
 #include "@{entity}.h"
 
@@ -246,7 +260,7 @@ static const char * get_meta_version()
     (@{entity}_dimensions_s)
     {@{dimsList.join(',')}},
     (@{entity}_properties_s)
-    {@{attrInitList.join(',\n    ')}
+    {@{newAttrInitList.join(',\n    ')}
     }
   };
   return self;
