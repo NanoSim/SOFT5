@@ -3,7 +3,7 @@
 struct _softc_entity_t
 {
   const struct softc_entity_vtable_ *vtable_;
-  char *id;  
+  const char *id;  
 };
 
 void softc_entity_store(const softc_entity_t *self, softc_datamodel_t *model)
@@ -11,7 +11,7 @@ void softc_entity_store(const softc_entity_t *self, softc_datamodel_t *model)
   self->vtable_->store(self, model);
 }
 
-void softc_entity_load(const softc_entity_t *self, const softc_datamodel_t *model)
+void softc_entity_load(softc_entity_t *self, const softc_datamodel_t *model)
 {
   self->vtable_->load(self, model);
 }
