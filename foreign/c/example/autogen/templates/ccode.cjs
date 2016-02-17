@@ -1,46 +1,8 @@
 @{
-    function type_to_c(metaType) {
-	switch(metaType){
-	case 'int8':
-	    return "int8_t";
-	case 'uint8':
-	    return "uint8_t";
-	case 'int16':
-	    return "int16_t";
-	case 'uint16':
-	    return "uint16_t";
-	case 'int':
-	case 'integer':
-    	case 'int32':
-	    return "int32_t";
-	case 'uint32':
-	    return "uint32_t";
-    	case 'int64':
-	    return "int64_t";
-	case 'uint64':
-	    return "uint64_t";
-	case 'float':
-	    return "float";
-	case 'double':
-	    return "double";
-	case 'bool':
-	case 'boolean':
-	    return "bool";
-	default:
-	    return "undefined";
-	};
-    };
-    
-    function dims_to_ptr(rank) {
-	var ret = "";
-	for (var i = 0; i < rank; ++i) {
-	    ret += "*";
-	}
-	return ret;
-    };
+    var capi = require('soft.forge.capi');
     
     constructorArgs = (function(){
-	var args = ["const char *id"];	
+	var args = [];	
 	if (soft.model.dimensions != undefined) {   
 	    soft.model.dimensions.forEach(function (d){		
 		args.push("size_t " + d.name);		
@@ -54,7 +16,7 @@
 	soft.model.properties.forEach(function (entry){
 	    var o = {};
 	    o.name = entry.name;
-	    o.type = type_to_c(entry.type);
+	    o.type = capi.type_to_c(entry.type);
 	    o.rank = (entry.dims != undefined ? entry.dims.length : 0);
 	    o.desc = (entry.description != undefined ? "/* " + entry.description + " */" : "");
 	    o.dims = entry.dims;
@@ -63,6 +25,30 @@
 	return attr;
     })();
 
+    dataModelGetFunction = function(entry) {
+	var getFunction = "softc_datamodel_get_";
+	switch(entry.type) {
+	case 'float':
+	case 'double':
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += entry.type;
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'int32_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'int32';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	default:
+	    getFunction += "undefined";
+	};
+	return getFunction;
+    };
+    
     dataModelAppendFunction = function(entry) {
 	var appendFunction = "softc_datamodel_append_";
 	switch (entry.type) {
@@ -91,7 +77,7 @@
 	setList = [];
 	attributes.forEach(function (entry) {
 	    var str = dataModelAppendFunction(entry);
-	    str += " (data_model, \"" + entry.name + "\", (const " + entry.type + dims_to_ptr(entry.rank) + ")self->props." + entry.name;
+	    str += " (data_model, \"" + entry.name + "\", (const " + entry.type + capi.dims_to_ptr(entry.rank) + ")self->props." + entry.name;
 	    if (entry.rank > 0) {
 		str += ", " + entry.dims.join(",");
 	    }
@@ -100,7 +86,42 @@
 	});
 	return setList;
     })();
+
+    /* List of dimensions for each property */
+    propDimsList = (function(){
+	var pdl = [];
+	attributes.forEach(function (entry) {
+	    var idx = 0;
+	    if (entry.rank > 0) {
+		entry.dims.forEach(function (dim){
+		    pdl.push("size_t " + entry.name + "_" + idx.toString() + ";");
+		    idx++;
+		});
+	    }
+	});
+	return pdl;
+    })();
     
+    getDataBlock = (function(){
+	getList = [];
+	attributes.forEach(function (entry) {
+	    var str = dataModelGetFunction(entry);
+	    str += " (data_model, \"" + entry.name + "\", &self->props." + entry.name;
+	    if (entry.rank > 0) {
+		var idx = 0;
+		var dl = [];
+		entry.dims.forEach(function(dim){
+		    dl.push("&" + entry.name + "_" + idx.toString());
+		    idx++;
+		});
+		str += ", " + dl.join(",");
+	    }
+	    str += ");";
+	    getList.push(str);
+	});
+	return getList;
+    })();
+
     paren = function(list) {
 	var plist = [];
 	list.forEach(function(entry){
@@ -115,29 +136,28 @@
 	    if (entry.rank == 0) {
 		as.push("0");
 	    } else {
-		as.push("malloc(" + paren(entry.dims).join('*') + "*sizeof(" + entry.type + "))");
+		as.push("softc_allocatable_allocatev(" + entry.rank + ", " + paren(entry.dims).join(",") + ")");
 	    }
 	});
 	return as;
     })();
 
-    newAttrInitList = (function(){
+    zeroAttrInitList = (function(){
 	var as = [];
 	attributes.forEach(function(entry){
 	    if (entry.rank == 0) {
 		as.push("0");
 	    } else {
-		as.push("softc_allocatable_allocatev(" + entry.rank + ", " + paren(entry.dims).join(",") + ")");
-//              as.push("malloc(" + paren(entry.dims).join('*') + "*sizeof(" + entry.type + "))");
+		as.push("NULL");
 	    }
 	});
 	return as;
     })();
-	
+
     attrDeclList = (function(){
 	var as = [];
 	attributes.forEach(function(entry){
-	    as.push(entry.type + " " + dims_to_ptr(entry.rank) + entry.name + ";" + entry.desc);
+	    as.push(entry.type + " " + capi.dims_to_ptr(entry.rank) + entry.name + ";" + entry.desc);
 	});
 	return as;
     })();
@@ -151,6 +171,16 @@
 	}
 	return ds;	
     })();
+
+    zeroDimsList = (function(){
+	var ds = [];
+	if (soft.model.dimensions != undefined) {
+	    soft.model.dimensions.forEach(function(entry){
+		ds.push("0");
+	    });
+	}
+	return ds;
+    })();
     
     dimsDeclList = (function(){
 	var ds = [];
@@ -160,6 +190,16 @@
 	    });
 	}
 	return ds;
+    })();
+
+    freeProperties = (function(){
+	var as = [];
+	attributes.forEach(function(entry){
+	    if (entry.rank > 0) {
+		as.push("softc_allocatable_free(self->props." + entry.name+ ")");
+	    }
+	});
+	return as;
     })();
 
     dimsSelfDeclList = (function(){
@@ -197,16 +237,6 @@ static const char @{ENTITY}_META_NAME[] = "@soft.model.name";
 static const char @{ENTITY}_META_VERSION[] = "@soft.model.version";
 static const char @{ENTITY}_META_NAMESPACE[] = "@soft.model.namespace";
 
-struct _@{entity}_dimensions_s
-{
-  @{dimsDeclList.join("\n  ");}
-};
-
-struct _@{entity}_properties_s
-{
-  @{attrDeclList.join("\n  ");}
-};
-
 struct _@{entity}_s {
   const struct softc_entity_vtable_ *vtable_;
   const char *id;
@@ -216,13 +246,17 @@ struct _@{entity}_s {
 
 static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
 {
-    const @{entity}_s *self = (const @{entity}_s*)ptr;
-    @{dimsSelfDeclList.join("\n    ")};
-    @{setDataBlock.join("\n    ");}
+  const @{entity}_s *self = (const @{entity}_s*)ptr;
+  @{dimsSelfDeclList.join('\n  ')}
+  @{setDataBlock.join('\n  ')}
 }
 
 static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
-{}
+{
+  @{entity}_s *self = (@{entity}_s*)ptr;
+  @{propDimsList.join('\n  ')}
+  @{getDataBlock.join('\n  ')}    
+}
 
 static const char ** get_dimensions(const softc_entity_t *ptr, size_t *size)
 {}
@@ -250,6 +284,31 @@ static const char * get_meta_version()
   return @{ENTITY}_META_VERSION;
 }
 
+static char* copy_string(const char *str)
+{
+  char *c = (char*)malloc(strlen(str)+1);
+  strcpy(c, str);
+  return c;
+}
+
+@{entity}_s *@{entity}_create0(const char *id)
+{
+  SOFTC_ENTITY_VTABLE(@{entity});
+  @{entity}_s *self;
+  self = malloc (sizeof *self); 
+  *self = (@{entity}_s) {SOFTC_ENTITY_VTABLE_NAME(@{entity}),
+    (const char *)copy_string(id),
+    (@{entity}_dimensions_s)
+    {@{zeroDimsList.join(',')}},
+    (@{entity}_properties_s)
+    {@{zeroAttrInitList.join(',\n    ')}
+    }
+  };
+
+  return self;
+}
+
+
 @{entity}_s *@{entity}_create(@{constructorArgs.join(", ")})
 {
   SOFTC_ENTITY_VTABLE(@{entity});
@@ -260,7 +319,7 @@ static const char * get_meta_version()
     (@{entity}_dimensions_s)
     {@{dimsList.join(',')}},
     (@{entity}_properties_s)
-    {@{newAttrInitList.join(',\n    ')}
+    {@{attrInitList.join(',\n    ')}
     }
   };
   return self;
@@ -268,6 +327,8 @@ static const char * get_meta_version()
 
 void @{entity}_free(@{entity}_s *self)
 {
+  @{freeProperties.join(',\n  ')};
+  free((char*)self->id);
   free (self);
 }
 

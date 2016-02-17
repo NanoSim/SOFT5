@@ -7,10 +7,32 @@ protected:
   static void TearDownTestCase() {}
 };
 
-TEST_F(AllocatableTest, rank)
+TEST_F(AllocatableTest, rank1)
+{
+  double *vec = (double *)softc_allocatable_allocatev(1, 3);
+  ASSERT_EQ(softc_allocatable_rank(vec), 1);
+  softc_allocatable_free(vec);
+}
+
+
+TEST_F(AllocatableTest, rank2)
 {
   double **vec = (double **)softc_allocatable_allocatev(2, 3, 2);
   ASSERT_EQ(softc_allocatable_rank(vec), 2);
+  softc_allocatable_free(vec);
+}
+
+TEST_F(AllocatableTest, rank3)
+{
+  double ***vec = (double ***)softc_allocatable_allocatev(3, 3, 2, 4);
+  ASSERT_EQ(softc_allocatable_rank(vec), 3);
+  softc_allocatable_free(vec);
+}
+
+TEST_F(AllocatableTest, rank4)
+{
+  double **vec = (double **)softc_allocatable_allocatev(4, 3, 2, 3, 4);
+  ASSERT_EQ(softc_allocatable_rank(vec), 4);
   softc_allocatable_free(vec);
 }
 
@@ -73,4 +95,91 @@ TEST_F(AllocatableTest, reshape)
 
   softc_allocatable_free(vec1);
   softc_allocatable_free(vec2);
+}
+
+static bool set_vector(double ***vec)
+{
+  if (*vec != NULL) return false;
+  *vec = (double**)softc_allocatable_allocatev(2, 30, 20);
+}
+
+
+static bool set_vector1(double **vec)
+{
+  if (*vec != NULL) return false;
+  *vec = (double*)softc_allocatable_allocatev(1, 30);
+}
+
+static bool set_vector2(double ***vec)
+{
+  if (*vec != NULL) return false;
+  *vec = (double**)softc_allocatable_allocatev(2, 3, 2);
+}
+
+TEST_F(AllocatableTest, copy)
+{
+  double **vec = NULL;
+  bool isok = set_vector(&vec);
+  ASSERT_TRUE(isok);
+  ASSERT_EQ(softc_allocatable_rank(vec), 2);
+  softc_allocatable_free(vec);
+}
+
+size_t numElements(const size_t *dims, size_t rank)
+{
+  size_t n = 1;
+  for (size_t i = 0; i < rank; ++i) {
+    n *= dims[i];
+  }
+  return n;
+}
+
+TEST_F(AllocatableTest, toStdVector1D)
+{
+  double *vec = NULL;
+  bool isok = set_vector1(&vec);
+  ASSERT_TRUE(isok);
+  ASSERT_EQ(softc_allocatable_rank(vec), 1);
+  
+  size_t *dims;
+  size_t rank;
+  softc_allocatable_dimensions(vec, &dims, &rank);
+  size_t n = numElements(dims, rank);
+
+  for (size_t i = 0; i < n; ++i) {
+    vec[i] = 2.13 * i;
+  }
+
+  //std::vector<double> stdvec (vec, vec + n);
+  for (size_t i = 0; i < n; ++i) {
+    //ASSERT_EQ(stdvec[i], vec[i]);
+  }
+
+  softc_allocatable_free(vec);
+  free(dims);
+}
+
+TEST_F(AllocatableTest, toStdVector2D)
+{
+  double **vec = NULL;
+  bool isok = set_vector2(&vec);
+  ASSERT_TRUE(isok);
+  ASSERT_EQ(softc_allocatable_rank(vec), 2);
+  
+  size_t *dims;
+  size_t rank;
+  softc_allocatable_dimensions(vec, &dims, &rank);
+  for (size_t j = 0; j < dims[1]; ++j) {
+    for (size_t i = 0; i < dims[0]; ++i) {
+      vec[j][i] = 2.3 * i + 2.1 * j;
+    }
+  }
+  
+  std::vector< std::vector<double> > stdvec(dims[1]);
+  for (size_t j = 0; j < dims[1]; ++j) {
+    stdvec[j].assign(vec[j], vec[j] + dims[0]);
+  }
+  
+  free(dims);			      
+  softc_allocatable_free(vec);
 }

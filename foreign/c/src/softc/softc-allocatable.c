@@ -7,7 +7,7 @@
 
 #include "softc-allocatable.h"
 
-#define MAX_RANK 3
+#define MAX_RANK 4
 #define UNUSED(arg) (void)arg;
 
 typedef struct {
@@ -26,10 +26,12 @@ void *alloc_block_rank0 (const block_s*);
 void *alloc_block_rank1 (const block_s*);
 void *alloc_block_rank2 (const block_s*);
 void *alloc_block_rank3 (const block_s*);
+void *alloc_block_rank4 (const block_s*);
 void free_block_rank0   (void *);
 void free_block_rank1   (void *);
 void free_block_rank2   (void *);
 void free_block_rank3   (void *);
+void free_block_rank4   (void *);
 void free_reference_counted_data(double **data);
 
 typedef void*(*alloc_block_fn)(const block_s*);
@@ -39,14 +41,16 @@ static alloc_block_fn alloc_block_fptrs[] = {
   alloc_block_rank0,
   alloc_block_rank1,
   alloc_block_rank2,
-  alloc_block_rank3
+  alloc_block_rank3,
+  alloc_block_rank4
 };
 
 static free_block_fn free_block_fptrs[] = {
   free_block_rank0,
   free_block_rank1,
   free_block_rank2,
-  free_block_rank3
+  free_block_rank3,
+  free_block_rank4
 };
 
 void *alloc_block_rank0 (const block_s* block)
@@ -59,11 +63,11 @@ void *alloc_block_rank0 (const block_s* block)
 void *alloc_block_rank1 (const block_s* block)
 {
   const uintptr_t n = (uintptr_t)&block[0];
-  void * ptr        = malloc(sizeof(uintptr_t) + sizeof(double));  
-  double *vec       = (ptr + sizeof (uintptr_t));
+  void * ptr        = malloc(sizeof(uintptr_t) + sizeof(double*));
+  double **vec      = (ptr + sizeof (uintptr_t));
 
   memcpy (ptr, &n, sizeof(uintptr_t));
-  vec = block->data;
+  *vec = block->data;
   return (void*)vec;
 }
 
@@ -108,6 +112,34 @@ void *alloc_block_rank3 (const block_s* block)
   return (void*)vec;
 }
 
+void *alloc_block_rank4 (const block_s* block)
+{
+  const size_t ni   = block->dimensions[0];
+  const size_t nj   = block->dimensions[1];
+  const size_t nk   = block->dimensions[2];
+  const size_t nl   = block->dimensions[3];
+  const uintptr_t n = (uintptr_t)&block[0];
+  size_t j          = 0;
+  size_t k          = 0;
+  size_t l          = 0;
+  void *ptr         = malloc(sizeof(uintptr_t) + sizeof(double***)*nl);  
+  double ****vec    = (ptr + sizeof (uintptr_t));
+
+  memcpy (ptr, &n, sizeof(uintptr_t));
+
+  for (l = 0; l < nl; ++l) {
+    vec[l] = malloc(sizeof(double**)*nk);
+    for (k = 0; k < nk; ++k) {
+      vec[l][k] = malloc(sizeof(double*)*nj);
+      for (j = 0; j < nj; ++j) {
+	vec[l][k][j] = block->data + (j*ni) + (k*nj*ni) + (l*nk*nj*ni);
+      }
+    }
+  }
+  
+  return (void*)vec;
+}
+
 void free_block_rank0   (void *ref)
 {
   UNUSED(ref);
@@ -116,16 +148,16 @@ void free_block_rank0   (void *ref)
 void free_block_rank1   (void *ref)
 {
   block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  free_reference_counted_data(&alloc->data);
-  void *ptr = ref - sizeof(uintptr_t); 
+  void *ptr = ref - sizeof(uintptr_t);
+
+  free_reference_counted_data(&alloc->data);  
   free (ptr);
 }
 
 void free_block_rank2   (void *ref)
 {
   block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  void *ptr            = ref - sizeof(uintptr_t);
-  
+  void *ptr      = ref - sizeof(uintptr_t);
   free_reference_counted_data(&alloc->data);
   free (ptr); 
 }
@@ -141,6 +173,26 @@ void free_block_rank3   (void *ref)
   free_reference_counted_data(&alloc->data);
   for (k = 0; k < nk; ++k) {
     free(vec[k]);
+  }
+  free (ptr); 
+}
+
+void free_block_rank4   (void *ref)
+{
+  block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
+  size_t nk            = alloc->dimensions[2];
+  size_t nl            = alloc->dimensions[3];
+  size_t k;
+  size_t l;
+  void *ptr            = ref - sizeof(uintptr_t);
+  double ****vec        = (double****)ref;
+  
+  free_reference_counted_data(&alloc->data);
+  for (l = 0; l < nl; ++l) {
+    for (k = 0; k < nk; ++k) {
+      free(vec[l][k]);
+    }
+    free(vec[l]);
   }
   free (ptr); 
 }
