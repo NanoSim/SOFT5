@@ -75,30 +75,27 @@ TEST_F(AllocatableTest, createAndReshape)
   softc_allocatable_free(alloc);
 }
 
-#if 0
-
-
-
-
 TEST_F(AllocatableTest, shallowCopy)
 {
-  double testA = 3.0;
-  double testB = 12.0;
-  double testC = 32.0;
-  double ***vec = (double***) softc_allocatable_allocatev(3, 300, 200, 89);
-  double ***copy = (double***) softc_allocatable_shallow_copy(vec);
+  auto v1 = softc_allocatable_createv(3, 300, 200, 89);
+  auto v2 = softc_allocatable_shallow_copy(v1);
+  double ***vec = (double***) softc_allocatable_data(v1);
+  double ***copy = (double***) softc_allocatable_data(v2);
 
-  vec[0][0][0] = testA;
-  vec[10][10][10] = testB;
-  vec[1][10][100] = testC;
+  vec[0][0][0] = 0.0;
+  vec[10][10][10] = 10.1010;
+  vec[1][10][100] = 1.10100;
 
   ASSERT_EQ(vec[0][0][0], copy[0][0][0]);
   ASSERT_EQ(vec[10][10][10], copy[10][10][10]);
   ASSERT_EQ(vec[1][10][100], copy[1][10][100]);
 
-  softc_allocatable_free(vec);
-  softc_allocatable_free(copy);
+  softc_allocatable_free(v1);
+  softc_allocatable_free(v2);
 }
+
+#if 0
+
 
 TEST_F(AllocatableTest, reshape)
 {

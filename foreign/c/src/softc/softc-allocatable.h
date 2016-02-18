@@ -14,6 +14,7 @@ void                 softc_allocatable_free(softc_allocatable_s *);
 void                *softc_allocatable_data(softc_allocatable_s *);
 void                 softc_allocatable_dimensions(const softc_allocatable_s *, size_t *rank, size_t **dims);
 void                 softc_allocatable_reshape(softc_allocatable_s *, size_t rank, const size_t dims[]);
+softc_allocatable_s *softc_allocatable_shallow_copy(const softc_allocatable_s *);
 SOFTC_END_DECLS
 
 #endif /* SOFTC_ALLOCATABLE_H_DEF */

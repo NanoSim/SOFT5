@@ -177,3 +177,11 @@ void softc_allocatable_reshape(softc_allocatable_s *self, size_t rank, const siz
   softc_block_reshape(self->block, rank, dims);
   alloc_fptrs[self->block->rank-1](self);
 }
+
+softc_allocatable_s *softc_allocatable_shallow_copy(const softc_allocatable_s *orig)
+{
+  softc_allocatable_s *allocatable = malloc(sizeof *allocatable);
+  size_t rank = orig->block->rank;
+  allocatable->block = softc_block_shallow_copy(orig->block);
+  return alloc_fptrs[rank-1](allocatable);
+}

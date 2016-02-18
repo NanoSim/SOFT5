@@ -67,6 +67,18 @@ softc_block_s *softc_block_create(size_t rank, const size_t dims[])
   return block;
 }
 
+softc_block_s *softc_block_shallow_copy(const softc_block_s *orig)
+{
+  softc_block_s *block = malloc(sizeof *block);
+  size_t         size  = sizeof(*block->dims)*orig->rank;
+  block->rank = orig->rank;
+  block->dims = malloc(size);
+  memcpy(block->dims, orig->dims, size);
+  inc((void**)&orig->data);
+  block->data = orig->data;
+  return block;
+}
+
 softc_block_s *softc_block_create_type(size_t rank, const size_t dims[], size_t type_size)
 {
   assert(rank > 0);
