@@ -85,14 +85,6 @@ else ()
   set(PATH "${library_path}")
 endif()
 
-# Install targets
-set (SOFTBASE lib/${PROJECT_NAME})
-set (STORAGE_PLUGINS_INSTALL_DIR ${SOFTBASE}/storage)
-set (SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
-set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
-set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
-set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
-
 # Make sure that we install 64-bit libraries in lib64 on systems that
 # use this convention
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
@@ -104,6 +96,14 @@ endif()
 set(LIB_INSTALL_DIR lib${LIBSUFFIX} CACHE PATH 
   "Installation directory for libraries")
 mark_as_advanced(LIB_INSTALL_DIR)
+
+# Install targets
+set (SOFTBASE ${LIB_INSTALL_DIR}/${PROJECT_NAME})
+set (STORAGE_PLUGINS_INSTALL_DIR ${SOFTBASE}/storage)
+set (SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
+set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
+set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
+set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
 
 ######################
