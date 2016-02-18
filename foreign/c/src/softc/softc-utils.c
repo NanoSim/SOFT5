@@ -6,10 +6,13 @@
 size_t
 softc_strlen (const char *str)
 {
-   return strlen(str);
+  return strlen(str);
 }
 
-size_t
+void
 softc_strfreev (char **str)
 {
+  char **p;
+  for (p=str; *p; p++) free(*p);
+  free(str);
 }

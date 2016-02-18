@@ -277,7 +277,7 @@
     softpy_entity_error = 1;
   }
 
-  static void softpy_load(const softc_entity_t *ptr, 
+  static void softpy_load(softc_entity_t *ptr, 
 			  const softc_datamodel_t *datamodel)
   {
     const softpy_entity_t *self = (const softpy_entity_t *)ptr;

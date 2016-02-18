@@ -51,7 +51,7 @@ static const char * get_meta_version(const softc_entity_t *ptr)
 static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
 {}
 
-static void load (const softc_entity_t *ptr, const softc_datamodel_t *data_model)
+static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
 {}
 
 static const char ** get_dimensions(const softc_entity_t *ptr, size_t *size)

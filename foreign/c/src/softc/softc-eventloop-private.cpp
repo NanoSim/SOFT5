@@ -18,6 +18,6 @@ int softc_eventloop_private_exec(struct _softc_eventloop_t* e)
 
 void softc_eventloop_private_destroy(struct _softc_eventloop_t* e)
 {
-  QEventLoop *eventLoop = (QEventLoop*)e->eventLoop;
+  //QEventLoop *eventLoop = (QEventLoop*)e->eventLoop;
   
 }
