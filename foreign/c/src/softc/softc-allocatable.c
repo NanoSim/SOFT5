@@ -1,380 +1,179 @@
-#include <assert.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdarg.h>
+#include <assert.h>
 
+#include "softc-block.h"
+#include "softc-block-private.h"
 #include "softc-allocatable.h"
 
 #define MAX_RANK 4
-#define UNUSED(arg) (void)arg;
 
-typedef struct {
-  size_t rank;
-  size_t *dimensions;
-  double *data;
-} block_s;
-
-typedef struct {
-  size_t rank;
-  size_t *dimensions;
-  int32_t *data;
-} blocki32_s;
-
-void *alloc_block_rank0 (const block_s*);
-void *alloc_block_rank1 (const block_s*);
-void *alloc_block_rank2 (const block_s*);
-void *alloc_block_rank3 (const block_s*);
-void *alloc_block_rank4 (const block_s*);
-void free_block_rank0   (void *);
-void free_block_rank1   (void *);
-void free_block_rank2   (void *);
-void free_block_rank3   (void *);
-void free_block_rank4   (void *);
-void free_reference_counted_data(double **data);
-
-typedef void*(*alloc_block_fn)(const block_s*);
-typedef void(*free_block_fn)(void*);
-
-static alloc_block_fn alloc_block_fptrs[] = {
-  alloc_block_rank0,
-  alloc_block_rank1,
-  alloc_block_rank2,
-  alloc_block_rank3,
-  alloc_block_rank4
+struct _softc_allocatable_s
+{
+  softc_block_s *block;
+  void          *data;
 };
 
-static free_block_fn free_block_fptrs[] = {
-  free_block_rank0,
-  free_block_rank1,
-  free_block_rank2,
-  free_block_rank3,
-  free_block_rank4
-};
-
-void *alloc_block_rank0 (const block_s* block)
+static softc_allocatable_s* alloc_rank1(softc_allocatable_s* alloc)
 {
-  fprintf(stderr, "rank 0 is undefined\n");
-  UNUSED(block);
-  return NULL;
+  alloc->data = (void*)softc_block_data(alloc->block);
+  return alloc;
 }
 
-void *alloc_block_rank1 (const block_s* block)
+static softc_allocatable_s* alloc_rank2(softc_allocatable_s* alloc)
 {
-  const uintptr_t n = (uintptr_t)&block[0];
-  void * ptr        = malloc(sizeof(uintptr_t) + sizeof(double*));
-  double **vec      = (ptr + sizeof (uintptr_t));
-
-  memcpy (ptr, &n, sizeof(uintptr_t));
-  *vec = block->data;
-  return (void*)vec;
-}
-
-void *alloc_block_rank2 (const block_s* block)
-{
-  const size_t ni   = block->dimensions[0];
-  const size_t nj   = block->dimensions[1];
-  const uintptr_t n = (uintptr_t)&block[0];
-  size_t j          = 0;
-  void *ptr         = malloc(sizeof(uintptr_t) + sizeof(double*)*nj);  
-  double **vec      = (ptr + sizeof (uintptr_t));
-
-  memcpy (ptr, &n, sizeof(uintptr_t));
-  
+  const size_t *dims = softc_block_dims(alloc->block);
+  const size_t nj = dims[1];
+  const size_t ni = dims[0];
+  size_t j;
+  double **vec = malloc(sizeof(*vec) * nj);  
   for (j = 0; j < nj; ++j) {
-    vec[j] = block->data + (j * ni);
+    vec[j] = (double*)alloc->block->data + (j*ni);
   }
-
-  return (void*)vec;
+  alloc->data = (void*)vec;
+  return alloc;
 }
 
-void *alloc_block_rank3 (const block_s* block)
+static softc_allocatable_s* alloc_rank3(softc_allocatable_s* alloc)
 {
-  const size_t ni   = block->dimensions[0];
-  const size_t nj   = block->dimensions[1];
-  const size_t nk   = block->dimensions[2];
-  const uintptr_t n = (uintptr_t)&block[0];
-  size_t j          = 0;
-  size_t k          = 0;
-  void *ptr         = malloc(sizeof(uintptr_t) + sizeof(double**)*nk);  
-  double ***vec     = (ptr + sizeof (uintptr_t));
-
-  memcpy (ptr, &n, sizeof(uintptr_t));
-
+  const size_t nk = alloc->block->dims[2];
+  const size_t nj = alloc->block->dims[1];
+  const size_t ni = alloc->block->dims[0];
+  size_t j, k;
+  double ***vec = malloc(sizeof(*vec) * nk);
   for (k = 0; k < nk; ++k) {
-    vec[k] = malloc(sizeof(double*)*nj);
+    vec[k] = malloc(sizeof(**vec) * nj);
     for (j = 0; j < nj; ++j) {
-      vec[k][j] = block->data + (j*ni) + (k*nj*ni);
+      vec[k][j] = (double*)alloc->block->data + (j*ni) + (k*ni*nj);
     }
   }
-  
-  return (void*)vec;
+  alloc->data = (void*)vec;
+  return alloc;
 }
 
-void *alloc_block_rank4 (const block_s* block)
+static softc_allocatable_s* alloc_rank4(softc_allocatable_s* alloc)
 {
-  const size_t ni   = block->dimensions[0];
-  const size_t nj   = block->dimensions[1];
-  const size_t nk   = block->dimensions[2];
-  const size_t nl   = block->dimensions[3];
-  const uintptr_t n = (uintptr_t)&block[0];
-  size_t j          = 0;
-  size_t k          = 0;
-  size_t l          = 0;
-  void *ptr         = malloc(sizeof(uintptr_t) + sizeof(double***)*nl);  
-  double ****vec    = (ptr + sizeof (uintptr_t));
+  const size_t ni = alloc->block->dims[0];
+  const size_t nj = alloc->block->dims[1];
+  const size_t nk = alloc->block->dims[2];
+  const size_t nl = alloc->block->dims[3];
 
-  memcpy (ptr, &n, sizeof(uintptr_t));
-
+  size_t j, k, l;
+  double ****vec = malloc(sizeof(*vec) * nl);
   for (l = 0; l < nl; ++l) {
-    vec[l] = malloc(sizeof(double**)*nk);
+    vec[l] = malloc(sizeof(***vec) * nk);
     for (k = 0; k < nk; ++k) {
-      vec[l][k] = malloc(sizeof(double*)*nj);
+      vec[l][k] = malloc(sizeof(**vec) * nj);
       for (j = 0; j < nj; ++j) {
-	vec[l][k][j] = block->data + (j*ni) + (k*nj*ni) + (l*nk*nj*ni);
+	vec[l][k][j] = (double*)alloc->block->data + (j*ni) + (k*ni*nj) + (l*ni*nj*nk);
       }
     }
   }
-  
-  return (void*)vec;
+  alloc->data = (void*)vec;
+  return alloc;
 }
 
-void free_block_rank0   (void *ref)
+static void free_rank1(softc_allocatable_s* alloc)
 {
-  UNUSED(ref);
+  (void)(alloc);
 }
 
-void free_block_rank1   (void *ref)
+static void free_rank2(softc_allocatable_s* alloc)
 {
-  block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  void *ptr = ref - sizeof(uintptr_t);
-
-  free_reference_counted_data(&alloc->data);  
-  free (ptr);
+  double **vec = alloc->data;
+  free(vec);
 }
 
-void free_block_rank2   (void *ref)
+static void free_rank3(softc_allocatable_s* alloc)
 {
-  block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  void *ptr      = ref - sizeof(uintptr_t);
-  free_reference_counted_data(&alloc->data);
-  free (ptr); 
-}
-
-void free_block_rank3   (void *ref)
-{
-  block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  size_t nk            = alloc->dimensions[2];
+  const size_t nk = alloc->block->dims[2];
   size_t k;
-  void *ptr            = ref - sizeof(uintptr_t);
-  double ***vec        = (double***)ref;
-  
-  free_reference_counted_data(&alloc->data);
+  double ***vec = alloc->data;
   for (k = 0; k < nk; ++k) {
     free(vec[k]);
   }
-  free (ptr); 
+  free(vec);
 }
 
-void free_block_rank4   (void *ref)
+static void free_rank4(softc_allocatable_s* alloc)
 {
-  block_s *alloc = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  size_t nk            = alloc->dimensions[2];
-  size_t nl            = alloc->dimensions[3];
-  size_t k;
-  size_t l;
-  void *ptr            = ref - sizeof(uintptr_t);
-  double ****vec        = (double****)ref;
-  
-  free_reference_counted_data(&alloc->data);
+  const size_t nk = alloc->block->dims[2];
+  const size_t nl = alloc->block->dims[3];
+  size_t k, l;
+  double ***vec = alloc->data;
   for (l = 0; l < nl; ++l) {
     for (k = 0; k < nk; ++k) {
       free(vec[l][k]);
     }
     free(vec[l]);
   }
-  free (ptr); 
+  free(vec);
 }
 
-/*
- * Decrement the reference counter one size_t ahead of the
- * vector-memory. When counter reaches 0, free the entire block
- */
-void free_reference_counted_data(double **data)
+typedef softc_allocatable_s*(*alloc_fptr)(softc_allocatable_s*);
+typedef void(*free_fptr)(softc_allocatable_s*);
+
+static alloc_fptr alloc_fptrs[] = {
+  alloc_rank1,
+  alloc_rank2,
+  alloc_rank3,
+  alloc_rank4
+};
+static free_fptr free_fptrs[] = {
+  free_rank1,
+  free_rank2,
+  free_rank3,
+  free_rank4
+};
+
+softc_allocatable_s *softc_allocatable_create(size_t rank, const size_t dims[])
 {
-  void *ref = (void*)*data;
-  size_t *ref_count = (size_t*)(ref - sizeof(size_t));
-  if (*ref_count > 0) {
-    *ref_count -= 1;
-  } else {
-    free ((void*)ref_count);
-    *data = NULL;
-  }  
+  assert(rank > 0 && rank <= MAX_RANK);
+
+  softc_allocatable_s *allocatable = malloc(sizeof *allocatable);
+  allocatable->block = softc_block_create_type(rank, dims, sizeof(double*));
+  return alloc_fptrs[rank-1](allocatable);
 }
 
-void *allocate_dims(block_s *alloc)
+softc_allocatable_s *softc_allocatable_createv(const size_t rank, ...)
 {
-  void *ptr = 0;
-  size_t dims = 1;
-  size_t i;
-  const size_t ref_counter = 0;
+  assert(rank > 0 && rank <= MAX_RANK);
 
-  assert(alloc->rank > 0 && alloc->rank <= MAX_RANK);
-  
-  for (i = 0; i < alloc->rank; ++i) {
-    dims *= alloc->dimensions[i];
-  }
-
-  ptr = malloc(sizeof(size_t) + sizeof(double)*dims);
-  memcpy(ptr, &ref_counter, sizeof(size_t));
-  alloc->data = (ptr + sizeof(size_t));
-  return alloc_block_fptrs[alloc->rank](alloc);
-}
-
-/*
- * Allocate a multidimensional (row-major order) array represented
- * internally as a rank one array for iso_c_binding interoperability.
- * \sa allocatev
- */
-void *softc_allocatable_allocate(const size_t *dimensions, const size_t rank)
-{
-  block_s *a = malloc(sizeof *a);
-  a->rank = rank;
-  a->dimensions = malloc(sizeof (*a->dimensions) * rank);
-  memcpy(a->dimensions, dimensions, sizeof (*a->dimensions) * rank);
-  return allocate_dims(a);
-}
-
-/*
- * Allocate a multidimensional (row-major order) array represented
- * internally as a rank one array for iso_c_binding interoperability.
- * \sa allocate
- */
-void *softc_allocatable_allocatev(const size_t ndims, ...)
-{
   size_t i;
   va_list vl;
-  block_s *a;
-  size_t d;
-  a = malloc(sizeof *a);
-  va_start(vl, ndims);
-  a->rank = ndims;
-  a->dimensions = malloc(sizeof (*a->dimensions)*ndims);
-  for (i = 0; i < ndims; i++) {
-    d = va_arg(vl, const size_t);
-    a->dimensions[i] = d;
-  }
-
-  va_end(vl);
-  return allocate_dims(a);
-}
-
-/*
- * Reshapes a block to a new rank/dimension. The total number of array items
- * must match the source. The original data is reference counted.
- */
-void *softc_allocatable_reshape(const void *source, const size_t *dims, const size_t rank)
-{
-  block_s *copy = malloc(sizeof *copy);
-  size_t *ref_counter;
-  const block_s *alloc = (const block_s *)(*(uintptr_t*)(source - sizeof(uintptr_t)));
-  copy->rank = rank;
-  copy->dimensions = malloc(sizeof (*copy->dimensions)*rank);
-  memcpy(copy->dimensions, dims, sizeof (*copy->dimensions)*rank);
-
-  ref_counter = (size_t*)((void*)alloc->data - sizeof(size_t));
-  *ref_counter += 1;
-
-  copy->data = alloc->data;
-  return alloc_block_fptrs[copy->rank](copy);
-}
-
-
-/*
- * Reshapes a block to a new rank/dimension. The total number of array items
- * must match the source. The original data is reference counted.
- */
-void *softc_allocatable_reshapev(const void *source, const size_t rank, ...)
-{
-  size_t i;
-  va_list vl;
-  block_s *copy = malloc(sizeof *copy);
-  size_t *ref_counter;
-  const block_s *alloc = (const block_s *)(*(uintptr_t*)(source - sizeof(uintptr_t)));
-    
   va_start(vl, rank);
-  copy->rank = rank;
-  copy->dimensions = malloc(sizeof (*copy->dimensions)*rank);
-  for (i = 0; i < rank; i++) {   
-    copy->dimensions[i] = va_arg(vl, const size_t);
+  size_t dims[MAX_RANK];
+  for (i = 0; i < rank; i++) {
+    dims[i] = va_arg(vl, const size_t);
   }
   va_end(vl);
-
-  ref_counter = (size_t*)((void*)alloc->data - sizeof(size_t));
-  *ref_counter += 1;
-
-  copy->data = alloc->data;
-  return alloc_block_fptrs[copy->rank](copy);
+  return softc_allocatable_create(rank, dims);
 }
 
-/*
- * Create a shallow copy reference of an allocatable. The original
- * data is reference counted.
- */
-void* softc_allocatable_shallow_copy(const void *ref)
+void softc_allocatable_free(softc_allocatable_s *self)
 {
-  const block_s *alloc = (const block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  
-  block_s *copy = malloc(sizeof *copy);
-  size_t *ref_counter;
-  copy->rank = alloc->rank;
-  copy->dimensions = malloc(sizeof (*copy->dimensions) * copy->rank);
-  memcpy(copy->dimensions, alloc->dimensions, sizeof (*copy->dimensions) * copy->rank);
-
-  ref_counter = (size_t*)((void*)alloc->data - sizeof(size_t));
-  *ref_counter += 1;
-  copy->data = alloc->data;
-  return alloc_block_fptrs[copy->rank](copy);
+  free_fptrs[self->block->rank-1](self);
+  softc_block_free(self->block);
+  free(self);
 }
 
-/*
- * Free the memory of an allocatable
- */
-void softc_allocatable_free(void* ref)
+void *softc_allocatable_data(softc_allocatable_s *self)
 {
-  block_s *a = (block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  free_block_fptrs[a->rank](ref);
-  if (a->dimensions != NULL) free(a->dimensions);  
-  free (a);
+  return self->data;
 }
 
-/*
- * Display properties of the allocatable reference.
- */
-void  softc_allocatable_info (const void *ref)
+void softc_allocatable_dimensions(const softc_allocatable_s *self, size_t *rank, size_t **dims)
 {
-  size_t r;
-  const block_s *a = (const block_s *)(*(uintptr_t*)(ref - sizeof(uintptr_t)));
-  printf("rank: %zu, ", a->rank);
-  printf("dims: [");
-  for (r = 0; r < a->rank; ++r) {
-    if (r > 0) (printf(", "));
-    printf("%zu", a->dimensions[r]);
-  }
-  printf("]\n");
+  *rank = self->block->rank;
+  *dims = self->block->dims;
 }
 
-size_t softc_allocatable_rank (const void *source)
+void softc_allocatable_reshape(softc_allocatable_s *self, size_t rank, const size_t dims[])
 {
-  const block_s *a = (const block_s *)(*(uintptr_t*)(source - sizeof(uintptr_t)));
-  return a->rank;
-}
-
-void softc_allocatable_dimensions (const void *source, size_t **dims, size_t *rank)
-{
-  const block_s *a = (const block_s *)(*(uintptr_t*)(source - sizeof(uintptr_t)));
-  (*dims) = malloc(a->rank);
-  memcpy ((*dims), a->dimensions, sizeof(size_t)*a->rank);
-  *rank = a->rank;
+  free_fptrs[self->block->rank-1](self);
+  softc_block_reshape(self->block, rank, dims);
+  alloc_fptrs[self->block->rank-1](self);
 }

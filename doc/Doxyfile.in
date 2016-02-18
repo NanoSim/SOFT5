@@ -756,7 +756,7 @@ WARN_LOGFILE           =
 INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/frontpage.md \
                          @CMAKE_CURRENT_SOURCE_DIR@/../core \
                          @CMAKE_CURRENT_SOURCE_DIR@/../storage \
-			 @CMAKE_CURRENT_SOURCE_DIR@/foreign \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../foreign \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../numerics \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../tools
 

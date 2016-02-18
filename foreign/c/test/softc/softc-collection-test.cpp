@@ -1,3 +1,4 @@
+#ifdef RUN_COLLECTION
 #include <gtest/gtest.h>
 #include <softc/softc-utils.h>
 #include <softc/softc-entity.h>
@@ -30,3 +31,5 @@ TEST_F (SoftC_CollectionTest, store1)
   softc_collection_free(coll);
   foo_free(foo);
 }
+
+#endif

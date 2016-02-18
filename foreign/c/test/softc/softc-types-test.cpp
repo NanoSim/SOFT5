@@ -1,3 +1,4 @@
+#ifdef RUN_TYPESTEST
 #include <gtest/gtest.h>
 #include <cstdlib>
 #include <softc/softc-types.h>
@@ -66,3 +67,4 @@ TEST_F(SoftC_TypesTest, double_array_foreach)
   softc_double_array_free(&da);
   delete f;
 }
+#endif

@@ -1,3 +1,5 @@
+#ifdef RUN_ENTITY_TEST
+
 #include <gtest/gtest.h>
 #include <cstdlib>
 #include <softc/softc-utils.h>
@@ -44,3 +46,5 @@ TEST_F(SoftC_EntityTest, construct)
   free(arr);
   foo_free(foo);
 }
+
+#endif
