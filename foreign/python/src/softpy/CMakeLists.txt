@@ -35,7 +35,29 @@ swig_add_module(softpy python softpy.i)
 swig_link_libraries(softpy softc ${PYTHON_LIBRARIES})
 
 
+# Install, Python module, follow the solution at
+# http://developer.intra2net.com/git/?p=libftdi;a=blob;f=python/CMakeLists.txt;h=93410544fac2a45eec51cb8dd344708b3bbdfe67;hb=HEAD
+if(UNIX)
+  set(pyext_ext ".so")
+else()
+  set(pyext_ext ".pyd")
+endif()
 
-#install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
-#install(DIRECTORY . DESTINATION include/soft5/softc FILES_MATCHING PATTERN "*.h")
+execute_process(COMMAND 
+  ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print(sysconfig.get_python_lib(plat_specific=True, prefix='${CMAKE_INSTALL_PREFIX}'))"
+  OUTPUT_VARIABLE _ABS_PYTHON_MODULE_PATH
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+get_filename_component(_ABS_PYTHON_MODULE_PATH 
+  ${_ABS_PYTHON_MODULE_PATH} ABSOLUTE)
+file(RELATIVE_PATH _REL_PYTHON_MODULE_PATH 
+  ${CMAKE_INSTALL_PREFIX} ${_ABS_PYTHON_MODULE_PATH})
+
+set(PYTHON_MODULE_PATH
+  ${_REL_PYTHON_MODULE_PATH}
+  )
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_softpy${pyext_ext}
+  DESTINATION ${PYTHON_MODULE_PATH})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/softpy.py
+  DESTINATION ${PYTHON_MODULE_PATH})

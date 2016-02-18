@@ -93,6 +93,22 @@ set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
+# Make sure that we install 64-bit libraries in lib64 on systems that
+# use this convention
+get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+if ("${LIB64}" STREQUAL "TRUE")
+  set(LIBSUFFIX 64)
+else()
+  set(LIBSUFFIX "")
+endif()
+set(LIB_INSTALL_DIR lib${LIBSUFFIX} CACHE PATH 
+  "Installation directory for libraries")
+mark_as_advanced(LIB_INSTALL_DIR)
+
+
+######################
+# Add subdirectories
+######################
 
 # Core library
 add_subdirectory(core/src/kernel)
@@ -153,7 +169,6 @@ endif(WITH_WEB)
 
 
 # Foreign
-
 if (WITH_FOREIGN_C)
   add_subdirectory(foreign/c/src/softc)
   if (WITH_TESTS)
