@@ -7,18 +7,25 @@ set (SRC_LIST ${SRC_LIST})
 
 # Run a json entity through the soft-forge code generator to create
 # a header and source file
-function (add_forge entity output_src output_hdr)
+function (add_forge entity output_src output_hdr output_f90)
+  add_custom_command(
+    OUTPUT ${output_f90}
+    COMMAND soft-forge ${entity} ${F90_MODULE_TEMPLATE} ${output_f90}
+    DEPENDS ${entity} ${F90_MODULE_TEMPLATE} 
+    )
+
   add_custom_command(
     OUTPUT ${output_hdr}
     COMMAND soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}
-    DEPENDS ${entity} ${C_HEADER_TEMPLATE}
+    DEPENDS ${entity} ${C_HEADER_TEMPLATE} ${output_f90}
     )
 
   add_custom_command(
     OUTPUT ${output_src}
     COMMAND soft-forge ${entity} ${C_SOURCE_TEMPLATE} ${output_src}
     DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr}
-    )  
+    )
+
 endfunction()
 
 
@@ -28,9 +35,11 @@ FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.json)
 foreach(JSON_SRC ${json-sources})
   string(REGEX REPLACE "\.json$" ".c" GEN_SRC ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
+  string(REGEX REPLACE "\.json$" ".f90" GEN_F90 ${JSON_SRC})
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
     ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR})
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_F90})
   list(APPEND SRC_LIST ${GEN_SRC})  
 endforeach(JSON_SRC ${json-sources})
 

@@ -23,9 +23,14 @@ using StdBool        = bool;
 using StdBlob        = std::vector<unsigned char>;
 using StdStringList  = std::vector<StdString>;
 using StdIntArray    = std::vector<StdInt>;
+using StdIntArray2D  = std::vector<StdIntArray>;
+using StdIntArray3D  = std::vector<StdIntArray2D>;
+using StdIntArray4D  = std::vector<StdIntArray3D>;
 using StdDoubleArray = std::vector<StdDouble>;
 using StdDoubleArray2D = std::vector<StdDoubleArray>;
 using StdDoubleArray3D = std::vector<StdDoubleArray2D>;
+using StdDoubleArray4D = std::vector<StdDoubleArray3D>;
+
 
 template <> struct VariantType<StdString>        {enum {value = 0};};
 template <> struct VariantType<StdInt>           {enum {value = 1};};  
@@ -42,9 +47,13 @@ template <> struct VariantType<StdBool>          {enum {value = 11};};
 template <> struct VariantType<StdBlob>          {enum {value = 12};};
 template <> struct VariantType<StdStringList>    {enum {value = 13};};
 template <> struct VariantType<StdIntArray>      {enum {value = 14};};
-template <> struct VariantType<StdDoubleArray>   {enum {value = 15};};
-template <> struct VariantType<StdDoubleArray2D> {enum {value = 16};};
-template <> struct VariantType<StdDoubleArray3D> {enum {value = 17};};
+template <> struct VariantType<StdIntArray2D>    {enum {value = 16};};
+template <> struct VariantType<StdIntArray3D>    {enum {value = 17};};
+template <> struct VariantType<StdIntArray4D>    {enum {value = 18};};
+template <> struct VariantType<StdDoubleArray>   {enum {value = 19};};
+template <> struct VariantType<StdDoubleArray2D> {enum {value = 20};};
+template <> struct VariantType<StdDoubleArray3D> {enum {value = 21};};
+template <> struct VariantType<StdDoubleArray4D> {enum {value = 22};};
 
 enum StdTypes { String = VariantType<StdString>::value,
 		Int = VariantType<StdInt>::value,
@@ -61,30 +70,38 @@ enum StdTypes { String = VariantType<StdString>::value,
 		Blob = VariantType<StdBlob>::value,
 		StringList = VariantType<StdStringList>::value,
 		IntArray = VariantType<StdIntArray>::value,
+		IntArray2D = VariantType<StdIntArray2D>::value,
+		IntArray3D = VariantType<StdIntArray3D>::value,
+		IntArray4D = VariantType<StdIntArray4D>::value,
 		DoubleArray = VariantType<StdDoubleArray>::value,
 		DoubleArray2D = VariantType<StdDoubleArray2D>::value,
-		DoubleArray3D = VariantType<StdDoubleArray2D>::value
+		DoubleArray3D = VariantType<StdDoubleArray3D>::value,
+		DoubleArray4D = VariantType<StdDoubleArray4D>::value
 
 };
 
 using StdVariant = Variant<StdString,
-			   StdInt,
-			   StdUInt,
-			   StdInt8,
-			   StdUInt8,
-			   StdInt16,
-			   StdUInt16,
-			   StdInt64,
-			   StdUInt64,
-			   StdFloat,
-			   StdDouble,
-			   StdBool,
-			   StdBlob,
-			   StdStringList,
-			   StdIntArray,
-			   StdDoubleArray,
-			   StdDoubleArray2D,
-			   StdDoubleArray3D>;
+  StdInt,
+  StdUInt,
+  StdInt8,
+  StdUInt8,
+  StdInt16,
+  StdUInt16,
+  StdInt64,
+  StdUInt64,
+  StdFloat,
+  StdDouble,
+  StdBool,
+  StdBlob,
+  StdStringList,
+  StdIntArray,
+  StdIntArray2D,
+  StdIntArray3D,
+  StdIntArray4D,
+  StdDoubleArray,
+  StdDoubleArray2D,
+  StdDoubleArray3D,
+  StdDoubleArray4D>;
 
 SOFT_END_NAMESPACE
 

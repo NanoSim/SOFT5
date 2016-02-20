@@ -76,6 +76,15 @@ bool softc_datamodel_append_array_int32  (softc_datamodel_t *model, const char *
   return softc_datamodel_private_append_array_int32(model, key, value, size);
 }
 
+bool softc_datamodel_append_array_int32_2d  (softc_datamodel_t *model, const char *key, const int32_t **value, size_t size_i, size_t size_j)
+{
+  return softc_datamodel_private_append_array_int32_2d(model, key, value, size_i, size_j);
+}
+bool softc_datamodel_append_array_int32_3d  (softc_datamodel_t *model, const char *key, const int32_t ***value, size_t size_i, size_t size_j, size_t size_k)
+{
+  return softc_datamodel_private_append_array_int32_3d(model, key, value, size_i, size_j, size_k);
+}
+
 bool softc_datamodel_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size)
 {
   return softc_datamodel_private_append_array_double(model, key, value, size);
@@ -164,6 +173,16 @@ bool softc_datamodel_get_string_list   (const softc_datamodel_t *model, const ch
 bool softc_datamodel_get_array_int32  (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size)
 {
   return softc_datamodel_private_get_array_int32 (model, key, value, size);
+}
+
+bool softc_datamodel_get_array_int32_2d  (const softc_datamodel_t *model, const char *key, int32_t ***value, size_t *size_i, size_t *size_j)
+{
+  return softc_datamodel_private_get_array_int32_2d (model, key, value, size_i, size_j);
+}
+
+bool softc_datamodel_get_array_int32_3d  (const softc_datamodel_t *model, const char *key, int32_t ****value, size_t *size_i, size_t *size_j, size_t *size_k)
+{
+  return softc_datamodel_private_get_array_int32_3d (model, key, value, size_i, size_j, size_k);
 }
 
 bool softc_datamodel_get_array_double (const softc_datamodel_t *model, const char *key, double **value, size_t *size)

@@ -184,6 +184,16 @@ bool softc_datamodel_private_append_array_int32  (softc_datamodel_t *model, cons
   return false;
 }
 
+bool softc_datamodel_private_append_array_int32_2d  (softc_datamodel_t *model, const char *key, const int32_t **value, size_t size_i, size_t size_j)
+{
+  return false;
+}
+
+bool softc_datamodel_private_append_array_int32_3d  (softc_datamodel_t *model, const char *key, const int32_t ***value, size_t size_i, size_t size_j, size_t size_k)
+{
+  return false;
+}
+
 bool softc_datamodel_private_append_array_double (softc_datamodel_t *model, const char *key, const double *value, size_t size)
 {
   if (model->ref) {
@@ -447,6 +457,16 @@ bool softc_datamodel_private_get_array_int32 (const softc_datamodel_t *model, co
       return true;
     }
   }
+  return false;
+}
+
+bool softc_datamodel_private_get_array_int32_2d (const softc_datamodel_t *model, const char *key, int32_t ***value, size_t *size_i, size_t *size_j)
+{
+  return false;
+}
+
+bool softc_datamodel_private_get_array_int32_3d (const softc_datamodel_t *model, const char *key, int32_t ****value, size_t *size_i, size_t *size_j, size_t *size_k)
+{
   return false;
 }
 

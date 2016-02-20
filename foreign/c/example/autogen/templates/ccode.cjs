@@ -1,5 +1,7 @@
 @{
     var capi = require('soft.forge.capi');
+    entity = soft.model.name.toLowerCase();
+    ENTITY = soft.model.name.toUpperCase();
     
     constructorArgs = (function(){
 	var args = [];	
@@ -11,6 +13,15 @@
 	return args;
     })();
 
+    dimensions = (function(){
+      var d = [];
+      if (soft.model.dimensions != undefined) {
+	soft.model.dimensions.forEach(function(dim){
+	  d.push(dim.name);
+	});
+      }
+      return d;
+    })();
     attributes = (function(){
 	var attr = [];
 	soft.model.properties.forEach(function (entry){
@@ -122,6 +133,14 @@
 	return getList;
     })();
 
+    quote = function(list) {
+      var ql = [];
+      list.forEach(function(list){
+	ql.push("\"" + list + "\"");
+      });
+      return ql;
+    };
+  
     paren = function(list) {
 	var plist = [];
 	list.forEach(function(entry){
@@ -136,12 +155,25 @@
 	    if (entry.rank == 0) {
 		as.push("0");
 	    } else {
-		as.push("softc_allocatable_allocatev(" + entry.rank + ", " + paren(entry.dims).join(",") + ")");
+	      as.push("(" + entry.type + capi.dims_to_ptr(entry.rank) + ")softc_allocatable_data(alloc->" + entry.name + ")");
 	    }
 	});
 	return as;
     })();
 
+    getDataFunctions = (function(){
+	var as = [];
+	attributes.forEach(function(entry){
+            if (entry.rank > 0) {
+		as.push(entry.type + capi.dims_to_ptr(entry.rank) + " " + entity + "_get_" + entry.name + " (" + entity + "_s *self)\n{");
+		as.push("  return softc_allocatable_data(self->allocs->" + entry.name + ");");
+		as.push("}");
+	    }
+	});
+	as.push("\n");
+	return as;
+    })();
+    
     zeroAttrInitList = (function(){
 	var as = [];
 	attributes.forEach(function(entry){
@@ -196,7 +228,7 @@
 	var as = [];
 	attributes.forEach(function(entry){
 	    if (entry.rank > 0) {
-		as.push("softc_allocatable_free(self->props." + entry.name+ ")");
+		as.push("softc_allocatable_free(" + entry.type + ", self->allocs->" + entry.name+ ")");
 	    }
 	});
 	return as;
@@ -212,9 +244,61 @@
 	return ds;
     })();
 
-    entity = soft.model.name.toLowerCase();
-    ENTITY = soft.model.name.toUpperCase();
-    
+    allocDeclList = (function(){
+	var as = [];
+	attributes.forEach(function(entry){
+	 if (entry.rank > 0) {
+	    as.push("softc_allocatable_s *" + entry.name + ";");
+	    }
+	});
+	return as;
+    })();
+
+
+    initDataAllocatables = (function(){
+    	var as = [];
+      attributes.forEach(function(entry){
+	if (entry.rank > 0) {
+	  as.push("alloc->" + entry.name + "=" + "softc_allocatable_createv(" + entry.type + ", " + entry.rank + ", " + paren(entry.dims).join(",") + ");");
+	}
+      });
+      
+      return as;
+    })();
+
+  getDimensionsBody = (function(){
+    var as  = [];
+
+    if (soft.model.dimensions == undefined) {
+      as.push("  *size = 0;");
+      as.push("  return NULL;");      
+    } else {
+      var dimlength = soft.model.dimensions.length.toString();
+      as.push(entity + "_s *self = (" + entity + "_s*) ptr;");
+      as.push("const size_t ndims = " + dimlength + ";");
+      as.push("size_t i;");
+      as.push("char **dl = malloc(sizeof (*dl) * ndims);");
+      soft.model.dimensions.forEach(function(dim, idx){
+	as.push("dl["+idx+"] = malloc(sizeof(**dl) * " + (dim.name.length+1).toString() + ");");
+	as.push("strcpy(dl["+idx+"], \"" + dim.name + "\");");
+      });
+      as.push("*size = " + dimlength.toString() + ";");
+      as.push("return (const char**)dl;");
+    }
+    return as;
+  })();
+
+  getDimensionSizeBody = (function(){
+    var txt = [];
+    if (soft.model.dimensions != undefined) {   
+      soft.model.dimensions.forEach(function (dim){		
+	txt.push("if (strcmp(label, \"" + dim.name + "\") == 0) return self->dims."+dim.name+";");
+      });
+    }
+    return txt;
+  })();
+
+  (function(){return soft.model.dimensions == undefined ? "0" : soft.model.dimensions.length.toString(); })();
     undefined;
 }/* This file is autgenerated. Do not edit! */
 
@@ -236,12 +320,19 @@ static const char @{ENTITY}_META_TYPE[] = "@soft.model.name:@soft.model.version:
 static const char @{ENTITY}_META_NAME[] = "@soft.model.name";
 static const char @{ENTITY}_META_VERSION[] = "@soft.model.version";
 static const char @{ENTITY}_META_NAMESPACE[] = "@soft.model.namespace";
+static const char *static_dims[] = {@{quote(dimensions).join(',');}};
+
+struct _@{entity}_allocatable_s
+{
+  @{allocDeclList.join("\n  ");}
+};
 
 struct _@{entity}_s {
   const struct softc_entity_vtable_ *vtable_;
   const char *id;
   @{entity}_dimensions_s dims;
   @{entity}_properties_s props;
+  @{entity}_allocatable_s *allocs;
 };
 
 static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
@@ -259,10 +350,17 @@ static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
 }
 
 static const char ** get_dimensions(const softc_entity_t *ptr, size_t *size)
-{}
+{
+  @{getDimensionsBody.join('\n  ')}
+}
 
 static int get_dimension_size(const softc_entity_t *ptr, const char *label)
-{}
+{
+  @{entity}_s *self = (@{entity}_s*)ptr;
+  @{getDimensionSizeBody.join('\n  ')}
+  assert(false); /* Illegal label */   
+  return 0;
+}
 
 static const char * get_meta_type()
 {
@@ -295,16 +393,17 @@ static char* copy_string(const char *str)
 {
   SOFTC_ENTITY_VTABLE(@{entity});
   @{entity}_s *self;
-  self = malloc (sizeof *self); 
+  self = malloc (sizeof *self);
   *self = (@{entity}_s) {SOFTC_ENTITY_VTABLE_NAME(@{entity}),
     (const char *)copy_string(id),
     (@{entity}_dimensions_s)
     {@{zeroDimsList.join(',')}},
     (@{entity}_properties_s)
-    {@{zeroAttrInitList.join(',\n    ')}
+    {@{zeroAttrInitList.join(',\n    ')}},
+    (@{entity}_allocatable_s*){
+    NULL
     }
   };
-
   return self;
 }
 
@@ -314,12 +413,18 @@ static char* copy_string(const char *str)
   SOFTC_ENTITY_VTABLE(@{entity});
   @{entity}_s *self;
   self = malloc (sizeof *self);
+   
+  @{entity}_allocatable_s *alloc = malloc(sizeof *alloc);
+  @{initDataAllocatables.join('\n  ');}
+  
   *self = (@{entity}_s) {SOFTC_ENTITY_VTABLE_NAME(@{entity}),
     softc_uuidgen(),
     (@{entity}_dimensions_s)
     {@{dimsList.join(',')}},
     (@{entity}_properties_s)
-    {@{attrInitList.join(',\n    ')}
+    {@{attrInitList.join(',\n    ')}},
+    (@{entity}_allocatable_s*){
+      alloc
     }
   };
   return self;
@@ -327,7 +432,7 @@ static char* copy_string(const char *str)
 
 void @{entity}_free(@{entity}_s *self)
 {
-  @{freeProperties.join(',\n  ')};
+  @{freeProperties.join(';\n  ')};
   free((char*)self->id);
   free (self);
 }
@@ -341,3 +446,10 @@ void @{entity}_free(@{entity}_s *self)
 {
   return &self->dims;
 }
+
+@{entity}_allocatable_s *@{entity}_allocatables(@{entity}_s *self)
+{
+  return self->allocs;
+}
+
+@{getDataFunctions.join('\n');}

@@ -28,7 +28,7 @@ public:
   virtual bool appendUInt64        (const char *, StdUInt64) = 0;
   virtual bool appendFloat         (const char *, StdFloat) = 0;
   virtual bool appendDouble        (const char *, StdDouble) = 0;
-  virtual bool appendBool          (const char *, bool) = 0;
+  virtual bool appendBool          (const char *, StdBool) = 0;
   virtual bool appendInt32Array    (const char *, StdIntArray const &) = 0;
   virtual bool appendDoubleArray   (const char *, StdDoubleArray const &) = 0;
   virtual bool appendDoubleArray2D (const char *, StdDoubleArray2D const&) = 0;

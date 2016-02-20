@@ -12,7 +12,11 @@
     ],
     "properties":[
 	{
-	    "name": "alloc",
+	    "name": "scalar",
+	    "type": "double"
+	},
+	{
+	    "name": "vec",
 	    "type": "double",
 	    "dims": ["NI"]
 	},
