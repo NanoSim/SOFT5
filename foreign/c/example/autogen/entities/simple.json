@@ -24,6 +24,11 @@
 	    "name": "matrix",
 	    "type": "double",
 	    "dims": ["NI","NJ-1"]
+	},
+	{
+	    "name": "test",
+	    "type": "int32",
+	    "dims": ["NI"]
 	}
     ]
 }
