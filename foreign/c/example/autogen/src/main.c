@@ -31,16 +31,41 @@ void user_init (sim_handle_t *handle, void *user_data)
 {
   user_ctx_s *user_ctx = malloc(sizeof *user_ctx);
   sim_handle_set_user_context(handle, user_ctx);
-
+  const int ni = 3;
+  const int nj = 2;
+  int j, i;
   user_ctx->a = 42;
-  user_ctx->simple = simple_create(10,10);
-  double **matrix = simple_get_matrix(user_ctx->simple);
-  matrix[0][0] = 3.14;
+  user_ctx->simple = simple_create(ni,nj);
+  double **A = simple_get_A(user_ctx->simple);
+  double *x = simple_get_x(user_ctx->simple);
+
+  A[0][0] = 1.0;
+  A[0][1] = -1.0;
+  A[0][2] = 2.0;
+  A[1][0] = 0.0;
+  A[1][1] = -3.0;
+  A[1][2] = 1.0;
+
+  x[0] = 2.0;
+  x[1] = 1.0;
+  x[2] = 0.0;
+  
 }
 
 void user_finalize(sim_handle_t *handle, void *user_data)
 {
   user_ctx_s *user_ctx = sim_handle_get_user_context(handle);
+  softc_storage_t *storage  = softc_storage_create("hdf5", "demo.h5", "append=false");
+
+  /* store the simple entity */
+  softc_storage_save(storage, user_ctx->simple);
+
+  /* print results to console */
+  double *Ax = simple_get_Ax(user_ctx->simple);  
+  printf("[%f, %f]\n", Ax[0], Ax[1]);
+
+  /* free memory */
+  softc_storage_free(storage);
   free(user_ctx);
   sim_handle_free(handle);
 }

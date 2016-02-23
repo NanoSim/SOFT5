@@ -15,12 +15,22 @@ contains
     type(user_ctx), pointer   :: ctx
     type(TSimple)             :: simple
     !
+    integer :: i, j
+    real(c_double) :: tmp
     call c_f_pointer(handle, hdl)
     call c_f_pointer(hdl%user_context, ctx)
     print *, 'hello from demo-compute', ctx%a
 
     ! Setup entity 
     simple = TSimple(ctx%simple)
-    print *, simple%matrix(1,1)
+
+    ! Multiply matrix A and vector x
+    do j = 1, simple%dimensions%NJ
+       tmp = 0.0
+       do i = 1, simple%dimensions%NI
+          tmp = tmp + simple%A(i,j)*simple%x(i)
+       end do
+       simple%Ax(j) = tmp
+    end do
   end subroutine demo_compute
 end module demo
