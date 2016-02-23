@@ -1,6 +1,4 @@
 #include <QObject>
-#include <QScopedPointer>
-
 #include "isoftplugin.h"
 
 class QScriptEngine;
