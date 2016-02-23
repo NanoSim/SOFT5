@@ -36,6 +36,7 @@ void user_init (sim_handle_t *handle, void *user_data)
   int j, i;
   user_ctx->a = 42;
   user_ctx->simple = simple_create(ni,nj);
+
   double **A = simple_get_A(user_ctx->simple);
   double *x = simple_get_x(user_ctx->simple);
 
