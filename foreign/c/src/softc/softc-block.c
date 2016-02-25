@@ -19,6 +19,21 @@ static void *refmalloc(size_t size)
   return ptr;
 }
 
+
+/*!
+ * reallocates a referenced memory
+ */
+static void *refrealloc(void *data, size_t size)
+{
+  void *ptr = data - sizeof(size_t);
+  ptr = realloc(ptr, sizeof(size_t) + size);
+  size_t *cnt = (size_t *)ptr;
+  *cnt = 0;
+  ptr += sizeof(size_t);
+  return ptr;
+}
+
+
 /*!
  * returns number of references
  */
@@ -50,21 +65,6 @@ static size_t dec(void **mem)
   free((void*)(*mem)-sizeof(size_t));
   *mem = NULL;
   return 0;
-}
-
-softc_block_s *softc_block_create(size_t rank, const size_t dims[])
-{
-  softc_block_s *block = malloc(sizeof *block);
-  size_t idx;
-  size_t tot = 1;
-  for (idx = 0; idx < rank; ++idx) {
-    tot *= dims[idx];
-  }
-  block->rank = rank;
-  block->dims = malloc(sizeof(*dims)*rank);
-  memcpy(block->dims, (void*)dims, sizeof(*dims)*rank);
-  block->data = refmalloc(sizeof(double*) * tot);
-  return block;
 }
 
 softc_block_s *softc_block_shallow_copy(const softc_block_s *orig)
@@ -139,4 +139,20 @@ void softc_block_reshape(softc_block_s *self, size_t rank, const size_t dims[])
 
   self->rank = rank;
   self->dims = realloc(self->dims, sizeof(*dims)*rank);
+}
+
+void softc_block_resize(softc_block_s *block, size_t rank, const size_t dims[], size_t type_size)
+{
+  /* warning! this command cannot be used if the block have multiple references*/ 
+  assert(softc_block_data_refs(block->data) == 0);
+  
+  size_t idx;
+  size_t tot = 1;
+  for (idx = 0; idx < rank; ++idx) {
+    tot *= dims[idx];
+  }
+  block->rank = rank;
+  block->dims = realloc(block->dims, sizeof(*dims)*rank);
+  memcpy(block->dims, (void*)dims, sizeof(*dims)*rank);
+  block->data = refrealloc(block->data, type_size * tot);
 }

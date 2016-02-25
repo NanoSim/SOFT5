@@ -36,6 +36,12 @@ IDataModel* BsonModel :: createModel()
    return new BsonModel;
 }
 
+bool BsonModel :: appendDimension  (const char *, StdUInt)
+{
+  return false;
+}
+
+
 bool BsonModel :: appendVariant (const char *, StdVariant const &)
 {
   return false;
@@ -162,6 +168,11 @@ bool BsonModel :: appendString(const char *key, const std::string &str)
 {
   QByteArray utfStr = QString::fromStdString(str).toUtf8();
   bson_append_utf8 (d->bson, key, strlen(key), utfStr.constData(), utfStr.length());
+}
+
+bool BsonModel :: getDimension (const char *, StdUInt &) const
+{
+  return false;
 }
 
 bool BsonModel :: getVariant (const char *, StdVariant &) const

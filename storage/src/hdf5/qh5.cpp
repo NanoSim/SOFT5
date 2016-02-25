@@ -565,17 +565,19 @@ static QVariant reshapeStr(QVector<hsize_t> const &dims, char **data)
 QVariant QH5 :: read (QString const &key)
 {
   auto dataset   = H5Dopen2 (d->file->id(), qPrintable (key), H5P_DEFAULT);
-  auto datatype  = H5Dget_type (dataset);
+  auto datatype  = H5Dget_type  (dataset);
   auto dclass    = H5Tget_class (datatype);
+  auto dsize     = H5Tget_size  (datatype);
+
   auto dataspace = H5Dget_space (dataset);
   auto rank      = H5Sget_simple_extent_ndims (dataspace);
-  auto size      = H5Tget_size(datatype);
+
   QVector<hsize_t> dims(rank);
   auto status    = H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr); 
   auto memspace  = H5Screate_simple(rank, dims.data(), nullptr);
 
   if (dclass == H5T_STRING && rank == 0) {
-    QByteArray strbuff(size+1, '\0');
+    QByteArray strbuff(dsize+1, '\0');
     status = H5Dread(dataset, datatype, memspace, dataspace, H5P_DEFAULT, strbuff.data());
     return QVariant(strbuff);
   }
@@ -583,7 +585,20 @@ QVariant QH5 :: read (QString const &key)
   void *data= nullptr;
   switch (dclass) {
   case H5T_INTEGER:
-    data = allocateBuffer<qint32>(dims);    
+    switch(dsize){
+    case 1:
+      data = allocateBuffer<quint8>(dims);
+      break;
+    case 2:
+      data = allocateBuffer<qint16>(dims);
+      break;
+    case 8:
+      data = allocateBuffer<qint64>(dims);
+      break;
+    case 4:
+    default:
+      data = allocateBuffer<qint32>(dims);    
+    }
     break;
   case H5T_FLOAT:
     data = allocateBuffer<double>(dims);
@@ -598,8 +613,17 @@ QVariant QH5 :: read (QString const &key)
   status = H5Dread(dataset, datatype, memspace, dataspace, H5P_DEFAULT, data);
   switch (dclass) {
   case H5T_INTEGER:
-    return reshape(dims, (qint32*)data);
-    break;
+    switch(dsize){
+    case 1:
+      return reshape(dims, (qint8*)data);
+    case 2:
+      return reshape(dims, (qint16*)data);
+    case 8:
+      return reshape(dims, (qint64*)data);
+    case 4:
+    default:
+      return reshape(dims, (qint32*)data);
+    }
   case H5T_FLOAT:
     return reshape(dims, (double*)data);
     break;

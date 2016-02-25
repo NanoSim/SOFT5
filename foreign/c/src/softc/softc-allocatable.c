@@ -198,6 +198,32 @@ typedef void(*free_fptr)(softc_allocatable_s*);
     alloc_fptrs_ ## type_t[self->block->rank-1](self);			\
   }
 
+#define IMPL_SOFTC_ALLOCATABLE_RESIZE(type_t)				\
+  void softc_allocatable_resize_ ## type_t (softc_allocatable_s *self, size_t rank, const size_t dims[]) \
+  {									\
+    assert(rank > 0 && rank <= MAX_RANK);				\
+    free_fptrs_ ## type_t[self->block->rank-1](self);			\
+    softc_block_resize (self->block,rank,dims,sizeof(type_t*));		\
+    alloc_fptrs_ ## type_t[self->block->rank-1](self);			\
+  }									\
+  
+#define IMPL_SOFTC_ALLOCATABLE_RESIZEV(type_t)				\
+  void softc_allocatable_resizev_ ## type_t (softc_allocatable_s *self, size_t rank, ...) \
+  {									\
+    assert(rank > 0 && rank <= MAX_RANK);				\
+    size_t i;								\
+    va_list vl;								\
+    size_t dims[MAX_RANK];						\
+    va_start(vl, rank);							\
+    for (i = 0; i < rank; i++) {					\
+      dims[i] = va_arg(vl, const size_t);				\
+    }									\
+    va_end(vl);								\
+    free_fptrs_ ## type_t[self->block->rank-1](self);			\
+    softc_block_resize(self->block,rank,dims,sizeof(type_t*));		\
+    alloc_fptrs_ ## type_t[self->block->rank-1](self);			\
+  }
+
 #define IMPL_SOFTC_ALLOCATABLE_SHALLOW_COPY(type_t)			\
   softc_allocatable_s *softc_allocatable_shallow_copy_ ## type_t(const softc_allocatable_s *orig) \
   {									\
@@ -223,6 +249,8 @@ typedef void(*free_fptr)(softc_allocatable_s*);
   IMPL_SOFTC_ALLOCATABLE_FREE(type_t)			\
   IMPL_SOFTC_ALLOCATABLE_RESHAPE(type_t)		\
   IMPL_SOFTC_ALLOCATABLE_RESHAPEV(type_t)		\
+  IMPL_SOFTC_ALLOCATABLE_RESIZE(type_t)			\
+  IMPL_SOFTC_ALLOCATABLE_RESIZEV(type_t)		\
   IMPL_SOFTC_ALLOCATABLE_SHALLOW_COPY(type_t)
 
 IMPL_ALLOC(double);

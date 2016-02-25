@@ -16,6 +16,8 @@ typedef struct _softc_allocatable_s softc_allocatable_s;
   void softc_allocatable_free_ ## type_t(softc_allocatable_s *self);	\
   void softc_allocatable_reshape_ ## type_t(softc_allocatable_s *, size_t rank, const size_t dims[]); \
   void softc_allocatable_reshapev_ ## type_t(softc_allocatable_s *, size_t rank, ...); \
+  void softc_allocatable_resize_ ## type_t(softc_allocatable_s *, size_t rank, const size_t dims[]); \
+  void softc_allocatable_resizev_ ## type_t(softc_allocatable_s *, size_t rank, ...); \
   softc_allocatable_s *softc_allocatable_shallow_copy_ ## type_t (const softc_allocatable_s *); 
 
 
@@ -51,6 +53,12 @@ typedef void (*allocatable_free_fptr)(softc_allocatable_s*);
 
 #define softc_allocatable_reshapev(type_t, self, rank, ...)	\
   softc_allocatable_reshapev_ ## type_t (self, rank, ##__VA_ARGS__)
+
+#define softc_allocatable_resize(type_t, self, rank, dims)	\
+  softc_allocatable_resize_ ## type_t (self, rank, dims)
+
+#define softc_allocatable_resizev(type_t, self, rank, ...)	\
+  softc_allocatable_resizev_ ## type_t (self, rank, ##__VA_ARGS__)
 
 #define softc_allocatable_shallow_copy(type_t, allocatable) \
   softc_allocatable_shallow_copy_ ## type_t (allocatable) 
