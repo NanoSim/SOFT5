@@ -1,4 +1,5 @@
 project (autogen-test C)
+find_package(SOFT5 REQUIRED)
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -12,8 +13,13 @@ set (LINK_LIBS
   ${LINK_LIBS}
   ${testlib-f90_LIBS}
   ${entities_LIBS}
+  ${SOFT5_KERNEL_LIBRARY}
+  ${SOFT5_SOFTC_LIBRARY}
+  ${SOFT5_NUMERICS_LIBRARY}
   )
+
 include_directories(
+  ${SOFT5_INCLUDE_DIR}
   ${testlib-f90_INCLUDE_DIRS}
   ${entities_INCLUDE_DIRS}
   )

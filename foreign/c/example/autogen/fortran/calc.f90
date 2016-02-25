@@ -16,5 +16,6 @@ contains
     print *, 'mysimple',my_simple%dimensions%NI, my_simple%dimensions%NJ
     print *, my_simple%vec(1), my_simple%vec(2)
     print *, my_simple%matrix(1,1), my_simple%matrix(1,2), my_simple%matrix(2,1)
+    my_simple%test(1) = 42
   end subroutine calc_fn
 end module calc

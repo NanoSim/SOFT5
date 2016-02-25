@@ -12,18 +12,19 @@
     ],
     "properties":[
 	{
-	    "name": "scalar",
-	    "type": "double"
+	    "name": "A",
+	    "type": "double",
+	    "dims": ["NI","NJ"]
 	},
 	{
-	    "name": "vec",
+	    "name": "x",
 	    "type": "double",
 	    "dims": ["NI"]
 	},
 	{
-	    "name": "matrix",
+	    "name": "Ax",
 	    "type": "double",
-	    "dims": ["NI","NJ-1"]
+	    "dims": ["NJ"]
 	}
     ]
 }

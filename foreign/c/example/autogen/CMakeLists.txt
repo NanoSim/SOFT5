@@ -3,6 +3,7 @@ project (example-autogen)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 find_package(SOFT5 REQUIRED)
 
+set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/entities)
 set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/ccode.cjs)
 set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/ccode.hjs)
 set (F90_MODULE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/fcode.fjs)
