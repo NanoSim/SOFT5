@@ -26,7 +26,7 @@ set(SWIG_MODULE_softpy_EXTRA_DEPS
 )
 
 if(USE_PYTHON3)
-  set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3 -Wall")
+  set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3;-Wall")
 else()
   set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-Wall")
 endif()

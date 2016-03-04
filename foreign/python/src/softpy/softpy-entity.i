@@ -67,9 +67,7 @@
 
     for (self->ndims=0; self->ndims < n; self->ndims++) {
       if (!(label = PySequence_GetItem(seq, self->ndims))) goto fail;
-      if (!PyString_Check(label))
-	ENTITY_ERROR(PyExc_TypeError,"dimension labels must be strings");
-      CK_ALLOC(self->dims[self->ndims] = strdup(PyString_AsString(label)));
+      if (!(self->dims[self->ndims] = pystring(label))) goto fail;
       Py_DECREF(label);
       label = NULL;
     }
@@ -112,21 +110,21 @@
   {
     int n;
     const char *string;
-    PyObject *args=NULL, *pystring=NULL;
+    PyObject *args=NULL, *o=NULL;
     if (!(args = Py_BuildValue("(O)", self->this))) goto fail;
     assert(PyTuple_Check(args));
-    if (!(pystring = PyObject_CallObject(callable, args))) goto fail;
-    string = PyString_AsString(pystring);
+    if (!(o = PyObject_CallObject(callable, args))) goto fail;
+    if (!(string = pystring(o))) goto fail;
     n = strlen(string);
     CK_ALLOC(s = realloc(s, n + 1));
     memcpy(s, string, n);
     s[n] = '\0';
-    Py_DECREF(pystring);
+    Py_DECREF(o);
     Py_DECREF(args);
     return s;
  fail:
     softpy_entity_error = 1;
-    if (pystring) Py_DECREF(pystring);
+    if (o) Py_DECREF(o);
     if (args) Py_DECREF(args);
     return NULL;
   }
@@ -329,21 +327,21 @@
       self->get_meta_name = meta_name;
       Py_INCREF(meta_name);
     } else {
-      CK_ALLOC(self->name = strdup(PyString_AsString(meta_name)));
+      if (!(self->name = pystring(meta_name))) goto fail;
     }
 
     if (PyCallable_Check(meta_version)) {
       self->get_meta_version = meta_version;
       Py_INCREF(meta_version);
     } else {
-      CK_ALLOC(self->version = strdup(PyString_AsString(meta_version)));
+      if (!(self->version = pystring(meta_version))) goto fail;
     }
 
     if (PyCallable_Check(meta_namespace)) {
       self->get_meta_namespace = meta_namespace;
       Py_INCREF(meta_namespace);
     } else {
-      CK_ALLOC(self->namespace = strdup(PyString_AsString(meta_namespace)));
+      if (!(self->namespace = pystring(meta_namespace))) goto fail;
     }
 
     if (PyCallable_Check(dimensions)) {
