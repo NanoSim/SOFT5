@@ -1,5 +1,3 @@
-#ifdef RUN_ENTITY_TEST
-
 #include <gtest/gtest.h>
 #include <cstdlib>
 #include <softc/softc-utils.h>
@@ -7,7 +5,7 @@
 
 #include "foo.h"
 
-class SoftC_EntityTest : public ::testing::Test {
+class EntityTest : public ::testing::Test {
 protected:
   static void SetUpTestCase() {}
   static void TearDownTestCase() {}    
@@ -16,7 +14,7 @@ protected:
 typedef char* soft_string;
 typedef double* soft_double_array;
 
-TEST_F(SoftC_EntityTest, construct)
+TEST_F(EntityTest, construct)
 {
   double a[] = {0.0, 1.0, 2.0, 3.0, 4.0};
   size_t len = sizeof(a)/sizeof(a[0]);
@@ -46,5 +44,3 @@ TEST_F(SoftC_EntityTest, construct)
   free(arr);
   foo_free(foo);
 }
-
-#endif

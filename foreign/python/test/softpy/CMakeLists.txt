@@ -1,4 +1,4 @@
-project(softpy-test C CXX)
+project(foreign-softpy-test C CXX)
 
 find_package(PythonLibs)
 message("PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")

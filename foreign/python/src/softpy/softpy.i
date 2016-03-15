@@ -144,6 +144,35 @@ like this:
     Py_DECREF(sys);
   }
 
+
+  /* Returns the content of the python string object `o` as a newly
+     malloc'ed string. NULL is returned on error. */
+  char *pystring(PyObject *o)
+  {
+    char *s, *str=NULL;
+    if (PyString_Check(o)) {
+      if (!(str = PyString_AsString(o))) return NULL;
+      if ((s = strdup(str))) return s;
+      PyErr_SetString(PyExc_MemoryError, "");
+    } else if (PyBytes_Check(o)) {
+      if (!(str = PyBytes_AsString(o))) return NULL;
+      if ((s = strdup(str))) return s;
+      PyErr_SetString(PyExc_MemoryError, "");
+    } else if (PyUnicode_Check(o)) {
+      PyObject *bytes = PyUnicode_AsUTF8String(o);
+      if (bytes) {
+	str = PyBytes_AS_STRING(bytes);
+	Py_DECREF(bytes);
+	if (!str) return NULL;
+	if ((s = strdup(str))) return s;
+	PyErr_SetString(PyExc_MemoryError, "");
+      }
+    } else {
+      PyErr_SetString(PyExc_TypeError,"must be string or unicode");
+    }
+    return NULL;
+  }
+  
 %}
 
 
@@ -180,14 +209,12 @@ like this:
   if (PySequence_Check($input)) {
     $2 = PySequence_Length($input);
     int i = 0;
-    $1 = (char **) malloc(($2)*sizeof(char *));
+    $1 = (char **)malloc(($2)*sizeof(char *));
     for (i = 0; i < $2; i++) {
       PyObject *o = PySequence_GetItem($input, i);
-      if (PyString_Check(o))
-	$1[i] = PyString_AsString(PySequence_GetItem($input, i));
-      else {
-	PyErr_SetString(PyExc_TypeError,"sequence must contain strings");
-	free($1);
+      $1[i] = pystring(o);
+      Py_DECREF(o);
+      if (!$1[i]) {
 	return NULL;
       }
     }
@@ -343,14 +370,12 @@ void                softc_storage_strategy_end_retrieve(softc_storage_strategy_t
  *   - What is the difference between softc_collection_create()
  *     and softc_collection_create_ext().  What about namespace?
  *
+ *   - The char *id argument of softc_collection_create() is not used
+ *
  *   - Is the ***dimensions arg. a pointer to a newly allocated
  *     NULL-terminated array of string pointers?
- *
- *   - How to treat softc_entity_t? We have so far avoided it, but
- *     maybe we need to make a sort of proxy with a C representation
- *     filling out the needed methods working on an entity.
  */
-softc_collection_s * softc_collection_create(const char *id);
+softc_collection_s * softc_collection_create(const char *id=NULL);
 //softc_collection_s * softc_collection_create_ext(const char *name, const char *version);
 void                 softc_collection_free(softc_collection_s *self);
 void                 softc_collection_register_entity(softc_collection_s *self, const char *label, const softc_entity_t *entity);

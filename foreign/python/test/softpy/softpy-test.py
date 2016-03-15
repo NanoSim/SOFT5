@@ -13,6 +13,15 @@ import softpy
 
 thisdir = os.path.dirname(__file__)
 
+
+# Python3 does not provide execfile
+if sys.version_info.major > 2:
+    def execfile(filename):
+        with open(filename) as f:
+            code = compile(f.read(), filename, 'exec')
+            exec(code)
+
+
 # Wrap tests in a unittest TestCase
 class TestSoftpy(unittest.TestCase):
     def test_datamodel(self):

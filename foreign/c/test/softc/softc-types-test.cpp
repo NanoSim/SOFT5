@@ -1,16 +1,15 @@
-#ifdef RUN_TYPESTEST
 #include <gtest/gtest.h>
 #include <cstdlib>
 #include <softc/softc-types.h>
 
-class SoftC_TypesTest : public ::testing::Test {
+class TypesTest : public ::testing::Test {
 protected:
   static void SetUpTestCase() {}
   static void TearDownTestCase() {}    
 };
 
 
-TEST_F(SoftC_TypesTest, double_array)
+TEST_F(TypesTest, double_array)
 {
   softc_double_array_s *da = softc_double_array_create();
   ASSERT_TRUE(softc_double_array_empty(da));
@@ -28,7 +27,7 @@ TEST_F(SoftC_TypesTest, double_array)
 }
 
 typedef softc_double_array_s * std_double_array;
-TEST_F(SoftC_TypesTest, double_array_value)
+TEST_F(TypesTest, double_array_value)
 {  
   std_double_array da = softc_double_array_create();
   const double compare = 1.23;
@@ -53,7 +52,7 @@ void callback(double v, void *data)
   f->sum += v;
 }
 
-TEST_F(SoftC_TypesTest, double_array_foreach)
+TEST_F(TypesTest, double_array_foreach)
 {
   ftest *f = new ftest();  
   std_double_array da = softc_double_array_create();
@@ -67,4 +66,3 @@ TEST_F(SoftC_TypesTest, double_array_foreach)
   softc_double_array_free(&da);
   delete f;
 }
-#endif

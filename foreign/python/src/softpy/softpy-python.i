@@ -3,6 +3,7 @@
 
 %pythoncode %{
 
+import sys
 import json
 import ast
 import operator
@@ -61,10 +62,10 @@ class Storage(object):
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         e = get_c_entity(entity)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asBytes(e.id))
-        datamodel_set_meta_name(datamodel, asBytes(e.name))
-        datamodel_set_meta_version(datamodel, asBytes(e.version))
-        datamodel_set_meta_namespace(datamodel, asBytes(e.namespace))
+        datamodel_set_id(datamodel, asStr(e.id))
+        datamodel_set_meta_name(datamodel, asStr(e.name))
+        datamodel_set_meta_version(datamodel, asStr(e.version))
+        datamodel_set_meta_namespace(datamodel, asStr(e.namespace))
         entity_store(e, datamodel)   # Ask the entity to fill out the datamodel
         storage_strategy_store(self.strategy, datamodel)
         storage_strategy_free_datamodel(datamodel)
@@ -75,10 +76,10 @@ class Storage(object):
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         e = get_c_entity(entity)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asBytes(e.id))
-        datamodel_set_meta_name(datamodel, asBytes(e.name))
-        datamodel_set_meta_version(datamodel, asBytes(e.version))
-        datamodel_set_meta_namespace(datamodel, asBytes(e.namespace))
+        datamodel_set_id(datamodel, asStr(e.id))
+        datamodel_set_meta_name(datamodel, asStr(e.name))
+        datamodel_set_meta_version(datamodel, asStr(e.version))
+        datamodel_set_meta_namespace(datamodel, asStr(e.namespace))
         storage_strategy_start_retrieve(self.strategy, datamodel)
         entity_load(e, datamodel)  # Ask the entity to fill out itself
         storage_strategy_end_retrieve(self.strategy, datamodel)
@@ -165,6 +166,19 @@ def asBytes(s):
     if hasattr(s, 'encode'):
         return s.encode()
     return s
+
+def asStr(s):
+    """Returns `s` as string using the default encoding - works for Python
+    2.7 and 3.x."""
+    if isinstance(s, str):
+        return s
+    if sys.version_info.major == 2:
+        if hasattr(s, 'encode'):
+            return s.encode()
+    else:
+        if hasattr(s, 'decode'):
+            return s.decode()
+    raise TypeError('Cannot convert %r to string' % (s, ))
 
 
 def _get_entity_method(entity, name):
@@ -383,22 +397,22 @@ class BaseFactoryEntity(object):
     def _get_property_unit(cls, name):
         """Returns unit for property `name`, or and empty string if
         `property_name` has no unit."""
-        return _get_prop_data(cls, asBytes(name), 'unit', '')
+        return _get_prop_data(cls, asStr(name), 'unit', '')
 
     @classmethod
     def _get_property_type(cls, name):
         """Returns the type of property `name`."""
-        return _get_prop_data(cls, asBytes(name), 'type')
+        return _get_prop_data(cls, asStr(name), 'type')
     
     @classmethod
     def _get_property_description(cls, name):
         """Returns description of property `name`."""
-        return _get_prop_data(cls, asBytes(name), 'description', '')
+        return _get_prop_data(cls, asStr(name), 'description', '')
 
     @classmethod
     def _get_property_dims(cls, name):
         """Returns a list with the dimensions of property `name`."""
-        return _get_prop_data(cls, asBytes(name), 'dims', [])
+        return _get_prop_data(cls, asStr(name), 'dims', [])
 
     def _get_property_dim_sizes(self, name):
         """Returns a list with the dimensions of property `name` evaluated
@@ -406,7 +420,7 @@ class BaseFactoryEntity(object):
         e = self.__soft_entity__
         sizes = zip(e.dimensions, e.dimension_sizes)
         dims = []
-        for label in _get_prop_data(self, asBytes(name), 'dims', []):
+        for label in _get_prop_data(self, name, 'dims', []):
             for dname, dsize in sizes:
                 label = label.replace(dname, str(dsize))
             dims.append(arithmetic_eval(label))
@@ -469,7 +483,7 @@ class BaseFactoryEntity(object):
             else:
                 setter = getattr(_softpy, 'datamodel_append_array_%s_%dd' % (
                     vtype, len(dims)))
-            setter(datamodel, asBytes(key), value)
+            setter(datamodel, asStr(key), value)
 
     def _load(self, e, datamodel):
         """Loads property values from `datamodel` into self.  Normally you
@@ -488,8 +502,8 @@ class BaseFactoryEntity(object):
             else:
                 getter = getattr(_softpy, 'datamodel_get_array_%s_%dd' % (
                     vtype, len(dims)))
-            value = getter(datamodel, asBytes(key))
-            setattr(self, key, value)
+            value = getter(datamodel, str(key))
+            setattr(self, asStr(key), value)
 
 
 def entity(metadata):
