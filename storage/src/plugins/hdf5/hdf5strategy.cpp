@@ -22,6 +22,16 @@ struct StrategyFtor {
   ~StrategyFtor()
   {}
 
+  bool getDimension(const char *key, StdUInt &retValue) {
+    auto ret = h5.read(QString("%1/dimensions/%2").arg(uuid).arg(key));
+    if (ret.isValid() && ret.canConvert(QMetaType::Int)) {
+      retValue = ret.value<int>();
+      return true;
+    }
+    return false;
+
+  }
+  
   bool getString(const char *key, std::string &retValue) {
     auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
     if (ret.isValid() && ret.canConvert(QMetaType::QString)) {
@@ -277,8 +287,10 @@ IDataModel* HDF5Strategy :: dataModel() const
 void HDF5Strategy :: store (IDataModel const *model)
 {
   JSONModel const * jsonModel = dynamic_cast<JSONModel const*>(model);
-  auto jsonObj = jsonModel->json();
+  auto jsonObj = jsonModel->propsJson();
+  auto dimsObj = jsonModel->dimsJson();
   QJsonDocument doc(*jsonObj);
+  QJsonDocument dimsDoc(*dimsObj);
 
   soft::hdf5::QH5 h5;
   if (!QFileInfo::exists(d->uri) || !d->append) {
@@ -290,8 +302,17 @@ void HDF5Strategy :: store (IDataModel const *model)
   auto id = QString::fromStdString(model->id());
   h5.createGroup(id);
   h5.createGroup(QString("%1/properties").arg(id));
+  h5.createGroup(QString("%1/dimensions").arg(id));
   h5.createGroup(QString("%1/meta").arg(id));
 
+  if (dimsDoc.isObject()) {
+    auto jsonObject = doc.object();
+    for (auto key: jsonObject.keys()) {
+      auto value = jsonObject.value(key);
+      h5.write(QString("%1/dimensions/%2").arg(id).arg(key), value.toVariant());
+    }    
+  }
+  
   if (doc.isObject()) {
     auto jsonObject = doc.object();
     for (auto key: jsonObject.keys()) {
@@ -314,12 +335,14 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   using std::placeholders::_1;
   using std::placeholders::_2;
   JSONModel * jsonModel = dynamic_cast<JSONModel*>(model);
-  auto jsonObj = jsonModel->json();
+  auto jsonObj = jsonModel->propsJson();
+  auto dimsObj = jsonModel->dimsJson();
   auto id = model->id().c_str();
   StrategyFtor *ftor = new StrategyFtor(d->uri, id);
   jsonModel->data = (void*)ftor;
 
-  std::function<bool(const char *,std::string&)>getString = std::bind(&StrategyFtor::getString, &(*ftor), _1, _2);
+  std::function<bool(const char*, StdUInt&)>getDimension = std::bind(&StrategyFtor::getDimension, &(*ftor), _1, _2);
+  std::function<bool(const char*, std::string&)>getString = std::bind(&StrategyFtor::getString, &(*ftor), _1, _2);
   std::function<bool(const char*, int8_t&)>getInt8 = std::bind(&StrategyFtor::getInt8, &(*ftor), _1, _2);
   std::function<bool(const char*, uint8_t&)>getUInt8 = std::bind(&StrategyFtor::getUInt8, &(*ftor), _1, _2);
   std::function<bool(const char*, int16_t&)>getInt16 = std::bind(&StrategyFtor::getInt16, &(*ftor), _1, _2);
@@ -336,7 +359,8 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   std::function<bool(const char*, std::vector<std::vector<double> >&)>getDoubleArray2D = std::bind(&StrategyFtor::getDoubleArray2D, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<std::vector<std::vector<double> > >&)>getDoubleArray3D = std::bind(&StrategyFtor::getDoubleArray3D, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<std::string> &)>getStringArray = std::bind(&StrategyFtor::getStringArray, &(*ftor), _1, _2);
-										   
+
+  jsonModel->registerGetDimension(getDimension);
   jsonModel->registerGetStringFn(getString);
   jsonModel->registerGetInt8Fn(getInt8);
   jsonModel->registerGetUInt8Fn(getUInt8);

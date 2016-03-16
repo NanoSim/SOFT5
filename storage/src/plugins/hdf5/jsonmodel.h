@@ -17,6 +17,7 @@ public:
   virtual ~JSONModel();
   IDataModel *createModel() override;
 
+  virtual bool appendDimension     (const char *, StdUInt) override;
   virtual bool appendVariant       (const char *, StdVariant const &) override;
   virtual bool appendString        (const char *, StdString const &) override;
   virtual bool appendInt8          (const char *, StdInt8) override;
@@ -39,6 +40,7 @@ public:
   virtual bool appendArray         (const char *, IDataModel const *) override;
   virtual bool appendModel         (const char *, IDataModel const *) override;
 
+  virtual bool getDimension        (const char *, StdUInt &) const override;
   virtual bool getVariant          (const char *, StdVariant &) const override;
   virtual bool getString           (const char *, StdString &str) const override;
   virtual bool getInt8             (const char *, StdInt8 &) const override;
@@ -62,9 +64,12 @@ public:
   virtual bool getModel            (const char *, IDataModel *) const override;
 
 private:
-  void setJson(QJsonObject const &);
-  const QJsonObject *json() const;
+  void setPropsJson(QJsonObject const &);
+  void setDimsJson(QJsonObject const &);
+  const QJsonObject *propsJson() const;
+  const QJsonObject *dimsJson() const;
 
+  void registerGetDimension      (std::function<bool(const char *,StdUInt&)> &fn);
   void registerGetStringFn       (std::function<bool(const char *, StdString&)> &fn);
   void registerGetInt8Fn         (std::function<bool(const char *, StdInt8&)> &fn);
   void registerGetUInt8Fn        (std::function<bool(const char *, StdUInt8&)> &fn);

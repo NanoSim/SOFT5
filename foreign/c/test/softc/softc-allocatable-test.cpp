@@ -125,6 +125,37 @@ TEST_F(AllocatableTest, reshapev_double)
   softc_allocatable_free(double, alloc);
 }
 
+TEST_F(AllocatableTest, resize_double)
+{
+  size_t dims[2] = {3,2};
+  size_t newdims[3] = {6,6,6};
+  double value   = 1.2345;
+  auto alloc = softc_allocatable_create(double, 2, dims);
+  double **vec1 = (double**)softc_allocatable_data(alloc);
+  vec1[1][1] = value;
+  softc_allocatable_resize(double, alloc, 3, newdims);
+  
+  softc_allocatable_free(double, alloc);
+}
+
+TEST_F(AllocatableTest, resizev_double)
+{
+  double value   = 1.2345;
+  auto alloc = softc_allocatable_createv(double, 2, 3, 2);
+  double **vec1 = (double**)softc_allocatable_data(alloc);
+  vec1[1][1] = value;
+  softc_allocatable_resizev(double, alloc, 3, 6,6,6);
+  double ***vec2 = (double***)softc_allocatable_data(alloc);
+  vec2[0][0][0] = 0.00;
+  vec2[1][1][1] = 1.11;
+  vec2[2][2][2] = 2.22;
+  vec2[3][3][3] = 3.33;
+  vec2[4][4][4] = 4.44;
+  vec2[5][5][5] = 5.55;
+  softc_allocatable_free(double, alloc);
+}
+
+
 TEST_F(AllocatableTest, toStdVector1D_double)
 {
   auto alloc = softc_allocatable_createv(double, 1,8);

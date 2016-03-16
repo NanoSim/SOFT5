@@ -27,6 +27,11 @@ IDataModel *JSONModel :: createModel()
   return new JSONModel;
 }
 
+bool JSONModel :: appendDimension (const char *, StdUInt)
+{
+  return false;
+}
+
 bool JSONModel :: appendVariant (const char *key, StdVariant const &value)
 {
   switch (value.type()) {
@@ -148,6 +153,11 @@ bool JSONModel :: appendArray      (const char *, const IDataModel *)
 
 bool JSONModel :: appendModel      (const char *, const IDataModel *)
 {}
+
+bool JSONModel :: getDimension (const char *, StdUInt &) const
+{
+  return false;
+}
 
 bool JSONModel :: getVariant       (const char *, StdVariant &) const
 {}

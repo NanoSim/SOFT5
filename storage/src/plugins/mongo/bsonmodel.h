@@ -15,6 +15,7 @@ public:
   virtual ~BsonModel();
   IDataModel* createModel() override;
 
+  bool appendDimension  (const char *, StdUInt) override;
   bool appendVariant    (const char *, StdVariant const &) override;
   bool appendString     (const char*, const std::string &) override;
   bool appendInt8       (const char *, int8_t) override;
@@ -38,6 +39,7 @@ public:
   bool appendArray      (const char *, const IDataModel *) override;
   bool appendModel      (const char *, const IDataModel *) override;
 
+  bool getDimension     (const char *, StdUInt &) const override;
   bool getVariant       (const char *, StdVariant &) const override;
   bool getString        (const char *, std::string &str) const override;
   bool getInt8          (const char *, int8_t &) const override;

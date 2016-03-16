@@ -16,6 +16,7 @@ public:
   virtual ~IDataModel() = 0;
 
   virtual IDataModel* createModel() = 0;
+  virtual bool appendDimension     (const char *, StdUInt) = 0;
   virtual bool appendVariant       (const char *, StdVariant const &) = 0;
   virtual bool appendString        (const char*, const StdString &) = 0;
   virtual bool appendInt8          (const char *, StdInt8) = 0;
@@ -38,6 +39,7 @@ public:
   virtual bool appendArray         (const char *, IDataModel const *) = 0;
   virtual bool appendModel         (const char *, IDataModel const *) = 0;
 
+  virtual bool getDimension        (const char *, StdUInt &) const = 0;
   virtual bool getVariant          (const char *, StdVariant &) const = 0;
   virtual bool getString           (const char *, StdString &str) const = 0;
   virtual bool getInt8             (const char *, StdInt8 &) const = 0;
