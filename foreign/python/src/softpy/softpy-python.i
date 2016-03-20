@@ -115,6 +115,62 @@ class Storage(object):
             return "Storage(%r, %r)" % (self.driver, self.uri)
 
 
+class Collection(object):
+    """A collection of entities."""
+    def __init__(self, id=None):
+        self.__soft_entity__ = collection_create(id)
+
+    def __delete__(self):
+        collection_free(self.__softpy_entity__)
+        object.__del__(self)
+
+    def __len__(self):
+        return collection_num_entities(self.__soft_entity__)
+
+    def __setitem__(self, label, value):
+        if isinstance(value, entity_t):
+            e = value
+        elif hasattr(value, '__soft_entity__'):
+            e = value.__soft_entity__
+        else:
+            raise TypeError('Value must be an softpy entity')
+        collection_register_entity(self.__soft_entity__, label, e)
+
+    def __getitem__(self, label):
+        raise NotImplementedError
+
+    #def __setattr__(self, label, value):
+    #    self.__setitem__(label, value)
+
+    #def __getattr__(self, label):
+    #    return self.__getitem__(label)
+
+    def register_entity(self, label, value):
+        self.__setitem__(label, value)
+
+    def add_dim(self, label, description=''):
+        collection_add_dim(self.__soft_entity__, label, description)
+
+    def add_connection(self, subject, predicate, object_):
+        collection_connection(self.__soft_entity__, subject,
+                              predicate, object_)
+
+    def get_num_entities(self):
+         return len(self)
+
+    def get_num_dims(self):
+         return collection_num_dims(self.__soft_entity__)
+
+    def get_num_relations(self):
+         return collection_num_relations(self.__soft_entity__)
+
+    def get_num_dim_maps(self):
+         return collection_num_dim_maps(self.__soft_entity__)
+
+    def get_dimensions(self):
+         return collection_get_dimensions(self.__soft_entity__)
+
+    
 def get_c_entity(entity):
     """Returns a reference to the underlying C-level entity_t."""
     if hasattr(entity, '__soft_entity__'):
@@ -235,7 +291,7 @@ class BaseFactoryEntity(object):
     __metaclass__ = MetaFactoryEntity
 
     def __init__(self, dimensions=None, uuid=None, driver=None, uri=None, 
-                 options=None):
+                 options=None, **kwargs):
         """Initialize a new entity.  
 
         If only `dimensions` is given, an new empty entity will be created.
@@ -249,10 +305,10 @@ class BaseFactoryEntity(object):
         Parameters
         ----------
         dimensions : None | sequence | dict
-            Dimensions if entity is kept uninitialised (i.e. `uri` is None).
-            Can be given either as ``[3, 5]`` or ``{'I'=3, 'J'=5}`` provided
-            that the entity has dimensions I and J.
-            If None, it will be attempted derived from 
+            Dimensions of the returned entity.  Can be given either as
+            ``[3, 5]`` or ``{'I'=3, 'J'=5}`` provided that the entity
+            has dimensions I and J.  If None, it will be attempted
+            derived from the data loaded from `uri`.
         uuid : None | string
             If given, it should be an unique uuid for the new instance.
             The default is to generate it.
@@ -263,6 +319,9 @@ class BaseFactoryEntity(object):
             are set to softpy.Uninitialized.
         options : None | string
             Additional options passed to the driver.
+        kwargs : 
+            Initial property label-value pairs.  These will overwrite
+            values initial values read from `uri`.
         """
         meta = self._meta
         dims = [str(d['name']) for d in meta['dimensions']]
@@ -320,6 +379,13 @@ class BaseFactoryEntity(object):
                             'cannot determine dimension with label "%s"' % 
                             label)
                 dim_sizes = [sizes[label] for label in dims]
+        elif dimensions is None:
+            if len(dims) == 0:
+                dim_sizes = []
+            else:
+                raise SoftMissingDimensionsError(
+                    'Dimension size(s) must be provided with the '
+                    '`dimentions` argument: ' + ', '.join(dims))
 
         assert len(dim_sizes) == len(dims)
 
@@ -333,6 +399,9 @@ class BaseFactoryEntity(object):
             store=lambda e, model: self._store(model),
             id=uuid,
             user_data=self)
+
+        for label, value in kwargs.items():
+            self[label] = value
 
     def __str__(self):
         s = []

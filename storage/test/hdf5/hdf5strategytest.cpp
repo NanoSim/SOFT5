@@ -22,6 +22,7 @@ soft::IStorageStrategy *HDF5StrategyTest::storageStrategy_ = nullptr;
 
 TEST_F (HDF5StrategyTest, construct1)
 {
+  ASSERT_TRUE(storageStrategy_);
   ASSERT_STREQ(storageStrategy_->metaType(), "http://sintef.no/soft/TR/storage-strategy#hdf5:0.1-SNAPSHOT-1");
 }
 

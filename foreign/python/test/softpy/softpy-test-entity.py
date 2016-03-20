@@ -2,9 +2,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import softpy
-import numpy as np
+import pickle
 
+import numpy as np
+import softpy
+
+try:
+    import dill
+    HAVE_DILL = True
+except ImportError:
+    HAVE_DILL = False
+    print("You need dill in order to pickle entities")
 
 class Data(object):
     pass
@@ -104,3 +112,11 @@ with softpy.Storage('hdf5', 'x.h5') as s:
 assert p.name == 'Jack'
 assert p.age == 42
 assert np.all(p.distances == person.distances)
+
+
+# Ensure that entities are pickleable
+if HAVE_DILL:
+    dump = pickle.dumps(person)
+    person2 = pickle.loads(dump)
+    for k in person.__dict__:
+        assert getattr(person2, k) == getattr(person, k)

@@ -2,7 +2,7 @@
 
 
 
-
+/* Redefine ARGOUTVIEWM_ARRAY1 to avoid appending output reults */
 %typemap(argout,
          fragment="NumPy_Backward_Compatibility,NumPy_Utilities")
   (DATA_TYPE** ARGOUTVIEWM_ARRAY1, DIM_TYPE* DIM1)
@@ -24,11 +24,116 @@
 %#else
   PyArray_SetBaseObject(array,cap);
 %#endif
-
+   
   //$result = SWIG_Python_AppendOutput($result,obj);
   $result = obj;
 }
 
+
+/* Typemaps for input array_double_2d */
+%typemap(in,numinputs=1) (double **IN_ARRAY2D, size_t DIM1, size_t DIM2)
+  (PyArrayObject *arr=NULL, int is_new_object)
+{
+  // typemap(in,numinputs=1) (double **IN_ARRAY2D, size_t DIM1, size_t DIM2)
+  int i;
+  if (!(arr = obj_to_array_allow_conversion($input, NPY_DOUBLE,
+					    &is_new_object))) SWIG_fail;
+  if (array_numdims(arr) != 2)
+    SWIG_exception_fail(SWIG_TypeError, "requires 2d array");
+  $2 = array_size(arr, 0);
+  $3 = array_size(arr, 1);
+  if (!($1 = malloc($2 * sizeof(double *))))
+    SWIG_exception_fail(SWIG_MemoryError, "allocation failure");
+  for (i=0; i<$2; i++) $1[i] = (double *)((char *)array_data(arr) + i * array_stride(arr, 0));
+
+  printf("*** dims:    %2lu, %lu\n", $2, $3);
+  printf("*** strides: %2lu, %lu\n", array_stride(arr, 0), array_stride(arr, 1));
+  for (i=0; i<$2; i++) {
+    int j;
+    for (j=0; j<$3; j++) {
+      printf("   %d,%d ->%-4.1f (%ld)\n", i, j, $1[i][j], (char *)(&$1[i][j]) - (char *)array_data(arr));
+    }
+  }
+  
+}
+%typemap(freearg) (double **IN_ARRAY2D, size_t DIM1, size_t DIM2)
+{
+  // typemap(freearg) (double **IN_ARRAY2D, size_t DIM1, size_t DIM2)
+  if ($1) free($1);
+  if (arr$argnum && is_new_object$argnum) Py_DECREF(arr$argnum);
+}
+
+
+/* Typemaps for input array_double_3d */
+%typemap(in,numinputs=1) (double ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3)
+  (PyArrayObject *arr=NULL, double **ptr=NULL, int is_new_object)
+{
+  // typemap(in,numinputs=1) (double ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3)
+  int i, j;
+  if (!(arr = obj_to_array_allow_conversion($input, NPY_DOUBLE,
+					    &is_new_object))) return NULL;
+  if (array_numdims(arr) != 3)
+    SWIG_exception_fail(SWIG_TypeError, "requires 3d array");
+  $2 = array_size(arr, 0);
+  $3 = array_size(arr, 1);
+  $4 = array_size(arr, 2);
+  if (!($1 = malloc($2 * sizeof(double *))))
+    SWIG_exception_fail(SWIG_MemoryError, "error allocating $1");
+  if (!(ptr = malloc($2 * $3 * sizeof(double *))))
+    SWIG_exception_fail(SWIG_MemoryError, "error allocating ptr$argnum");
+
+  printf("*** strides: %lu, %lu, %lu\n", array_stride(arr, 0),
+	 array_stride(arr, 1), array_stride(arr, 2));
+
+  for (i=0; i<$2; i++) {
+    for (j=0; j<$3; j++)
+      ptr[i*$2+j] = (double *)((char *)array_data(arr) +
+			       i*array_stride(arr, 0) + j*array_stride(arr, 1));
+    $1[i] = &ptr[i*$2];
+  }
+
+
+  for (i=0; i<$2; i++) {
+    for (j=0; j<$3; j++) {
+      int k;
+      for (k=0; k<$4; k++) {
+	printf("   %d,%d,%d -> %g\n", i, j, k, $1[i][j][k]);
+      }
+    }
+  }
+  
+}
+%typemap(freearg) (double ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3)
+{
+  // typemap(freearg) (double ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3)
+  if ($1) free($1);
+  if (ptr$argnum) free(ptr$argnum);
+  if (arr$argnum && is_new_object$argnum) Py_DECREF(arr$argnum);
+}
+
+
+/* Typemap for argout array_double_2d */
+%typemap(in,numinputs=0) (double ***value, size_t *size_i, size_t *size_j)
+  (double **v, size_t ni, size_t nj)
+{
+  $1 = &v;
+  $2 = &ni;
+  $3 = &nj;
+}
+%typemap(argout) (double ***value, size_t *size_i, size_t *size_j)
+{
+  int i, j;
+  npy_intp dims[] = {*$2, *$3};
+  PyObject *arr = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  for (i=0; i<*$2; i++) {
+    for (j=0; j<*$3; j++) {
+      double v = (*$1)[i][j];
+      *((double *)((char *)array_data(arr) +
+		   i*array_stride(arr, 0) + j*array_stride(arr, 1))) = v;
+    }
+  }
+  $result = arr;
+}
 
 
 // Create numpy typemaps
@@ -41,8 +146,8 @@
 %apply (unsigned char *IN_ARRAY1, size_t DIM1)                           {(unsigned char  *value, size_t length)};
 %apply (int32_t       *IN_ARRAY1, size_t DIM1)                           {(const int32_t  *value, size_t size)};
 %apply (double        *IN_ARRAY1, size_t DIM1)                           {(const double   *value, size_t size)};
-//%apply (double        *IN_ARRAY2, size_t DIM1, size_t DIM2)              {(const double  **value, size_t size_i, size_t size_j)};
-//%apply (double        *IN_ARRAY3, size_t DIM1, size_t DIM2, size_t DIM3) {(const double ***value, size_t size_i, size_t size_j, size_t size_k)};
+%apply (double       **IN_ARRAY2D, size_t DIM1, size_t DIM2)              {(const double  **value, size_t size_i, size_t size_j)};
+%apply (double      ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3) {(const double ***value, size_t size_i, size_t size_j, size_t size_k)};
 bool softc_datamodel_append_string         (softc_datamodel_t *model, const char *key, const char *value);
 bool softc_datamodel_append_int8           (softc_datamodel_t *model, const char *key, int8_t value);
 bool softc_datamodel_append_uint8          (softc_datamodel_t *model, const char *key, uint8_t value);
@@ -59,14 +164,14 @@ bool softc_datamodel_append_blob           (softc_datamodel_t *model, const char
 bool softc_datamodel_append_string_list    (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements);
 bool softc_datamodel_append_array_int32    (softc_datamodel_t *model, const char *key, const int32_t  *value, size_t size);
 bool softc_datamodel_append_array_double   (softc_datamodel_t *model, const char *key, const double   *value, size_t size);
-//bool softc_datamodel_append_array_double_2d(softc_datamodel_t *model, const char *key, const double  **value, size_t size_i, size_t size_j);
-//bool softc_datamodel_append_array_double_3d(softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k);
+bool softc_datamodel_append_array_double_2d(softc_datamodel_t *model, const char *key, const double  **value, size_t size_i, size_t size_j);
+bool softc_datamodel_append_array_double_3d(softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k);
 %clear (char         **value, size_t n_elements);
 %clear (unsigned char *value, size_t length);
 %clear (int32_t       *value, size_t size);
 %clear (double        *value, size_t size);
-//%clear (double       **value, size_t size_i, size_t size_j);
-//%clear (double      ***value, size_t size_i, size_t size_j, size_t size_k);
+%clear (double       **value, size_t size_i, size_t size_j);
+%clear (double      ***value, size_t size_i, size_t size_j, size_t size_k);
 
 
 %typemap(in,numinputs=0) char **value (char *temp)        { $1 = &temp; };
@@ -128,7 +233,7 @@ bool softc_datamodel_get_blob            (const softc_datamodel_t *model, const 
 bool softc_datamodel_get_string_list     (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements);
 bool softc_datamodel_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
 bool softc_datamodel_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
-//bool softc_datamodel_get_array_double_2d (const softc_datamodel_t *model, const char *key, double ***value, size_t *size_i, size_t *size_j);
+bool softc_datamodel_get_array_double_2d (const softc_datamodel_t *model, const char *key, double ***value, size_t *size_i, size_t *size_j);
 //bool softc_datamodel_get_array_double_3d (const softc_datamodel_t *model, const char *key, double ****value, size_t *size_i, size_t *size_j, size_t *size_k);
 %clear int8_t *value;
 %clear uint8_t *value;

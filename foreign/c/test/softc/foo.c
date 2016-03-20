@@ -27,7 +27,7 @@ static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
   printf("storing...\n");
 }
 
-static void load (const softc_entity_t *ptr, const softc_datamodel_t *data_model)
+static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
 {
   foo_s *self = (foo_s*)ptr;
   size_t new_i_size;

@@ -5,6 +5,7 @@
 #include "softc-utils.h"
 #include "softc-collection.h"
 #include "softc-macros.h"
+#include "softc-storage.h"
 
 typedef struct _softc_t softc_t;
 

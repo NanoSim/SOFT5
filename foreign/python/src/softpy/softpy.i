@@ -253,7 +253,7 @@ like this:
   }
 }
 
-/* Converts (char ***, size_t) to sqeuence of strings */
+/* Converts (char ***, size_t) to a sequence of strings */
 %typemap("doc") (char ***OUT_STRING_LIST, size_t *LEN) "List of strings."
 %typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN) (char **s, size_t len) {
   // typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN)
@@ -269,6 +269,25 @@ like this:
     free((*$1)[i]);
   }
   free(*$1);
+}
+
+/* Converts (char ***) to a sequence of strings */
+%typemap("doc") (char ***OUT_NULLTERM_STRING_LIST) "List of strings."
+%typemap(in,numinputs=0) (char ***OUT_NULLTER_STRING_LIST) (char **s) {
+  // typemap(in,numinputs=0) (char ***OUT_NULLTERM_STRING_LIST)
+  $1 = &s;
+}
+%typemap(argout) (char ***OUT_NULLTERM_STRING_LIST) {
+  // typemap(argout) (char ***OUT_NULLTERM_STRING_LIST)
+  int i;
+  $result = PyList_New(0);
+  if ($1) {
+    for (i=0; (*$1)[i]; i++) {
+      PyList_Append($result, PyString_FromString((*$1)[i]));
+      free((*$1)[i]);
+    }
+    free(*$1);
+  }
 }
 
 /* Converts a return integer array (with size given by first element)
@@ -375,6 +394,7 @@ void                softc_storage_strategy_end_retrieve(softc_storage_strategy_t
  *   - Is the ***dimensions arg. a pointer to a newly allocated
  *     NULL-terminated array of string pointers?
  */
+//%include softpy-collection.i
 softc_collection_s * softc_collection_create(const char *id=NULL);
 //softc_collection_s * softc_collection_create_ext(const char *name, const char *version);
 void                 softc_collection_free(softc_collection_s *self);
@@ -385,8 +405,7 @@ size_t               softc_collection_num_entities(softc_collection_s *self);
 size_t               softc_collection_num_dims(softc_collection_s *self);
 size_t               softc_collection_num_relations(softc_collection_s *self);
 size_t               softc_collection_num_dim_maps(softc_collection_s *self);
-void                 softc_collection_get_dimensions(softc_collection_s *self, char ***dimensions);
-
+void                 softc_collection_get_dimensions(softc_collection_s *self, char ***OUT_NULLTERM_STRING_LIST);
 
 
 /**********************************************

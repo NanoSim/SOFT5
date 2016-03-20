@@ -292,20 +292,50 @@
   /*
    * Functions for the extended API
    */
-  softc_entity_t *new_softc_entity_t(PyObject *meta_name,
-				     PyObject *meta_version,
-				     PyObject *meta_namespace,
-				     PyObject *dimensions, 
-				     PyObject *dimension_size, 
-				     PyObject *store, 
-				     PyObject *load,
-				     const char *id,
-				     PyObject *user_data)
+  static void clear_softpy_entity_t(softpy_entity_t *self)
   {
-    softpy_entity_t *self=NULL;
-    CK_ALLOC(self = calloc(1, sizeof(softpy_entity_t)));
-    CK_ALLOC(self->vtable_ = calloc(1, sizeof(softc_entity_vtable)));
+    if (self->get_meta_name) Py_DECREF(self->get_meta_name);
+    if (self->get_meta_version) Py_DECREF(self->get_meta_version);
+    if (self->get_meta_namespace) Py_DECREF(self->get_meta_namespace);
+    if (self->get_dimensions) Py_DECREF(self->get_dimensions);
+    if (self->get_dimension_size) Py_DECREF(self->get_dimension_size);
+    if (self->store) Py_DECREF(self->store);
+    if (self->load) Py_DECREF(self->load);
 
+    if (self->vtable_) free(self->vtable_);
+    if (self->id) free((char *)self->id);
+    if (self->this) Py_DECREF(self->this);
+    if (self->user_data) Py_DECREF(self->user_data);
+
+    if (self->name) free((char *)self->name);
+    if (self->version) free((char *)self->version);
+    if (self->namespace) free((char *)self->namespace);
+    if (self->dims) {
+      int i;
+      for (i=0; i<self->ndims; i++) free((char *)self->dims[i]);
+      free(self->dims);
+    }
+    if (self->dim_sizes) free(self->dim_sizes);
+  }
+
+  static void delete_softc_entity_t(softc_entity_t *ptr) {
+    softpy_entity_t *self = (softpy_entity_t *)ptr;
+    clear_softpy_entity_t(self);
+    free(self);
+  }
+
+  static void init_softpy_entity_t(softpy_entity_t *self,
+			    PyObject *meta_name,
+			    PyObject *meta_version,
+			    PyObject *meta_namespace,
+			    PyObject *dimensions, 
+			    PyObject *dimension_size, 
+			    PyObject *store, 
+			    PyObject *load,
+			    const char *id,
+			    PyObject *user_data)
+  {
+    CK_ALLOC(self->vtable_ = calloc(1, sizeof(softc_entity_vtable)));
     self->vtable_->get_meta_name = softpy_get_meta_name;
     self->vtable_->get_meta_version = softpy_get_meta_version;
     self->vtable_->get_meta_namespace = softpy_get_meta_namespace;
@@ -378,47 +408,37 @@
       ENTITY_ERROR(PyExc_TypeError, "`load` must be callable");
     }
 
-    return (softc_entity_t *)self;
+    return;
 
   fail:
     softpy_entity_error = 1;
-    if (self) {
-      if (self->vtable_) free(self->vtable_);
-      free(self);
-    }
+    if (self) delete_softc_entity_t((softc_entity_t *)self);
+  }
+
+ 
+  softc_entity_t *new_softc_entity_t(PyObject *meta_name,
+				     PyObject *meta_version,
+				     PyObject *meta_namespace,
+				     PyObject *dimensions, 
+				     PyObject *dimension_size, 
+				     PyObject *store, 
+				     PyObject *load,
+				     const char *id,
+				     PyObject *user_data)
+  {
+    softpy_entity_t *self=NULL;
+    CK_ALLOC(self = calloc(1, sizeof(softpy_entity_t)));
+    init_softpy_entity_t(self, meta_name, meta_version, meta_namespace,
+			 dimensions, dimension_size, store, load, id,
+			 user_data);
+    if (softpy_entity_error) goto fail;
+    return (softc_entity_t *)self;
+  fail:
+    if (self) delete_softc_entity_t((softc_entity_t *)self);
     return NULL;
   }
 
-
-  static void delete_softc_entity_t(softc_entity_t *ptr) {
-    softpy_entity_t *self = (softpy_entity_t *)ptr;
-
-    if (self->get_meta_name) Py_DECREF(self->get_meta_name);
-    if (self->get_meta_version) Py_DECREF(self->get_meta_version);
-    if (self->get_meta_namespace) Py_DECREF(self->get_meta_namespace);
-    if (self->get_dimensions) Py_DECREF(self->get_dimensions);
-    if (self->get_dimension_size) Py_DECREF(self->get_dimension_size);
-    Py_DECREF(self->store);
-    Py_DECREF(self->load);
-
-    free(self->vtable_);
-    free((char *)self->id);
-    Py_DECREF(self->this);  
-    if (self->user_data) Py_DECREF(self->user_data);
-
-    if (self->name) free((char *)self->name);
-    if (self->version) free((char *)self->version);
-    if (self->namespace) free((char *)self->namespace);
-    if (self->dims) {
-      int i;
-      for (i=0; i<self->ndims; i++) free((char *)self->dims[i]);
-      free(self->dims);
-    }
-    if (self->dim_sizes) free(self->dim_sizes);
-
-    free(self);
-  }
-
+ 
   static const char *softc_entity_t_id_get(softc_entity_t *self) {
     return softc_entity_get_id(self);
   }
@@ -484,7 +504,100 @@
     return NULL;
   }
 
+  /* For supporting pickle */
+  static PyObject *softpy_getstate(softpy_entity_t *self)
+  {
+    PyObject *state=NULL;
+    int i;
+    
+    if (!(state = PyDict_New())) goto fail;
 
+    if (self->get_meta_name) {
+      PyDict_SetItemString(state, "meta_name", self->get_meta_name);
+    } else {
+      PyObject *meta_name = PyString_FromString(self->name);
+      PyDict_SetItemString(state, "meta_name", meta_name);
+      Py_DECREF(meta_name);
+    }
+
+    if (self->get_meta_version) {
+      PyDict_SetItemString(state, "meta_version", self->get_meta_version);
+    } else {
+      PyObject *meta_version = PyString_FromString(self->version);
+      PyDict_SetItemString(state, "meta_version", meta_version);
+      Py_DECREF(meta_version);
+    }
+
+    if (self->get_meta_namespace) {
+      PyDict_SetItemString(state, "meta_namespace", self->get_meta_namespace);
+    } else {
+      PyObject *meta_namespace = PyString_FromString(self->namespace);
+      PyDict_SetItemString(state, "meta_namespace", meta_namespace);
+      Py_DECREF(meta_namespace);
+    }
+
+    if (self->get_dimensions) {
+      PyDict_SetItemString(state, "dimensions", self->get_dimensions);
+    } else {
+      PyObject *dims = PyTuple_New(self->ndims);
+      for (i=0; i<self->ndims; i++)
+	PyTuple_SetItem(dims, i, PyString_FromString(self->dims[i]));
+      PyDict_SetItemString(state, "dimensions", dims);
+      Py_DECREF(dims);
+    }
+
+    if (self->get_dimension_size) {
+      PyDict_SetItemString(state, "dimension_size", self->get_dimension_size);
+    } else {
+      PyObject *dim_sizes = PyTuple_New(self->ndims);
+      for (i=0; i<self->ndims; i++)
+	PyTuple_SetItem(dim_sizes, i, PyInt_FromSize_t(self->dim_sizes[i]));
+      PyDict_SetItemString(state, "dimension_size", dim_sizes);
+      Py_DECREF(dim_sizes);
+    }
+
+    PyDict_SetItemString(state, "store", self->store);
+    PyDict_SetItemString(state, "load", self->load);
+    PyDict_SetItemString(state, "id", PyString_FromString(self->id));
+    PyDict_SetItemString(state, "user_data", self->user_data);
+    return state;
+  fail:
+    if (state) Py_DECREF(state);
+    return NULL;
+  }
+
+  /* 
+  static void softpy_setstate(softpy_entity_t *self, PyObject *state)
+  {
+    PyObject *meta_name, *meta_version, *meta_namespace,
+      *dimensions, *dimension_size, *store, *load, *pyid, *user_data;
+    char *id=NULL;
+    if (!PyDict_Check(state)) goto fail;
+    if (!(meta_name =
+	  PyDict_GetItemString(state, "meta_name"))) goto fail;
+    if (!(meta_version =
+	  PyDict_GetItemString(state, "meta_version"))) goto fail;
+    if (!(meta_namespace =
+	  PyDict_GetItemString(state, "meta_namespace"))) goto fail;
+    if (!(dimensions =
+	  PyDict_GetItemString(state, "dimensions"))) goto fail;
+    if (!(dimension_size =
+	  PyDict_GetItemString(state, "dimension_size"))) goto fail;
+    if (!(store = PyDict_GetItemString(state, "store"))) goto fail;
+    if (!(load = PyDict_GetItemString(state, "load"))) goto fail;
+    if (!(pyid = PyDict_GetItemString(state, "id"))) goto fail;
+    if (!(user_data = PyDict_GetItemString(state, "user_data"))) goto fail;
+    if (!(id = pystring(pyid))) goto fail;
+    init_softpy_entity_t(self, meta_name, meta_version, meta_namespace,
+			 dimensions, dimension_size, store, load, id,
+			 user_data);
+    return;
+  fail:
+    softpy_entity_error = 1;
+    if (id) free(id);
+  }
+  */
+  
 %}
 
 
@@ -548,6 +661,40 @@ typedef struct {
     INT_LIST dimension_sizes;
     PyObject *user_data;
     %mutable;
+
+    PyObject *__getstate__() {
+      return softpy_getstate((softpy_entity_t *)$self);
+    }
+    /*
+    void __setstate__(PyObject *state) {
+      softpy_setstate((softpy_entity_t *)$self, state);
+    }
+    */
+
+    %pythoncode {
+        def __reduce__(self):
+            state = self.__getstate__()
+            args = tuple(state[k] for k in (
+                'meta_name', 'meta_version', 'meta_namespace',
+                'dimensions', 'dimension_size', 'store', 'load',
+                'id', 'user_data'))
+            return self.__class__, args
+
+        def __eq__(self, other):
+            state1 = self.__getstate__()
+            state2 = other.__getstate__()
+            for k, v1 in state1.items():
+                v2 = state2[k]
+                if hasattr(v1, 'im_func') and hasattr(v2, 'im_func'):
+                    if v1.im_func.func_code != v2.im_func.func_code:
+                       return False
+                elif hasattr(v1, '__func__') and hasattr(v2, '__func__'):
+                    if v1.__func__ != v2.__func__:
+                       return False
+                elif v1 != v2:
+                    return False
+            return True
+    }
   }
 } softc_entity_t;
 
