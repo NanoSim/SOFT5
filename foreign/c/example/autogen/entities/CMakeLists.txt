@@ -37,9 +37,9 @@ foreach(JSON_SRC ${json-sources})
   string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".f90" GEN_F90 ${JSON_SRC})
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_F90})
+    ${example-autogen_BINARY_DIR}/entities/${GEN_SRC}
+    ${example-autogen_BINARY_DIR}/entities/${GEN_HDR}
+    ${example-autogen_BINARY_DIR}/entities/${GEN_F90})
   list(APPEND SRC_LIST ${GEN_SRC})  
 endforeach(JSON_SRC ${json-sources})
 

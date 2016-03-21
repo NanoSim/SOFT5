@@ -59,7 +59,7 @@ void user_finalize(sim_handle_t *handle, void *user_data)
   softc_storage_t *storage  = softc_storage_create("hdf5", "demo.h5", "append=false");
 
   /* store the simple entity */
-  softc_storage_save(storage, user_ctx->simple);
+  softc_storage_save(storage, (softc_entity_t *)user_ctx->simple);
 
   /* print results to console */
   double *Ax = simple_get_Ax(user_ctx->simple);  

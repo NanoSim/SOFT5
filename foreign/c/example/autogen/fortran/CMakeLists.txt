@@ -33,11 +33,11 @@ endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 set (LINK_LIBS ${LINK_LIBS})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../entities/)
-#set (F90_SRC "softf-allocatable.f90" "${CMAKE_CURRENT_BINARY_DIR}/../entities/simple.f90" "calc.f90")
 message(STATUS ${F90_SRC})
-#add_library (${PROJECT_NAME} SHARED "softf-allocatable.f90" "${CMAKE_CURRENT_BINARY_DIR}/../entities/simple.f90" "calc.f90")
-add_library (${PROJECT_NAME} SHARED "softf-allocatable.f90" "sim-handle.f90" "${CMAKE_CURRENT_BINARY_DIR}/../entities/simple.f90" "user-ctx.f90" "demo.f90")
+add_library (${PROJECT_NAME} SHARED "softf-allocatable.f90" "sim-handle.f90" "${example-autogen_BINARY_DIR}/entities/simple.f90" "user-ctx.f90" "demo.f90")
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
+set_source_files_properties("${example-autogen_BINARY_DIR}/entities/simple.f90"
+  PROPERTIES GENERATED 1)
 
 set(${PROJECT_NAME}_LIBS
   ${PROJECT_NAME}
