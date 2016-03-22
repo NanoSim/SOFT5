@@ -26,7 +26,7 @@ size_t softc_double_array_size(const softc_double_array_s *self)
 
 void softc_double_array_free(softc_double_array_s **self)
 {
-  free (*self);
+  delete (*self);
   *self = 0;
 }
 

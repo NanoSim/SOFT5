@@ -260,7 +260,7 @@ bool softc_datamodel_private_get_string (const softc_datamodel_t *model, const c
   if (model->ref) {
     soft::StdString str;
     if (model->ref->getString(key, str)) {
-      *value = new char[str.size()+1];
+      *value = (char *)malloc(str.size()+1);
       std::copy(str.begin(), str.end(), *value);
       (*value)[str.size()] = '\0';
       return true;
