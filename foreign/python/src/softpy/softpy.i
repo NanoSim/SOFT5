@@ -12,7 +12,7 @@
  */
 
 %define DOCSTRING
-"""Python bindings to SOFT5.
+"""softpy -- Python bindings to SOFT5
 
 softpy provides bindings to most of the SOFT C API using SWIG.
 
