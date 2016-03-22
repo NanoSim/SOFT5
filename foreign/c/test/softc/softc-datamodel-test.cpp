@@ -99,7 +99,6 @@ TEST_F(DatamodelTest, store_and_load)
       for (k=0; k<5; k++)
         fprintf(fp, "%d,%d,%d -> %-.1f (+%ld)\n", i, j, k, dbl_array3[i][j][k], 
 	       (char *)(&dbl_array3[i][j][k]) - (char *)data3);
-  fclose(fp);
 
 
   /* store */
@@ -109,8 +108,9 @@ TEST_F(DatamodelTest, store_and_load)
   stat = softc_datamodel_append_string_list(m->datamodel, "strlist", strlist, 3);                                   ASSERT_TRUE(stat);
   stat = softc_datamodel_append_double(m->datamodel, "dbl", dbl);                                                   ASSERT_TRUE(stat);
   stat = softc_datamodel_append_array_double(m->datamodel, "dbl_array", dbl_array, 4);                              ASSERT_TRUE(stat);
-  stat = softc_datamodel_append_array_double_2d(m->datamodel, "dbl_array2", (const double **)dbl_array2, 5, 3);     ASSERT_TRUE(stat);
-  //stat = softc_datamodel_append_array_double_3d(m->datamodel, "dbl_array3", (const double ***)dbl_array3, 2, 3, 5); ASSERT_TRUE(stat);
+  // NB: soft seems assuming fortran order - reverse dimensions
+  stat = softc_datamodel_append_array_double_2d(m->datamodel, "dbl_array2", (const double **)dbl_array2, 3, 5);     ASSERT_TRUE(stat);
+  stat = softc_datamodel_append_array_double_3d(m->datamodel, "dbl_array3", (const double ***)dbl_array3, 5, 3, 2); ASSERT_TRUE(stat);
   softc_storage_strategy_store(m->strategy, m->datamodel);
   free_model(m);
   
@@ -145,23 +145,29 @@ TEST_F(DatamodelTest, store_and_load)
   ASSERT_EQ(4, ni);
   for (i=0; i<3; i++) ASSERT_EQ(dbl_array[i], new_dbl_array[i]);
 
-  stat = softc_datamodel_get_array_double_2d(m->datamodel, "dbl_array2", &new_dbl_array2, &ni, &nj);
+  stat = softc_datamodel_get_array_double_2d(m->datamodel, "dbl_array2", &new_dbl_array2, &nj, &ni);
   ASSERT_TRUE(stat);
   ASSERT_EQ(5, ni);
   ASSERT_EQ(3, nj);
-  for (i=0; i<5; i++)
-    for (j=0; i<3; j++)
+  fprintf(fp, "\nloading array2:\n");
+  for (i=0; i<5; i++) {
+    for (j=0; j<3; j++) {
+      fprintf(fp, "%d,%d -> %g (%g)\n", i, j, new_dbl_array2[i][j], dbl_array2[i][j]);
       ASSERT_EQ(dbl_array2[i][j], new_dbl_array2[i][j]);
+    }
+  }
 
-  //stat = softc_datamodel_get_array_double_3d(m->datamodel, "dbl_array3", &new_dbl_array3, &ni, &nj, &nk);
-  //ASSERT_TRUE(stat);
-  //ASSERT_EQ(2, ni);
-  //ASSERT_EQ(3, nj);
-  //ASSERT_EQ(5, nj);
-  //for (i=0; i<2; i++)
-  //  for (j=0; i<3; j++)
-  //    for (k=0; k<5; k++)
-  //	ASSERT_EQ(dbl_array3[i][j][k], new_dbl_array3[i][j][k]);
+  stat = softc_datamodel_get_array_double_3d(m->datamodel, "dbl_array3", &new_dbl_array3, &nk, &nj, &ni);
+  ASSERT_TRUE(stat);
+  ASSERT_EQ(2, ni);
+  ASSERT_EQ(3, nj);
+  ASSERT_EQ(5, nk);
+  for (i=0; i<2; i++)
+    for (j=0; j<3; j++)
+      for (k=0; k<5; k++)
+	ASSERT_EQ(dbl_array3[i][j][k], new_dbl_array3[i][j][k]);
+
+  fclose(fp);
 
   softc_storage_strategy_end_retrieve(m->strategy, m->datamodel);
   free_model(m);
