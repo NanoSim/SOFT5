@@ -44,5 +44,6 @@ CMakeFiles/
 *.txt.user
 *.pro.user
 [Bb]uild/
+[Bb]uild-*/
 .\#*
 \#*\#

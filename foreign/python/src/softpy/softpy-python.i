@@ -1,6 +1,5 @@
 # -*- python -*-
 
-
 %pythoncode %{
 
 import sys
@@ -561,9 +560,13 @@ class BaseFactoryEntity(object):
         for key in self._keys():
             vtype = self._get_property_type(key)
             dims = self._get_property_dims(key)
+            if vtype.startswith('array_'):
+                vtype = vtype[6:]
+            if vtype.endswith('_2d') or vtype.endswith('_3d'):
+                vtype = vtype[:-3]
             if not dims:
                 getter = getattr(_softpy, 'datamodel_get_' + vtype)
-            elif vtype == 'string':
+            elif vtype == 'string_list' or vtype == 'string':
                 assert len(dims) == 1
                 getter = getattr(_softpy, 'datamodel_get_string_list')
             elif len(dims) == 1:
@@ -589,5 +592,40 @@ def entity(metadata):
     return type(str(meta['name']), (BaseFactoryEntity,), attr)
 
 
-   
+# Convinience functions for returning entity info
+# -----------------------------------------------
+def _get_entity_info(e, field, *args):
+    """Help function for returning info about entities."""
+    if isinstance(e, entity_t):
+        return globals()['entity_get_' + field](e, *args)
+    elif hasattr(e, '__soft_entity__'):
+        return globals()['entity_get_' + field](e.__soft_entity__, *args)
+    else:
+        raise TypeError('not an entity: %r' % e)
+
+def get_id(e):
+    """Returns the id of entity `e`."""
+    return _get_entity_info(e, 'id')
+
+def get_meta_name(e):
+    """Returns the name of entity `e`."""
+    return _get_entity_info(e, 'meta_name')
+
+def get_meta_version(e):
+    """Returns the version of entity `e`."""
+    return _get_entity_info(e, 'version')
+
+def get_meta_namespace(e):
+    """Returns the namespace of entity `e`."""
+    return _get_entity_info(e, 'meta_namespace')
+
+def get_dimensions(e):
+    """Returns list of dimension lables for entity `e`."""
+    return _get_entity_info(e, 'dimensions')
+
+def get_dimension_size(e, label):
+    """Returns size of dimension `label` for entity `e`.  If `label` is
+    not a valid dimension label -1 is returned."""
+    return _get_entity_info(e, 'dimension_size', label)
+
 %}
