@@ -74,7 +74,7 @@ set (library_path
   ${soft-numerics-sim_BINARY_DIR}
   ${softc_BINARY_DIR}
 )
-set (SOFTSTORAGE
+set (storage_path
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
   ${soft-storage-plugins-mongo_BINARY_DIR}
@@ -84,6 +84,7 @@ if (UNIX)
 else ()
   set(PATH "${library_path}")
 endif()
+string(REPLACE ";" ":" SOFTSTORAGE "${storage_path}")
 
 # Make sure that we install 64-bit libraries in lib64 on systems that
 # use this convention

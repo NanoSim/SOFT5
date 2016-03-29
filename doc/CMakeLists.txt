@@ -9,6 +9,7 @@ if (DOXYGEN_FOUND)
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/softpy.py
       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/formatSwigPythonModule.py ${softpy_BINARY_DIR}/softpy.py ${CMAKE_CURRENT_BINARY_DIR}/softpy.py
+      DEPENDS ${softpy_BINARY_DIR}/softpy.py
       )
   endif()
   
