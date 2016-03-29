@@ -26,13 +26,37 @@ class SoftMissingDimensionsError(SoftError):
     """Raised if dimensions are missing or cannot be derived."""
     pass
 
-class Uninitialized(object):
-    """Class representing uninitialized values. Not intended to be
-    instanciated..."""
+class SoftInvalidDimensionsError(SoftError):
+    """Raised if an invalid dimension label is used."""
+    pass
+
+class SoftInvalidPropertyError(SoftError):
+    """Raised if an invalid property name is used."""
+    pass
+
+class SoftMetadataError(SoftError):
+    """Raised on malformed metadata description."""
     pass
 
 
+class SettingDerivedPropertyError(Exception):
+    """Users of softpy can raise this exception in setters for derived
+    properties.  This exception will signal to the storage loader, of all
+    classes inheriting from a class created with the entity factory, that
+    the property should not be set.  Example:
+
+        myprop = property(
+            lambda self: "hello world",
+            lambda self value: derived_property_exception('myprop'))
+    """
+    pass
     
+
+class Uninitialized(object):
+    """Class representing uninitialized values. Not intended to be
+    instanciated..."""
+
+
 class Storage(object):
     """Class for connecting to a storage.
 
@@ -55,13 +79,15 @@ class Storage(object):
         self.strategy = storage_get_storage_strategy(self.storage)
         self._closed = False
 
-    def save(self, entity):
-        """Saves entity in this storage."""
+    def save(self, entity, uuid=None):
+        """Saves entity in this storage.  By default `entity` is stored
+        under its own id, but by providing `uuid` you can store it under this
+        id instead."""
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         e = get_c_entity(entity)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asStr(e.id))
+        datamodel_set_id(datamodel, asStr(uuid if uuid else e.id))
         datamodel_set_meta_name(datamodel, asStr(e.name))
         datamodel_set_meta_version(datamodel, asStr(e.version))
         datamodel_set_meta_namespace(datamodel, asStr(e.namespace))
@@ -69,13 +95,15 @@ class Storage(object):
         storage_strategy_store(self.strategy, datamodel)
         storage_strategy_free_datamodel(datamodel)
 
-    def load(self, entity):
-        """Fills `entity` with data loaded from this storage."""
+    def load(self, entity, uuid=None):
+        """Fills `entity` with data loaded from this storage.  By default
+        `entity` is loaded from its own id, but by providing `uuid` can load
+        it from this id instead."""
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         e = get_c_entity(entity)
         datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asStr(e.id))
+        datamodel_set_id(datamodel, asStr(uuid if uuid else e.id))
         datamodel_set_meta_name(datamodel, asStr(e.name))
         datamodel_set_meta_version(datamodel, asStr(e.version))
         datamodel_set_meta_namespace(datamodel, asStr(e.namespace))
@@ -247,303 +275,185 @@ def _get_entity_method(entity, name):
     assert hasattr(method, '__call__')
     return method
 
-def _get_prop_data(cls, property_name, dataname, default=None):
-    """Help function used by MetaFactoryEntity."""
-    for p in cls._meta['properties']:
-        if p['name'] == property_name:
-            return p.get(dataname, default)
-    raise NameError('%s has no property named "%s"' % (
-        cls._name, dataname))
 
-
-class MetaFactoryEntity(type):
-    """Metaclass for BaseFactoryEntity providing some functionality to
-    Entity classes that is not inherited by their instances."""
+class MetaEntity(type):
+    """Metaclass for BaseEntity providing some functionality to entity
+    classes that is not inherited by their instances."""
     def __str__(self):
-        return json.dumps(self._meta, indent=2, sort_keys=True)
+        return json.dumps(self.soft_metadata, indent=2, sort_keys=True)
 
     def __repr__(self):
         return '<class %s version=%r, namespace=%r)>' % (
-            self._meta['name'], self._meta['version'], self._meta['namespace'])
+            self.soft_metadata['name'], self.soft_metadata['version'],
+            self.soft_metadata['namespace'])
 
-class classproperty(property):
-    """For defining class properties."""
-    def __get__(self, cls, owner):
-        return self.fget.__get__(None, owner)()
+    def __len__(self):
+        return len(self.soft_metadata['properties'])
+    
+    name = property(lambda self: str(self.soft_metadata['name']),
+                    doc='Entity name.')
+    version = property(lambda self: str(self.soft_metadata['version']),
+                       doc='Entity version string.')
+    namespace = property(lambda self: str(self.soft_metadata['namespace']),
+                         doc='Entity namespace.')
+    description = property(lambda self: str(self.soft_metadata['description']),
+                           doc='Entity description.')
+    dimensions = property(lambda self: [
+        str(d['name']) for d in self.soft_metadata['dimensions']],
+                          doc='List of dimension labels.')
+    property_names = property(lambda self: [
+        str(p['name']) for p in self.soft_metadata['properties']],
+                              doc='List of property names.')
+    
 
-class EntityIter(object):
-    """For iterating over property names of Entity instances."""
-    def __init__(self, entity):
-        self.n = 0
-        self.entity = entity
-    def __next__(self):
-        if self.n >= len(self.entity):
-            raise StopIteration
-        self.n += 1
-        return self.entity._meta['properties'][self.n - 1]['name']
-    next = __next__  # for Python 2
-
-
-class BaseFactoryEntity(object):
+class BaseEntity(object):
     """Base class for entities created with the entity() factory function.
+
+    To avoid name conflict with properties and making it easy to subclass
+    the entity class created with entity(), all attributes of this class
+    are starts with "soft_".  The only exception is the "__soft_entity__"
+    attribute. 
     """
-    __metaclass__ = MetaFactoryEntity
+    __metaclass__ = MetaEntity
 
-    def __init__(self, dimensions=None, uuid=None, driver=None, uri=None, 
-                 options=None, **kwargs):
+    def __init__(self, uuid=None, driver=None, uri=None, options=None,
+                 dimension_sizes=None, **kwargs):
         """Initialize a new entity.  
-
-        If only `dimensions` is given, an new empty entity will be created.
 
         If `uuid`, `driver` and `uri` are given, initial property
         values of the new entity will be loaded from dataset `uuid` is
-        storage `uri`.  In `dimensions` is not given, it will be
-        derived from the loaded data (if possible, otherwise a
-        SoftMissingDimensionsError is raised).
+        storage `uri`.  Otherwise a new empty entity will be created.
 
         Parameters
         ----------
-        dimensions : None | sequence | dict
-            Dimensions of the returned entity.  Can be given either as
-            ``[3, 5]`` or ``{'I'=3, 'J'=5}`` provided that the entity
-            has dimensions I and J.  If None, it will be attempted
-            derived from the data loaded from `uri`.
         uuid : None | string
-            If given, it should be an unique uuid for the new instance.
-            The default is to generate it.
+            Id of the instance.  If `driver` is given, it should match the
+            id of the dataset to load.  The default is to generate a
+            new unique id.
         driver : None | "json" | "hdf5" | "mongo" | ...
-            The driver to use for loading initial values.
+            The driver to use for loading initial values.  If None, all
+            property values are set to softpy.Uninitialized.
         uri : None | string
-            Where the initial values are stored.  If None, all property values
-            are set to softpy.Uninitialized.
+            Where the initial values are stored.  Required if `driver` is
+            given.
         options : None | string
             Additional options passed to the driver.
+        dimension_sizes : None | sequence | dict | callable
+            By default the dimension sizes are derived from the
+            property sizes - requires that for each dimensions at
+            least one property has a dimension of exactly this size.
+            If that is not the case (bad design?), you have to provide
+            this argument.
+
+            For entities with static dimensions, it can be given as a
+            sequence or dict, like ``[3, 5]`` or ``{'I'=3, 'J'=5}``
+            provided that the entity has dimensions I and J.  
+
+            For entities with dynamic dimensions, `dimension_sizes` must
+            be a callable taking two arguments; a softpy.entity_t and
+            a dimension label and should return the size of the dimension
+            corresponding to the label.
         kwargs : 
             Initial property label-value pairs.  These will overwrite
-            values initial values read from `uri`.
+            initial values read from `uri`.
         """
-        meta = self._meta
+        meta = self.soft_metadata
         dims = [str(d['name']) for d in meta['dimensions']]
-
-        if dimensions:
-            if len(dimensions) != len(dims):
-                raise TypeError('Entity "%s" has %d dimensions, %d given' % (
-                    self._name, len(dims), len(dimensions)))
-            if hasattr(dimensions, 'keys'):
-                dim_sizes = [dimensions[label] for label in dims]
-            else:
-                dim_sizes = [int(size) for size in dimensions]
-            for key in self._keys():
-                setattr(self, key, Uninitialized)
-
-        if uri:
-            if uuid is None:
-                raise TypeError('`uuid` must be provided when initialising '
-                                'an entity from storage')
-            if driver is None:
-                raise TypeError('`driver` must be provided when initialising '
-                                'an entity from storage')
-            # We should be able to queue the storage about the size of 
-            # each dimensions...
-            # A workaround is to create a temporary entity and try to extract
-            # the dimension sizes from the loaded data...
-            def get_dimension_size(e, label):
-                raise RuntimeError('dimension sizes are not available...')
-            self.__soft_entity__ = entity_t(
-                get_meta_name=meta['name'],
-                get_meta_version=meta['version'],
-                get_meta_namespace=meta['namespace'],
-                get_dimensions=dims,
-                get_dimension_size=get_dimension_size,
-                load=self._load,
-                store=self._store,
-                id=uuid,
-                user_data=self)
-            with Storage(driver, uri, options) as s:
-                s.load(self)
-            if dimensions is None:
-                sizes = {}
-                for label in self._get_dimensions():
-                    for key in self._keys():
-                        value = getattr(self, key)
-                        for i, name in enumerate(self._get_property_dims(key)):
-                            if name == label:
-                                if isinstance(value, np.ndarray):
-                                    sizes[label] = value.shape[i]
-                                elif i == 0:
-                                    sizes[label] = len(value)
-                            break
-                    if not label in sizes:
-                        raise SoftMissingDimensionsError(
-                            'cannot determine dimension with label "%s"' % 
-                            label)
-                dim_sizes = [sizes[label] for label in dims]
-        elif dimensions is None:
-            if len(dims) == 0:
-                dim_sizes = []
-            else:
-                raise SoftMissingDimensionsError(
-                    'Dimension size(s) must be provided with the '
-                    '`dimentions` argument: ' + ', '.join(dims))
-
-        assert len(dim_sizes) == len(dims)
-
+        if isinstance(dimension_sizes, dict):
+            dimension_sizes = [dimension_sizes[label] for label in dims]
+        self.soft_internal_dimension_info = dimension_sizes
+    
         self.__soft_entity__ = entity_t(
             get_meta_name=meta['name'],
             get_meta_version=meta['version'],
             get_meta_namespace=meta['namespace'],
             get_dimensions=dims,
-            get_dimension_size=dim_sizes,
-            load=lambda e, model: self._load(model),
-            store=lambda e, model: self._store(model),
+            get_dimension_size=self.soft_internal_dimension_size,
+            load=self.soft_internal_load,
+            store=self.soft_internal_store,
             id=uuid,
             user_data=self)
 
-        for label, value in kwargs.items():
-            self[label] = value
+        if driver:
+            if uuid is None:
+                raise TypeError('`uuid` must be provided when initialising '
+                                'an entity from storage')
+            if uri is None:
+                raise TypeError('`uri` must be provided when initialising '
+                                'an entity from storage')
+            with Storage(driver, uri, options) as s:
+                s.load(self)
+        else:
+            for name in self.soft_get_property_names():
+                try:
+                    setattr(self, name, Uninitialized)
+                except SettingDerivedPropertyError:
+                    pass
 
-    def __str__(self):
-        s = []
-        s.append('Entity %s' % self._name)
-        s.append('  id: %s' % self._id)
-        s.append('  version: %s' % self._version)
-        s.append('  namespace: %s' % self._namespace)
-        s.append('  dimensions: %s' % ', '.join(
-            '%s=%d' % (d, self._get_dimension_size(d)) for d in
-                self._get_dimensions()))
-        s.append('  description: %s' % self._description)
-        s.append('  properties:')
-        for key in self._keys():
-             s.append('    %s: %r %s' % (
-                 key, self[key], self._get_property_unit(key)))
-        return '\n'.join(s)
+        propnames = set(self.soft_get_property_names())
+        for name, value in kwargs.items():
+            if name not in propnames:
+                raise SoftInvalidPropertyError(name)
+            setattr(self, name, value)
     
-    def __getitem__(self, name):
-        return self.__dict__[name]
+    def soft_internal_dimension_size(self, e, label):
+        """Returns the size of dimension `label`.  Used internally by softpy."""
+        if hasattr(self.soft_internal_dimension_info, '__call__'):
+            return self.soft_internal_dimension_info(e, label)
+        elif isinstance(self.soft_internal_dimension_info, dict):
+            # Dynamic size from property, using cached property name
+            # and dimension index
+            name, ind = self.soft_internal_dimension_info[label]
+            prop = getattr(self, name)
+            if prop is Uninitialized:
+                raise SoftUninitializedError(
+                    'cannot determine dimension size from uninitialized '
+                    'property: %r' % name)
+            for i in range(ind):
+                prop = prop[0]
+            return len(prop)
+        elif hasattr(self.soft_internal_dimension_info, '__getitem__'):
+            # Static sizes
+            dims = entity_get_dimensions(self.__soft_entity__)
+            ind = dims.index(label)
+            return self.soft_internal_dimension_info[ind]
+        else:
+            # Associate property name and dimension index with dimensions,
+            # for fast retrival of dynamic sizes
+            assert self.soft_internal_dimension_info is None
+            #e = self.__soft_entity__
+            dimensions = entity_get_dimensions(self.__soft_entity__)
+            d = {}
+            for lab in dimensions:
+                 for name in self.soft_get_property_names():
+                     value = getattr(self, name)
+                     for i, dim in enumerate(self.soft_get_property_dims(name)):
+                         if dim == lab:
+                             d[lab] = (name, i)
+                 if not lab in d:
+                     raise SoftMissingDimensionsError(
+                         'cannot determine size of dimension "%s"' % lab)
+            assert set(d) == set(dimensions)
+            self.soft_internal_dimension_info = d
+            return self.soft_internal_dimension_size(e, label)
 
-    def __setitem__(self, name, value):
-        if name not in self.__dict__:
-            raise KeyError('No property named "%s"' % (name, ))
-        self.__dict__[name] = value
-
-    def __len__(self):
-        return len(self._meta['properties'])
-
-    def __contains__(self, name):
-        return name in self._keys()
-
-    def __iter__(self):
-        return EntityIter(self)
-    
-    _name = classproperty(
-        classmethod(lambda cls: str(cls._meta['name'])),
-        doc='Entity name.')
-    _version = classproperty(
-        classmethod(lambda cls: str(cls._meta['version'])),
-        doc='Entity version string.')
-    _namespace = classproperty(
-        classmethod(lambda cls: str(cls._meta['namespace'])),
-        doc='Entity namespace.')
-    _description = classproperty(
-        classmethod(lambda cls: cls._meta['description']),
-        doc='Entity description.')
-    _dimensions = classproperty(
-        classmethod(lambda cls: cls._get_dimensions()),
-                    doc='List with dimension names.')
-    _dimension_sizes = property(
-        lambda self: self.__soft_entity__.dimension_sizes,
-        doc='List with dimension sizes.')
-    _id = property(
-        lambda self: self.__soft_entity__.id,
-        doc='UUID of Entity instance.')
-
-    @classmethod
-    def _keys(cls):
-        return [p['name'] for p in cls._meta['properties']]
-
-    @classmethod
-    def _get_property_unit(cls, name):
-        """Returns unit for property `name`, or and empty string if
-        `property_name` has no unit."""
-        return _get_prop_data(cls, asStr(name), 'unit', '')
-
-    @classmethod
-    def _get_property_type(cls, name):
-        """Returns the type of property `name`."""
-        return _get_prop_data(cls, asStr(name), 'type')
-    
-    @classmethod
-    def _get_property_description(cls, name):
-        """Returns description of property `name`."""
-        return _get_prop_data(cls, asStr(name), 'description', '')
-
-    @classmethod
-    def _get_property_dims(cls, name):
-        """Returns a list with the dimensions of property `name`."""
-        return _get_prop_data(cls, asStr(name), 'dims', [])
-
-    def _get_property_dim_sizes(self, name):
-        """Returns a list with the dimensions of property `name` evaluated
-        to integers."""
-        e = self.__soft_entity__
-        sizes = zip(e.dimensions, e.dimension_sizes)
-        dims = []
-        for label in _get_prop_data(self, name, 'dims', []):
-            for dname, dsize in sizes:
-                label = label.replace(dname, str(dsize))
-            dims.append(arithmetic_eval(label))
-        return dims
-
-    def _initialized(self):
-        """Returns true if all properties are initialized. False is returned
-        otherwise."""
-        return all(self[key] is not Uninitialized for key in self._keys())
-
-    # ------------ methods modelled after the softc-entity API -----------
-
-    #@classmethod
-    #def _get_meta_type(cls):
-    #    """Returns """
-    #    pass
-
-    @classmethod
-    def _get_meta_name(cls):
-        return self._meta['name']
-
-    @classmethod
-    def _get_meta_version(cls):
-        return self._meta['version']
-
-    @classmethod
-    def _get_meta_namespace(cls):
-        return self._meta['namespace']
-
-    @classmethod
-    def _get_dimensions(cls):
-        """Returns a list with dimension labels."""
-        return [str(d['name']) for d in cls._meta['dimensions']]
-
-    def _get_dimension_size(self, label):
-        """Returns the length of dimension `label`."""
-        return entity_get_dimension_size(self.__soft_entity__, label)
-
-    def _store(self, datamodel):
+    def soft_internal_store(self, e, datamodel):
         """Stores property values to `datamodel`, raising SoftUnitializedError
         if any property is uninitialized.
 
         Normally you would not call this function directly, but
         instead through Storage.save()."""
-        for key in self._keys():
-            value = getattr(self, key)
-            vtype = self._get_property_type(key)
+        for name in self.soft_get_property_names():
+            value = getattr(self, name)
             if value is Uninitialized:
                 raise SoftUninitializedError(
-                    'Uninitialized data for "%s" in %s' % (
-                        key, self.__class__.__name__))
-            dims = self._get_property_dims(key)
+                    'Uninitialized data for "%s.%s"' % (
+                        self.__class__.__name__, name))
+            vtype = self.soft_get_property_type(name)
+            dims = self.soft_get_property_dims(name)
             if not dims:
                 setter = getattr(_softpy, 'datamodel_append_' + vtype)
-            elif vtype == 'string':
+            elif vtype == 'string' or vtype == 'string_list':
                 assert len(dims) == 1
                 setter = getattr(_softpy, 'datamodel_append_string_list')
             elif len(dims) == 1:
@@ -551,19 +461,21 @@ class BaseFactoryEntity(object):
             else:
                 setter = getattr(_softpy, 'datamodel_append_array_%s_%dd' % (
                     vtype, len(dims)))
-            setter(datamodel, asStr(key), value)
+            #print('*** name=%r -> %r' % (name, setter))
+            try:
+                setter(datamodel, asStr(name), value)
+            except Exception as ex:
+                ex.args = ('%s.%s: %s' % (
+                    self.__class__.__name__, name, ex), ) + ex.args[1:]
+                raise  # reraise exception with property prepended to message
 
-    def _load(self, e, datamodel):
+    def soft_internal_load(self, e, datamodel):
         """Loads property values from `datamodel` into self.  Normally you
         would not call this function directly, but instead through
         Storage.load()."""
-        for key in self._keys():
-            vtype = self._get_property_type(key)
-            dims = self._get_property_dims(key)
-            if vtype.startswith('array_'):
-                vtype = vtype[6:]
-            if vtype.endswith('_2d') or vtype.endswith('_3d'):
-                vtype = vtype[:-3]
+        for name in self.soft_get_property_names():
+            vtype = self.soft_get_property_type(name)
+            dims = self.soft_get_property_dims(name)
             if not dims:
                 getter = getattr(_softpy, 'datamodel_get_' + vtype)
             elif vtype == 'string_list' or vtype == 'string':
@@ -574,9 +486,106 @@ class BaseFactoryEntity(object):
             else:
                 getter = getattr(_softpy, 'datamodel_get_array_%s_%dd' % (
                     vtype, len(dims)))
-            value = getter(datamodel, str(key))
-            setattr(self, asStr(key), value)
+            #print('*** name=%r <- %r' % (name, getter))
+            value = getter(datamodel, str(name))
+            #print('    self=%r, value=%r' % (self, value))
+            try:
+                setattr(self, asStr(name), value)
+            except SettingDerivedPropertyError:
+                pass
+            except Exception as ex:
+                ex.args = ('%s.%s: %s' % (
+                    self.__class__.__name__, name, ex), ) + ex.args[1:]
+                raise  # reraise exception with property prepended to message
+    
+    def soft_initialized(self):
+        """Returns true if all properties are initialized. False is returned
+        otherwise."""
+        return all(getattr(self, name) is not Uninitialized
+                   for name in self.soft_get_property_names())
 
+    def soft_get_id(self):
+        """Returns entity id."""
+        return entity_get_id(self.__soft_entity__)
+
+    def soft_get_meta_name(self):
+        """Returns entity name."""
+        return entity_get_name(self.__soft_entity__)
+
+    def soft_get_meta_version(self):
+        """Returns entity version."""
+        return entity_get_name(self.__soft_entity__)
+
+    def soft_get_meta_namespace(self):
+        """Returns entity name space."""
+        return entity_get_namespace(self.__soft_entity__)
+
+    @classmethod
+    def soft_get_meta_description(cls):
+        """Returns description of entity."""
+        return cls.soft_metadata.get('description', '')
+
+    def soft_get_dimensions(self):
+        """Returns a list of dimension labels."""
+        return entity_get_dimensions(self.__soft_entity__)
+
+    def soft_get_dimension_size(self, label):
+        """Returns size of dimension `label`.  If `label` is not a valid
+        dimension label -1 is returned."""
+        return entity_get_dimension_size(self.__soft_entity__, label)
+
+    @classmethod
+    def soft_get_property_names(cls):
+        """Returns a list with the name of all properties."""
+        return [p['name'] for p in cls.soft_metadata['properties']]
+
+    @classmethod
+    def soft_get_property_unit(cls, name):
+        """Returns unit for property `name`, or and empty string if
+        `property_name` has no unit."""
+        return _get_prop_info(cls, asStr(name), 'unit', '')
+
+    @classmethod
+    def soft_get_property_type(cls, name):
+        """Returns the type of property `name`."""
+        ptype = _get_prop_info(cls, asStr(name), 'type')
+        if not ptype:
+            raise SoftMetadataError(
+                'property "%s" has no type information' % name)
+        return ptype
+    
+    @classmethod
+    def soft_get_property_description(cls, name):
+        """Returns description of property `name`."""
+        return _get_prop_info(cls, asStr(name), 'description', '')
+
+    @classmethod
+    def soft_get_property_dims(cls, name):
+        """Returns a list with the dimensions of property `name`."""
+        return _get_prop_info(cls, asStr(name), 'dims', [])
+
+    def soft_get_property_dim_sizes(self, name):
+        """Returns a list with the dimensions of property `name` evaluated
+        to integers."""
+        sizes = [(label, get_dimension_size(self.__soft_entity__, label))
+                 for label in get_dimensions(self.__soft_entity__)]
+        dim_sizes = []
+        for sizeexpr in self.soft_get_property_dims[asStr(name)]:
+             for label, size in sizes:
+                 sizeexpr = sizeexpr.replace(label, str(size))
+             dim_sizes.append(arithmetic_eval(sizeexpr))
+        return dim_sizes
+
+
+def _get_prop_info(cls, name, field, default=None):
+    """Help function used by BaseEntity class methods."""
+    for p in cls.soft_metadata['properties']:
+        if p['name'] == name:
+            return p.get(field, default)
+    raise SoftInvalidPropertyError('%s has no property named "%s"' % (
+        cls.soft_metadata['name'], field))
+
+    
 
 def entity(metadata):
     """Factory fuction for creating an Entity class object for `metadata`.
@@ -588,8 +597,8 @@ def entity(metadata):
         meta = json.load(metadata)
     else:
         meta = json.loads(metadata)
-    attr = dict(_meta=meta)
-    return type(str(meta['name']), (BaseFactoryEntity,), attr)
+    attr = dict(soft_metadata=meta)
+    return type(str(meta['name']), (BaseEntity,), attr)
 
 
 # Convinience functions for returning entity info
@@ -613,7 +622,7 @@ def get_meta_name(e):
 
 def get_meta_version(e):
     """Returns the version of entity `e`."""
-    return _get_entity_info(e, 'version')
+    return _get_entity_info(e, 'meta_version')
 
 def get_meta_namespace(e):
     """Returns the namespace of entity `e`."""
@@ -627,5 +636,10 @@ def get_dimension_size(e, label):
     """Returns size of dimension `label` for entity `e`.  If `label` is
     not a valid dimension label -1 is returned."""
     return _get_entity_info(e, 'dimension_size', label)
+
+def derived_property_exception(msg=''):
+    """Convinient function for raising SettingDerivedPropertyError
+    within lambdas."""
+    raise SettingDerivedPropertyError(msg)
 
 %}

@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import os
 import softpy
 
 import numpy as np
 
+thisdir = os.path.abspath(os.path.dirname(__file__))
 
 metadata = """
 {
@@ -62,7 +64,7 @@ metadata = """
 Structure = softpy.entity(metadata)
 
 # Create a empty Structure instance
-s = Structure(dimensions=(3, ))
+s = Structure()
 s.structure = 'water'
 s.symbols = ['H', 'H', 'O']
 s.spacegroup = 1
@@ -75,19 +77,37 @@ with softpy.Storage('hdf5', 'softpy-test-factory.h5') as storage:
 
 
 # Create new Structure instance initiated from file
-s2 = Structure(uuid=s._id, driver='hdf5', uri='softpy-test-factory.h5')
-#
-#
-## Check that the entities are equals
-#for name in '_id', '_name', '_version', '_namespace':
-#    assert getattr(s, name) == getattr(s2, name)
-#    
-#assert s._keys() == s2._keys()
-#
-#for key in s._keys():
-#    if isinstance(s[key], np.ndarray):
-#        assert s[key].all() == s2[key].all()
-#    else:
-#        assert s[key] == s2[key]
-#
+s2 = Structure(uuid=s.soft_get_id(), driver='hdf5',
+               uri='softpy-test-factory.h5')
 
+
+# Check that the entities are equals
+for name in 'id', 'meta_name', 'meta_version', 'meta_namespace':
+    f = getattr(softpy, 'get_' + name)
+    assert f(s) == f(s2)
+    
+assert s.soft_get_property_names() == s2.soft_get_property_names()
+
+for name in s.soft_get_property_names():
+    v = getattr(s, name)
+    v2 = getattr(s2, name)
+    if isinstance(v, np.ndarray):
+        assert v.all() == v2.all()
+    else:
+        assert v == v2
+
+
+Structure3 = softpy.entity(metadata)
+s3 = Structure3()
+s3.structure = 'water'
+s3.symbols = ['H', 'H', 'O']
+s3.spacegroup = 1
+s3.total_energy = 446.32
+s3.masses = np.array([1., 1., 16.])
+
+s4 = Structure3(uuid=s.soft_get_id(), driver='hdf5',
+                uri='softpy-test-factory.h5')
+
+
+Person = softpy.entity(open(os.path.join(thisdir, 'person.json')))
+jack = Person(name='Jack Daniels', age=42, skills=['tasting', 'Python', 'C'])

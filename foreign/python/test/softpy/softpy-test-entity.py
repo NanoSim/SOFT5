@@ -68,8 +68,7 @@ assert d.latt == 5.64
 assert np.allclose(
     d.posi, np.array([(0.0, 0.0, 0.0), (0.5, 0.5, 0.5)]).flatten())
                    
-
-#del e
+del e
 
 
 class Person(object):

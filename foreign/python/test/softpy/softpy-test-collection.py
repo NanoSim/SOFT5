@@ -10,14 +10,12 @@ import softpy
 thisdir = os.path.dirname(__file__)
 
 
-with open(os.path.join(thisdir, 'testentity.json')) as f:
-    metadata = f.read()
-Extraction = softpy.entity(metadata)
+Person = softpy.entity(open(os.path.join(thisdir, 'person.json')))
 
-e = Extraction(dimensions=[3])
+jack = Person()
 
 
 coll = softpy.Collection()
 assert len(coll) == 0
-coll['extraction1'] = e
+coll['jack'] = jack
 #assert len(coll) == 1
