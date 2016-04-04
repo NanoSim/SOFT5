@@ -453,7 +453,7 @@ class BaseEntity(object):
             # Dynamic size from property, using cached property name
             # and dimension index
             name, ind = self.soft_internal_dimension_info[label]
-            prop = getattr(self, name)
+            prop = self.soft_get_property(name)
             if prop is Uninitialized:
                 raise SoftUninitializedError(
                     'cannot determine dimension size from uninitialized '
@@ -470,12 +470,11 @@ class BaseEntity(object):
             # Associate property name and dimension index with dimensions,
             # for fast retrival of dynamic sizes
             assert self.soft_internal_dimension_info is None
-            #e = self.__soft_entity__
             dimensions = entity_get_dimensions(self.__soft_entity__)
             d = {}
             for lab in dimensions:
                  for name in self.soft_get_property_names():
-                     value = getattr(self, name)
+                     value = self.soft_get_property(name)
                      for i, dim in enumerate(self.soft_get_property_dims(name)):
                          if dim == lab:
                              d[lab] = (name, i)
@@ -493,7 +492,7 @@ class BaseEntity(object):
         Normally you would not call this function directly, but
         instead through Storage.save()."""
         for name in self.soft_get_property_names():
-            value = self.soft_get_property(asStr(name))
+            value = self.soft_get_property(name)
             if value is Uninitialized:
                 raise SoftUninitializedError(
                     'Uninitialized data for "%s.%s"' % (
@@ -550,7 +549,7 @@ class BaseEntity(object):
     def soft_initialized(self):
         """Returns true if all properties are initialized. False is returned
         otherwise."""
-        return all(getattr(self, name) is not Uninitialized
+        return all(self.soft_get_property(name) is not Uninitialized
                    for name in self.soft_get_property_names())
 
     def soft_get_property(self, name):
