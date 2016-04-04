@@ -60,8 +60,8 @@ These attributes can either be initialized manually:
 
 or assigned by the creator:
 
-    >>> jack = Person(uuid=s.soft_get_id(), driver='hdf5',
-    ...               uri='softpy-test-factory.h5'
+    >>> jack = Person(name='Jack Daniels', age=42,
+    ...               skills=['tasting', 'Python', 'C'])
 
 or loaded from a storage:
 
@@ -102,41 +102,32 @@ and share your Account instances:
    ...     storage.save(account)
 
 If you have attributes that cannot be stored as SOFT properties (e.g.
-a dict) you may be able to map it to something that can be stored by
-SOFT.  In such cases it might be usefull to name the property
-differently in the entity definition and override
-soft_internal_store() and soft_internal_load().  E.g. if the Accound
-class above also contains an attribute `transaction_dict` which is a dict
+a dict) you can add setter and getter methods that maps the attribute
+to something that can be stored by SOFT.  E.g. if the Accound class
+above also contains an attribute `transactions` which is a dict
 mapping dates to amounts, you could define the methods:
 
-    >>>     def soft_internal_store(self, e, datamodel):
-    ...         self.transactions = ['%s:%s' % (k, v) for k, v in 
-    ...                              self.transaction_dict.items()]
-    ...         super(Account, self).soft_internal_store(e, datamodel)
-    ...
-    >>>     def soft_internal_load(self, e, datamodel):
-    ...         super(Account, self).soft_internal_load(e, datamodel)
-    ...         self.transaction_dict = {
-    ...             k: float(v) for k, v in [t.split(':') for t in 
-    ...                                      self.transactions]}
+    >>>     def get_transactions(self):
+    ...         string_list = ['%s:%f' % (k, v) for k, v in
+    ...                        self.transaction.items()]
+    ...         return string_list
 
-Alternatively, you can create a property `transactions` that takes care
-of the transformations:
+    >>>     def set_transactions(self, string_list):
+    ...         for s in string_list:
+    ...             date, amount = s.split(':')
+    ...             self.transactions[date] = float(amount)
 
-    >>>     transactions = property(
-    ...         fget=lambda self: ['%s:%s' % (k, v) for k, v in 
-    ...                            self.transaction_dict.items()],
-    ...         fset=lambda self, value: {k: float(v) for k, v in [
-    ...             t.split(':') for t in self.transactions]})
+If your class has getters and setters with another naming convention,
+you can override softpy_get_property() and softpy_set_property().
 
 
 Other classes
 -------------
 Below is a list of other usefull classes exposing the SOFT:
 
-  * Storage     : for connecting to storage
-  * Collection  : a special entity containing a set of entities and 
-                  relations between them
+  * Storage     : For connecting to a data storage.
+  * Collection  : A special entity containing a set of entities and
+                  relations between them.
 
 
 Some technical details about entities

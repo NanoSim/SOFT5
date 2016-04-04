@@ -38,7 +38,6 @@ class SoftMetadataError(SoftError):
     """Raised on malformed metadata description."""
     pass
 
-
 class SettingDerivedPropertyError(Exception):
     """Users of softpy can raise this exception in setters for derived
     properties.  This exception will signal to the storage loader, of all
@@ -51,6 +50,10 @@ class SettingDerivedPropertyError(Exception):
     """
     pass
     
+class ArithmeticError(Exception):
+    """Raised by arithmetic_eval() on errors in the evaluated expression."""
+    pass
+
 
 class Uninitialized(object):
     """Class representing uninitialized values. Not intended to be
@@ -209,12 +212,18 @@ def get_c_entity(entity):
     return e
 
 
-def arithmetic_eval(s):
-    """Returns the result of arithmetic evaluation of s.  This function is
-    much safer to use than eval() and should be preferred for simple
+def arithmetic_eval(expr, constants=None, functions=()):
+    """Returns the result of arithmetic evaluation of `expr`.  This function
+    is much safer to use than eval() and should be preferred for simple
     arithmetic evaluation.
 
-    It is based on the answer at
+    If given, `constants` should be a dict mapping constant names to values,
+    e.g. ``{'pi': math.pi, 'e': math.e}``.
+
+    The `functions` argument should be a sequence of available functions, 
+    e.g. ``(abs, min, max, math.sin)``.
+
+    This implementation is inspired by
     http://bingbots.com/questions/148864/valueerror-malformed-string-when-using-ast-literal-eval
     """
     binOps = {
@@ -225,7 +234,9 @@ def arithmetic_eval(s):
         ast.Mod: operator.mod,
         ast.Pow: operator.pow,
     }
-    node = ast.parse(s, mode='eval')
+    consts = constants if constants else {}
+    funcs = {f.__name__: f for f in functions}
+    node = ast.parse(expr, mode='eval')
 
     def _eval(node):
         if isinstance(node, ast.Expression):
@@ -236,9 +247,41 @@ def arithmetic_eval(s):
             return node.n
         elif isinstance(node, ast.BinOp):
             return binOps[type(node.op)](_eval(node.left), _eval(node.right))
+        elif isinstance(node, ast.Call):  # function call
+            if not node.func.id in funcs:
+                raise ArithmeticError(
+                    'Invalid function %s() in expr: %r' % (node.func.id, expr))
+            func = funcs[node.func.id]
+            args = tuple(_eval(arg) for arg in node.args)
+            keywords = {kw.arg: _eval(kw.value) for kw in node.keywords}
+            return func(*args, **keywords)
+        elif isinstance(node, ast.Name):  # constant
+            if not node.id in consts:
+                raise ArithmeticError(
+                    'Invalid constant %r in expr: %r' % (node.id, expr))
+            return consts[node.id]
+        # -- indexing...
+        elif isinstance(node, ast.Subscript):
+            return _eval(node.value)[_eval(node.slice)]
+        elif isinstance(node, ast.Index):
+            return _eval(node.value)
+        elif isinstance(node, ast.Slice):
+            lower = _eval(node.lower) if node.lower else None
+            upper = _eval(node.upper) if node.upper else None
+            step = _eval(node.step) if node.step else None
+            return slice(lower, upper, step)
+        # -- some Python containers, not really arithmetic, but useful...
+        elif isinstance(node, ast.List):
+            return [_eval(v) for v in node.elts]
+        elif isinstance(node, ast.Tuple):
+            return tuple(_eval(v) for v in node.elts)
+        elif isinstance(node, ast.Set):
+            return {_eval(v) for v in node.elts}
+        elif isinstance(node, ast.Dict):
+            return {_eval(k): _eval(v) for k, v in zip(node.keys, node.values)}
         else:
-            raise Exception('Unsupported type %s in evaluation of "%s"' % (
-                node, s))
+            raise ArithmeticError(
+                'Unsupported type %s in expr: %r' % (node, expr))
 
     return _eval(node.body)
 
@@ -317,7 +360,7 @@ class BaseEntity(object):
     __metaclass__ = MetaEntity
 
     def __init__(self, uuid=None, driver=None, uri=None, options=None,
-                 dimension_sizes=None, **kwargs):
+                 dimension_sizes=None, uninitialize=True, **kwargs):
         """Initialize a new entity.  
 
         If `uuid`, `driver` and `uri` are given, initial property
@@ -331,8 +374,7 @@ class BaseEntity(object):
             id of the dataset to load.  The default is to generate a
             new unique id.
         driver : None | "json" | "hdf5" | "mongo" | ...
-            The driver to use for loading initial values.  If None, all
-            property values are set to softpy.Uninitialized.
+            The driver to use for loading initial values.
         uri : None | string
             Where the initial values are stored.  Required if `driver` is
             given.
@@ -353,6 +395,10 @@ class BaseEntity(object):
             be a callable taking two arguments; a softpy.entity_t and
             a dimension label and should return the size of the dimension
             corresponding to the label.
+        uninitialize : bool
+            If this is true and `driver` is None, all attributes
+            representing SOFT properties not initialized with `kwargs`
+            will be set to ``softpy.Uninitialized``.
         kwargs : 
             Initial property label-value pairs.  These will overwrite
             initial values read from `uri`.
@@ -383,18 +429,21 @@ class BaseEntity(object):
                                 'an entity from storage')
             with Storage(driver, uri, options) as s:
                 s.load(self)
-        else:
-            for name in self.soft_get_property_names():
-                try:
-                    setattr(self, name, Uninitialized)
-                except SettingDerivedPropertyError:
-                    pass
 
         propnames = set(self.soft_get_property_names())
         for name, value in kwargs.items():
             if name not in propnames:
                 raise SoftInvalidPropertyError(name)
-            setattr(self, name, value)
+            self.soft_set_property(name, value)
+
+        if uninitialize and not driver:
+            for name in propnames:
+                if not hasattr(self, name):
+                    try:
+                        self.soft_set_property(name, Uninitialized)
+                    except SettingDerivedPropertyError:
+                        pass
+
     
     def soft_internal_dimension_size(self, e, label):
         """Returns the size of dimension `label`.  Used internally by softpy."""
@@ -444,7 +493,7 @@ class BaseEntity(object):
         Normally you would not call this function directly, but
         instead through Storage.save()."""
         for name in self.soft_get_property_names():
-            value = getattr(self, name)
+            value = self.soft_get_property(asStr(name))
             if value is Uninitialized:
                 raise SoftUninitializedError(
                     'Uninitialized data for "%s.%s"' % (
@@ -490,7 +539,7 @@ class BaseEntity(object):
             value = getter(datamodel, str(name))
             #print('    self=%r, value=%r' % (self, value))
             try:
-                setattr(self, asStr(name), value)
+                self.soft_set_property(asStr(name), value)
             except SettingDerivedPropertyError:
                 pass
             except Exception as ex:
@@ -503,6 +552,30 @@ class BaseEntity(object):
         otherwise."""
         return all(getattr(self, name) is not Uninitialized
                    for name in self.soft_get_property_names())
+
+    def soft_get_property(self, name):
+         """Returns the value of property `name`.  The default implementation
+         checks if there exists a method get_`name`().  If so, the the
+         result of calling get_`name`() with no argument is returned.
+         Otherwise the value of attribute `name` is returned."""
+         getter = 'get_' + name
+         if hasattr(self, getter):
+             return getattr(self, getter)()
+         elif hasattr(self, name):
+             return getattr(self, name)
+         else:
+             raise SoftInvalidPropertyError(name)
+
+    def soft_set_property(self, name, value):
+         """Sets property `name` to value.  The default implementation checks
+         if there exists a method set_`name`().  If so, set_`name`() is called
+         with `value` as argument.  Otherwise the attribute `name` is set to
+         `value`."""
+         setter = 'set_' + name
+         if hasattr(self, setter):
+             getattr(self, setter)(value)
+         else:
+             setattr(self, name, value)
 
     def soft_get_id(self):
         """Returns entity id."""
@@ -570,7 +643,7 @@ class BaseEntity(object):
         sizes = [(label, get_dimension_size(self.__soft_entity__, label))
                  for label in get_dimensions(self.__soft_entity__)]
         dim_sizes = []
-        for sizeexpr in self.soft_get_property_dims[asStr(name)]:
+        for sizeexpr in self.soft_get_property_dims(asStr(name)):
              for label, size in sizes:
                  sizeexpr = sizeexpr.replace(label, str(size))
              dim_sizes.append(arithmetic_eval(sizeexpr))
