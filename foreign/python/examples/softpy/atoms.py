@@ -15,10 +15,11 @@ import ast
 import numpy as np
 import ase
 import ase.constraints
-from ase.calculators.eam import EAM
+from ase.calculators.emt import EMT
 from ase.lattice.spacegroup import Spacegroup, crystal
 from ase.visualize import view
 import softpy
+import dill
 
 
 BaseSoftAtoms = softpy.entity(open('atoms.json'))
@@ -26,6 +27,15 @@ BaseSoftAtoms = softpy.entity(open('atoms.json'))
 
 class SoftAtoms(BaseSoftAtoms, ase.Atoms):
     """An ase.Atoms subclass behaving as a SOFT entity.
+
+    Takes the same arguments as ase.Atoms with the following additions:
+
+    symbols - same meaning as in Atoms, except that it also can be an
+              existing Atoms object
+    uuid    - optional, id of instance to load from driver
+    driver  - optional, driver to use for loading data: "json", "hdf5", "mongo"
+    uri     - optional, from where to load data
+    options - optional, additional options passed to the driver
     """
     def __new__(cls, symbols=None, uuid=None, driver=None, uri=None,
                 options=None, **kwargs):
@@ -33,13 +43,13 @@ class SoftAtoms(BaseSoftAtoms, ase.Atoms):
             atoms = symbols.copy()
             # Note: calculator is not copied!  (bug in ASE?)
             atoms.set_calculator(symbols.get_calculator())  
-        elif symbols is None:
+        elif driver:
             b = BaseSoftAtoms(
                 uuid=uuid, driver=driver, uri=uri, options=options)
             atoms = ase.Atoms(positions=b.positions, numbers=b.numbers,
                               **kwargs)
         else:
-            atoms = Atoms(symbols, **kwargs)
+            atoms = ase.Atoms(symbols, **kwargs)
         atoms.__class__ = cls
         return atoms
     
@@ -140,7 +150,6 @@ rutile = crystal(['Ti', 'O'], basis=[(0, 0, 0), (0.3, 0.3, 0.0)],
                  spacegroup=136, cellpar=[a, a, c, 90, 90, 90])
 rutile.set_constraint(ase.constraints.FixAtoms(indices=(1, 3)))
 
-rutile.set_calculator(EAM())
 
 r = SoftAtoms(rutile)
 
@@ -149,4 +158,33 @@ s.save(r)
 s.close()
 
 rr = SoftAtoms(driver='hdf5', uri='atoms.h5', uuid=r.soft_get_id())
+rr.write('rutile.cif')
 
+
+
+print('=' * 70)
+
+import ase.io
+from ase.calculators.emt import EMT
+from ase.visualize import view
+import softpy
+
+# Load structure from cif-file and print the entity id
+Al2Cu = SoftAtoms(ase.io.read('Al2Cu.cif'))
+print(Al2Cu.soft_get_id())
+
+# Visualize the structure
+view(Al2Cu)
+
+# Calculate total energy using the EAM calculator
+Al2Cu.set_calculator(EMT())
+print('Total energy:', Al2Cu.get_potential_energy())
+
+# Save the data using a SOFT storage
+with softpy.Storage(driver='hdf5', uri='Al2Cu.h5') as storage:
+    storage.save(Al2Cu)
+
+# Load data with given id from the storage to a new object
+thetaprime = SoftAtoms(driver='hdf5', uri='Al2Cu.h5', 
+                       uuid='bd0d5e92-fc2e-47e5-adec-513f6b0fef24')
+print('Total energy:', thetaprime.get_potential_energy())
