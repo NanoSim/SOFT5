@@ -11,6 +11,7 @@ from __future__ import print_function
 import warnings
 import pickle
 import ast
+import base64
 
 import numpy as np
 import ase
@@ -112,10 +113,12 @@ class SoftAtoms(BaseSoftAtoms, ase.Atoms):
                 )))
 
     def get_calculator_pickle(self):
-        return pickle.dumps(self.get_calculator())
+        s = pickle.dumps(self.get_calculator())
+        return softpy.asStr(base64.b64encode(s))
 
     def set_calculator_pickle(self, value):
-        self.set_calculator(pickle.loads(value))
+        s = softpy.asBytes(base64.b64decode(value))
+        self.set_calculator(pickle.loads(s))
 
     def get_numbers(self):
         # needed because SOFT is missing int64 array
@@ -160,31 +163,3 @@ s.close()
 rr = SoftAtoms(driver='hdf5', uri='atoms.h5', uuid=r.soft_get_id())
 rr.write('rutile.cif')
 
-
-
-print('=' * 70)
-
-import ase.io
-from ase.calculators.emt import EMT
-from ase.visualize import view
-import softpy
-
-# Load structure from cif-file and print the entity id
-Al2Cu = SoftAtoms(ase.io.read('Al2Cu.cif'))
-print(Al2Cu.soft_get_id())
-
-# Visualize the structure
-view(Al2Cu)
-
-# Calculate total energy using the EAM calculator
-Al2Cu.set_calculator(EMT())
-print('Total energy:', Al2Cu.get_potential_energy())
-
-# Save the data using a SOFT storage
-with softpy.Storage(driver='hdf5', uri='Al2Cu.h5') as storage:
-    storage.save(Al2Cu)
-
-# Load data with given id from the storage to a new object
-thetaprime = SoftAtoms(driver='hdf5', uri='Al2Cu.h5', 
-                       uuid='bd0d5e92-fc2e-47e5-adec-513f6b0fef24')
-print('Total energy:', thetaprime.get_potential_energy())

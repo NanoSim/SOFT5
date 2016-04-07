@@ -47,3 +47,5 @@ CMakeFiles/
 [Bb]uild-*/
 .\#*
 \#*\#
+
+.gdb_history
