@@ -23,6 +23,7 @@ m._namespace = 'sintef.no/TR/metadata/test'
 m.int32 = 42
 m.double = 3.14
 m.string = 'Hello world!'
+m.blob = b'My blob of bytes...'
 m.int32_array = range(5)
 m.double_array = np.arange(6.0)
 m.double_array_2d = np.arange(15.0).reshape(5, 3)
@@ -42,6 +43,7 @@ softpy.datamodel_set_meta_namespace(model, m._namespace)
 softpy.datamodel_append_int32(model, 'int32', m.int32)
 softpy.datamodel_append_double(model, 'double', m.double)
 softpy.datamodel_append_string(model, 'string', m.string)
+#softpy.datamodel_append_blob(model, 'blob', m.blob)
 softpy.datamodel_append_array_int32(
     model, 'int32_array', m.int32_array)
 softpy.datamodel_append_array_double(
@@ -77,6 +79,9 @@ assert(double == m.double)
 
 string = softpy.datamodel_get_string(model, 'string')
 assert(string == m.string)
+
+#blob = softpy.datamodel_get_string(model, 'blob')
+#assert(blob == m.blob)
 
 int32_array = softpy.datamodel_get_array_int32(model, 'int32_array')
 assert(np.all(int32_array == m.int32_array))

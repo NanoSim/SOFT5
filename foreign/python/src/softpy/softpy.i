@@ -246,131 +246,15 @@ the same information).
 
 
 /**********************************************
- ** Generic typemaps
+ ** Typemaps
  **********************************************/
+/* Generic typemaps */
 %include <typemaps.i>
 %include <exception.i>
 %include "numpy.i"  // slightly changed to fit out needs, search for "XXX"
 
-%{
-  typedef bool status_t;
-  typedef char const_char;
-  typedef int * INT_LIST;
-%}
+%include "softpy-typemaps.i"
 
-
-/* Converts Python sequence of strings to (char **, size_t) */
-%typemap("doc") (char **STRING_LIST, size_t LEN) "Sequence of strings."
-%typemap(in,numinputs=1) (char **STRING_LIST, size_t LEN) {
-  // typemap(in,numinputs=1) (char **STRING_LIST, size_t LEN)
-  if (PySequence_Check($input)) {
-    $2 = PySequence_Length($input);
-    int i = 0;
-    $1 = (char **)malloc(($2)*sizeof(char *));
-    for (i = 0; i < $2; i++) {
-      PyObject *o = PySequence_GetItem($input, i);
-      $1[i] = pystring(o);
-      Py_DECREF(o);
-      if (!$1[i]) {
-	return NULL;
-      }
-    }
-  } else {
-    PyErr_SetString(PyExc_TypeError,"not a list");
-    return NULL;
-  }
-}
-%typemap(freearg) (char **STRING_LIST, size_t LEN) {
-  free((char *) $1);
-}
-
-/* Converts (char **) return value to a python list of strings */
-%typemap("doc") char ** "List of strings."
-%typemap(out) char ** {
-  // typemap(out) char **
-  char **p;
-  if (!$1) SWIG_fail;
-  $result = PyList_New(0);
-  for (p=$1; *p; p++) {
-    PyList_Append($result, PyString_FromString(*p));
-    free(*p);
-  }
-  free($1);
-}
-
-/* Converts (const char **) return value to a python list of strings */
-%typemap("doc") const_char ** "List of strings."
-%typemap(out) const_char ** {
-  // typemap(out) const_char **
-  char **p;
-  if (!$1) SWIG_fail;
-  $result = PyList_New(0);
-  for (p=$1; *p; p++) {
-    PyList_Append($result, PyString_FromString(*p));
-  }
-}
-
-/* Converts (char ***, size_t) to a sequence of strings */
-%typemap("doc") (char ***OUT_STRING_LIST, size_t *LEN) "List of strings."
-%typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN) (char **s, size_t len) {
-  // typemap(in,numinputs=0) (char ***OUT_STRING_LIST, size_t *LEN)
-  $1 = &s;
-  $2 = &len;
-}
-%typemap(argout) (char ***OUT_STRING_LIST, size_t *LEN) {
-  // typemap(argout) (char ***OUT_STRING_LIST, size_t *LEN)
-  int i;
-  $result = PyList_New(0);
-  for (i=0; i<*$2; i++) {
-    PyList_Append($result, PyString_FromString((*$1)[i]));
-    free((*$1)[i]);
-  }
-  free(*$1);
-}
-
-/* Converts (char ***) to a sequence of strings */
-%typemap("doc") (char ***OUT_NULLTERM_STRING_LIST) "List of strings."
-%typemap(in,numinputs=0) (char ***OUT_NULLTER_STRING_LIST) (char **s) {
-  // typemap(in,numinputs=0) (char ***OUT_NULLTERM_STRING_LIST)
-  $1 = &s;
-}
-%typemap(argout) (char ***OUT_NULLTERM_STRING_LIST) {
-  // typemap(argout) (char ***OUT_NULLTERM_STRING_LIST)
-  int i;
-  $result = PyList_New(0);
-  if ($1) {
-    for (i=0; (*$1)[i]; i++) {
-      PyList_Append($result, PyString_FromString((*$1)[i]));
-      free((*$1)[i]);
-    }
-    free(*$1);
-  }
-}
-
-/* Converts a return integer array (with size given by first element)
- * to a python list of ints */
-%typemap("doc") INT_LIST "List of integers."
-%typemap(out) INT_LIST {
-  // typemap(out) INT_LIST
-  int i, size;
-  if (!$1) SWIG_fail;
-  size = $1[0];
-  $result = PyList_New(0);
-  for (i=1; i<=size; i++)
-    PyList_Append($result, PyInt_FromLong($1[i]));
-  free($1);
-}
-
-
-/* Convert false return value to RuntimeError exception
- * Consider to replace a general bool with a ``typedef bool status_t;`` */
-%typemap(out) bool {
-  // typemap(out) bool
-  if (!$1) SWIG_exception(SWIG_RuntimeError,
-			  "false return value in softc_$symname()");
-  $result = Py_None;
-  Py_INCREF(Py_None); // Py_None is a singleton so increment its reference if used.
-}
 
 
 
@@ -462,7 +346,7 @@ size_t               softc_collection_num_entities(softc_collection_s *self);
 size_t               softc_collection_num_dims(softc_collection_s *self);
 size_t               softc_collection_num_relations(softc_collection_s *self);
 size_t               softc_collection_num_dim_maps(softc_collection_s *self);
-void                 softc_collection_get_dimensions(softc_collection_s *self, char ***OUT_NULLTERM_STRING_LIST);
+void                 softc_collection_get_dimensions(softc_collection_s *self, char ***ARGOUT_NULLTERM_STRING_LIST);
 
 
 /**********************************************

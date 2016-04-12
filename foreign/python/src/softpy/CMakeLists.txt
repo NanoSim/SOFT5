@@ -20,6 +20,7 @@ set(CMAKE_SWIG_FLAGS "")
 
 set(SWIG_MODULE_softpy_EXTRA_DEPS
   numpy.i
+  softpy-typemaps.i
   softpy-entity.i
   softpy-datamodel.i
   softpy-python.i
