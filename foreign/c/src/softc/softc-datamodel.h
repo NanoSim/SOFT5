@@ -9,6 +9,7 @@ SOFTC_BEGIN_DECLS
 
 typedef struct _softc_datamodel_t softc_datamodel_t;
 
+bool softc_datamodel_append_dimension    (softc_datamodel_t *model, const char *key, uint32_t value);
 bool softc_datamodel_append_string       (softc_datamodel_t *model, const char *key, const char *value);
 bool softc_datamodel_append_int8         (softc_datamodel_t *model, const char *key, int8_t value);
 bool softc_datamodel_append_uint8        (softc_datamodel_t *model, const char *key, uint8_t value);
@@ -30,6 +31,7 @@ bool softc_datamodel_append_array_double (softc_datamodel_t *model, const char *
 bool softc_datamodel_append_array_double_2d (softc_datamodel_t *model, const char *key, const double **value, size_t size_i, size_t size_j);
 bool softc_datamodel_append_array_double_3d (softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k);
 
+bool softc_datamodel_get_dimension       (const softc_datamodel_t *model, const char *key, uint32_t *value);
 bool softc_datamodel_get_string          (const softc_datamodel_t *model, const char *key, char **value);
 bool softc_datamodel_get_int8            (const softc_datamodel_t *model, const char *key, int8_t *value);
 bool softc_datamodel_get_uint8           (const softc_datamodel_t *model, const char *key, uint8_t *value);

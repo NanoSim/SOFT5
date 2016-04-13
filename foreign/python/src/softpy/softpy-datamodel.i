@@ -11,6 +11,7 @@
 %apply (double        *IN_ARRAY1, size_t DIM1)                           {(const double   *value, size_t size)};
 %apply (double      **IN_ARRAY2D, size_t DIM1, size_t DIM2)              {(const double  **value, size_t size_i, size_t size_j)};
 %apply (double     ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3) {(const double ***value, size_t size_i, size_t size_j, size_t size_k)};
+bool softc_datamodel_append_dimension      (softc_datamodel_t *model, const char *key, uint32_t value);
 bool softc_datamodel_append_string         (softc_datamodel_t *model, const char *key, const char *value);
 bool softc_datamodel_append_int8           (softc_datamodel_t *model, const char *key, int8_t value);
 bool softc_datamodel_append_uint8          (softc_datamodel_t *model, const char *key, uint8_t value);
@@ -85,6 +86,7 @@ bool softc_datamodel_append_array_double_3d(softc_datamodel_t *model, const char
 %apply (double        **ARGOUTVIEWM_ARRAY1, size_t *DIM1) {(double        **value, size_t *size)};
 %apply (double           ***ARGOUT_ARRAY2D, size_t *DIM1, size_t *DIM2) {(double       ***value, size_t *size_i, size_t *size_j)};
 %apply (double          ****ARGOUT_ARRAY3D, size_t *DIM1, size_t *DIM2, size_t *DIM3) {(double        ****value, size_t *size_i, size_t *size_j, size_t *size_k)};
+bool softc_datamodel_get_dimension       (const softc_datamodel_t *model, const char *key, uint32_t *value);
 bool softc_datamodel_get_string          (const softc_datamodel_t *model, const char *key, char **value);
 bool softc_datamodel_get_int8            (const softc_datamodel_t *model, const char *key, int8_t *value);
 bool softc_datamodel_get_uint8           (const softc_datamodel_t *model, const char *key, uint8_t *value);

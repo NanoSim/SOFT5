@@ -306,7 +306,7 @@ void HDF5Strategy :: store (IDataModel const *model)
   h5.createGroup(QString("%1/meta").arg(id));
 
   if (dimsDoc.isObject()) {
-    auto jsonObject = doc.object();
+    auto jsonObject = dimsDoc.object();
     for (auto key: jsonObject.keys()) {
       auto value = jsonObject.value(key);
       h5.write(QString("%1/dimensions/%2").arg(id).arg(key), value.toVariant());
