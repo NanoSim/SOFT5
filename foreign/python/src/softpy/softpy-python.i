@@ -443,10 +443,10 @@ class BaseEntity(object):
                         self.soft_set_property(name, Uninitialized)
                     except SettingDerivedPropertyError:
                         pass
-
     
     def soft_internal_dimension_size(self, e, label):
-        """Returns the size of dimension `label`.  Used internally by softpy."""
+        """Returns the size of dimension `label`.  Used internally by
+        softpy."""
         if hasattr(self.soft_internal_dimension_info, '__call__'):
             return self.soft_internal_dimension_info(e, label)
         elif isinstance(self.soft_internal_dimension_info, dict):
@@ -484,6 +484,24 @@ class BaseEntity(object):
             assert set(d) == set(dimensions)
             self.soft_internal_dimension_info = d
             return self.soft_internal_dimension_size(e, label)
+
+    def soft_internal_check_dimension_sizes(self):
+        """Checks that the dimension sizes of properties is consistent with
+        the metadata definitions.  Raises SoftInvalidDimensionsError for
+        inconsistencies."""
+        for d in self.soft_metadata['properties']:
+             name = asStr(d['name'])
+             value = getattr(self, name)
+             if value is not Uninitialized and 'dims' in d:
+                 for label in d['dims']:
+                     dimsize = self.soft_get_dimension_size(asStr(label))
+                     if len(value) != dimsize:
+                         raise SoftInvalidDimensionsError(
+                             'length of dimension %r of property %r is %d, '
+                             'expected %d' % (label, name, len(value), dimsize))
+                     if len(value) == 0:  # can't continue for zero-sized dims
+                         break
+                     value = value[0]
 
     def soft_internal_store(self, e, datamodel):
         """Stores property values to `datamodel`, raising SoftUnitializedError

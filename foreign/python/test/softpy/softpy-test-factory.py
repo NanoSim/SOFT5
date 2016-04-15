@@ -71,6 +71,8 @@ s.spacegroup = 1
 s.total_energy = 446.32
 s.masses = np.array([1., 1., 16.])
 
+s.soft_internal_check_dimension_sizes()
+
 # Write the structure to file
 with softpy.Storage('hdf5', 'softpy-test-factory.h5') as storage:
     storage.save(s)
