@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <softc/softc.h>
+#include <cstdint>
 
 class DatamodelTest : public ::testing::Test {
 protected:
@@ -52,6 +53,7 @@ TEST_F(DatamodelTest, store_and_load)
   double dbl_array[] = {0.0, 1.0, 2.0, 3.0};
   double **dbl_array2;
   double ***dbl_array3;
+  uint32_t NI, NJ;
   
   /* assign dbl_array2 */
   double data2[5][3];
@@ -85,6 +87,8 @@ TEST_F(DatamodelTest, store_and_load)
   /* store */
   uuid = (char *)softc_uuidgen();                                                                                   ASSERT_TRUE(uuid);
   m = create_model(uuid);                                                                                           ASSERT_TRUE(m);
+  stat = softc_datamodel_append_dimension(m->datamodel, "NI", 50);                                                  ASSERT_TRUE(stat);
+  stat = softc_datamodel_append_dimension(m->datamodel, "NJ", 40);                                                  ASSERT_TRUE(stat);
   stat = softc_datamodel_append_string(m->datamodel, "string", string);                                             ASSERT_TRUE(stat);
   stat = softc_datamodel_append_string_list(m->datamodel, "strlist", strlist, 3);                                   ASSERT_TRUE(stat);
   stat = softc_datamodel_append_double(m->datamodel, "dbl", dbl);                                                   ASSERT_TRUE(stat);
@@ -149,6 +153,13 @@ TEST_F(DatamodelTest, store_and_load)
       for (k=0; k<nk; k++)
 	ASSERT_EQ(dbl_array3[i][j][k], new_dbl_array3[i][j][k]);
   //free(new_dbl_array3);
+
+  stat = softc_datamodel_get_dimension(m->datamodel, "NI", &NI);  
+  ASSERT_TRUE(stat);
+  ASSERT_EQ(NI, 50);
+  stat = softc_datamodel_get_dimension(m->datamodel, "NJ", &NJ);                                                  
+  ASSERT_TRUE(stat);
+  ASSERT_EQ(NJ, 40);
 
   softc_storage_strategy_end_retrieve(m->strategy, m->datamodel);
   free_model(m);

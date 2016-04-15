@@ -491,6 +491,10 @@ class BaseEntity(object):
 
         Normally you would not call this function directly, but
         instead through Storage.save()."""
+        for label in self.soft_get_dimensions():
+            value = self.soft_get_dimension_size(label)
+            datamodel_append_dimension(datamodel, label, value)
+
         for name in self.soft_get_property_names():
             value = self.soft_get_property(name)
             if value is Uninitialized:

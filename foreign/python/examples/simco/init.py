@@ -11,3 +11,4 @@ i.nu = 1.0e-2
 s = softpy.Storage(driver='hdf5', uri='init.h5')
 s.save(i)
 s.close()
+print(softpy.get_id(i));

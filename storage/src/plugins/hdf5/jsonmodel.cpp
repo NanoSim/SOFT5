@@ -257,7 +257,7 @@ bool JSONModel :: appendDimension (const char *key, StdUInt value)
 {
   QJsonValue jsonValue((int)value);
   auto it = d->dimsObject.insert(key, jsonValue);
-  bool isOk = (it != d->propertyObject.end());
+  bool isOk = (it != d->dimsObject.end());
   return isOk;
 }
 
