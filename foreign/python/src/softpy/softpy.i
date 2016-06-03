@@ -98,7 +98,7 @@ without changing anything else.  You are now ready to use SOFT to store
 and share your Account instances:
 
    >>> account = Account(owner='Per Gynt')
-   >>> with softpy.Storage(driver='hdf5', 'mydata.h5') as storage:
+   >>> with softpy.Storage(driver='hdf5', uri='mydata.h5') as storage:
    ...     storage.save(account)
 
 If you have attributes that cannot be stored as SOFT properties (e.g.
@@ -135,7 +135,7 @@ Some technical details about entities
 The C-level handles to entities are instances of ``softpy.entity_t``.  If
 an object has an attribute named '__soft_entity__' that refers to such an
 instance, the object itself will be treated as an entity by all the high-
-level classes in softpy.  
+level classes in softpy.
 
 The entities created with the entity() factory function inherits from
 BaseEntity, which defines a set of useful methods, all starting with
@@ -229,7 +229,7 @@ the same information).
     }
     return NULL;
   }
-  
+
 %}
 
 
@@ -269,7 +269,7 @@ the same information).
 %include <stdint.i>
 
 
-/* 
+/*
  * softc
  */
 void   init();  // called automatically in module initialisation...

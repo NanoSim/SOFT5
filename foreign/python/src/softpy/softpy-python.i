@@ -46,10 +46,10 @@ class SettingDerivedPropertyError(Exception):
 
         myprop = property(
             lambda self: "hello world",
-            lambda self value: derived_property_exception('myprop'))
+            lambda self, value: derived_property_exception('myprop'))
     """
     pass
-    
+
 class ArithmeticError(Exception):
     """Raised by arithmetic_eval() on errors in the evaluated expression."""
     pass
@@ -200,7 +200,7 @@ class Collection(object):
     def get_dimensions(self):
          return collection_get_dimensions(self.__soft_entity__)
 
-    
+
 def get_c_entity(entity):
     """Returns a reference to the underlying C-level entity_t."""
     if hasattr(entity, '__soft_entity__'):
@@ -220,7 +220,7 @@ def arithmetic_eval(expr, constants=None, functions=()):
     If given, `constants` should be a dict mapping constant names to values,
     e.g. ``{'pi': math.pi, 'e': math.e}``.
 
-    The `functions` argument should be a sequence of available functions, 
+    The `functions` argument should be a sequence of available functions,
     e.g. ``(abs, min, max, math.sin)``.
 
     This implementation is inspired by
@@ -332,7 +332,7 @@ class MetaEntity(type):
 
     def __len__(self):
         return len(self.soft_metadata['properties'])
-    
+
     name = property(lambda self: str(self.soft_metadata['name']),
                     doc='Entity name.')
     version = property(lambda self: str(self.soft_metadata['version']),
@@ -347,21 +347,29 @@ class MetaEntity(type):
     property_names = property(lambda self: [
         str(p['name']) for p in self.soft_metadata['properties']],
                               doc='List of property names.')
-    
+
 
 class BaseEntity(object):
     """Base class for entities created with the entity() factory function.
 
     To avoid name conflict with properties and making it easy to subclass
     the entity class created with entity(), all attributes of this class
-    are starts with "soft_".  The only exception is the "__soft_entity__"
-    attribute. 
+    are starts with "soft_".  The only exception is the special
+    "__soft_entity__" attribute, which provides direct access to the c-level
+    object.
+
+    Sometimes the automatic derivation of dimension sizes doesn't work
+    (e.g. if the properties has dimension "N+1", softpy is not smart enough
+    to determine the size of dimension "N").  In these cases you can either
+    provide the argument `dimension_sizes` to the constructor, but it is
+    often more convenient to override soft_internal_dimension_size() in
+    your subclass.
     """
     __metaclass__ = MetaEntity
 
     def __init__(self, uuid=None, driver=None, uri=None, options=None,
                  dimension_sizes=None, uninitialize=True, **kwargs):
-        """Initialize a new entity.  
+        """Initialize a new entity.
 
         If `uuid`, `driver` and `uri` are given, initial property
         values of the new entity will be loaded from dataset `uuid` is
@@ -381,15 +389,17 @@ class BaseEntity(object):
         options : None | string
             Additional options passed to the driver.
         dimension_sizes : None | sequence | dict | callable
+
             By default the dimension sizes are derived from the
-            property sizes - requires that for each dimensions at
-            least one property has a dimension of exactly this size.
-            If that is not the case (bad design?), you have to provide
-            this argument.
+            property sizes (unless the subclass overrides
+            soft_internal_dimension_size()).  This requires that for
+            each dimensions at least one property has a dimension of
+            exactly this size.  If that is not the case (bad design?),
+            you have to provide this argument.
 
             For entities with static dimensions, it can be given as a
             sequence or dict, like ``[3, 5]`` or ``{'I'=3, 'J'=5}``
-            provided that the entity has dimensions I and J.  
+            provided that the entity has dimensions I and J.
 
             For entities with dynamic dimensions, `dimension_sizes` must
             be a callable taking two arguments; a softpy.entity_t and
@@ -399,7 +409,7 @@ class BaseEntity(object):
             If this is true and `driver` is None, all attributes
             representing SOFT properties not initialized with `kwargs`
             will be set to ``softpy.Uninitialized``.
-        kwargs : 
+        kwargs :
             Initial property label-value pairs.  These will overwrite
             initial values read from `uri`.
         """
@@ -408,7 +418,7 @@ class BaseEntity(object):
         if isinstance(dimension_sizes, dict):
             dimension_sizes = [dimension_sizes[label] for label in dims]
         self.soft_internal_dimension_info = dimension_sizes
-    
+
         self.__soft_entity__ = entity_t(
             get_meta_name=meta['name'],
             get_meta_version=meta['version'],
@@ -443,10 +453,14 @@ class BaseEntity(object):
                         self.soft_set_property(name, Uninitialized)
                     except SettingDerivedPropertyError:
                         pass
-    
+
     def soft_internal_dimension_size(self, e, label):
-        """Returns the size of dimension `label`.  Used internally by
-        softpy."""
+        """Returns the size of dimension `label`.
+
+        Used internally by softpy but may be overridded by subclasses.
+        The argument `e` corresponds to __soft_entity__ and should
+        normally be used when overriding this method.
+        """
         if hasattr(self.soft_internal_dimension_info, '__call__'):
             return self.soft_internal_dimension_info(e, label)
         elif isinstance(self.soft_internal_dimension_info, dict):
@@ -458,9 +472,12 @@ class BaseEntity(object):
                 raise SoftUninitializedError(
                     'cannot determine dimension size from uninitialized '
                     'property: %r' % name)
-            for i in range(ind):
-                prop = prop[0]
-            return len(prop)
+            if isinstance(prop, np.ndarray):
+                return prop.shape[ind]
+            else:
+                for i in range(ind):
+                    prop = prop[0]
+                return len(prop)
         elif hasattr(self.soft_internal_dimension_info, '__getitem__'):
             # Static sizes
             dims = entity_get_dimensions(self.__soft_entity__)
@@ -567,7 +584,7 @@ class BaseEntity(object):
                 ex.args = ('%s.%s: %s' % (
                     self.__class__.__name__, name, ex), ) + ex.args[1:]
                 raise  # reraise exception with property prepended to message
-    
+
     def soft_initialized(self):
         """Returns true if all properties are initialized. False is returned
         otherwise."""
@@ -647,7 +664,7 @@ class BaseEntity(object):
             raise SoftMetadataError(
                 'property "%s" has no type information' % name)
         return ptype
-    
+
     @classmethod
     def soft_get_property_description(cls, name):
         """Returns description of property `name`."""
@@ -679,7 +696,7 @@ def _get_prop_info(cls, name, field, default=None):
     raise SoftInvalidPropertyError('%s has no property named "%s"' % (
         cls.soft_metadata['name'], field))
 
-    
+
 
 def entity(metadata):
     """Factory fuction for creating an Entity class object for `metadata`.
