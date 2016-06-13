@@ -18,6 +18,7 @@ option (WITH_NUMERICS "Compile with SOFT Numerics"        ON)
 option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
 #option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
+option (WITH_PORTO "Compile porto plugins"                ON)
 
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -204,6 +205,14 @@ if (WITH_NUMERICS)
     add_subdirectory(numerics/test/sim)
   endif(WITH_TESTS)  
 endif (WITH_NUMERICS)
+
+if (WITH_PORTO)
+  add_subdirectory(porto/src/json)
+  if (WITH_TESTS)
+    add_subdirectory(porto/test/json)
+  endif (WITH_TESTS)
+endif (WITH_PORTO)
+
 
 # Documentation
 add_subdirectory(doc)
