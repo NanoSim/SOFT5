@@ -7,7 +7,7 @@
 ExternalStrategyPlugin :: ~ExternalStrategyPlugin()
 {}
 
-void ExternalStrategyPlugin :: registerStreategy()
+void ExternalStrategyPlugin :: registerStrategy()
 {
   auto isOk = soft::registerStorage("external", soft::ExtStrategy::create);
   if (!isOk) {
