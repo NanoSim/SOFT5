@@ -7,6 +7,7 @@ option (WITH_HSM "Compile with HSM plugin"                ON)
 option (WITH_STORAGE_HD5 "HDF5 storage support"           ON)
 option (WITH_STORAGE_MONGO "MongoDB storage support"      ON)
 option (WITH_STORAGE_JSON "JSON storage support"          ON)
+option (WITH_STORAGE_EXTERNAL "External storage support"  ON)
 option (WITH_PLUGIN_GSL "Compile GSL plugin"              ON)
 option (WITH_PLUGIN_NLOPT "Compile NLOpt plugin"          ON)
 option (WITH_PLUGIN_HD5 "Compile HD5 plugin"              ON)
@@ -139,6 +140,10 @@ endif (WITH_STORAGE_MONGO)
 if (WITH_STORAGE_JSON)
   add_subdirectory(storage/src/plugins/json)
 endif (WITH_STORAGE_JSON)
+
+if (WITH_STORAGE_EXTERNAL)
+  add_subdirectory(storage/src/plugins/external)
+endif (WITH_STORAGE_EXTERNAL)
 
 # Tools
 add_subdirectory(tools/src/softshell)
