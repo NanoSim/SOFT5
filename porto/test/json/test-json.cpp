@@ -3,9 +3,11 @@
 #include <gtest/gtest.h>
 #include <json.h>
 
-TEST(PortoJsonTest, helloCruelWorld)
+TEST(PortoJsonTest, TestCapabilities) 
 {
-  auto i = blargh(2);
-  ASSERT_TRUE(i == 3);
+  int capabilities = softc_plugin_capabilities();
+
+  ASSERT_TRUE(capabilities & SOFTC_CAPABILITY_READ);
+  ASSERT_TRUE(capabilities & SOFTC_CAPABILITY_WRITE);
 }
 
