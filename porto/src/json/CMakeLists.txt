@@ -7,7 +7,6 @@ find_package(Qt5Core REQUIRED)
 
 set(${PROJECT_NAME}_INCLUDE_DIRS
   ${soft-kernel_INCLUDE_DIRS}
-  ${soft-storage-plugin-json_INCLUDE_DIRS}
   ${softc_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}
   CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
@@ -16,7 +15,6 @@ include_directories (${porto-json_INCLUDE_DIRS})
 
 set (LINK_LIBS Qt5::Core 
   ${softc_LIBS} 
-  ${soft-storage-plugin-json_LIBS}
   ${soft-kernel_LIBS})
 
 aux_source_directory (. SRC_LIST)

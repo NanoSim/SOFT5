@@ -4,6 +4,7 @@
 #include <json.h>
 
 #include "json/jsonmodel.h"
+#include "softc/softc-datamodel-private.hpp"
 
 TEST(PortoJsonTests, TestIdentify) {
   {
@@ -50,13 +51,36 @@ TEST(PortoJsonTests, TestCapabilities)
 }
 
 TEST(PortoJsonTests, TestSaveLoad) {
-  // TODO: Construct a datamodel!
-  
-  softc_datamodel_t d;
-  
-  int error = softc_plugin_save(&d, "test.json", "");
+ 
+  // Construct a dummy data model
+  // TODO: We may need some name/versioning and check here?
+  soft::JSONModel j;
+  j.appendDouble("amount", 40.0);
 
-  // TODO: Load the saved plugin and check that the data models are the same
+  // Construct a wrapper for the data model so that we can pass it to the c interface
+  softc_datamodel_t d{&j};
+  
+  int error;
+  const std::string uri = "test.json";
+  
+  // Check that it is possible to store the data in the given .json file
+  error = softc_plugin_save(&d, uri.c_str(), "");
+  ASSERT_EQ(SOFTC_STATUS_OK, error);
 
-  ASSERT_EQ(error, SOFTC_STATUS_OK);
+  // Construct a dummy target data model
+  soft::JSONModel k;
+  softc_datamodel_t e{&k};
+
+  // Then check that we can read the data from the same .json file
+  error = softc_plugin_load(&e, uri.c_str(), "");
+  ASSERT_EQ(SOFTC_STATUS_OK, error);
+
+  // Finally, check that the data models (j created above, k read from file) are identical
+  double j_amount, k_amount;
+  ASSERT_TRUE(j.getDouble("amount", j_amount));
+  ASSERT_TRUE(k.getDouble("amount", k_amount));
+  ASSERT_EQ(j_amount, k_amount);
+
+  // TODO: Introduce an equality operator for JSONModel or models in general? 
+  // TODO: Add version/name check between j and k?
 }

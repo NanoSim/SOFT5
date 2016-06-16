@@ -28,8 +28,22 @@ int softc_plugin_capabilities() {
 }
 
 int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char* options ) {
-  // TODO
+  // TODO: Return an actual datamodel with the proper structure, naming etc.
+  
+  QFile f(uri);
+  if (!f.open(QIODevice::ReadOnly)) {
+    return SOFTC_STATUS_FAILURE;
+  }
 
+  QByteArray ba = f.readAll();
+
+  QJsonDocument doc = QJsonDocument::fromJson(ba);
+
+  double dummy = doc.object()["amount"].toDouble();
+
+  softc_datamodel_append_double(datamodel, "amount", dummy);
+
+  return SOFTC_STATUS_OK;
 }
 
 int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, const char* options) {
@@ -44,7 +58,10 @@ int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, cons
   if (!softc_datamodel_get_double(datamodel, "amount", &dummy)) {
     return SOFTC_STATUS_FAILURE;
   }
-  
+
+  // TODO: Also make sure that, regardless of meta information, we check that the
+  //       properties exist before we use them.
+
   QJsonObject root;
   root["recepie"] = "cheese cake";
 
