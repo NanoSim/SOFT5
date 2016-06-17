@@ -1,4 +1,5 @@
 project (autogen-test C)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/../cmake")
 find_package(SOFT5 REQUIRED)
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
