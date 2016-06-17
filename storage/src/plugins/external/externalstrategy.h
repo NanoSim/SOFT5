@@ -12,6 +12,7 @@ class ExternalStrategy : public IStorageStrategy
 public:
   ExternalStrategy();
   ExternalStrategy(const char *uri, const char *options);
+  ExternalStrategy(ExternalStrategy const &)=delete;
   ExternalStrategy& operator= (ExternalStrategy const&) =delete;
   virtual ~ExternalStrategy();
 

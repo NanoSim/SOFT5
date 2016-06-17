@@ -1,4 +1,5 @@
-#include <QString>
+#include <QtCore>
+#include <QScopedPointer>
 #include "externalstrategy.h"
 #include "externalmodel.h"
 
@@ -20,6 +21,7 @@ class ExternalStrategy::Private
   {}
   QString uri;
   QString options;
+  QScopedPointer<QLibrary> extPlugin;
 };
 
 ExternalStrategy :: ExternalStrategy()
