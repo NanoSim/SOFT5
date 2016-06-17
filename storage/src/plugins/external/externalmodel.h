@@ -64,6 +64,9 @@ public:
   bool getModel            (const char *, IDataModel *) const override;
 
 private:
+  void setJson(QJsonObject const &);
+  const QJsonObject *json() const;
+
   class Private;
   Private *d;
 };

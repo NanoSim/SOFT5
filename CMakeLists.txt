@@ -143,6 +143,9 @@ endif (WITH_STORAGE_JSON)
 
 if (WITH_STORAGE_EXTERNAL)
   add_subdirectory(storage/src/plugins/external)
+  if (WITH_TESTS)	
+    add_subdirectory(storage/test/plugins/external)
+  endif (WITH_TESTS)	
 endif (WITH_STORAGE_EXTERNAL)
 
 # Tools

@@ -247,7 +247,7 @@ bool ExternalModel :: getArray         (const char *, IDataModel *) const
 bool ExternalModel :: getModel         (const char *, IDataModel *) const
 {}
 
-/*
+
 const QJsonObject *ExternalModel :: json() const
 {
   return &d->jsonObject;
@@ -257,7 +257,6 @@ void ExternalModel :: setJson(QJsonObject const &obj)
 {
   d->jsonObject = obj;
 }
-*/
 
 bool ExternalModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) 
 {
