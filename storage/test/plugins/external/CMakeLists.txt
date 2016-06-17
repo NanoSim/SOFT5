@@ -1,5 +1,9 @@
 project(storage-plugin-external-test C CXX)
+set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/entities)
+set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/ccode.cjs)
+set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/ccode.hjs)
 
+add_subdirectory(entities)
 find_package(GTest)
 
 if(GTEST_FOUND)
@@ -8,9 +12,9 @@ if(GTEST_FOUND)
 
   aux_source_directory(. SRC_LIST)
   add_executable(${PROJECT_NAME} ${SRC_LIST})
-  include_directories(${soft-storage-plugins-external_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+  include_directories(${plot-entities_INCLUDE_DIRS} ${soft-storage-plugins-external_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
-  target_link_libraries(${PROJECT_NAME} ${soft-kernel_LIBS} ${GTEST_LIBRARIES}) 
+  target_link_libraries(${PROJECT_NAME} ${plot-entities_LIBS} ${GTEST_LIBRARIES}) 
 
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-external_BINARY_DIR}")

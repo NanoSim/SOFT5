@@ -23,6 +23,8 @@ public:
   static IStorageStrategy* create(char const *uri, char const *opts);
   static const char *staticMetaType;
 private:
+  class Private;
+  Private *d;
 };
 
 SOFT_END_NAMESPACE

@@ -1,3 +1,4 @@
+#include <QString>
 #include "externalstrategy.h"
 #include "externalmodel.h"
 
@@ -8,6 +9,32 @@ const char *ExternalStrategy::staticMetaType = "http://sintef.no/soft/TR/externa
 const char *ExternalStrategy::metaType() const
 {
   return ExternalStrategy::staticMetaType;
+}
+
+class ExternalStrategy::Private
+{
+  friend class ExternalStrategy;
+  Private (QString const &uri, QString const &options)
+    : uri(uri)
+    , options (options)
+  {}
+  QString uri;
+  QString options;
+};
+
+ExternalStrategy :: ExternalStrategy()
+  : IStorageStrategy()
+  , d(new ExternalStrategy::Private(QString(), QString()))
+{}
+      
+ExternalStrategy :: ExternalStrategy(const char *uri, const char *options)
+  : IStorageStrategy()
+  , d(new ExternalStrategy::Private(uri, options))
+{}
+
+ExternalStrategy :: ~ExternalStrategy()
+{
+  delete d;
 }
 
 IDataModel *ExternalStrategy::dataModel () const
@@ -34,8 +61,8 @@ IStorageStrategy* ExternalStrategy::create(char const *uri, char const *opts)
 {
   // TODO: Parse opts and load correct plugin 
   // Set correct function pointers
-  
-  return nullptr;
+  auto s = new ExternalStrategy(uri, opts);
+  return s;
 }
 
 
