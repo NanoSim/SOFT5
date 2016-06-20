@@ -6,6 +6,7 @@
 #include <softc/softc-allocatable.h>
 #include <softc/softc-storage.h>
 #include "xy.h"
+#include "amount.h"
 
 class ExternalPluginTest : public ::testing::Test {
 protected:
@@ -26,9 +27,11 @@ TEST_F(ExternalPluginTest, checkRegistered)
 }
 
 TEST_F(ExternalPluginTest, connect)
-{
-  softc_storage_t *storage  = softc_storage_create("external", "xyplot", "uri=file.dat");
+{  
+  softc_storage_t *storage  = softc_storage_create("external", "porto-json:///tmp/file.json", "");
   xy_s * xy = xy_create(3,2);
-  softc_storage_save(storage, (softc_entity_t*)xy);
+  amount_s *a = amount_create();
+
+  softc_storage_save(storage, (softc_entity_t*)a);
   ASSERT_TRUE(storage != nullptr);
 }

@@ -3,7 +3,7 @@ project (soft-storage-plugins-external C CXX)
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set (CMAKE_AUTOMOC TRUE)
 
-include_directories (${soft-kernel_INCLUDE_DIRS})
+include_directories (${soft-kernel_INCLUDE_DIRS} ${softc_INCLUDE_DIRS})
 set (LINK_LIBS ${LINK_LIBS} ${soft-kernel_LIBS})
 
 aux_source_directory (. SRC_LIST)

@@ -7,6 +7,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QFile>
+#include <QUrl>
 
 int softc_plugin_identify( char* name, int maxlen ) {
   // TODO: Is this the name we want to return?
@@ -54,6 +55,8 @@ int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, cons
   // softc_datamodel_get_meta_version
   // softc_datamodel_get_meta_namespace
   
+  QUrl url(uri);
+
   double dummy;
   if (!softc_datamodel_get_double(datamodel, "amount", &dummy)) {
     return SOFTC_STATUS_FAILURE;
@@ -76,7 +79,7 @@ int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, cons
 
   QJsonDocument doc(root);
 
-  QFile f(uri);
+  QFile f(url.path());
   if (!f.open(QIODevice::WriteOnly)) {
     return SOFTC_STATUS_FAILURE;
   }
