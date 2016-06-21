@@ -21,7 +21,7 @@ if(GTEST_FOUND)
     ${GTEST_LIBRARIES}
     )
 
-  message("Test: ${soft-storage-plugins-json_INCLUDE_DIRS}")
+#  message("Test: ${soft-storage-plugins-json_INCLUDE_DIRS}")
     
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 

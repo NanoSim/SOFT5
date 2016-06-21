@@ -1,6 +1,7 @@
 #include <functional>
 #include <QtCore>
 #include <QScopedPointer>
+#include "soft.h"
 #include "externalstrategy.h"
 #include "externalmodel.h"
 #include "softc/softc-storage-plugin.h"
@@ -12,7 +13,6 @@ const char pluginIdentify[]     = "softc_plugin_identify";
 const char pluginSave[]         = "softc_plugin_save";
 const char pluginLoad[]         = "softc_plugin_load";
 const char pluginCapabilities[] = "softc_plugin_capabilities";
-const char hardcodedPath[]      = "/home/thomash/proj/soft5/build/porto/src/json"; // TODO: soft-code this!
 const size_t MAXLEN = 512;
 
 namespace Singleton {
@@ -21,7 +21,7 @@ namespace Singleton {
     typedef int(*IdentityPrototype)(char*,int);
   public:
     PluginsListSingleton(){
-      paths << hardcodedPath;
+      auto paths = pluginsDirectories();
     
       auto libFilter = [](QStringList const &files) {
 	QStringList retval;
@@ -34,7 +34,7 @@ namespace Singleton {
       };
     
       for (auto const dir: paths) {
-	QDir const pluginsDir (dir);
+	QDir const pluginsDir (QString::fromStdString(dir));
 	auto const files         = pluginsDir.entryList (QDir::Files);
 	auto const filteredFiles = libFilter(files);
 	for (auto const file: filteredFiles) {
@@ -50,7 +50,6 @@ namespace Singleton {
       }
     }
 
-    QStringList paths;
     QMap<QString, QSharedPointer<QLibrary>> libraryMap;
   };
 

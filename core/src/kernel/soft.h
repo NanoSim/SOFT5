@@ -20,6 +20,7 @@ std::list<std::string>            registeredStorageDrivers();
 bool                              registerStorage(const char *name, IStorageStrategy*(*createFunc)(const char*, const char *options));
 std::shared_ptr<IStorageStrategy>  create(const char *name, const char *uri, const char *options);
 IStorageStrategy*                  createStrategy(const char *name, const char *uri, const char *options);
+std::list<std::string>            pluginsDirectories();
 
 SOFT_END_NAMESPACE
 

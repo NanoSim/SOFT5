@@ -9,6 +9,8 @@
 #include <QTextStream>
 #include <QProcessEnvironment>
 #include <QDebug>
+#include <string>
+#include <list>
 #include "soft.h"
 
 #include "storagefactory.h"
@@ -105,6 +107,16 @@ static QList<QDir> pluginsDirList()
   }
 
   return list;
+}
+
+std::list<std::string> pluginsDirectories()
+{
+  std::list<std::string> ret;
+  for(const auto dir: pluginsDirList()) {
+    std::string path = dir.absolutePath().toStdString();
+    ret.push_back(path);
+  }
+  return ret;
 }
 
 static bool registerStoragePlugins()
