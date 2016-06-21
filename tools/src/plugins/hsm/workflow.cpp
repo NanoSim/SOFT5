@@ -153,6 +153,7 @@ static void registerFunction (QScriptEngine *engine,
 Workflow :: ~Workflow()
 {}
 
+
 void Workflow :: registerPlugin (QScriptEngine *engine)
 {
   Q_CHECK_PTR (engine);
@@ -162,7 +163,9 @@ void Workflow :: registerPlugin (QScriptEngine *engine)
   auto environment = engine->newObject();
   globalObj.setProperty("Ats", ats);
   ats.setProperty("Workflow", wf);
-  wf.setProperty("environment", "environment");
-  registerFunction (engine, "run", ::runWorkflow, &wf, "Run the current workflow");
-  registerFunction (engine, "setProcessEnvironment", ::setProcessEnv, &wf, "Sets the environment that the workflow will use when starting a process to environment object");
+  wf.setProperty("environment", environment);
+
+  registerFunction (engine, "run", &::runWorkflow, &wf, "Run the current workflow");
+  registerFunction (engine, "setProcessEnvironment", &::setProcessEnv, &wf,
+    "Sets the environment that the workflow will use when starting a process to environment object");
 }
