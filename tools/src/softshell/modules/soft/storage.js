@@ -19,6 +19,7 @@
 	case "mongo":
 	case "mongodb":
 	    MongoDriver = require('soft.storage.mongo').driver();
+print("Creating MongoDriver: ", options.uri);
 	    return new MongoDriver(options);
 	    break;
 	case "json":
