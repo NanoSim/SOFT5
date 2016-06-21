@@ -4,6 +4,9 @@
 #include <collection.h>
 #include <istoragestrategy.h>
 #include <idatamodel.h>
+#include <json/jsonmodel.h>
+#include "collection_test_entity.h"
+#include <softc/softc-entity.h>
 
 //static const char * driver  = "mongo";
 static const char * driver = "json";
@@ -17,7 +20,7 @@ class CollectionTest : public ::testing::Test {
 protected:
   CollectionTest() {
   }
-  
+
   virtual ~CollectionTest(){
   }
 
@@ -31,10 +34,10 @@ protected:
     delete storageStrategy_;
     storageStrategy_ = nullptr;
   }
-  
+
   virtual void SetUp(){
   }
-  
+
   virtual void TearDown(){
   }
 
@@ -95,7 +98,7 @@ TEST_F(CollectionTest, save1) {
 
   //  model->appendInt32("test", 42);
   //  storageStrategy_->store(model);
-  
+
   delete e;
 }
 
@@ -161,3 +164,71 @@ TEST_F (CollectionTest, findConnections2) {
   ASSERT_STREQ(p.front().object().c_str(), "obj");
   ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
 }
+
+TEST(Collection, instanciateFromDataModel1) {
+
+  soft::Collection recepie;
+  soft::Collection baking_log;
+
+  soft::Collection mums_cookies;
+
+  mums_cookies.registerEntity("cookie-recepie", &recepie);
+  mums_cookies.registerEntity("cooking-competition-baking-log", &baking_log);
+  mums_cookies.setName("Mums best cookies!");
+  mums_cookies.setVersion("1-with-some-improvements");
+
+  ASSERT_EQ(2, mums_cookies.numEntities()) << "mums_cookies numEntities";
+  ASSERT_EQ("Mums best cookies!", mums_cookies.name());
+  ASSERT_EQ("1-with-some-improvements", mums_cookies.version());
+
+  soft::JSONModel dm;
+  mums_cookies.save((soft::IDataModel *)(&dm));
+
+  // ... mum shelves her cookie activities and pursue other activities
+  // while a generation passes. Until one day ...
+
+  soft::Collection grandmas_cookies;
+  grandmas_cookies.load(&dm);
+
+  ASSERT_EQ(2, grandmas_cookies.numEntities()) << "grandmas_cookies numEntities";
+
+  // TODO: Check that I got a label here
+}
+
+/*
+TEST(CollectionTest, instanciateFromDataModel2) {
+
+  // FIXTURE:
+
+  // Where is the entity code generation? See entities/ CMakeLists.txt
+
+  collection_test_entity_s *e = collection_test_entity_create();
+
+  // Note: We need to cast the entity to softc_entity_t. It seems to be safe!
+  std::string uuid(softc_entity_get_id((softc_entity_t *)e));
+  std::string name(softc_entity_get_meta_name((softc_entity_t *)e));
+
+  soft::JSONModel jm();
+
+  soft::Collection c(jm);
+  std::string label{ "tubes" };
+
+  c.addEntity(label, name, version, ns, uuid);
+
+  c.store(jm);
+
+
+  // TEST:
+  soft::Collection d(jm);
+
+  ASSERT_TRUE(c.hasEntity(label));
+  std::string new_uuid = c.getEntityId(label);
+  IDataModel *entity_idm = c.getEntityDataModel(label); // IDataModel or data_model_t ?
+  data_model_t entity_dm = { entity_idm }; // TODO: Also might need a future conversion to/from IDataModel?
+
+  tube_entity_s *e2 = tube_entity_create0(new_uuid.c_str());
+  tube_entity_load(e2, &entity_dm);
+
+  ASSERT_TRUE(nullptr != e2);
+}
+*/

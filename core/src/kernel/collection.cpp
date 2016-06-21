@@ -8,8 +8,8 @@ SOFT_BEGIN_NAMESPACE
 struct DimMap_
 {
   DimMap_(std::string const l,
-	  std::string const e,
-	  std::string const c)
+      std::string const e,
+      std::string const c)
     : label(l)
     , entityDim(e)
     , collectionDim(c)
@@ -26,9 +26,9 @@ struct Dim_
     : label(l)
     , description(d)
   {}
-  
+
   std::string const label;
-  std::string const description;    
+  std::string const description;
 };
 
 class RelationTriplet :: Private
@@ -46,8 +46,8 @@ class RelationTriplet :: Private
 };
 
 RelationTriplet :: RelationTriplet (std::string const &s,
-				    std::string const &p,
-				    std::string const &o)
+                    std::string const &p,
+                    std::string const &o)
   : d (new RelationTriplet :: Private (s, p, o))
 {}
 
@@ -71,8 +71,8 @@ class RelationTriplet_
 {
 public:
   RelationTriplet_(std::string const &s,
-		  std::string const &p,
-		  std::string const &o)
+          std::string const &p,
+          std::string const &o)
     : subject(s)
     , predicate(p)
     , object(o)
@@ -89,17 +89,17 @@ private:
 struct EntityRef_
 {
   EntityRef_(std::string const &l,
-	     std::string const &n,
-	     std::string const &v,
-	     std::string const &ns,
-	     std::string const &id)
+         std::string const &n,
+         std::string const &v,
+         std::string const &ns,
+         std::string const &id)
     : label(l)
     , name(n)
     , version(v)
     , ns(ns)
     , uuid(id)
   {}
-  
+
   std::string const label;
   std::string const name;
   std::string const version;
@@ -135,6 +135,18 @@ Collection :: Collection(const IEntity *ptr)
   : IEntity(ptr)
   , d (new Collection::Private())
 {
+}
+
+// Instanciate a collection from a data model
+Collection :: Collection(IDataModel const *dm)
+  : IEntity()
+  , d(new Collection::Private())
+{
+  load(dm);
+
+  // TODO: Discuss and find out, do we want exceptions or error codes?
+  if (!checkCorrectness())
+    throw std::runtime_error("Failed to construct Collection from entity");
 }
 
 Collection :: ~Collection()
@@ -175,17 +187,17 @@ void Collection :: registerEntity(std::string const &label, IEntity const *entit
 {
   d->entityMap.insert({label, entity});
   this->addEntity(label,
-		  entity->metaName(),
-		  entity->metaVersion(),
-		  entity->metaNamespace(),
-		  entity->id());
+          entity->metaName(),
+          entity->metaVersion(),
+          entity->metaNamespace(),
+          entity->id());
 }
 
 void Collection :: addEntity(std::string const &label,
-		 std::string const &name,
-		 std::string const &version,
-		 std::string const &ns,
-		 std::string const &uuid)
+         std::string const &name,
+         std::string const &version,
+         std::string const &ns,
+         std::string const &uuid)
 {
   EntityRef ref(label, name, version, ns, uuid);
   d->entityList.push_back(ref);
@@ -198,7 +210,7 @@ int Collection :: numEntities() const
 
 
 void Collection :: addDim(std::string const &label,
-			  std::string const &description)
+              std::string const &description)
 {
   Dim dim (label, description);
   d->dimList.push_back(dim);
@@ -210,16 +222,16 @@ int Collection :: numDims() const
 }
 
 void Collection :: addRelation(std::string const &subject,
-			       std::string const &predicate,
-			       std::string const &object)
+                   std::string const &predicate,
+                   std::string const &object)
 {
   RelationTriplet triplet(subject, predicate, object);
   d->relationList.push_back(triplet);
 }
 
 void Collection :: connect (std::string const &subject,
-			    std::string const &predicate,
-			    std::string const &object)
+                std::string const &predicate,
+                std::string const &object)
 {
   addRelation(subject, predicate, object);
 }
@@ -230,8 +242,8 @@ int Collection :: numRelations() const
 }
 
 void Collection :: addDimMap(std::string const &label,
-			     std::string const &entityDim,
-			     std::string const &collectionDim)
+                 std::string const &entityDim,
+                 std::string const &collectionDim)
 {
   DimMap dimMap(label, entityDim, collectionDim);
   d->dimMapList.push_back(dimMap);
@@ -258,19 +270,26 @@ std::list<RelationTriplet> Collection :: findRelations(std::string const &subjec
   if (subject.empty()) {
     return this->relationList();
   }
-  
+
   std::list<RelationTriplet> retval;
   for (auto r : this->relationList()) {
     if (r.subject() == subject) {
       retval.push_back(r);
-    }    			  
+    }
   }
   return retval;
 }
 
 void Collection :: load (IDataModel const *dataModel)
 {
+  // TODO: Reflect name/version in load
+  // dataModel->getStringArray("");
+}
 
+bool Collection :: checkCorrectness()
+{
+  // TODO: Implement this
+  return true;
 }
 
 std::list<DimMap> Collection :: dimMapList() const
