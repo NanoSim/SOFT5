@@ -3,6 +3,8 @@
 
 SOFT_BEGIN_NAMESPACE
 
+#define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
+
 class JSONModel :: Private
 {
   friend class JSONModel;
@@ -10,6 +12,7 @@ class JSONModel :: Private
   {}
 
   QJsonObject jsonObject;
+  std::map<std::string, IDataModel *> dataModels;
 };
 
 JSONModel :: JSONModel()
@@ -29,6 +32,7 @@ IDataModel *JSONModel :: createModel()
 
 bool JSONModel :: appendDimension (const char *, StdUInt)
 {
+  NOT_IMPLEMENTED
   return false;
 }
 
@@ -128,10 +132,14 @@ bool JSONModel :: appendDouble     (const char *key, double value)
 }
 
 bool JSONModel :: appendBool       (const char *, bool)
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: appendInt32Array (const char *, const std::vector<int32_t> &)
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: appendDoubleArray(const char *key, const std::vector<double> &value)
 {
@@ -143,7 +151,9 @@ bool JSONModel :: appendDoubleArray(const char *key, const std::vector<double> &
 }
 
 bool JSONModel :: appendByteArray  (const char *, const std::vector<unsigned char> &)
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: appendStringArray(const char *key, const std::vector<std::string> &value)
 {
@@ -156,19 +166,18 @@ bool JSONModel :: appendStringArray(const char *key, const std::vector<std::stri
 
 bool JSONModel :: appendArray      (const char *, const IDataModel *)
 {
-  // TODO: Empty methods should throw "not implemented"!
+  NOT_IMPLEMENTED
 }
-
-bool JSONModel :: appendModel      (const char *, const IDataModel *)
-{}
 
 bool JSONModel :: getDimension (const char *, StdUInt &) const
 {
-  return false;
+  NOT_IMPLEMENTED
 }
 
 bool JSONModel :: getVariant       (const char *, StdVariant &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getString (const char *key, std::string &str) const
 {
@@ -184,31 +193,49 @@ bool JSONModel :: getString (const char *key, std::string &str) const
 }
 
 bool JSONModel :: getInt8          (const char *, int8_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getUInt8         (const char *, uint8_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getInt16         (const char *, int16_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getUInt16        (const char *, uint16_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getInt32         (const char *, int32_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getUInt32        (const char *, uint32_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getInt64         (const char *, int64_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getUInt64        (const char *, uint64_t &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getFloat         (const char *, float &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getDouble        (const char *key, double &value) const
 {
@@ -221,10 +248,14 @@ bool JSONModel :: getDouble        (const char *key, double &value) const
 }
 
 bool JSONModel :: getBool          (const char *, bool &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getInt32Array    (const char *, std::vector<int32_t> &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getDoubleArray   (const char *key, std::vector<double> &value) const
 {
@@ -249,7 +280,9 @@ bool JSONModel :: getDoubleArray   (const char *key, std::vector<double> &value)
 }
 
 bool JSONModel :: getByteArray     (const char *, std::vector<unsigned char> &) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
 bool JSONModel :: getStringArray(const char * key, std::vector<std::string> &value) const
 {
@@ -275,10 +308,30 @@ bool JSONModel :: getStringArray(const char * key, std::vector<std::string> &val
 }
 
 bool JSONModel :: getArray         (const char *, IDataModel *) const
-{}
+{
+  NOT_IMPLEMENTED
+}
 
-bool JSONModel :: getModel         (const char *, IDataModel *) const
-{}
+
+bool JSONModel :: appendModel      (const char *key, IDataModel *dm)
+{
+  const auto it = d->dataModels.find(key);
+  // Only insert if the model does not already exist with the same label
+  if (it == d->dataModels.cend()) {
+    d->dataModels.insert({key, dm});
+    return true;
+  }
+  return false; // TODO: Should we return false for failed inserts?
+}
+
+IDataModel* JSONModel :: getModel         (const char *key) const
+{
+  const auto it = d->dataModels.find(key);
+  if (it != d->dataModels.cend()) {
+    return (*it).second;
+  }
+  return nullptr;
+}
 
 const QJsonObject *JSONModel :: json() const
 {
@@ -292,22 +345,22 @@ void JSONModel :: setJson(QJsonObject const &obj)
 
 bool JSONModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&)
 {
-  return false;
+  NOT_IMPLEMENTED
 }
 
 bool JSONModel :: appendDoubleArray3D (const char *, const std::vector<std::vector<std::vector<double> > >&)
 {
-  return false;
+  NOT_IMPLEMENTED
 }
 
 bool JSONModel :: getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const
 {
-  return false;
+  NOT_IMPLEMENTED
 }
 
 bool JSONModel :: getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const
 {
-  return false;
+  NOT_IMPLEMENTED
 }
 
 SOFT_END_NAMESPACE

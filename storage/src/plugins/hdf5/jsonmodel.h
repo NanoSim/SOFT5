@@ -38,7 +38,6 @@ public:
   virtual bool appendByteArray     (const char *, StdBlob const &) override;
   virtual bool appendStringArray   (const char *, StdStringList const &) override;
   virtual bool appendArray         (const char *, IDataModel const *) override;
-  virtual bool appendModel         (const char *, IDataModel const *) override;
 
   virtual bool getDimension        (const char *, StdUInt &) const override;
   virtual bool getVariant          (const char *, StdVariant &) const override;
@@ -61,7 +60,10 @@ public:
   virtual bool getByteArray        (const char *, StdBlob &) const override;
   virtual bool getStringArray      (const char *, StdStringList &) const override;
   virtual bool getArray            (const char *, IDataModel *) const override;
-  virtual bool getModel            (const char *, IDataModel *) const override;
+
+  bool appendModel(const char *, IDataModel *) override;
+  IDataModel* getModel(const char *) const override;
+
 
 private:
   void setPropsJson(QJsonObject const &);
@@ -88,7 +90,7 @@ private:
   void registerGetDoubleArray3DFn(std::function<bool(const char *, StdDoubleArray3D&)> &fn);
   void registerGetByteArrayFn    (std::function<bool(const char *, StdBlob&)> &fn);
   void registerGetStringArrayFn  (std::function<bool(const char *, StdStringList &)> &fn);
-  
+
   void *data;
   class Private;
   Private *d;

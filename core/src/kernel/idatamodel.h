@@ -37,7 +37,6 @@ public:
   virtual bool appendByteArray     (const char *, StdBlob const &) = 0;
   virtual bool appendStringArray   (const char *, StdStringList const &) = 0;
   virtual bool appendArray         (const char *, IDataModel const *) = 0;
-  virtual bool appendModel         (const char *, IDataModel const *) = 0;
 
   virtual bool getDimension        (const char *, StdUInt &) const = 0;
   virtual bool getVariant          (const char *, StdVariant &) const = 0;
@@ -61,8 +60,9 @@ public:
   virtual bool getStringArray      (const char *, StdStringList &) const = 0;
   virtual bool getArray            (const char *, IDataModel *) const = 0;
 
-  // TODO: This is actually different key than above
-  virtual bool getModel            (const char *, IDataModel *) const = 0;
+  // TODO: This is actually different key than above. Make this clear.
+  virtual IDataModel* getModel(const char *) const = 0;
+  virtual bool appendModel(const char *, IDataModel *) = 0;
 
   virtual void setId               (const StdString &id) {_id = id;}
   virtual void setMetaName         (const StdString &metaName){_metaName = metaName;}

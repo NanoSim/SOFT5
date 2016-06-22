@@ -73,43 +73,12 @@ TEST_F(CollectionTest, StaticCreate) {
   delete coll;
 }
 
-
-TEST_F(CollectionTest, metaType) {
-  /*
-  const char *uuid = "bb1bb66e-fa49-40a2-8796-6e2ba6e3c50f";
-
-  soft::IEntity *e = soft::Collection::create(uuid);
-  ASSERT_STREQ("http://emmc.eu/TR/metadata-entity#Collection:1.0-SNAPSHOT-4", e->metaType());
-  delete e;
-  */
-}
-
-TEST_F(CollectionTest, save1) {
+TEST_F(CollectionTest, createAsEntity) {
   soft::IEntity *e = soft::Collection::create();
   ASSERT_TRUE(e != NULL);
-
-  ASSERT_TRUE(storageStrategy_ != NULL);
-  ASSERT_STREQ("http://sintef.no/soft/TR/storage-strategy#json:0.1-SNAPSHOT-1", storageStrategy_->metaType());
-
-  // soft::IDataModel const* model = CollectionTest::storageStrategy_->dataModel();
-  //  ASSERT_TRUE(model != NULL);
-  //  auto model = storageStrategy_->dataModel();
-  //  ASSERT_TRUE(model != NULL);
-
-  //  model->appendInt32("test", 42);
-  //  storageStrategy_->store(model);
-
   delete e;
 }
 
-TEST_F(CollectionTest, load1) {
-  soft::IEntity *e = soft::Collection::create();
-  ASSERT_TRUE(e != NULL);
-
-  //  auto model = storageStrategy_->dataModel();
-  //  ASSERT_TRUE(model != NULL);
-  delete e;
-}
 
 TEST_F(CollectionTest, registerEntity) {
   soft::IEntity *e = soft::Collection::create();
@@ -126,7 +95,7 @@ TEST_F(CollectionTest, collection) {
   collection.addRelation("label2", "inherits", "label3");
 }
 
-TEST_F(CollectionTest, registerAndFetch) {
+TEST_F(CollectionTest, DISABLED_registerAndFetch) {
   soft::Collection subCollection;
   soft::Collection collection;
   collection.registerEntity("subCollection", &subCollection);
@@ -150,8 +119,8 @@ TEST_F (CollectionTest, DISABLED_findConnections1) {
   auto p = collection.findRelations("sub");
 
   ASSERT_EQ(1, p.size());
-  ASSERT_STREQ(p.front().object().c_str(), "obj");
-  ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
+  // ASSERT_STREQ(p.front().object().c_str(), "obj");
+  // ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
 }
 
 TEST_F (CollectionTest, DISABLED_findConnections2) {
@@ -181,8 +150,8 @@ TEST_F (CollectionTest, DISABLED_findConnections2) {
   auto p = collection.findRelations("sub");
 
   ASSERT_EQ(1, p.size());
-  ASSERT_STREQ(p.front().object().c_str(), "obj");
-  ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
+  // ASSERT_STREQ(p.front().object().c_str(), "obj");
+  // ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
 }
 
 TEST(Collection, instanciateFromDataModel) {
@@ -230,40 +199,33 @@ TEST(Collection, instanciateFromDataModel) {
   // TODO: Check that I got a label here
 }
 
-/*
-TEST(CollectionTest, instanciateFromDataModel2) {
+TEST_F(CollectionTest, saveAndLoadWithEntities) {
+  soft::Collection c;
+  soft::Collection e;
 
-  // FIXTURE:
+  e.setName("My-sub-entity");
+  e.setVersion("1.0");
+  c.setName("My-collection");
+  c.setVersion("2.0");
 
-  // Where is the entity code generation? See entities/ CMakeLists.txt
+  c.attachEntity("sub-entity", &e);
 
-  collection_test_entity_s *e = collection_test_entity_create();
+  soft::JSONModel dm;
+  c.save(&dm);
 
-  // Note: We need to cast the entity to softc_entity_t. It seems to be safe!
-  std::string uuid(softc_entity_get_id((softc_entity_t *)e));
-  std::string name(softc_entity_get_meta_name((softc_entity_t *)e));
+  soft::Collection e2;
+  soft::Collection c2;
+  c2.attachEntity("sub-entity", &e2);
 
-  soft::JSONModel jm();
+  c2.load(&dm);
 
-  soft::Collection c(jm);
-  std::string label{ "tubes" };
+  ASSERT_EQ("My-collection", c2.name());
+  ASSERT_EQ("2.0", c2.version());
+  ASSERT_EQ("My-sub-entity", e2.name());
+  ASSERT_EQ("1.0", e2.version());
+  ASSERT_EQ(e.id(), e2.id());
 
-  c.addEntity(label, name, version, ns, uuid);
 
-  c.store(jm);
-
-
-  // TEST:
-  soft::Collection d(jm);
-
-  ASSERT_TRUE(c.hasEntity(label));
-  std::string new_uuid = c.getEntityId(label);
-  IDataModel *entity_idm = c.getEntityDataModel(label); // IDataModel or data_model_t ?
-  data_model_t entity_dm = { entity_idm }; // TODO: Also might need a future conversion to/from IDataModel?
-
-  tube_entity_s *e2 = tube_entity_create0(new_uuid.c_str());
-  tube_entity_load(e2, &entity_dm);
-
-  ASSERT_TRUE(nullptr != e2);
+  //const soft::IEntity *s = d.findInstance("sub-entity");
+  // ASSERT_TRUE(nullptr != s);
 }
-*/

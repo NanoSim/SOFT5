@@ -9,38 +9,9 @@
 
 SOFT_BEGIN_NAMESPACE
 
-class Collection;
-
-// TODO: Can't triplet be extracted from here? I think so!
-class RelationTriplet
-{
-public:
-  public:
-  RelationTriplet(std::string const &s,
-      std::string const &p,
-      std::string const &o);
-  RelationTriplet(std::string const &encoded);
-
-  virtual ~RelationTriplet();
-
-  std::string subject() const;
-  std::string predicate() const;
-  std::string object() const;
-
-  // TODO: These are const methods and may be moved out of the class
-  std::string const encode() const;
-  std::string decodeSubject(std::string const &encoded) const;
-  std::string decodePredicate(std::string const &encoded) const;
-  std::string decodeObject(std::string const &encoded) const;
-private:
-  friend class Collection;
-  class Private;
-  Private *d;
+// TODO: Needed? Should be a part of tripletstore?
+struct RelationTriplet {
 };
-
-typedef struct DimMap_ DimMap;
-typedef struct Dim_ Dim;
-typedef struct EntityRef_ EntityRef;
 
 class Collection : public IEntity
 {
@@ -65,9 +36,12 @@ public:
                  std::string const &version,
                  std::string const &ns,
                  std::string const &uuid);
+  void attachEntity(std::string const &label, IEntity *entity);
+
 
   void addDim(std::string const &label,
               std::string const &description = std::string());
+  // TODO: Not fully implemented.
   void connect(std::string const &subject,
                std::string const &predicate,
                std::string const &object);
@@ -80,27 +54,15 @@ public:
                  std::string const &collectionDim);
 
   int numEntities() const;
-  int numDims() const;
   int numRelations() const;
-  int numDimMaps() const;
 
   IEntity const *findInstance(std::string const &label) const;
   std::list<RelationTriplet> findRelations(std::string const &subject) const;
 
   virtual void save (IDataModel *) const override;
   virtual void load (IDataModel const *) override;
+
   virtual std::vector<std::string> dimensions() const override;
-
-  bool checkCorrectness();
-
-  // TODO: Required?
-  std::unique_ptr<IEntity> getEntity(std::string const &label);
-
-protected:
-  std::list<DimMap> dimMapList() const;
-  std::list<RelationTriplet> relationList() const;
-  std::list<Dim> dimList() const;
-  std::list<EntityRef> entityList() const;
 
 private:
   class Private;
