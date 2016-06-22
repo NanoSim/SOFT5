@@ -224,8 +224,4 @@ TEST_F(CollectionTest, saveAndLoadWithEntities) {
   ASSERT_EQ("My-sub-entity", e2.name());
   ASSERT_EQ("1.0", e2.version());
   ASSERT_EQ(e.id(), e2.id());
-
-
-  //const soft::IEntity *s = d.findInstance("sub-entity");
-  // ASSERT_TRUE(nullptr != s);
 }

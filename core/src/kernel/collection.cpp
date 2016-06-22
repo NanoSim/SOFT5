@@ -13,7 +13,6 @@ SOFT_BEGIN_NAMESPACE
 // * How do we specify the Collection schema? We have a name/version field, but
 //   is this suficient? Probably not!
 // * Dimension maps using triples should be implemented and tested
-// * The private data class d is not freed properly, memory leak posibilities
 
 class Collection :: Private
 {

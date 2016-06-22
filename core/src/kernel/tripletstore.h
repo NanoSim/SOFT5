@@ -22,12 +22,9 @@ public:
   std::list<std::string> findTriplets(const std::string &subj,
               const std::string &pred = std::string()) const;
 
-  std::vector<std::string> findSubjectsWithPredicate(
-      std::string const &predicate);
-
   std::string toRdf() const;
-  std::string toCSV() const;
 
+  std::string toCSV() const;
   void fromCSV(std::string const &csv);
 
 };

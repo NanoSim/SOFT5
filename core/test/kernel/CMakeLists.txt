@@ -33,8 +33,6 @@ if(GTEST_FOUND)
     ${GTEST_LIBRARIES}
     )
 
-  message("soft-storage-plugins-json_INCLUDE_DIRS: ${soft-storage-plugins-json_INCLUDE_DIRS}")
-
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-mongo_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}")
 

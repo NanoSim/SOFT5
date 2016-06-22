@@ -101,22 +101,6 @@ std::list<std::string> TripletStore :: findTriplets(const std::string &subj_, co
   return retval;
 }
 
-// Returns a vector of all subjects associated with a given predicate.
-// For example:
-//   subject predicate  object
-//   Luke    child-of   Darth
-// will return a vector containing "Luke" when called with findSubjectsWithPredicate("child-of")
-std::vector<std::string> TripletStore::findSubjectsWithPredicate(std::string const &predicate) {
-  const QString &&pred = QString::fromStdString(predicate);
-  Private::PredicateMap::const_iterator i = d->predicateMap.find(pred);
-  std::vector<std::string> results;
-  while (i != d->predicateMap.cend() && i.key() == pred) {
-    results.push_back(i.value().toStdString());
-    ++i;
-  }
-  return results;
-}
-
 std::string TripletStore :: toRdf() const
 {
   QByteArray byteArray;

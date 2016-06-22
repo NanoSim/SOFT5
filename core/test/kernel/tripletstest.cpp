@@ -56,7 +56,7 @@ TEST_F(TripletStoreTest, toFromToCSV) {
   ASSERT_EQ(0, triplets2.findTriplets("Luke", "child-of").size());
 }
 
-TEST_F(TripletStoreTest, testFindSubjectsWithPredicate) {
+TEST_F(TripletStoreTest, testReverseLookup) {
   soft::TripletStore triplets;
   triplets.addTriplet("Dune", "full-of", "sand");
   std::list<std::string> s = triplets.findTriplets("sand", "^full-of");
