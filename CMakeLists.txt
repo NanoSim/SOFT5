@@ -219,6 +219,12 @@ if (WITH_PORTO)
   if (WITH_TESTS)
     add_subdirectory(porto/test/json)
   endif (WITH_TESTS)
+
+  add_subdirectory(porto/src/thirdParty/chemkinReader)
+  if (WITH_TESTS)
+    add_subdirectory(porto/test/thirdParty/chemkinReader)
+  endif (WITH_TESTS)
+
 endif (WITH_PORTO)
 
 

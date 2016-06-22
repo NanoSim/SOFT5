@@ -25,6 +25,7 @@ void               sim_register_finalize     (sim_application_t *, void(*)(sim_h
 void               sim_register_pre_finalize (sim_application_t *, void(*)(sim_handle_t*, void*));
 void               sim_register_post_finalize(sim_application_t *, void(*)(sim_handle_t*, void*));
 void               sim_run                   (sim_application_t *, void*);
+void               sim_register_toolkit      (sim_application_t *, const char*);
 
 SIM_END_DECLS
 #endif /* SIM_H_DEF */

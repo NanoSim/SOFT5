@@ -15,6 +15,7 @@
    
     // Factory method for creating new storage driver instances
     StorageDriverFactory.prototype.createStorageDriver = function (options) {
+	print("StorageDriverFactory.prototype.createStorageDriver");
 	switch (options.driver) {
 	case "mongo":
 	case "mongodb":

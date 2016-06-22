@@ -1,11 +1,11 @@
 #include <functional>
 #include <QtCore>
 #include <QScopedPointer>
-#include "soft.h"
+#include <soft.h>
+#include <softc/softc-storage-plugin.h>
+#include <softc/softc-datamodel-private.hpp>
 #include "externalstrategy.h"
 #include "externalmodel.h"
-#include "softc/softc-storage-plugin.h"
-#include "softc/softc-datamodel-private.hpp"
 
 SOFT_BEGIN_NAMESPACE
 
@@ -136,6 +136,5 @@ IStorageStrategy* ExternalStrategy::create(char const *uri, char const *opts)
   auto s = new ExternalStrategy(uri, opts);
   return s;
 }
-
 
 SOFT_END_NAMESPACE

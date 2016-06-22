@@ -16,7 +16,7 @@ struct _sim_application_t
   void (*user_pre_finalize)(sim_handle_t*, void*);
   void (*user_post_finalize)(sim_handle_t*, void*);
   void (*user_time_stepper)(sim_handle_t*, void (*)(sim_handle_t*, void*), void (*)(sim_handle_t*, void*), void (*)(sim_handle_t*, void*), void*);
-  
+  void *libraryMap;
 };
 
 #endif
