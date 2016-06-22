@@ -21,15 +21,19 @@ if(GTEST_FOUND)
   include_directories(
     ${test-entities_INCLUDE_DIRS}
     ${soft-kernel_INCLUDE_DIRS}
+    ${softc_INCLUDE_DIRS}
     ${soft-storage-plugins-json_INCLUDE_DIRS}
     ${GTEST_INCLUDE_DIRS}
     )
   target_link_libraries(${PROJECT_NAME}
     ${test-entities_LIBS}
     ${soft-kernel_LIBS}
+    ${softc_LIBS}
     ${soft-storage-plugins-json_LIBS}
     ${GTEST_LIBRARIES}
     )
+
+  message("soft-storage-plugins-json_INCLUDE_DIRS: ${soft-storage-plugins-json_INCLUDE_DIRS}")
 
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-mongo_BINARY_DIR}:${soft-storage-plugins-json_BINARY_DIR}")
@@ -42,7 +46,7 @@ if(GTEST_FOUND)
     set_property(TEST ${PROJECT_NAME} PROPERTY
       ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
   endif()
- 
+
 else(GTEST_FOUND)
   message("Google test not found - skipping tests")
 endif(GTEST_FOUND)

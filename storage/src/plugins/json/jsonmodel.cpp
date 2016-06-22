@@ -56,7 +56,7 @@ bool JSONModel :: appendVariant (const char *key, StdVariant const &value)
       array.append(QJsonValue(*it));
     }
     d->jsonObject.insert(key, array);
-    break;   
+    break;
   }
   return true;
 }
@@ -145,11 +145,19 @@ bool JSONModel :: appendDoubleArray(const char *key, const std::vector<double> &
 bool JSONModel :: appendByteArray  (const char *, const std::vector<unsigned char> &)
 {}
 
-bool JSONModel :: appendStringArray(const char *, const std::vector<std::string> &)
-{}
+bool JSONModel :: appendStringArray(const char *key, const std::vector<std::string> &value)
+{
+  QJsonArray jsonArray;
+  for (auto &v: value) {
+    jsonArray.append(QJsonValue(QString(v.c_str())));
+  }
+  d->jsonObject.insert(key, jsonArray);
+}
 
 bool JSONModel :: appendArray      (const char *, const IDataModel *)
-{}
+{
+  // TODO: Empty methods should throw "not implemented"!
+}
 
 bool JSONModel :: appendModel      (const char *, const IDataModel *)
 {}
@@ -172,7 +180,7 @@ bool JSONModel :: getString (const char *key, std::string &str) const
   str.resize(qstr.length());
   str = qstr.toStdString();
 
-  return true;    
+  return true;
 }
 
 bool JSONModel :: getInt8          (const char *, int8_t &) const
@@ -221,8 +229,13 @@ bool JSONModel :: getInt32Array    (const char *, std::vector<int32_t> &) const
 bool JSONModel :: getDoubleArray   (const char *key, std::vector<double> &value) const
 {
   auto it = d->jsonObject.find(key);
-  if (it == d->jsonObject.end()) return false;
-  if (!(*it).isArray()) return false;
+
+  if (it == d->jsonObject.end())
+    return false;
+
+  if (!(*it).isArray())
+    return false;
+
   QJsonArray array = (*it).toArray();
   value.resize(array.size());
 
@@ -238,8 +251,28 @@ bool JSONModel :: getDoubleArray   (const char *key, std::vector<double> &value)
 bool JSONModel :: getByteArray     (const char *, std::vector<unsigned char> &) const
 {}
 
-bool JSONModel :: getStringArray(const char *, std::vector<std::string> &) const
-{}
+bool JSONModel :: getStringArray(const char * key, std::vector<std::string> &value) const
+{
+  auto it = d->jsonObject.find(key);
+
+  if (it == d->jsonObject.end())
+    return false;
+
+  if (!(*it).isArray())
+    return false;
+
+  QJsonArray array = (*it).toArray();
+  value.resize(array.size());
+
+  auto array_it = array.constBegin();
+  auto value_it = value.begin();
+
+  while (array_it != array.constEnd() && value_it != value.end()) {
+    (*value_it++) = (*array_it++).toString().toStdString();
+  }
+
+  return true;
+}
 
 bool JSONModel :: getArray         (const char *, IDataModel *) const
 {}
@@ -257,7 +290,7 @@ void JSONModel :: setJson(QJsonObject const &obj)
   d->jsonObject = obj;
 }
 
-bool JSONModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) 
+bool JSONModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&)
 {
   return false;
 }

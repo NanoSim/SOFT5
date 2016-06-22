@@ -60,6 +60,8 @@ public:
   virtual bool getByteArray        (const char *, StdBlob &) const = 0;
   virtual bool getStringArray      (const char *, StdStringList &) const = 0;
   virtual bool getArray            (const char *, IDataModel *) const = 0;
+
+  // TODO: This is actually different key than above
   virtual bool getModel            (const char *, IDataModel *) const = 0;
 
   virtual void setId               (const StdString &id) {_id = id;}

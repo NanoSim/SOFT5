@@ -2,6 +2,7 @@
 #include <map>
 #include "idatamodel.h"
 #include "collection.h"
+#include "tripletstore.h"
 
 SOFT_BEGIN_NAMESPACE
 
@@ -31,6 +32,9 @@ struct Dim_
   std::string const description;
 };
 
+
+// ----------------------------------------------------------------
+
 class RelationTriplet :: Private
 {
   friend class RelationTriplet;
@@ -40,16 +44,36 @@ class RelationTriplet :: Private
     , object(o)
   {}
 
+  virtual ~Private() {};
+
   std::string const subject;
   std::string const predicate;
   std::string const object;
 };
+
+// ----------------------------------------------------------------
 
 RelationTriplet :: RelationTriplet (std::string const &s,
                     std::string const &p,
                     std::string const &o)
   : d (new RelationTriplet :: Private (s, p, o))
 {}
+
+// Construct a relation directly from an encoding
+RelationTriplet::RelationTriplet(std::string const &encoded)
+  : RelationTriplet(decodeSubject(encoded),
+                    decodePredicate(encoded),
+                    decodeObject(encoded))
+{
+}
+
+RelationTriplet::~RelationTriplet() {
+  // TODO: This could be remedied by having d as a unique_ptr, but for some
+  // reason this doesnt compile with this gcc version.
+  // TODO2: This crashes... why?
+  //if (d)
+  //  delete d;
+}
 
 std::string RelationTriplet :: subject() const
 {
@@ -66,26 +90,37 @@ std::string RelationTriplet :: object() const
   return d->object;
 }
 
-/*
-class RelationTriplet_
-{
-public:
-  RelationTriplet_(std::string const &s,
-          std::string const &p,
-          std::string const &o)
-    : subject(s)
-    , predicate(p)
-    , object(o)
-  {}
+std::string const RelationTriplet::encode() const {
+  return d->subject + ":" + d->predicate + ":" + d->object;
+}
+
+// Decode and return subject, predicate and object as separate strings
+std::string RelationTriplet::decodeSubject(std::string const &encoded) const {
+  const std::string token = ":";
+  return encoded.substr(0, encoded.find(token));
+}
+
+std::string RelationTriplet::decodePredicate(std::string const &encoded) const {
+  const std::string token = ":";
+
+  const size_t first = encoded.find(token);
+  const size_t second = encoded.find(token, first);
+
+  return encoded.substr(first, second - first);
+}
+
+std::string RelationTriplet::decodeObject(std::string const &encoded) const {
+  const std::string token = ":";
+
+  const size_t first = encoded.find(token);
+  const size_t second = encoded.find(token, first);
+
+  return encoded.substr(second);
+}
+
+// ----------------------------------------------------------------
 
 
-private:
-  friend class Collection;
-  std::string const subject;
-  std::string const predicate;
-  std::string const object;
-};
-*/
 struct EntityRef_
 {
   EntityRef_(std::string const &l,
@@ -117,6 +152,8 @@ class Collection :: Private
   std::list<RelationTriplet>relationList;
   std::list<DimMap>dimMapList;
   std::map<std::string, const IEntity*> entityMap;
+
+  TripletStore tripletStore;
 };
 
 
@@ -199,13 +236,16 @@ void Collection :: addEntity(std::string const &label,
          std::string const &ns,
          std::string const &uuid)
 {
-  EntityRef ref(label, name, version, ns, uuid);
-  d->entityList.push_back(ref);
+  addRelation(label, "is-a", "Entity");
+  addRelation(label, "name", name);
+  addRelation(label, "version", version);
+  addRelation(label, "namespace", ns);
+  addRelation(label, "id", uuid);
 }
 
 int Collection :: numEntities() const
 {
-  return d->entityList.size();
+  return d->tripletStore.findTriplets("Entity", "^is-a").size();
 }
 
 
@@ -225,10 +265,12 @@ void Collection :: addRelation(std::string const &subject,
                    std::string const &predicate,
                    std::string const &object)
 {
-  RelationTriplet triplet(subject, predicate, object);
-  d->relationList.push_back(triplet);
+  // RelationTriplet triplet(subject, predicate, object);
+  // d->relationList.push_back(triplet);
+  d->tripletStore.addTriplet(subject, predicate, object);
 }
 
+// TODO: Remove this duplicate here, replaced by addRelation
 void Collection :: connect (std::string const &subject,
                 std::string const &predicate,
                 std::string const &object)
@@ -251,6 +293,7 @@ void Collection :: addDimMap(std::string const &label,
 
 int Collection :: numDimMaps() const
 {
+  // TODO: DimMaps not yet really implemented
   return d->dimMapList.size();
 }
 
@@ -258,6 +301,18 @@ void Collection :: save (IDataModel *dataModel) const
 {
   dataModel->appendString("__name__", d->name);
   dataModel->appendString("__version__", d->version);
+
+  dataModel->appendString("triplets", d->tripletStore.toCSV());
+
+  /*
+  std::vector<std::string> rs;
+  for(const auto &r: d->relationList) {
+    rs.push_back(r.encode());
+  }
+
+  // Store relations
+  dataModel->appendStringArray("relations", rs);
+  */
 }
 
 IEntity const *Collection :: findInstance(std::string const &label) const
@@ -282,8 +337,21 @@ std::list<RelationTriplet> Collection :: findRelations(std::string const &subjec
 
 void Collection :: load (IDataModel const *dataModel)
 {
-  // TODO: Reflect name/version in load
-  // dataModel->getStringArray("");
+  dataModel->getString("__name__", d->name);
+  dataModel->getString("__version__", d->version);
+
+  std::string csv;
+  dataModel->getString("triplets", csv);
+  d->tripletStore.fromCSV(csv);
+
+  /*
+  std::vector<std::string> rs;
+  dataModel->getStringArray("relations", rs);
+  for (const auto &encoded: rs) {
+    d->relationList.push_back(RelationTriplet(encoded));
+  }
+*/
+
 }
 
 bool Collection :: checkCorrectness()

@@ -137,7 +137,10 @@ TEST_F(CollectionTest, registerAndFetch) {
   ASSERT_STREQ(e->id().c_str(), subCollection.id().c_str());
 }
 
-TEST_F (CollectionTest, findConnections1) {
+TEST_F (CollectionTest, DISABLED_findConnections1) {
+  // TODO: Presently disabled, pending API change for connections and
+  // relations. See test below.
+
   soft::Collection a;
   soft::Collection b;
   soft::Collection collection;
@@ -146,12 +149,12 @@ TEST_F (CollectionTest, findConnections1) {
   collection.connect("sub", "has-a", "obj");
   auto p = collection.findRelations("sub");
 
-  ASSERT_TRUE(p.size() == 1);
+  ASSERT_EQ(1, p.size());
   ASSERT_STREQ(p.front().object().c_str(), "obj");
   ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
 }
 
-TEST_F (CollectionTest, findConnections2) {
+TEST_F (CollectionTest, DISABLED_findConnections2) {
   soft::Collection a;
   soft::Collection b;
   soft::Collection collection;
@@ -159,28 +162,51 @@ TEST_F (CollectionTest, findConnections2) {
   collection.registerEntity("obj", &b);
   collection.connect("sub", "has-a", "obj");
   collection.connect("obj", "owned-by", "sub");
+
+  /*
+  TODO: We must resolve this API change
+  subj ----parent-of----> obj
+  obj ----child-of----> subj
+
+  collection.connect("obj1", "subj");
+  collection.connect("obj2", "subj");
+  collection.findConnections("subj")
+
   auto p = collection.findRelations("sub");
-  ASSERT_TRUE(p.size() == 1);
+  auto p = collection.findRelations("connected-to");
+
+  auto p = collection.findConnections("subj");
+  auto p = collection.findReverseConnections("obj"); // Name can be revised
+  */
+  auto p = collection.findRelations("sub");
+
+  ASSERT_EQ(1, p.size());
   ASSERT_STREQ(p.front().object().c_str(), "obj");
   ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
 }
 
-TEST(Collection, instanciateFromDataModel1) {
+TEST(Collection, instanciateFromDataModel) {
 
   soft::Collection recepie;
   soft::Collection baking_log;
 
   soft::Collection mums_cookies;
 
-  mums_cookies.registerEntity("cookie-recepie", &recepie);
-  mums_cookies.registerEntity("cooking-competition-baking-log", &baking_log);
+  // Confirm that we have been able to populate the collection.
   mums_cookies.setName("Mums best cookies!");
   mums_cookies.setVersion("1-with-some-improvements");
-
-  ASSERT_EQ(2, mums_cookies.numEntities()) << "mums_cookies numEntities";
   ASSERT_EQ("Mums best cookies!", mums_cookies.name());
   ASSERT_EQ("1-with-some-improvements", mums_cookies.version());
 
+  mums_cookies.registerEntity("cookie-recepie", &recepie);
+  mums_cookies.registerEntity("cooking-competition-baking-log", &baking_log);
+  ASSERT_EQ(2, mums_cookies.numEntities()) << "mums_cookies numEntities";
+
+  mums_cookies.addRelation("cookie-recepie", "loged-in", "cooking-competition-baking-log");
+  // TODO: Relations not yet implemented
+  // ASSERT_EQ(1, mums_cookies.numRelations());
+
+  // TODO: Can this fail?
   soft::JSONModel dm;
   mums_cookies.save((soft::IDataModel *)(&dm));
 
@@ -190,7 +216,16 @@ TEST(Collection, instanciateFromDataModel1) {
   soft::Collection grandmas_cookies;
   grandmas_cookies.load(&dm);
 
+  // Confirm that what we retrieve from the collection through the
+  // data model is exactly what we sent in.
+  ASSERT_EQ("Mums best cookies!", grandmas_cookies.name());
+  ASSERT_EQ("1-with-some-improvements", grandmas_cookies.version());
+
+  // TODO: Relations not yet implemented
+  // ASSERT_EQ(1, grandmas_cookies.numRelations());
+
   ASSERT_EQ(2, grandmas_cookies.numEntities()) << "grandmas_cookies numEntities";
+
 
   // TODO: Check that I got a label here
 }

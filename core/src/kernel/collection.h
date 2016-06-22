@@ -11,6 +11,7 @@ SOFT_BEGIN_NAMESPACE
 
 class Collection;
 
+// TODO: Can't triplet be extracted from here? I think so!
 class RelationTriplet
 {
 public:
@@ -18,10 +19,19 @@ public:
   RelationTriplet(std::string const &s,
       std::string const &p,
       std::string const &o);
+  RelationTriplet(std::string const &encoded);
+
+  virtual ~RelationTriplet();
 
   std::string subject() const;
   std::string predicate() const;
   std::string object() const;
+
+  // TODO: These are const methods and may be moved out of the class
+  std::string const encode() const;
+  std::string decodeSubject(std::string const &encoded) const;
+  std::string decodePredicate(std::string const &encoded) const;
+  std::string decodeObject(std::string const &encoded) const;
 private:
   friend class Collection;
   class Private;
