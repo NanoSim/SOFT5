@@ -216,6 +216,10 @@ if (WITH_NUMERICS)
 endif (WITH_NUMERICS)
 
 if (WITH_PORTO)
+set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/entities)
+set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.cjs)
+set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.hjs)
+
   add_subdirectory(porto/src/entities)
   add_subdirectory(porto/src/json) 
   add_subdirectory(porto/src/thirdParty/chemkinReader)

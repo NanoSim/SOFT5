@@ -35,7 +35,8 @@
 	case 'boolean':
 	    return "bool";
 	case 'string':
-	    return "char*";
+        case 'string_list':
+	    return "string";
 	default:
 	    return "undefined";
 	};	

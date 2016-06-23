@@ -64,7 +64,7 @@ bool softc_datamodel_append_dimension    (softc_datamodel_t *model, const char *
   return false;
 }
 
-bool softc_datamodel_append_string (softc_datamodel_t *model, const char *key, const char *value)
+bool softc_datamodel_append_string (softc_datamodel_t *model, const char *key, const softc_string value)
 {
   if (model->ref) {
     return model->ref->appendString(key, value);    
@@ -170,7 +170,7 @@ bool softc_datamodel_append_blob (softc_datamodel_t *model, const char *key, con
   return false;
 }
 
-bool softc_datamodel_append_string_list (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements)
+bool softc_datamodel_append_string_list (softc_datamodel_t *model, const char *key, const softc_string *value, size_t n_elements)
 {
   if (model->ref) {
     soft::StdStringList stringList(n_elements);
@@ -275,12 +275,12 @@ bool softc_datamodel_get_array_double_3d (const softc_datamodel_t *model, const 
   return false;
 }
 
-bool softc_datamodel_get_string (const softc_datamodel_t *model, const char *key, char **value)
+bool softc_datamodel_get_string (const softc_datamodel_t *model, const char *key, softc_string *value)
 {
+  // TODO: TFH - Fix this
   if (model->ref) {
     soft::StdString str;
     if (model->ref->getString(key, str)) {
-      *value = (char *)malloc(str.size()+1);
       std::copy(str.begin(), str.end(), *value);
       (*value)[str.size()] = '\0';
       return true;
@@ -446,16 +446,16 @@ bool softc_datamodel_get_blob (const softc_datamodel_t *model, const char *key, 
   return false;
 }
 
-bool softc_datamodel_get_string_list (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
+bool softc_datamodel_get_string_list (const softc_datamodel_t *model, const char *key, softc_string **value, size_t *n_elements)
 {
+  // TODO: TFH - Fix this
   if (model->ref) {
     soft::StdStringList source;
     auto isOk = model->ref->getStringArray(key, source);
     if (isOk) {
       auto siz = source.size();
-      *value = (char **)malloc(siz*sizeof(char *));
+      *value = (softc_string *)malloc(siz*sizeof(softc_string));
       for (size_t i = 0; i < siz; ++i) {
-	(*value)[i] = (char *)malloc((source[i].size() + 1)*sizeof(char));
 	memcpy((*value)[i], source[i].c_str(), source[i].size());
 	(*value)[i][source[i].size()] = '\0';	
       }      

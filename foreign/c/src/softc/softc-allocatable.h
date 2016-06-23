@@ -36,6 +36,7 @@ DECL_ALLOCATABLE(int32_t);
 DECL_ALLOCATABLE(uint32_t);
 DECL_ALLOCATABLE(int64_t);
 DECL_ALLOCATABLE(uint64_t);
+DECL_ALLOCATABLE(char);
 
 typedef void (*allocatable_free_fptr)(softc_allocatable_s*);
 

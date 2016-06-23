@@ -253,6 +253,7 @@ typedef void(*free_fptr)(softc_allocatable_s*);
   IMPL_SOFTC_ALLOCATABLE_RESIZEV(type_t)		\
   IMPL_SOFTC_ALLOCATABLE_SHALLOW_COPY(type_t)
 
+IMPL_ALLOC(char);
 IMPL_ALLOC(double);
 IMPL_ALLOC(float);
 IMPL_ALLOC(int);

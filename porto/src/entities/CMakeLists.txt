@@ -7,10 +7,11 @@ set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.cjs)
 set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.hjs)
 
+message("template: ${C_SOURCE_TEMPLATE}")
 # Run a json entity through the soft-forge code generator to create
 # a header and source file
 function (add_forge entity output_src output_hdr)
-  message("outp: ${entity} ${output_src} ${output_hdr}")
+  message("Running command soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}")
   add_custom_command(
     OUTPUT ${output_hdr}
     COMMAND soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}
@@ -27,17 +28,14 @@ endfunction()
 
 # Find all .json files in current source dir and run through
 # soft-forge
-FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} kmos_meta.json)
-#SET(json-sources kmos_meta.json)
-
+FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.json)
 foreach(JSON_SRC ${json-sources})
-  message("About to generate: ${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}")
+ 
   string(REGEX REPLACE "\.json$" ".c" GEN_SRC ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
-#  message("${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC} - ${GEN_SRC}")		
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
-    ${plot-entities_BINARY_DIR}/${GEN_SRC}
-    ${plot-entities_BINARY_DIR}/${GEN_HDR})
+    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_SRC}
+    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_HDR})
 
   list(APPEND SRC_LIST ${GEN_SRC})  
 endforeach(JSON_SRC ${json-sources})

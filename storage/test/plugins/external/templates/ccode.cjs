@@ -54,7 +54,13 @@
 		getFunction += "_" + entry.rank + "d";
 	    }
 	    break;
+        case 'char*':
+            if (entry.rank > 1) 
+              throw("stringlists are not implement");
+            getFunction += 'string';
+	    break;
 	default:
+	    throw ("Unimplemented type: " + entry.type);
 	    getFunction += "undefined";
 	};
 	return getFunction;
@@ -78,6 +84,11 @@
 		appendFunction += "_" + entry.rank + "d";
 	    }
 	    break;
+        case 'char*':
+	    if (entry.rank > 1) 
+	      throw ("stringlists not implemented");
+            appendFunction += 'string';
+            break;
 	default:
 	    appendFunction += "undefined";
 	};
