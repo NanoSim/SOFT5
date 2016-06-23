@@ -151,7 +151,7 @@ bool ExternalModel :: appendStringArray(const char *, const std::vector<std::str
 bool ExternalModel :: appendArray      (const char *, const IDataModel *)
 {}
 
-bool ExternalModel :: appendModel      (const char *, const IDataModel *)
+bool ExternalModel :: appendModel      (const char *, IDataModel *)
 {}
 
 bool ExternalModel :: getDimension (const char *, StdUInt &) const
@@ -244,7 +244,7 @@ bool ExternalModel :: getStringArray(const char *, std::vector<std::string> &) c
 bool ExternalModel :: getArray         (const char *, IDataModel *) const
 {}
 
-bool ExternalModel :: getModel         (const char *, IDataModel *) const
+IDataModel* ExternalModel :: getModel(const char *) const 
 {}
 
 
