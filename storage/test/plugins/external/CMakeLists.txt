@@ -21,15 +21,14 @@ if(GTEST_FOUND)
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}"
-      ENVIRONMENT "SOFTSTORAGE=$ENV{SOFTSTORAGE}:${soft-storage-plugins-external_BINARY_DIR}")
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${soft-storage-plugins-external_BINARY_DIR}:${porto-json_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
       ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
   endif()
 
   set_property(TEST ${PROJECT_NAME} APPEND PROPERTY
-    ENVIRONMENT "SOFTSTORAGE=${SOFTSTORAGE}:$ENV{SOFTSTORAGE}")
+    ENVIRONMENT "SOFTSTORAGE=${SOFTSTORAGE}:$ENV{SOFTSTORAGE}:${soft-storage-plugins-external_BINARY_DIR}:${porto-json_BINARY_DIR}")
  
 else(GTEST_FOUND)
   message("Google test not found - skipping tests")
