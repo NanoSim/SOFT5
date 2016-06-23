@@ -2,9 +2,10 @@
 #define STORAGESTRATEGY_H_DEF
 
 #include "softns.h"
-#include "idatamodel.h"
 
 SOFT_BEGIN_NAMESPACE
+
+class IDataModel;
 
 class IStorageStrategy
 {

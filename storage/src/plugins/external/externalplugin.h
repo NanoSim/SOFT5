@@ -2,7 +2,6 @@
 #define EXTERNALPLUGIN_H_DEF
 
 #include <QObject>
-#include <QObject>
 #include "istrategyplugin.h"
 
 class ExternalStrategyPlugin : public QObject

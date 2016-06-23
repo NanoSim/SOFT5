@@ -1,0 +1,12 @@
+{
+    "name": "amount",
+    "version": "1.0",
+    "namespace": "porto",
+    "properties": [
+        {
+            "name": "amount",
+            "type": "double",
+            "description": "Amount of something"
+        }
+    ]
+}
