@@ -34,6 +34,8 @@
 	case 'bool':
 	case 'boolean':
 	    return "bool";
+	case 'string':
+	    return "char*";
 	default:
 	    return "undefined";
 	};	
