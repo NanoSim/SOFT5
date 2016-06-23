@@ -2,121 +2,26 @@
 #include <map>
 #include "idatamodel.h"
 #include "collection.h"
+#include "tripletstore.h"
 
 SOFT_BEGIN_NAMESPACE
 
-struct DimMap_
-{
-  DimMap_(std::string const l,
-	  std::string const e,
-	  std::string const c)
-    : label(l)
-    , entityDim(e)
-    , collectionDim(c)
-  {}
-  std::string const label;
-  std::string const entityDim;
-  std::string const collectionDim;
-};
+#define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
 
-struct Dim_
-{
-  Dim_(std::string const &l,
-      std::string const &d)
-    : label(l)
-    , description(d)
-  {}
-  
-  std::string const label;
-  std::string const description;    
-};
-
-class RelationTriplet :: Private
-{
-  friend class RelationTriplet;
-  Private(std::string const &s,std::string const &p, std::string const &o)
-    : subject(s)
-    , predicate(p)
-    , object(o)
-  {}
-
-  std::string const subject;
-  std::string const predicate;
-  std::string const object;
-};
-
-RelationTriplet :: RelationTriplet (std::string const &s,
-				    std::string const &p,
-				    std::string const &o)
-  : d (new RelationTriplet :: Private (s, p, o))
-{}
-
-std::string RelationTriplet :: subject() const
-{
-  return d->subject;
-}
-
-std::string RelationTriplet :: predicate() const
-{
-  return d->predicate;
-}
-
-std::string RelationTriplet :: object() const
-{
-  return d->object;
-}
-
-/*
-class RelationTriplet_
-{
-public:
-  RelationTriplet_(std::string const &s,
-		  std::string const &p,
-		  std::string const &o)
-    : subject(s)
-    , predicate(p)
-    , object(o)
-  {}
-
-
-private:
-  friend class Collection;
-  std::string const subject;
-  std::string const predicate;
-  std::string const object;
-};
-*/
-struct EntityRef_
-{
-  EntityRef_(std::string const &l,
-	     std::string const &n,
-	     std::string const &v,
-	     std::string const &ns,
-	     std::string const &id)
-    : label(l)
-    , name(n)
-    , version(v)
-    , ns(ns)
-    , uuid(id)
-  {}
-  
-  std::string const label;
-  std::string const name;
-  std::string const version;
-  std::string const ns;
-  std::string const uuid;
-};
+// TODO:
+// * How do we check for correctness after a load?
+// * How do we specify the Collection schema? We have a name/version field, but
+//   is this suficient? Probably not!
+// * Dimension maps using triples should be implemented and tested
 
 class Collection :: Private
 {
   friend class Collection;
   std::string name;
   std::string version;
-  std::list<EntityRef> entityList;
-  std::list<Dim> dimList;
-  std::list<RelationTriplet>relationList;
-  std::list<DimMap>dimMapList;
-  std::map<std::string, const IEntity*> entityMap;
+  std::map<std::string, IEntity*> entityMap;
+
+  TripletStore tripletStore;
 };
 
 
@@ -135,6 +40,14 @@ Collection :: Collection(const IEntity *ptr)
   : IEntity(ptr)
   , d (new Collection::Private())
 {
+}
+
+// Instanciate a collection from a data model
+Collection :: Collection(IDataModel const *dm)
+  : IEntity()
+  , d(new Collection::Private())
+{
+  load(dm);
 }
 
 Collection :: ~Collection()
@@ -173,131 +86,129 @@ void Collection :: setVersion(std::string const &version)
 
 void Collection :: registerEntity(std::string const &label, IEntity const *entity)
 {
-  d->entityMap.insert({label, entity});
   this->addEntity(label,
-		  entity->metaName(),
-		  entity->metaVersion(),
-		  entity->metaNamespace(),
-		  entity->id());
+          entity->metaName(),
+          entity->metaVersion(),
+          entity->metaNamespace(),
+          entity->id());
 }
 
+// TODO: Remove one of these duplicates?
 void Collection :: addEntity(std::string const &label,
-		 std::string const &name,
-		 std::string const &version,
-		 std::string const &ns,
-		 std::string const &uuid)
+         std::string const &name,
+         std::string const &version,
+         std::string const &ns,
+         std::string const &uuid)
 {
-  EntityRef ref(label, name, version, ns, uuid);
-  d->entityList.push_back(ref);
+  addRelation(label, "is-a", "Entity");
+  addRelation(label, "name", name);
+  addRelation(label, "version", version);
+  addRelation(label, "namespace", ns);
+  addRelation(label, "id", uuid);
 }
+
+// Attaches the entity to this collection so that it is loaded and stored
+// with the collection.
+void Collection :: attachEntity(std::string const &label, IEntity *entity) {
+  registerEntity(label, entity);
+  d->entityMap.insert({label, entity});
+}
+
 
 int Collection :: numEntities() const
 {
-  return d->entityList.size();
+  return d->tripletStore.findTriplets("Entity", "^is-a").size();
 }
 
 
 void Collection :: addDim(std::string const &label,
-			  std::string const &description)
+              std::string const &description)
 {
-  Dim dim (label, description);
-  d->dimList.push_back(dim);
-}
-
-int Collection :: numDims() const
-{
-  return d->dimList.size();
+  NOT_IMPLEMENTED
 }
 
 void Collection :: addRelation(std::string const &subject,
-			       std::string const &predicate,
-			       std::string const &object)
+                   std::string const &predicate,
+                   std::string const &object)
 {
-  RelationTriplet triplet(subject, predicate, object);
-  d->relationList.push_back(triplet);
+  d->tripletStore.addTriplet(subject, predicate, object);
 }
 
+// TODO: Remove this duplicate here, replaced by addRelation
 void Collection :: connect (std::string const &subject,
-			    std::string const &predicate,
-			    std::string const &object)
+                std::string const &predicate,
+                std::string const &object)
 {
   addRelation(subject, predicate, object);
 }
 
 int Collection :: numRelations() const
 {
-  return d->relationList.size();
-}
-
-void Collection :: addDimMap(std::string const &label,
-			     std::string const &entityDim,
-			     std::string const &collectionDim)
-{
-  DimMap dimMap(label, entityDim, collectionDim);
-  d->dimMapList.push_back(dimMap);
-}
-
-int Collection :: numDimMaps() const
-{
-  return d->dimMapList.size();
-}
-
-void Collection :: save (IDataModel *dataModel) const
-{
-  dataModel->appendString("__name__", d->name);
-  dataModel->appendString("__version__", d->version);
-}
-
-IEntity const *Collection :: findInstance(std::string const &label) const
-{
-  return d->entityMap.at(label);
-}
-
-std::list<RelationTriplet> Collection :: findRelations(std::string const &subject) const
-{
-  if (subject.empty()) {
-    return this->relationList();
-  }
-  
-  std::list<RelationTriplet> retval;
-  for (auto r : this->relationList()) {
-    if (r.subject() == subject) {
-      retval.push_back(r);
-    }    			  
-  }
-  return retval;
+  NOT_IMPLEMENTED
 }
 
 void Collection :: load (IDataModel const *dataModel)
 {
+  setId(dataModel->id());
 
+  dataModel->getString("__name__", d->name);
+  dataModel->getString("__version__", d->version);
+
+  std::string csv;
+  dataModel->getString("triplets", csv);
+  d->tripletStore.fromCSV(csv);
+
+  // Also attach entities that we have data models for
+  auto labels = d->tripletStore.findTriplets("Entity", "^is-a");
+  for (auto l: labels) {
+    IDataModel *dm = dataModel->getModel(l.c_str());
+    if (dm) {
+      // Pass the datamodel on to attached entities
+      auto ie = d->entityMap.find(l);
+      if (ie != d->entityMap.end()) {
+        IEntity *e = ie->second;
+        ie->second->load(dm);
+      }
+    }
+  }
 }
 
-std::list<DimMap> Collection :: dimMapList() const
+void Collection :: save (IDataModel *dataModel) const
 {
-  return d->dimMapList;
+  dataModel->setId(id());
+
+  dataModel->appendString("__name__", d->name);
+  dataModel->appendString("__version__", d->version);
+
+  dataModel->appendString("triplets", d->tripletStore.toCSV());
+
+  // Also perform a save on all attached entities.
+  for(auto &e: d->entityMap) {
+    // Creates an empty clone of the same data model type
+    // TODO: Who owns this data model now? Needs to be freed at some point?
+    auto dm = dataModel->createModel();
+    e.second->save(dm);
+    dataModel->appendModel(e.first.c_str(), dm);
+  }
 }
 
-std::vector<std::string> Collection :: dimensions() const
+IEntity const *Collection :: findInstance(std::string const &label) const
 {
-  // TODO: Implement this function
-  std::vector<std::string> retval;
-  return retval;
+  const auto it = d->entityMap.find(label);
+  if (it != d->entityMap.cend()) {
+    return (*it).second;
+  }
+  return nullptr;
 }
 
-std::list<RelationTriplet> Collection :: relationList() const
+std::list<RelationTriplet> Collection :: findRelations(std::string const &subject) const
 {
-  return d->relationList;
+  NOT_IMPLEMENTED
 }
 
-std::list<Dim> Collection :: dimList() const
-{
-  return d->dimList;
-}
 
-std::list<EntityRef> Collection :: entityList() const
-{
-  return d->entityList;
+std::vector<std::string> Collection :: dimensions() const {
+  NOT_IMPLEMENTED
 }
 
 

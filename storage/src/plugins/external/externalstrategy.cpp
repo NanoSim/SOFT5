@@ -82,7 +82,12 @@ ExternalStrategy :: ExternalStrategy()
   : IStorageStrategy()
   , d(new ExternalStrategy::Private(QString(), QString()))
 {}
-      
+
+
+//!  
+// The URI for an external strategy should contain at least the
+// scheme and path in this form <scheme>://<path>, where scheme will
+// invoke the factory function to select the correct plugin
 ExternalStrategy :: ExternalStrategy(const char *uri, const char *options)
   : IStorageStrategy()
   , d(new ExternalStrategy::Private(uri, options))
@@ -129,9 +134,11 @@ void ExternalStrategy::retrieve (IDataModel *model) const
   fn(&datamodel, qPrintable(d->uri), qPrintable(d->options));
 }
 
+//!
+/// Creates a new storage strategy where \arg uri and \arg opts is passed
+/// to the external storage plugin. 
 IStorageStrategy* ExternalStrategy::create(char const *uri, char const *opts)
 {
-  // TODO: Parse opts and load correct plugin 
   // Set correct function pointers
   auto s = new ExternalStrategy(uri, opts);
   return s;
