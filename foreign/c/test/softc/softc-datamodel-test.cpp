@@ -90,7 +90,7 @@ TEST_F(DatamodelTest, store_and_load)
   stat = softc_datamodel_append_dimension(m->datamodel, "NI", 50);                                                  ASSERT_TRUE(stat);
   stat = softc_datamodel_append_dimension(m->datamodel, "NJ", 40);                                                  ASSERT_TRUE(stat);
   stat = softc_datamodel_append_string(m->datamodel, "string", string);                                             ASSERT_TRUE(stat);
-  stat = softc_datamodel_append_string_list(m->datamodel, "strlist", strlist, 3);                                   ASSERT_TRUE(stat);
+  stat = softc_datamodel_append_string_list(m->datamodel, "strlist", (softc_string*)strlist, 3);                                   ASSERT_TRUE(stat);
   stat = softc_datamodel_append_double(m->datamodel, "dbl", dbl);                                                   ASSERT_TRUE(stat);
   stat = softc_datamodel_append_array_double(m->datamodel, "dbl_array", dbl_array, 4);                              ASSERT_TRUE(stat);
   // NB: soft assumes fortran order - reverse dimensions
@@ -102,8 +102,8 @@ TEST_F(DatamodelTest, store_and_load)
 
   /* load */
   size_t ni, nj, nk;
-  char *new_string;
-  char **new_strlist;
+  softc_string new_string;
+  softc_string *new_strlist;
   double new_dbl;
   double *new_dbl_array;
   double **new_dbl_array2;

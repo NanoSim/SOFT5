@@ -120,7 +120,7 @@ TEST_F(SoftC_StorageTest, writeData)
   double **v2d;
   double ***v3d;
   bool isOk;
-  char **strList_stdc;
+  softc_string *strList_stdc;
   
   arrayToPtr(&v3d, doublevec3d);
   arrayToPtr(&v2d, doublevec2d);
@@ -138,19 +138,16 @@ TEST_F(SoftC_StorageTest, writeData)
   isOk = softc_datamodel_append_array_double_2d(model, "double-array-2d", (const double**)v2d, doublevec2d[0].size(), doublevec2d.size()); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_double_3d(model, "double-array-3d", (const double***)v3d, doublevec3d[0][0].size(), doublevec3d[0].size(), doublevec3d.size()); ASSERT_TRUE(isOk);
 
-  strList_stdc = (char**)malloc(sizeof(char*) * strlist.size());
-  for (int i = 0; i < (int)strlist.size(); ++i) {
-    strList_stdc[i] = (char*)strlist[i].c_str();
-  }
+  strList_stdc = (softc_string*)malloc(sizeof(softc_string) * strlist.size());
   
-  isOk = softc_datamodel_append_string_list(model, "string-list", (const char **)strList_stdc, strlist.size()); ASSERT_TRUE(isOk);
+  isOk = softc_datamodel_append_string_list(model, "string-list", strList_stdc, strlist.size()); ASSERT_TRUE(isOk);
 
   softc_storage_strategy_store(strategy, model);  
 }
 
 TEST_F(SoftC_StorageTest, readString)
 {
-  char *message;
+  softc_string message;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", NULL);
   auto strategy = softc_storage_get_storage_strategy(storage);
@@ -302,7 +299,7 @@ TEST_F(SoftC_StorageTest, doubleVec3D)
 
 TEST_F(SoftC_StorageTest, strList)
 {
-  char **slist;
+  softc_string *slist;
   size_t n_elements;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
