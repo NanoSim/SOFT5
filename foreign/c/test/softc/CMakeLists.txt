@@ -21,6 +21,9 @@ if(GTEST_FOUND)
       ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
   endif()
  
+  set_property(TEST ${PROJECT_NAME} APPEND PROPERTY
+    ENVIRONMENT "SOFTSTORAGE=${SOFTSTORAGE}:$ENV{SOFTSTORAGE}")
+
 else(GTEST_FOUND)
   message("Google test not found - skipping tests")
 endif(GTEST_FOUND)

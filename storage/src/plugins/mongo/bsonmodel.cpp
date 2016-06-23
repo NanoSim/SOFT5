@@ -23,7 +23,7 @@ class BsonModel :: Private
 BsonModel :: BsonModel()
    : IDataModel()
    , d(new BsonModel::Private)
-      
+
 {}
 
 BsonModel :: ~BsonModel()
@@ -47,68 +47,68 @@ bool BsonModel :: appendVariant (const char *, StdVariant const &)
   return false;
 }
 
-bool BsonModel :: appendInt8(const char *key, int8_t value) 
+bool BsonModel :: appendInt8(const char *key, int8_t value)
 {
   return BSON_APPEND_INT32(d->bson, key, (int32_t)value);
 }
 
-bool BsonModel :: appendInt16(const char *key, int16_t value) 
+bool BsonModel :: appendInt16(const char *key, int16_t value)
 {
   return BSON_APPEND_INT32(d->bson, key, (int32_t)value);
 }
 
-bool BsonModel :: appendInt32(const char *key, int32_t value) 
+bool BsonModel :: appendInt32(const char *key, int32_t value)
 {
   return BSON_APPEND_INT32(d->bson, key, value);
 }
 
-bool BsonModel :: appendInt64(const char *key, int64_t value) 
+bool BsonModel :: appendInt64(const char *key, int64_t value)
 {
   return BSON_APPEND_INT64(d->bson, key, value);
 }
 
-bool BsonModel :: appendUInt8(const char *key, uint8_t value) 
+bool BsonModel :: appendUInt8(const char *key, uint8_t value)
 {
   return BSON_APPEND_INT32(d->bson, key, (int32_t)value);
 }
 
-bool BsonModel :: appendUInt16(const char *key, uint16_t value) 
+bool BsonModel :: appendUInt16(const char *key, uint16_t value)
 {
   return BSON_APPEND_INT32(d->bson, key, (int32_t)value);
 }
 
-bool BsonModel :: appendUInt32(const char *key, uint32_t value) 
+bool BsonModel :: appendUInt32(const char *key, uint32_t value)
 {
   return BSON_APPEND_INT32(d->bson, key, value);
 }
 
-bool BsonModel :: appendUInt64(const char *key, uint64_t value) 
+bool BsonModel :: appendUInt64(const char *key, uint64_t value)
 {
   return BSON_APPEND_INT64(d->bson, key, (int64_t)value);
 }
 
-bool BsonModel :: appendFloat(const char *key, float value) 
+bool BsonModel :: appendFloat(const char *key, float value)
 {
   return BSON_APPEND_DOUBLE(d->bson, key, value);
 }
 
-bool BsonModel :: appendDouble(const char *key, double value) 
+bool BsonModel :: appendDouble(const char *key, double value)
 {
    return BSON_APPEND_DOUBLE(d->bson, key, value);
 }
 
-bool BsonModel :: appendBool(const char *key, bool value) 
+bool BsonModel :: appendBool(const char *key, bool value)
 {
    return BSON_APPEND_BOOL(d->bson, key, value);
 }
 
-bool BsonModel :: appendArray(const char *key, const IDataModel *model) 
+bool BsonModel :: appendArray(const char *key, const IDataModel *model)
 {
    auto m = dynamic_cast<const BsonModel*>(model);
    return bson_append_array (d->bson, key, strlen(key), m->d->bson);
 }
 
-bool BsonModel :: appendModel(const char *key, const IDataModel *model) 
+bool BsonModel :: appendModel(const char *key, IDataModel *model)
 {
    auto m = dynamic_cast<const BsonModel*>(model);
    return bson_append_document (d->bson, key, strlen(key), m->d->bson);
@@ -160,7 +160,7 @@ bool BsonModel :: appendStringArray (const char *key, const std::vector<std::str
 
 
 bool BsonModel :: appendByteArray(const char* key, const std::vector<unsigned char> &value)
-{  
+{
   return BSON_APPEND_BINARY(d->bson, key, BSON_SUBTYPE_BINARY, (unsigned char*)value.data(), value.size());
 }
 
@@ -265,7 +265,7 @@ bool BsonModel :: getArray (const char *, IDataModel *) const
   return false;
 }
 
-bool BsonModel :: getModel (const char *, IDataModel *) const
+IDataModel* BsonModel :: getModel (const char *) const
 {
   return false;
 }
@@ -276,7 +276,7 @@ const _bson_t *BsonModel :: bson() const
 }
 
 
-bool BsonModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) 
+bool BsonModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&)
 {
   return false;
 }
@@ -296,5 +296,5 @@ bool BsonModel :: getDoubleArray3D (const char *, std::vector<std::vector<std::v
   return false;
 }
 
-  
+
 SOFT_END_NAMESPACE

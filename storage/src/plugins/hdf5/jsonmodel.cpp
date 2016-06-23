@@ -168,7 +168,7 @@ bool JSONModel :: appendVariant (const char *key, StdVariant const &value)
       array.append(QJsonValue(*it));
     }
     d->propertyObject.insert(key, array);
-    break;   
+    break;
   }
   return true;
 }
@@ -299,14 +299,14 @@ bool JSONModel :: appendDoubleArray(const char *key, const StdDoubleArray &value
   return isOk;
 }
 
-bool JSONModel :: appendDoubleArray2D (const char *key, const StdDoubleArray2D& value) 
+bool JSONModel :: appendDoubleArray2D (const char *key, const StdDoubleArray2D& value)
 {
   QJsonArray jsonArray;
   for (auto &v: value) {
     QJsonArray array;
     for (auto &d: v) {
       array.append(QJsonValue(d));
-    }    
+    }
     jsonArray.append(array);
   }
   auto it = d->propertyObject.insert(key, jsonArray);
@@ -322,8 +322,8 @@ bool JSONModel :: appendDoubleArray3D (const char *key, const StdDoubleArray3D& 
     for (auto &a: v) {
       QJsonArray array;
       for (auto &d: a) {
-	array.append(QJsonValue(d));
-      }    
+  array.append(QJsonValue(d));
+      }
       aa.append(array);
     }
     jsonArray.append(aa);
@@ -355,7 +355,7 @@ bool JSONModel :: appendArray      (const char *, const IDataModel *)
   return false;
 }
 
-bool JSONModel :: appendModel      (const char *, const IDataModel *)
+bool JSONModel :: appendModel      (const char *, IDataModel *)
 {
   return false;
 }
@@ -472,7 +472,7 @@ bool JSONModel :: getArray         (const char *, IDataModel *) const
   return false;
 }
 
-bool JSONModel :: getModel         (const char *, IDataModel *) const
+IDataModel* JSONModel :: getModel         (const char *) const
 {
   return false;
 }
