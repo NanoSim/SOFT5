@@ -10,8 +10,8 @@ SOFT_BEGIN_NAMESPACE
 class IDataModel;
 
 #define SOFT_ENTITY_METADATA(name,ns,ver)	\
-  virtual const char * metaType() const override {return #name;}						  \
-  virtual const char * metaName() const override {return #name;}   \
+  virtual const char * metaType() const override {return #name;} \
+  virtual const char * metaName() const override {return #name;} \
   virtual const char * metaNamespace() const override {return #ns;} \
   virtual const char * metaVersion() const override {return #ver;}
 
@@ -27,7 +27,8 @@ public:
   virtual void        load(IDataModel const *)                = 0;
   static  IEntity*    create (const std::string &uuid);
 
-  virtual std::string id()                              const;    
+  virtual std::string id()                              const;
+  virtual void setId(std::string const &id);
   virtual const char* metaType()                        const = 0;
   virtual const char* metaName()                        const = 0;
   virtual const char* metaNamespace()                   const = 0;
