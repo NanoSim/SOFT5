@@ -36,7 +36,7 @@
 	    return "bool";
 	case 'string':
         case 'string_list':
-	    return "softc_string";
+	    return "softc_string_s";
 	default:
 	    return "undefined";
 	};	

@@ -104,7 +104,7 @@
 	    }
 	    break;
 
-        case 'softc_string':
+        case 'softc_string_s':
             if (entry.rank > 2) 
               throw("not implemented");
             else if (entry.rank == 1)
@@ -137,7 +137,7 @@
 		appendFunction += "_" + entry.rank + "d";
 	    }
 	    break;
-        case 'softc_string':
+        case 'softc_string_s':
             if (entry.rank > 2) 
               throw("not implemented");
             else if (entry.rank == 1)

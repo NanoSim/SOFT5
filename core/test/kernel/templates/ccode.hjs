@@ -4,55 +4,55 @@
     ENTITY = soft.model.name.toUpperCase();
     entity = soft.model.name.toLowerCase();
     dims = [];
-
+    
     createArgs = [];
     if (soft.model.dimensions != undefined) {
-        soft.model.dimensions.forEach(function (d){
-            dims.push(d.name);
-            createArgs.push("size_t " + d.name);
-        });
+	soft.model.dimensions.forEach(function (d){
+	    dims.push(d.name);
+	    createArgs.push("size_t " + d.name);
+	});
     }
 
     attributes = (function(){
-        var attr = [];
-        soft.model.properties.forEach(function (entry){
-            var o = {};
-            o.name = entry.name;
-            o.type = capi.type_to_c(entry.type);
-            o.rank = (entry.dims != undefined ? entry.dims.length : 0);
-            o.desc = (entry.description != undefined ? "/* " + entry.description + " */" : "");
-            o.dims = entry.dims;
-            attr.push(o);
-        });
-        return attr;
+	var attr = [];
+	soft.model.properties.forEach(function (entry){
+	    var o = {};
+	    o.name = entry.name;
+	    o.type = capi.type_to_c(entry.type);
+	    o.rank = (entry.dims != undefined ? entry.dims.length : 0);
+	    o.desc = (entry.description != undefined ? "/* " + entry.description + " */" : "");
+	    o.dims = entry.dims;
+	    attr.push(o);
+	});
+	return attr;
     })();
 
     attrDeclList = (function(){
-        var as = [];
-        attributes.forEach(function(entry){
-            as.push(entry.type + " " + capi.dims_to_ptr(entry.rank) + entry.name + ";" + entry.desc);
-        });
-        return as;
+	var as = [];
+	attributes.forEach(function(entry){
+	    as.push(entry.type + " " + capi.dims_to_ptr(entry.rank) + entry.name + ";" + entry.desc);
+	});
+	return as;
     })();
 
     dimsDeclList = (function(){
-        var ds = [];
-        if (soft.model.dimensions != undefined) {
-            soft.model.dimensions.forEach(function(entry){
-                ds.push("size_t " + entry.name + ";");
-            });
-        }
-        return ds;
+	var ds = [];
+	if (soft.model.dimensions != undefined) {
+	    soft.model.dimensions.forEach(function(entry){
+		ds.push("size_t " + entry.name + ";");
+	    });
+	}
+	return ds;
     })();
 
     declGetDataFunction = (function(){
       var as = [];
       attributes.forEach(function(entry){
-        if (entry.rank > 0) {
-          as.push(entry.type + capi.dims_to_ptr(entry.rank) + " " + entity + "_get_" + entry.name + " (" + entity + "_s *self);");
-        }
+	if (entry.rank > 0) {
+	  as.push(entry.type + capi.dims_to_ptr(entry.rank) + " " + entity + "_get_" + entry.name + " (" + entity + "_s *self);");
+	}
       });
-
+      
       return as;
     })();
 
@@ -70,12 +70,12 @@ extern "C" {
 typedef struct _@{entity}_s @{entity}_s;
 typedef struct _@{entity}_allocatable_s @{entity}_allocatable_s;
 
-typedef struct
+typedef struct 
 {
   @{dimsDeclList.join("\n  ");}
 } @{entity}_dimensions_s;
 
-typedef struct
+typedef struct 
 {
   @{attrDeclList.join("\n  ");}
 } @{entity}_properties_s;
@@ -94,4 +94,5 @@ void @{entity}_free(@{entity}_s *self);
 #endif
 
 #endif /* ENTITY_@{ENTITY}_H_DEF */
+
 
