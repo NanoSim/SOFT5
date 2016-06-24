@@ -1,0 +1,37 @@
+@{
+    ENTITY = soft.model.name.toUpperCase();
+    entity = soft.model.name.toLowerCase();
+    Entity = entity.charAt(0).toUpperCase() + entity.slice(1);
+    undefined;
+}
+#ifndef @{ENTITY}_ENTITY_H_DEF
+#define @{ENTITY}_ENTITY_H_DEF
+
+#include <softns.h>
+#include <ientity.h>
+
+SOFT_BEGIN_NAMESPACE
+
+class @{Entity} : public IEntity
+{
+public:
+  SOFT_ENTITY_METADATA("@{Entity}", "@soft.model.namespace", @soft.model.version)
+  @{Entity}();
+  explicit @{Entity}(std::string const &id);
+  explicit @{Entity}(const IEntity *);
+  explicit @{Entity}(IDataModel const *);
+  virtual ~@{Entity}();
+
+  static IEntity* create (std::string const &uuid = std::string());
+  virtual void save (IDataModel *) const override;
+  virtual void load (IDataModel const *) override;
+
+  virtual std::vector<std::string> dimensions() const override;
+private:
+  class Private;
+  Private *d;
+};
+
+SOFT_END_NAMESPACE
+
+#endif // @{ENTITY}_ENTITY_H_DEF

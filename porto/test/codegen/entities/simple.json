@@ -1,0 +1,12 @@
+{
+    "name": "simple",
+    "version": "1.0",
+    "namespace": "local",
+    "properties": [
+	{
+	    "name": "number",
+	    "type": "int32",
+	    "description": "some number"
+	}
+    ]
+}

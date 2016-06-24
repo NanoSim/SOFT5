@@ -21,6 +21,8 @@ option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
 option (WITH_PORTO "Compile porto plugins"                ON)
 
+set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
@@ -215,9 +217,10 @@ if (WITH_NUMERICS)
 endif (WITH_NUMERICS)
 
 if (WITH_PORTO)
-  add_subdirectory(porto/src/json)
+#  add_subdirectory(porto/src/json)
   if (WITH_TESTS)
-    add_subdirectory(porto/test/json)
+#    add_subdirectory(porto/test/json)
+    add_subdirectory(porto/test/codegen)
   endif (WITH_TESTS)
 endif (WITH_PORTO)
 
