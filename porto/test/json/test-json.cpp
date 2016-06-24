@@ -96,6 +96,8 @@ TEST(PortoJsonTests, TestSaveLoad) {
   read_coll.attachEntity("finance", &read_entity1);
   read_coll.attachEntity("physics", &read_entity2);
 
+  read_coll.load(k);
+
   // Finally, check that the read collection is the same as the written
   ASSERT_EQ(written_entity1.property->amount, read_entity1.property->amount);
   ASSERT_EQ(written_entity2.property->coefficient, read_entity2.property->coefficient);
