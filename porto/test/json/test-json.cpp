@@ -10,7 +10,7 @@ TEST(PortoJsonTests, TestIdentify) {
   {
     const char expected[] = "porto-json";
     const int maxlen = sizeof(expected);
-  
+
     char name[maxlen + 1]; // String with a canari bird at the end
     name[maxlen] = '*'; // The function should never overwrite past maxlen!
 
@@ -34,7 +34,7 @@ TEST(PortoJsonTests, TestIdentify) {
     int error = softc_plugin_identify(name, maxlen);
 
     ASSERT_EQ(SOFTC_STATUS_OK, error);
-    
+
     ASSERT_STREQ("porto-js", name);
     ASSERT_EQ('*', name[maxlen]);
     ASSERT_EQ('\0', name[maxlen - 1]);
@@ -42,7 +42,7 @@ TEST(PortoJsonTests, TestIdentify) {
 }
 
 
-TEST(PortoJsonTests, TestCapabilities) 
+TEST(PortoJsonTests, TestCapabilities)
 {
   int capabilities = softc_plugin_capabilities();
 
@@ -51,18 +51,30 @@ TEST(PortoJsonTests, TestCapabilities)
 }
 
 TEST(PortoJsonTests, TestSaveLoad) {
- 
-  // Construct a dummy data model
-  // TODO: We may need some name/versioning and check here?
+
+  // TODO: This should be replaced by a generated c++ entity, i.e.:
+  soft::FinancialInput written_entity1;
+  soft::SomeModelConfiguration written_entity2;
+
+  // Build up collection with structure
+  soft::Collection written_coll;
+  written_coll.attachEntity("finance", &written_entity1);
+  written_coll.attachEntity("physics", &written_entity2);
+
+  // Populate the entities
+  written_entity1.property->amount = "20";
+  written_entity2.property->coefficient = "0.5";
+
+  // Construct a dummy data model and populate it
   soft::JSONModel j;
-  j.appendDouble("amount", 40.0);
+  written_coll.save(&j);
 
   // Construct a wrapper for the data model so that we can pass it to the c interface
   softc_datamodel_t d{&j};
-  
+
   int error;
   const std::string uri = "test.json";
-  
+
   // Check that it is possible to store the data in the given .json file
   error = softc_plugin_save(&d, uri.c_str(), "");
   ASSERT_EQ(SOFTC_STATUS_OK, error);
@@ -75,12 +87,18 @@ TEST(PortoJsonTests, TestSaveLoad) {
   error = softc_plugin_load(&e, uri.c_str(), "");
   ASSERT_EQ(SOFTC_STATUS_OK, error);
 
-  // Finally, check that the data models (j created above, k read from file) are identical
-  double j_amount, k_amount;
-  ASSERT_TRUE(j.getDouble("amount", j_amount));
-  ASSERT_TRUE(k.getDouble("amount", k_amount));
-  ASSERT_EQ(j_amount, k_amount);
+  // Recreate an expected data collection
+  soft::FinancialInput read_entity1;
+  soft::SomeModelConfiguration read_entity2;
 
-  // TODO: Introduce an equality operator for JSONModel or models in general? 
-  // TODO: Add version/name check between j and k?
+  // Build up collection with structure
+  soft::Collection read_coll;
+  read_coll.attachEntity("finance", &read_entity1);
+  read_coll.attachEntity("physics", &read_entity2);
+
+  // Finally, check that the read collection is the same as the written
+  ASSERT_EQ(written_entity1.property->amount, read_entity1.property->amount);
+  ASSERT_EQ(written_entity2.property->coefficient, read_entity2.property->coefficient);
+  ASSERT_EQ(written_entity1.id(), read_entity1.id());
+  ASSERT_EQ(written_entity2.id(), read_entity2.id());
 }
