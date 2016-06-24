@@ -1,7 +1,30 @@
 @{
+    var capi = require('soft.forge.capi');
     ENTITY = soft.model.name.toUpperCase();
     entity = soft.model.name.toLowerCase();
     Entity = entity.charAt(0).toUpperCase() + entity.slice(1);
+    attributes = (function(){
+	var attr = [];
+	soft.model.properties.forEach(function (entry){
+	    var o = {};
+	    o.name = entry.name;
+	    o.type = capi.type_to_c(entry.type);
+	    o.rank = (entry.dims != undefined ? entry.dims.length : 0);
+	    o.desc = (entry.description != undefined ? "/* " + entry.description + " */" : "");
+	    o.dims = entry.dims;
+	    attr.push(o);
+	})
+	return attr;
+    })();
+    
+    attrDeclList = (function(){
+        var as = [];
+	attributes.forEach(function(entry){
+	    as.push(entry.type + " " + capi.dims_to_ptr(entry.rank) + entry.name + ";" + entry.desc);
+	});
+	return as;
+    })();
+    
     undefined;
 }
 #ifndef @{ENTITY}_ENTITY_H_DEF
@@ -27,6 +50,8 @@ public:
   virtual void load (IDataModel const *) override;
 
   virtual std::vector<std::string> dimensions() const override;
+
+  @{attrDeclList.join("\n  ");}
 private:
   class Private;
   Private *d;

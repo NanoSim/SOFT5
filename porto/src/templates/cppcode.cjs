@@ -5,6 +5,7 @@
     undefined;
 }
 #include <stdexcept>
+#include <idatamodel.h>
 #include "@{entity}.h"
 
 SOFT_BEGIN_NAMESPACE
@@ -51,12 +52,12 @@ IEntity* @{Entity} :: create (std::string const &uuid)
 
 void @{Entity} :: save (IDataModel *dataModel) const
 {
-  NOT_IMPLEMENTED	
+  dataModel->setId(id());
 }
 
 void @{Entity} :: load (IDataModel const *dataModel)
 {
-  NOT_IMPLEMENTED	
+  setId(dataModel->id());
 }
 
 std::vector<std::string> @{Entity} :: dimensions() const

@@ -10,6 +10,11 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QUrl>
+#include <collection.h>
+#include <softc/softc-datamodel-private.hpp>
+#include "financial.h"
+#include "physics.h"
+
 
 int softc_plugin_identify( char* name, int maxlen ) {
   // TODO: Is this the name we want to return?
@@ -34,8 +39,8 @@ int softc_plugin_capabilities() {
 int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char* options ) {
 
   // TODO: This should be replaced by a generated c++ entity, i.e.:
-  soft::FinancialInput entity1;
-  soft::SomeModelConfiguration entity2;
+  soft::Financial entity1;
+  soft::Physics entity2;
 
   // Build up collection with structure
   soft::Collection coll;
@@ -56,12 +61,12 @@ int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char
   double coefficient = doc.object()["coefficient"].toDouble();
 
   // Now store the items retrieved in the entities
-  entity1.property->amount = amount;
-  entity2.property->coefficient = coefficient;
+  entity1.amount = amount;
+  entity2.coefficient = coefficient;
 
   // ... and store the entire collection. The datamodel now contains the full
   // information from all the contained entities.
-  coll.save(datamodel);
+  coll.save(datamodel->ref);
 
   return SOFTC_STATUS_OK;
 }
@@ -70,8 +75,8 @@ int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char
 int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, const char* options) {
 
   // TODO: This should be replaced by a generated c++ entity, i.e.:
-  soft::FinancialInput entity1;
-  soft::SomeModelConfiguration entity2;
+  soft::Financial entity1;
+  soft::Physics entity2;
 
   // Build up collection with structure
   soft::Collection coll;
@@ -81,16 +86,16 @@ int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, cons
   // This should now load and the contents from the datamodel into the collection
   // and its contained entities, as long as it was originally created with the
   // same structure:
-  //   collection { "finance" -> FinancialInput, "physics" -> SomeModelConfiguration }
-  coll.load(datamodel);
+  //   collection { "finance" -> Financial, "physics" -> SomeModelConfiguration }
+  coll.load(datamodel->ref);
 
   // At this point the collection and its entities are fully popualted, and we can
   // write this to a json file.
   QUrl url(uri);
 
   // Assuming "amount" is in the first entity:
-  double amount = entity1.property->amount; // TODO: Actual generated structure may vary
-  double coefficient = entity2.property->coeff;
+  double amount = entity1.amount; // TODO: Actual generated structure may vary
+  double coefficient = entity2.coefficient;
 
   QJsonObject root;
   root["amount"] = amount;

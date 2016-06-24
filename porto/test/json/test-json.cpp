@@ -2,7 +2,9 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 #include <json.h>
-
+#include <collection.h>
+#include "financial.h"
+#include "physics.h"
 #include "json/jsonmodel.h"
 #include "softc/softc-datamodel-private.hpp"
 
@@ -53,8 +55,8 @@ TEST(PortoJsonTests, TestCapabilities)
 TEST(PortoJsonTests, TestSaveLoad) {
 
   // TODO: This should be replaced by a generated c++ entity, i.e.:
-  soft::FinancialInput written_entity1;
-  soft::SomeModelConfiguration written_entity2;
+  soft::Financial written_entity1;
+  soft::Physics written_entity2;
 
   // Build up collection with structure
   soft::Collection written_coll;
@@ -62,8 +64,8 @@ TEST(PortoJsonTests, TestSaveLoad) {
   written_coll.attachEntity("physics", &written_entity2);
 
   // Populate the entities
-  written_entity1.property->amount = "20";
-  written_entity2.property->coefficient = "0.5";
+  written_entity1.amount = 20.9;
+  written_entity2.coefficient = 0.5;
 
   // Construct a dummy data model and populate it
   soft::JSONModel j;
@@ -88,8 +90,8 @@ TEST(PortoJsonTests, TestSaveLoad) {
   ASSERT_EQ(SOFTC_STATUS_OK, error);
 
   // Recreate an expected data collection
-  soft::FinancialInput read_entity1;
-  soft::SomeModelConfiguration read_entity2;
+  soft::Financial read_entity1;
+  soft::Physics read_entity2;
 
   // Build up collection with structure
   soft::Collection read_coll;
@@ -97,8 +99,8 @@ TEST(PortoJsonTests, TestSaveLoad) {
   read_coll.attachEntity("physics", &read_entity2);
 
   // Finally, check that the read collection is the same as the written
-  ASSERT_EQ(written_entity1.property->amount, read_entity1.property->amount);
-  ASSERT_EQ(written_entity2.property->coefficient, read_entity2.property->coefficient);
+  ASSERT_EQ(written_entity1.amount, read_entity1.amount);
+  ASSERT_EQ(written_entity2.coefficient, read_entity2.coefficient);
   ASSERT_EQ(written_entity1.id(), read_entity1.id());
   ASSERT_EQ(written_entity2.id(), read_entity2.id());
 }

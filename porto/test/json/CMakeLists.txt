@@ -11,6 +11,7 @@ if(GTEST_FOUND)
   include_directories(
     ${porto-json_INCLUDE_DIRS} 
     ${soft-storage-plugins-json_INCLUDE_DIRS}
+    ${porto-codegen-entities_INCLUDE_DIRS}
     ${GTEST_INCLUDE_DIRS}
     )
 
@@ -18,20 +19,18 @@ if(GTEST_FOUND)
   target_link_libraries(${PROJECT_NAME} 
     porto-json 
     ${soft-storage-plugins-json_LIBS}
+    ${porto-codegen-entities_LIBS}
     ${GTEST_LIBRARIES}
     )
 
-#  message("Test: ${soft-storage-plugins-json_INCLUDE_DIRS}")
-    
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 
   add_test(${PROJECT_NAME}
     ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 
-
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}")
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH} ${porto-codegen-entities_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
       ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
