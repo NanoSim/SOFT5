@@ -47,8 +47,9 @@ TEST_F(DatamodelTest, store_and_load)
   Model *m;
   char *uuid;
   
-  char const *string = "This is a test...";
-  char const *strlist[] = {"first", "second", "third"};
+  char const *string_c = "This is a test...";
+  char const *strlist_c[] = {"first", "second", "third"};
+  const size_t strlist_n = sizeof(strlist_c)/sizeof(strlist_c[0]);
   double dbl = 3.14;
   double dbl_array[] = {0.0, 1.0, 2.0, 3.0};
   double **dbl_array2;
@@ -89,8 +90,14 @@ TEST_F(DatamodelTest, store_and_load)
   m = create_model(uuid);                                                                                           ASSERT_TRUE(m);
   stat = softc_datamodel_append_dimension(m->datamodel, "NI", 50);                                                  ASSERT_TRUE(stat);
   stat = softc_datamodel_append_dimension(m->datamodel, "NJ", 40);                                                  ASSERT_TRUE(stat);
+  softc_string_s string = softc_string_create( string_c );
   stat = softc_datamodel_append_string(m->datamodel, "string", string);                                             ASSERT_TRUE(stat);
-  stat = softc_datamodel_append_string_list(m->datamodel, "strlist", (softc_string*)strlist, 3);                                   ASSERT_TRUE(stat);
+  softc_string_destroy( string );
+  /*TODO: strlist type not implemented yet
+  softc_string_s* strlist = softc_string_createlist( strlist_c, strlist_n );
+  stat = softc_datamodel_append_string_list(m->datamodel, "strlist", strlist, strlist_n);                           ASSERT_TRUE(stat);
+  softc_string_destroylist( strlist );
+  */
   stat = softc_datamodel_append_double(m->datamodel, "dbl", dbl);                                                   ASSERT_TRUE(stat);
   stat = softc_datamodel_append_array_double(m->datamodel, "dbl_array", dbl_array, 4);                              ASSERT_TRUE(stat);
   // NB: soft assumes fortran order - reverse dimensions
@@ -102,8 +109,8 @@ TEST_F(DatamodelTest, store_and_load)
 
   /* load */
   size_t ni, nj, nk;
-  softc_string new_string;
-  softc_string *new_strlist;
+  softc_string_s new_string;
+  softc_string_s *new_strlist;
   double new_dbl;
   double *new_dbl_array;
   double **new_dbl_array2;
@@ -114,15 +121,16 @@ TEST_F(DatamodelTest, store_and_load)
 
   stat = softc_datamodel_get_string(m->datamodel, "string", &new_string);
   ASSERT_TRUE(stat);
-  ASSERT_EQ(strcmp(string, new_string), 0);
-  free(new_string);
+  ASSERT_EQ(strcmp(string_c, from_softc_string(new_string)), 0);
+  softc_string_destroy(new_string);
 
+  /*TODO: strlist type not implemented yet
   stat = softc_datamodel_get_string_list(m->datamodel, "strlist", &new_strlist, &ni);
   ASSERT_TRUE(stat);
-  ASSERT_EQ(3, ni);
-  for (i=0; i<ni; i++) ASSERT_EQ(strcmp(strlist[i], new_strlist[i]), 0);
-  for (i=0; i<ni; i++) free(new_strlist[i]);
-  free(new_strlist);
+  ASSERT_EQ(strlist_n, ni);
+  for (i=0; i<ni; i++) ASSERT_EQ( strcmp(strlist_c[i], from_softc_string(new_strlist[i])), 0);
+  softc_destroylist( new_strlist, ni );
+  */
   
   stat = softc_datamodel_get_double(m->datamodel, "dbl", &new_dbl);
   ASSERT_TRUE(stat);

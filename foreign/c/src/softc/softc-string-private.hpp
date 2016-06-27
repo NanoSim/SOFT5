@@ -1,6 +1,9 @@
 #ifndef SOFTC_STRING_PRIVATE_H_CPP
 #define SOFTC_STRING_PRIVATE_H_CPP
 
+#include <string>
+#include <utility>      // std::move
+
 struct _softc_string_s
 {
   _softc_string_s(){}
