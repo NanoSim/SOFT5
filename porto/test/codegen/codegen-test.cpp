@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <Soft>
 #include <collection.h>
 #include "simple.h"
 #include "financial.h"
@@ -33,4 +34,12 @@ TEST(codegen, collectionAdd)
   collection.attachEntity("simple1", simple);
   auto instance = collection.findInstance("simple1");
   ASSERT_EQ(instance, simple);
+}
+
+TEST(codegen, storeSimple)
+{
+  using namespace soft;
+  soft::Storage storage("mongo", "mongodb://localhost", "db=codegentest;coll=coll");
+  Simple simple(0,0,0,0);
+  storage.save(&simple);
 }

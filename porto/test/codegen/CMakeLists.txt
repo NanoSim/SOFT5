@@ -17,7 +17,7 @@ if(GTEST_FOUND)
   target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} ${soft-kernel_LIBS} ${porto-codegen-entities_LIBS}) 
 
   add_test(${PROJECT_NAME}
-    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${soft-storage-plugins-mongo_BINARY_DIR})
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
