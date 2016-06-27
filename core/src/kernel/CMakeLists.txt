@@ -7,7 +7,6 @@ set (CMAKE_AUTOMOC ON)
 # Generate config.h from config.h.in
 configure_file("config.h.in" "config.h")
 
-include_directories (${CMAKE_CURRENT_BINARY_DIR} ${BSON_INCLUDE_DIR})
 set (LINK_LIBS ${LINK_LIBS}
   ${BSON_LIBRARIES}
   Qt5::Core
@@ -18,6 +17,7 @@ set (LINK_LIBS ${LINK_LIBS}
 aux_source_directory(. SRC_LIST)
 add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BSON_INCLUDE_DIR})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 

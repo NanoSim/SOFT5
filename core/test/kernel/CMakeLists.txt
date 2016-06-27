@@ -19,6 +19,7 @@ if(GTEST_FOUND)
     ${test-entities_ENTITIES}
     )
   include_directories(
+    "${SOFT_ROOT}/foreign/c/src/softc"
     ${test-entities_INCLUDE_DIRS}
     ${soft-kernel_INCLUDE_DIRS}
     ${softc_INCLUDE_DIRS}

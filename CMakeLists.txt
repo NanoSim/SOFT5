@@ -117,9 +117,10 @@ set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
 # Core library
 add_subdirectory(core/src/kernel)
-if (WITH_TESTS)
-add_subdirectory(core/test/kernel)
-endif (WITH_TESTS)
+
+if (WITH_FOREIGN_C)
+  add_subdirectory(foreign/c/src/softc)
+endif (WITH_FOREIGN_C)
 
 # Storage
 if (WITH_STORAGE_HD5)
@@ -182,7 +183,6 @@ endif(WITH_WEB)
 
 # Foreign
 if (WITH_FOREIGN_C)
-  add_subdirectory(foreign/c/src/softc)
   if (WITH_TESTS)
     add_subdirectory(foreign/c/test/softc)
     add_subdirectory(foreign/c/test/storage)	
@@ -217,12 +217,16 @@ if (WITH_NUMERICS)
 endif (WITH_NUMERICS)
 
 if (WITH_PORTO)
+  add_subdirectory(porto/test/codegen)
   add_subdirectory(porto/src/json)
   if (WITH_TESTS)
     add_subdirectory(porto/test/json)
-    add_subdirectory(porto/test/codegen)
   endif (WITH_TESTS)
 endif (WITH_PORTO)
+
+if (WITH_TESTS)
+add_subdirectory(core/test/kernel)
+endif (WITH_TESTS)
 
 
 # Documentation
