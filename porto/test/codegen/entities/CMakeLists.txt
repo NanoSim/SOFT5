@@ -1,28 +1,23 @@
-project (porto-entities C CXX)
+project (porto-codegen-entities C CXX)
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set (SRC_LIST ${SRC_LIST})
-set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.cjs)
-set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.hjs)
 
-message("softshell modules: ${softshell_MODULES_DIR}")
-message("template: ${C_SOURCE_TEMPLATE}")
 # Run a json entity through the soft-forge code generator to create
 # a header and source file
 function (add_forge entity output_src output_hdr)
-  message("Running command soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}")
+#  message("outp: ${entity} ${output_src} ${output_hdr}")
   add_custom_command(
     OUTPUT ${output_hdr}
-    COMMAND SOFT_MODULES=${softshell_MODULES_DIR} soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}
-    DEPENDS ${entity} ${C_HEADER_TEMPLATE}
+    COMMAND soft-forge ${entity} ${CPP_HEADER_TEMPLATE} ${output_hdr}
+    DEPENDS ${entity} ${CPP_HEADER_TEMPLATE}
     )
 
   add_custom_command(
     OUTPUT ${output_src}
-    COMMAND SOFT_MODULES=${softshell_MODULES_DIR} soft-forge ${entity} ${C_SOURCE_TEMPLATE} ${output_src}
-    DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr}
+    COMMAND soft-forge ${entity} ${CPP_SOURCE_TEMPLATE} ${output_src}
+    DEPENDS ${entity} ${CPP_SOURCE_TEMPLATE} ${output_hdr}
     )
 endfunction()
 
@@ -31,21 +26,21 @@ endfunction()
 # soft-forge
 FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.json)
 foreach(JSON_SRC ${json-sources})
- 
-  string(REGEX REPLACE "\.json$" ".c" GEN_SRC ${JSON_SRC})
+#  message("${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}")
+  string(REGEX REPLACE "\.json$" ".cpp" GEN_SRC ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
+#  message("${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC} - ${GEN_SRC}")		
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
-    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_SRC}
-    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_HDR})
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR})
 
   list(APPEND SRC_LIST ${GEN_SRC})  
 endforeach(JSON_SRC ${json-sources})
 
 set_source_files_properties(${SRC_LIST} PROPERTIES GENERATED TRUE)
-include_directories(${soft-kernel_INCLUDE_DIRS} ${softc_INCLUDE_DIRS})
+include_directories(${soft-kernel_INCLUDE_DIRS})
 set (LINK_LIBS ${LINK_LIBS}
-  ${soft-kernel_LIBS}
-  ${softc_LIBS})
+  ${soft-kernel_LIBS}  ${softc_LIBS})
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})

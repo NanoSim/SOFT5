@@ -21,6 +21,8 @@ option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
 option (WITH_TESTS "Compile tests"                        ON)
 option (WITH_PORTO "Compile porto plugins"                ON)
 
+set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
@@ -228,6 +230,7 @@ set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.hjs
     add_subdirectory(porto/test/json)
     add_subdirectory(porto/test/thirdParty/chemkinReader)
     add_subdirectory(porto/test/parscale)
+    add_subdirectory(porto/test/codegen)
   endif (WITH_TESTS)
 
 endif (WITH_PORTO)

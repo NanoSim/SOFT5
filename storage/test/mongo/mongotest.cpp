@@ -401,8 +401,7 @@ TEST_F(MongoTest, collection_rename)
    auto collection = database->collection("foo");
    auto isOk = collection->rename("test2", "foo2", true);
 
-   ASSERT_TRUE (isOk);
-   
+   ASSERT_TRUE (isOk);   
 }
 
 TEST_F(MongoTest, collection_save)

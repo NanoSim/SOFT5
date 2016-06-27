@@ -63,7 +63,7 @@ public:
   virtual void load (IDataModel const *) override;
 
   virtual std::vector<std::string> dimensions() const override;
-
+  virtual int getDimensionSize(std::string const &dim) const override;
 private:
   class Private;
   Private *d;
