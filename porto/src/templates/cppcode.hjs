@@ -1,49 +1,49 @@
 @{
-    var cppapi = require('soft.forge.cppapi');
+  var cppapi = require('soft.forge.cppapi');
 
-    ENTITY = soft.model.name.toUpperCase();
-    entity = soft.model.name.toLowerCase();
-    Entity = entity.charAt(0).toUpperCase() + entity.slice(1);
+  ENTITY = soft.model.name.toUpperCase();
+  entity = soft.model.name.toLowerCase();
+  Entity = entity.charAt(0).toUpperCase() + entity.slice(1);
     
-    propertyType = function(type, rank){	
-	var rank = typeof rank !== 'undefined' ?  rank : 0;
+  propertyType = function(type, rank){	
+    var rank = typeof rank !== 'undefined' ?  rank : 0;
 	
-    };    
+  };    
 
-    attributes = (function(){
-	var attr = [];
-	soft.model.properties.forEach(function (entry){
-	    var o = {};
-	    var rank = (typeof entry.dims !== 'undefined' ? entry.dims.length : 0);
-	    o.name = entry.name;
-	    o.rank = rank
+  attributes = (function(){
+      var attr = [];
+      soft.model.properties.forEach(function (entry){
+	  var o = {};
+	  var rank = (typeof entry.dims !== 'undefined' ? entry.dims.length : 0);
+	  o.name = entry.name;
+	  o.rank = rank
 	    o.type = cppapi.type_to_cpp(entry.type, rank);
-	    o.desc = (entry.description != undefined ? "/* " + entry.description + " */" : "");
-	    o.dims = entry.dims;
-	    attr.push(o);
+	  o.desc = (entry.description != undefined ? "/* " + entry.description + " */" : "");
+	  o.dims = entry.dims;
+	  attr.push(o);
 	})
 	return attr;
     })();
     
-    createArgs = (function(){
-	var ret = [];
-	if (soft.model.dimensions != undefined) {
-	    soft.model.dimensions.forEach(function (d){
-		ret.push("StdUInt " + d.name);
-	    });
-	}
-	return ret;
+  createArgs = (function(){
+      var ret = [];
+      if (soft.model.dimensions != undefined) {
+	soft.model.dimensions.forEach(function (d){
+	    ret.push("StdUInt " + d.name);
+	  });
+      }
+      return ret;
     })();
     
-    attrDeclList = (function(){
-        var as = [];
-	attributes.forEach(function(entry){
-	    as.push(entry.type + " " + entry.name + ";" + entry.desc);
+  attrDeclList = (function(){
+      var as = [];
+      attributes.forEach(function(entry){
+	  as.push(entry.type + " " + entry.name + ";" + entry.desc);
 	});
-	return as;
+      return as;
     })();
     
-    undefined;
+  undefined;
 }
 #ifndef @{ENTITY}_ENTITY_H_DEF
 #define @{ENTITY}_ENTITY_H_DEF
@@ -57,9 +57,9 @@ SOFT_BEGIN_NAMESPACE
 
 class @{Entity} : public IEntity
 {
-public:
+ public:
   SOFT_ENTITY_METADATA("@{Entity}", "@soft.model.namespace", @soft.model.version)  
-  @{createArgs.length == 1 ? "explicit " : ""}@{Entity} (@{createArgs.join(", ")});
+    @{createArgs.length == 1 ? "explicit " : ""}@{Entity} (@{createArgs.join(", ")});
   explicit @{Entity}(std::string const &);
   explicit @{Entity}(IEntity const *);
   explicit @{Entity}(IDataModel const *);  
@@ -73,7 +73,7 @@ public:
   virtual int getDimensionSize(std::string const &) const override;
 
   @{attrDeclList.join("\n  ");}
-private:
+ private:
   class Private;
   Private *d;
 };
