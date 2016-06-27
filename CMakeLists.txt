@@ -62,8 +62,9 @@ set (SOFT_PATCH_VERSION 5)
 # Tests
 # Run them with "ctest -V" or "make check" to get verbose output.
 if (WITH_TESTS)
-  enable_testing()
+  enable_testing()  
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
+
 endif (WITH_TESTS)
 
 # Define content of PATH (Windows), LD_LIBRARY_PATH (Unix) and SOFTSTORAGE
@@ -135,7 +136,7 @@ if (WITH_STORAGE_MONGO)
   add_subdirectory(storage/src/mongo)
   add_subdirectory(storage/src/plugins/mongo)
   if (WITH_TESTS)
-    #add_subdirectory(storage/test/mongo)
+    add_subdirectory(storage/test/mongo)
     add_subdirectory(storage/test/plugins/mongo)
   endif(WITH_TESTS)
 endif (WITH_STORAGE_MONGO)
