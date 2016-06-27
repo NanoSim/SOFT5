@@ -1,3 +1,5 @@
+// Test plugin that also functions as an example of various features.
+
 #include "json.h"
 
 #include <string.h>
@@ -8,6 +10,11 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QUrl>
+#include <collection.h>
+#include <softc/softc-datamodel-private.hpp>
+#include "financial.h"
+#include "physics.h"
+
 
 int softc_plugin_identify( char* name, int maxlen ) {
   // TODO: Is this the name we want to return?
@@ -28,9 +35,19 @@ int softc_plugin_capabilities() {
   return SOFTC_CAPABILITY_READ | SOFTC_CAPABILITY_WRITE;
 }
 
+// Loads from an URI into a datamodel
 int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char* options ) {
-  // TODO: Return an actual datamodel with the proper structure, naming etc.
-  
+
+  // TODO: This should be replaced by a generated c++ entity, i.e.:
+  soft::Financial entity1;
+  soft::Physics entity2;
+
+  // Build up collection with structure
+  soft::Collection coll;
+  coll.attachEntity("finance", &entity1);
+  coll.attachEntity("physics", &entity2);
+
+  // Read from JSON
   QFile f(uri);
   if (!f.open(QIODevice::ReadOnly)) {
     return SOFTC_STATUS_FAILURE;
@@ -40,45 +57,51 @@ int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char
 
   QJsonDocument doc = QJsonDocument::fromJson(ba);
 
-  double dummy = doc.object()["amount"].toDouble();
+  double amount = doc.object()["amount"].toDouble();
+  double coefficient = doc.object()["coefficient"].toDouble();
 
-  softc_datamodel_append_double(datamodel, "amount", dummy);
+  // Now store the items retrieved in the entities
+  entity1.amount = amount;
+  entity2.coefficient = coefficient;
+
+  // ... and store the entire collection. The datamodel now contains the full
+  // information from all the contained entities.
+  coll.save(datamodel->ref);
 
   return SOFTC_STATUS_OK;
 }
 
+// Stores a datamodel into an URI
 int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, const char* options) {
-  
-  // TODO: Some checks for id, version, name and namespace here?
-  // softc_datamodel_get_id
-  // softc_datamodel_get_meta_name
-  // softc_datamodel_get_meta_version
-  // softc_datamodel_get_meta_namespace
-  
+
+  // TODO: This should be replaced by a generated c++ entity, i.e.:
+  soft::Financial entity1;
+  soft::Physics entity2;
+
+  // Build up collection with structure
+  soft::Collection coll;
+  coll.attachEntity("finance", &entity1);
+  coll.attachEntity("physics", &entity2);
+
+  // This should now load and the contents from the datamodel into the collection
+  // and its contained entities, as long as it was originally created with the
+  // same structure:
+  //   collection { "finance" -> Financial, "physics" -> SomeModelConfiguration }
+  coll.load(datamodel->ref);
+
+  // At this point the collection and its entities are fully popualted, and we can
+  // write this to a json file.
   QUrl url(uri);
 
-  double dummy;
-  if (!softc_datamodel_get_double(datamodel, "amount", &dummy)) {
-    return SOFTC_STATUS_FAILURE;
-  }
-
-  // TODO: Also make sure that, regardless of meta information, we check that the
-  //       properties exist before we use them.
+  // Assuming "amount" is in the first entity:
+  double amount = entity1.amount; // TODO: Actual generated structure may vary
+  double coefficient = entity2.coefficient;
 
   QJsonObject root;
-  root["recepie"] = "cheese cake";
-
-  QJsonArray ingredients;
-  ingredients.append("cheese");
-  ingredients.append("flour");
-  ingredients.append("sugar");
-
-  root["ingredients"] = ingredients;
-  
-  root["amount"] = dummy;
+  root["amount"] = amount;
+  root["coefficient"] = coefficient;
 
   QJsonDocument doc(root);
-
   QFile f(url.path());
   if (!f.open(QIODevice::WriteOnly)) {
     return SOFTC_STATUS_FAILURE;
@@ -89,4 +112,4 @@ int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, cons
 
   return SOFTC_STATUS_OK;
 }
- 
+

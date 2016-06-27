@@ -41,3 +41,7 @@ std::vector<std::string> TestEntity :: dimensions() const
   return ret;
 			       
 }
+int TestEntity :: getDimensionSize(std::string const &) const 
+{
+  return -1;
+}
