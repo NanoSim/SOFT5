@@ -49,7 +49,4 @@ void IEntity :: setId(const std::string &id) {
   d->uuid = QUuid(id.c_str());
 }
 
-int IEntity :: getDimensionSize(std::string const &) const
-{}
-
 SOFT_END_NAMESPACE

@@ -34,8 +34,7 @@ public:
   virtual const char* metaNamespace()                   const = 0;
   virtual const char* metaVersion()                     const = 0;
   virtual std::vector<std::string> dimensions()         const = 0;
-
-  virtual int getDimensionSize(std::string const &dim) const;
+  virtual int getDimensionSize(std::string const &)     const = 0;
 
 private:
   class Private;

@@ -211,5 +211,9 @@ std::vector<std::string> Collection :: dimensions() const {
   NOT_IMPLEMENTED
 }
 
+int Collection :: getDimensionSize(std::string const &dim) const 
+{
+  NOT_IMPLEMENTED
+}
 
 SOFT_END_NAMESPACE
