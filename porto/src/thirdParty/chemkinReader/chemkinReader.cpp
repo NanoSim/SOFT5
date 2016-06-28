@@ -128,8 +128,10 @@ void IO::ChemkinReader::read()
     readElements();
     readSpecies();
 
-    ThermoParser thermoParser(thermfile_);
-    thermoParser.parse(species_);
+    if (thermfile_ != "NOT READ") {
+      ThermoParser thermoParser(thermfile_);
+      thermoParser.parse(species_);
+    }
 
     if (transfile_ != "NOT READ")
     {

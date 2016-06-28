@@ -59,7 +59,7 @@ namespace IO
             ChemkinReader
             (
                 const std::string chemfile,
-                const std::string thermfile,
+                const std::string thermfile = "NOT READ",
                 const std::string transfile = "NOT READ"
             );
             
