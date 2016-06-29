@@ -66,15 +66,12 @@ static bool registerPlugin(QString const &file)
     if (isOk) {
       auto pluginPtr = qobject_cast<IStrategyPlugin*>(loader->instance());
       if (pluginPtr) {
-	pluginPtr->registerStrategy();
-      }
-      else {
-	return false;
+        pluginPtr->registerStrategy();
+        return true;
       }
     }
     else {
       QTextStream(stderr) << loader->errorString() << endl;
-      return false;
     }
   }
   return false;

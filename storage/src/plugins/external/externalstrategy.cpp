@@ -22,7 +22,7 @@ namespace Singleton {
   public:
     PluginsListSingleton(){
       auto paths = pluginsDirectories();
-    
+
       auto libFilter = [](QStringList const &files) {
 	QStringList retval;
 	for (auto file : files) {
@@ -32,7 +32,7 @@ namespace Singleton {
 	}
 	return retval;
       };
-    
+
       for (auto const dir: paths) {
 	QDir const pluginsDir (QString::fromStdString(dir));
 	auto const files         = pluginsDir.entryList (QDir::Files);
@@ -40,7 +40,7 @@ namespace Singleton {
 	for (auto const file: filteredFiles) {
 	  IdentityPrototype fn = (IdentityPrototype)QLibrary::resolve(file, pluginIdentify);
 	  if (fn) {
-	    char id[MAXLEN];      
+	    char id[MAXLEN];
 	    fn(id, MAXLEN);
 	    QString key(id);
 	    QSharedPointer<QLibrary> lib(new QLibrary(pluginsDir.absolutePath() + "/" + file));
@@ -84,20 +84,22 @@ ExternalStrategy :: ExternalStrategy()
 {}
 
 
-//!  
+//!
 // The URI for an external strategy should contain at least the
 // scheme and path in this form <scheme>://<path>, where scheme will
 // invoke the factory function to select the correct plugin
 ExternalStrategy :: ExternalStrategy(const char *uri, const char *options)
   : IStorageStrategy()
-  , d(new ExternalStrategy::Private(uri, options))
+  , d(nullptr)
 {
   QUrl url(uri);
   auto scheme = url.scheme();
   auto s = Singleton::get();
-  if (s.libraryMap.contains(scheme)) {
-    d->extPlugin = s.libraryMap[scheme];
+  if (!s.libraryMap.contains(scheme)) {
+    throw std::runtime_error("External Storage Strategy cannot load scheme plugin");
   }
+  d = new ExternalStrategy::Private(uri, options);
+  d->extPlugin = s.libraryMap[scheme];
 }
 
 ExternalStrategy :: ~ExternalStrategy()
@@ -117,7 +119,7 @@ void ExternalStrategy::store (IDataModel const *model)
   ExternalModel const* extModel = dynamic_cast<ExternalModel const*>(model);
   Q_CHECK_PTR(extModel);
   const _softc_datamodel_t datamodel = { (IDataModel*)extModel};
-  
+
   SavePrototype fn = (SavePrototype)d->extPlugin->resolve(pluginSave);
   fn(&datamodel, qPrintable(d->uri), qPrintable(d->options));
 }
@@ -129,14 +131,14 @@ void ExternalStrategy::retrieve (IDataModel *model) const
   Q_CHECK_PTR(extModel);
   struct _softc_datamodel_t datamodel;
   datamodel.ref = extModel;
-  
+
   LoadPrototype fn = (LoadPrototype)d->extPlugin->resolve(pluginLoad);
   fn(&datamodel, qPrintable(d->uri), qPrintable(d->options));
 }
 
 //!
 /// Creates a new storage strategy where \arg uri and \arg opts is passed
-/// to the external storage plugin. 
+/// to the external storage plugin.
 IStorageStrategy* ExternalStrategy::create(char const *uri, char const *opts)
 {
   // Set correct function pointers
