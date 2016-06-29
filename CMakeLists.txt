@@ -141,6 +141,7 @@ if (WITH_STORAGE_MONGO)
   if (WITH_TESTS)
     add_subdirectory(storage/test/mongo)
     add_subdirectory(storage/test/plugins/mongo)
+    add_subdirectory(storage/test/plugins/mongo2)
   endif(WITH_TESTS)
 endif (WITH_STORAGE_MONGO)
 
@@ -225,9 +226,9 @@ if (WITH_PORTO)
   set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.hjs)
 
   add_subdirectory(porto/src/entities)
-  add_subdirectory(porto/src/json) 
   add_subdirectory(porto/src/thirdParty/chemkinReader)
   add_subdirectory(porto/test/codegen)
+  add_subdirectory(porto/src/json) 
 
  if (WITH_TESTS)
     add_subdirectory(porto/test/json)

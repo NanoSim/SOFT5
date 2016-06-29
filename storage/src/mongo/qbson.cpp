@@ -1,8 +1,28 @@
+#include <QVector>
+#include <QList>
+#include <list>
+#include <string>
 #include <bson.h>
 #include "qbson.h"
 
 SOFT_BEGIN_NAMESPACE
 BSON_BEGIN_NAMESPACE
+
+static QStringList fromStdStringList(StdStringList const &xs)
+{
+  QVector<QString> ys(xs.size());
+  std::transform(xs.begin(), xs.end(), ys.begin(), &QString::fromStdString);
+  return QList<QString>::fromVector(ys);
+}
+
+
+static StdStringList fromQStringList(QStringList const &ys)
+{
+  QVector<QString> vs = QVector<QString>::fromList(ys);
+  StdStringList xs(vs.size());
+  std::transform(vs.begin(), vs.end(), xs.begin(), [](QString const &str){return str.toStdString();});
+  return xs;
+}
 
 static void bsonDeleter (bson_t *ptr)
 {
@@ -120,6 +140,18 @@ bool Bson :: appendBool (char const * key, bool value)
    return isOk;
 }
 
+bool Bson :: getBool (const char *key, bool &value) const
+{
+  bson_iter_t iter;
+  if (bson_iter_init_find(&iter, bson.get(), key) &&
+      BSON_ITER_HOLDS_BOOL(&iter)) {
+    auto v = bson_iter_value(&iter);
+    value = v->value.v_bool;
+    return true;
+  }
+  return false;
+}
+
 bool Bson :: appendDouble(char const * key, double const &value)
 {
   auto isOk = BSON_APPEND_DOUBLE(bson.get(), key, value);
@@ -151,6 +183,11 @@ bool Bson :: appendIntArray(char const *key, soft::StdIntArray const &value)
 bool Bson :: append(char const *key, soft::StdIntArray const &value)
 {
   return appendIntArray(key, value);
+}
+
+bool Bson :: append(char const *key, soft::StdStringList const &value)
+{
+  return appendStringList(key, fromStdStringList(value));
 }
 
 bool Bson :: appendDoubleArray(char const *key, soft::StdDoubleArray const &value)
@@ -465,6 +502,17 @@ bool Bson :: getFloat(char const *key, float &value) const
   return false;
 }
 
+QStringList Bson :: keys() const
+{
+  QStringList retval;
+  bson_iter_t iter;
+  if (bson_iter_init(&iter, bson.get())) {
+    while (bson_iter_next(&iter)) {
+      retval << QString::fromLocal8Bit(bson_iter_key(&iter));
+    }
+  }
+  return retval;
+}
 
 qint32 Bson :: countKeys() const
 {
@@ -494,6 +542,10 @@ Bson& Bson :: operator=(Bson const &other)
   bson = other.bson;
 }
 
+std::shared_ptr<struct _bson_t> Bson :: bsonPtr()
+{
+  return bson;
+}
 
 BSON_END_NAMESPACE
 SOFT_END_NAMESPACE

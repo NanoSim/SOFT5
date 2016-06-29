@@ -9,11 +9,12 @@ SOFT_BEGIN_NAMESPACE
 
 class IDataModel;
 
+#define SOFT_META_STRING(x) std::string(#x);
 #define SOFT_ENTITY_METADATA(name,ns,ver)	\
-  virtual const char * metaType() const override {return #name;} \
-  virtual const char * metaName() const override {return #name;} \
-  virtual const char * metaNamespace() const override {return #ns;} \
-  virtual const char * metaVersion() const override {return #ver;}
+  virtual std::string metaType() const override {return name;} \
+  virtual std::string metaName() const override {return name;} \
+  virtual std::string metaNamespace() const override {return ns;} \
+  virtual std::string metaVersion() const override {return ver;}
 
 class IEntity
 {
@@ -29,10 +30,10 @@ public:
 
   virtual std::string id()                              const;
   virtual void setId(std::string const &id);
-  virtual const char* metaType()                        const = 0;
-  virtual const char* metaName()                        const = 0;
-  virtual const char* metaNamespace()                   const = 0;
-  virtual const char* metaVersion()                     const = 0;
+  virtual std::string metaType()                        const = 0;
+  virtual std::string metaName()                        const = 0;
+  virtual std::string metaNamespace()                   const = 0;
+  virtual std::string metaVersion()                     const = 0;
   virtual std::vector<std::string> dimensions()         const = 0;
   virtual int getDimensionSize(std::string const &)     const = 0;
 

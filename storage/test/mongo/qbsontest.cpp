@@ -278,7 +278,20 @@ TEST(QBsonTest, getDoubleArray3D)
   bson.get("double_array3d", copy);
   ASSERT_EQ(copy, ix);
 }
-			    
+
+TEST(QBsonTest, keys)
+{
+  bson::Bson doc;
+  doc.append("foo", "bar");
+  doc.append("baz", "qux");
+  doc.append("quux", "xyxxy");
+
+  auto keys = doc.keys();
+  ASSERT_EQ(keys.size(), 3);
+  ASSERT_TRUE(keys.contains("foo"));
+  ASSERT_TRUE(keys.contains("baz"));
+  ASSERT_TRUE(keys.contains("quux"));
+}
 
 TEST(QBsonTest, getBson)
 {

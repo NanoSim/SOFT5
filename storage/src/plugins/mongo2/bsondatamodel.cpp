@@ -1,3 +1,6 @@
+#include <QStringList>
+#include <QVector>
+#include <QList>
 #include "bsondatamodel.h"
 
 SOFT_BEGIN_NAMESPACE
@@ -27,100 +30,85 @@ bool BsonDataModel :: appendVariant (const char *key, StdVariant const &value)
   return false;
 }
 
-bool BsonDataModel :: appendString (const char*, const StdString &value) 
+bool BsonDataModel :: appendString (const char*key, const StdString &value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, value);
 }
 
 bool BsonDataModel :: appendInt8 (const char *key, StdInt8 value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, (StdInt)value);
 }
 
 bool BsonDataModel :: appendUInt8 (const char *key, StdUInt8 value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, (StdInt)value);
 }
 
 bool BsonDataModel :: appendInt16 (const char *key, StdInt16 value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, (StdInt)value);
 }
 
 bool BsonDataModel :: appendUInt16 (const char *key, StdUInt16 value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, (StdInt)value);
 }
 
 bool BsonDataModel :: appendInt32 (const char *key, StdInt value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, value);
 }
 
 bool BsonDataModel :: appendUInt32 (const char *key, StdUInt value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, (StdInt)value);
 }
 
 bool BsonDataModel :: appendInt64 (const char *key, StdInt64 value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.appendInt64(key, value);
 }
 
 bool BsonDataModel :: appendUInt64 (const char *key, StdUInt64 value) 
-{
+{  
   NOT_IMPLEMENTED;
   return false;
 }
 
 bool BsonDataModel :: appendFloat (const char *key, StdFloat value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.appendFloat(key, value);
 }
 
 bool BsonDataModel :: appendDouble (const char *key, StdDouble value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.appendDouble(key, value);
 }
 
 bool BsonDataModel :: appendBool (const char *key, StdBool value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.appendBool(key, value);
 }
 
 bool BsonDataModel :: appendInt32Array (const char *key, StdIntArray const &value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.appendIntArray(key, value);
 }
 
 bool BsonDataModel :: appendDoubleArray (const char *key, StdDoubleArray const &value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, value);
 }
 
 bool BsonDataModel :: appendDoubleArray2D (const char *key, StdDoubleArray2D const&value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, value);
 }
 
 bool BsonDataModel :: appendDoubleArray3D (const char *key, StdDoubleArray3D const&value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, value);
 }
 
 bool BsonDataModel :: appendByteArray (const char *key, StdBlob const &value) 
@@ -131,8 +119,7 @@ bool BsonDataModel :: appendByteArray (const char *key, StdBlob const &value)
 
 bool BsonDataModel :: appendStringArray (const char *key, StdStringList const &value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.append(key, value);
 }
 
 bool BsonDataModel :: appendArray (const char *key, IDataModel const * value) 
@@ -143,7 +130,7 @@ bool BsonDataModel :: appendArray (const char *key, IDataModel const * value)
 
 bool BsonDataModel :: getDimension (const char *key, StdUInt &value) const 
 {
-  return dimsObject.get(key, reinterpret_cast<StdInt&>(value));
+  return propertyObject.get(key, reinterpret_cast<StdInt&>(value));
 }
 
 bool BsonDataModel :: getVariant (const char *key, StdVariant &value) const 
@@ -154,14 +141,12 @@ bool BsonDataModel :: getVariant (const char *key, StdVariant &value) const
 
 bool BsonDataModel :: getString (const char *key, StdString &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getInt8 (const char *key, StdInt8 &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.getInt32(key, (StdInt&)value);
 }
 
 bool BsonDataModel :: getUInt8 (const char *key, StdUInt8 &value) const 
@@ -184,20 +169,17 @@ bool BsonDataModel :: getUInt16 (const char *key, StdUInt16 &value) const
 
 bool BsonDataModel :: getInt32 (const char *key, StdInt &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getUInt32 (const char *key, StdUInt &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, (StdInt&)value);
 }
 
 bool BsonDataModel :: getInt64 (const char *key, StdInt64 &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.getInt64(key, (qint64&)value);
 }
 
 bool BsonDataModel :: getUInt64 (const char *key, StdUInt64 &value) const 
@@ -208,50 +190,51 @@ bool BsonDataModel :: getUInt64 (const char *key, StdUInt64 &value) const
 
 bool BsonDataModel :: getFloat (const char *key, StdFloat &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.getFloat(key, value);
 }
 
 bool BsonDataModel :: getDouble (const char *key, StdDouble &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getBool (const char *key, StdBool &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.getBool(key, value);
 }
 
 bool BsonDataModel :: getInt32Array (const char *key, StdIntArray &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getDoubleArray (const char *key, StdDoubleArray &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getDoubleArray2D (const char *key, StdDoubleArray2D &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getDoubleArray3D (const char *key, StdDoubleArray3D &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getByteArray (const char *key, StdBlob &value) const 
 {
   NOT_IMPLEMENTED;
   return false;
+  /*
+  QByteArray buffer;
+  auto ret = propertyObject.getBinary(key, value);
+  if (!ret) return false;
+
+  value.resize(buffer.size());
+  std::copy(buffer.constBegin(), buffer.constEnd(), value.begin());
+  */
 }
 
 bool BsonDataModel :: getStringArray (const char *key, StdStringList &value) const 

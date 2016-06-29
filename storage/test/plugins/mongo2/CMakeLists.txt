@@ -1,4 +1,4 @@
-project(storage-plugin-mongo-test C CXX)
+project(storage-plugin-mongo-test2 CXX)
 
 find_package(GTest)
 
@@ -12,7 +12,7 @@ if(GTEST_FOUND)
   target_link_libraries(${PROJECT_NAME} ${soft-storage-mongo_LIBS} ${GTEST_LIBRARIES}) 
 
   add_test(${PROJECT_NAME}
-    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-mongo_BINARY_DIR}")
+    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-mongo2_BINARY_DIR}")
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
