@@ -59,6 +59,26 @@ bool Bson :: appendString (char const * key, char const * value)
    return isOk;
 }
 
+bool Bson :: append (const char *key, soft::StdString const &value)
+{
+  appendString(key, value.c_str());
+}
+
+bool Bson :: append (const char *key, Bson const &value) 
+{
+  return appendBson(key, value);
+}
+
+bool Bson :: append(char const *key, soft::StdInt const &value)
+{
+  return appendInt32(key, value);
+}
+
+bool Bson :: append(char const *key, soft::StdDouble const &value)
+{
+  return appendDouble(key, value);
+}
+
 bool Bson :: appendStringList (char const * key, QStringList const &value)
 {
   bson_t b;
@@ -116,7 +136,7 @@ bool Bson :: appendBinary (char const *key, QByteArray const &value)
   return isOk;
 }
 
-bool Bson :: append(char const *key, soft::StdIntArray const &value)
+bool Bson :: appendIntArray(char const *key, soft::StdIntArray const &value)
 {
   bson_t array;
   uint idx = 0;
@@ -128,7 +148,12 @@ bool Bson :: append(char const *key, soft::StdIntArray const &value)
   return isOk;
 }
 
-bool Bson :: append(char const *key, soft::StdDoubleArray const &value)
+bool Bson :: append(char const *key, soft::StdIntArray const &value)
+{
+  return appendIntArray(key, value);
+}
+
+bool Bson :: appendDoubleArray(char const *key, soft::StdDoubleArray const &value)
 {
   bson_t array;
   uint idx = 0;
@@ -140,7 +165,12 @@ bool Bson :: append(char const *key, soft::StdDoubleArray const &value)
   return isOk;
 }
 
-bool Bson :: append(char const *key, soft::StdDoubleArray2D const &value)
+bool Bson :: append(char const *key, soft::StdDoubleArray const &value)
+{
+  return appendDoubleArray(key, value);
+}
+
+bool Bson :: appendDoubleArray2D(char const *key, soft::StdDoubleArray2D const &value)
 {
   bson_t array;
   bson_t inner;
@@ -159,7 +189,12 @@ bool Bson :: append(char const *key, soft::StdDoubleArray2D const &value)
   return isOk; 
 }
 
-bool Bson :: append(char const *key, soft::StdDoubleArray3D const &value)
+bool Bson :: append(char const *key, soft::StdDoubleArray2D const &value)
+{
+  return appendDoubleArray2D(key, value);
+}
+
+bool Bson :: appendDoubleArray3D(char const *key, soft::StdDoubleArray3D const &value)
 {
   bson_t array;
   bson_t inner;
@@ -183,6 +218,11 @@ bool Bson :: append(char const *key, soft::StdDoubleArray3D const &value)
   }
   auto isOk = bson_append_array_end(bson.get(), &array);
   return isOk; 
+}
+
+bool Bson :: append(char const *key, soft::StdDoubleArray3D const &value)
+{
+  return appendDoubleArray3D(key, value);
 }
 
 
@@ -209,6 +249,24 @@ bool Bson :: getInt32(char const * key, qint32 &value)
     return true;
   }
   return false;
+}
+
+bool Bson :: get(const char *key, soft::StdInt &value)
+{
+  return getInt32(key, value);
+}
+
+bool Bson :: get(char const *key, soft::StdDouble &value)
+{
+  return getDouble(key, value);
+}
+
+bool Bson :: get(const char *key, soft::StdString &value)
+{
+  QString temp;
+  auto ret = getString(key, temp);
+  value = temp.toStdString();
+  return ret;
 }
 
 bool Bson :: getString(char const * key, QString &value)
@@ -242,6 +300,26 @@ bool Bson :: getStringList (char const * key, QStringList &value)
   }
   return false;
 }  
+
+bool Bson :: getIntArray(char const *key, soft::StdIntArray &value)
+{
+  return get(key, value);
+}
+
+bool Bson :: getDoubleArray(char const *key, soft::StdDoubleArray &value)
+{
+  return get(key, value);
+}
+
+bool Bson :: getDoubleArray2D(char const *key, soft::StdDoubleArray2D &value)
+{
+  return get(key, value);
+}
+
+bool Bson :: getDoubleArray3D(char const *key, soft::StdDoubleArray3D &value)
+{
+  return get(key, value);
+}
 
 bool Bson :: get(char const *key, soft::StdIntArray &value)
 {
@@ -302,6 +380,21 @@ bool Bson :: get(char const *key, soft::StdDoubleArray2D &value)
     return true;
   }
   return false;
+}
+
+Bson Bson :: getBson(char const *key)
+{
+  bson_iter_t iter;
+
+  if (bson_iter_init_find(&iter, bson.get(), key) &&
+      BSON_ITER_HOLDS_DOCUMENT(&iter)) {
+    const uint8_t *data = NULL;
+    uint32_t len = 0;
+    bson_iter_document(&iter, &len, &data);
+    bson_t *bson = bson_new_from_data(data, len);
+    return Bson(bson);    
+  }  
+  return Bson();
 }
 
 bool Bson :: get(char const *key, soft::StdDoubleArray3D &value)
@@ -395,6 +488,12 @@ bson_t* Bson :: data() const
 {
    return bson.get();
 }
+
+Bson& Bson :: operator=(Bson const &other)
+{
+  bson = other.bson;
+}
+
 
 BSON_END_NAMESPACE
 SOFT_END_NAMESPACE

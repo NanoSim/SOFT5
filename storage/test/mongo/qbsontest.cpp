@@ -280,3 +280,26 @@ TEST(QBsonTest, getDoubleArray3D)
 }
 			    
 
+TEST(QBsonTest, getBson)
+{
+  bson::Bson doc, page1, page2;
+  page1.appendString("test", "this is page 1");
+  page2.appendString("test", "this is page 2");
+
+  doc.appendBson("page1", page1);
+  doc.appendBson("page2", page2);
+
+  bson::Bson copy1, copy2;
+  copy1 = doc.getBson("page1");
+  copy2 = doc.getBson("page2");
+
+  QString string;
+  copy1.getString("test", string);
+  ASSERT_STREQ(qPrintable(string), "this is page 1");
+}
+
+TEST(QBsonTest, appendInt)
+{
+  bson::Bson test;
+  test.append("i", 20303);
+}

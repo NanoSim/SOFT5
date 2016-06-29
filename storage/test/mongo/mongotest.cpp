@@ -353,7 +353,7 @@ TEST_F(MongoTest, collection_insert)
    ASSERT_TRUE (ok);
 }
 
-TEST_F(MongoTest, collection_insertBulk)
+TEST_F(MongoTest, DISABLED_collection_insertBulk)
 {
    auto database = client->database("test");
    database->createCollection("foo");
