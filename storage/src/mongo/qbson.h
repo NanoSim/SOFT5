@@ -54,30 +54,30 @@ public:
   bool append(char const *key, soft::StdDoubleArray const &value);
   bool append(char const *key, soft::StdDoubleArray2D const &value);
   bool append(char const *key, soft::StdDoubleArray3D const &value);
-  bool get(char const *key, soft::StdInt &value);
-  bool get(char const *key, soft::StdDouble &value);
-  bool get(char const *key, soft::StdString &value);
-  bool get(char const *key, soft::StdIntArray &value);
-  bool get(char const *key, soft::StdDoubleArray &value);
-  bool get(char const *key, soft::StdDoubleArray2D &value);
-  bool get(char const *key, soft::StdDoubleArray3D &value);
+  bool get(char const *key, soft::StdInt &value) const;
+  bool get(char const *key, soft::StdDouble &value)const;
+  bool get(char const *key, soft::StdString &value)const;
+  bool get(char const *key, soft::StdIntArray &value)const;
+  bool get(char const *key, soft::StdDoubleArray &value)const;
+  bool get(char const *key, soft::StdDoubleArray2D &value)const;
+  bool get(char const *key, soft::StdDoubleArray3D &value)const;
    
-  bool getInt32(const char *key, qint32 &value);
-  bool getInt64(const char *key, qint64 &value);
-  bool getString(const char *key, QString &value);
-  bool getDouble(const char *key, double &value);
-  bool getFloat(const char *key, float &value);
-  bool getBinary(const char *key, QByteArray &value);
-  bool getStringList (char const * key, QStringList &value);
-  bool getIntArray(char const *key, soft::StdIntArray &value);
-  bool getDoubleArray(char const *key, soft::StdDoubleArray &value);
-  bool getDoubleArray2D(char const *key, soft::StdDoubleArray2D &value);
-  bool getDoubleArray3D(char const *key, soft::StdDoubleArray3D &value);
+  bool getInt32(const char *key, qint32 &value)const;
+  bool getInt64(const char *key, qint64 &value)const;
+  bool getString(const char *key, QString &value)const;
+  bool getDouble(const char *key, double &value)const;
+  bool getFloat(const char *key, float &value)const;
+  bool getBinary(const char *key, QByteArray &value)const;
+  bool getStringList (char const * key, QStringList &value)const;
+  bool getIntArray(char const *key, soft::StdIntArray &value)const;
+  bool getDoubleArray(char const *key, soft::StdDoubleArray &value)const;
+  bool getDoubleArray2D(char const *key, soft::StdDoubleArray2D &value)const;
+  bool getDoubleArray3D(char const *key, soft::StdDoubleArray3D &value)const;
 
   qint32 countKeys() const;
   bool hasField(char const * key) const;
   QString asString() const;
-  Bson getBson(const char *key);
+  Bson getBson(const char *key) const;
 
   Bson& operator=(Bson const &other);
 

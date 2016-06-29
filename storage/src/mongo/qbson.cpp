@@ -226,7 +226,7 @@ bool Bson :: append(char const *key, soft::StdDoubleArray3D const &value)
 }
 
 
-bool Bson :: getBinary (char const *key, QByteArray &value)
+bool Bson :: getBinary (char const *key, QByteArray &value) const
 {
   bson_iter_t iter;
   if (bson_iter_init_find(&iter, bson.get(), key) &&
@@ -239,7 +239,7 @@ bool Bson :: getBinary (char const *key, QByteArray &value)
   return false;
 }
 
-bool Bson :: getInt32(char const * key, qint32 &value)
+bool Bson :: getInt32(char const * key, qint32 &value) const
 {
   bson_iter_t iter;
   if (bson_iter_init_find(&iter, bson.get(), key) &&
@@ -251,17 +251,17 @@ bool Bson :: getInt32(char const * key, qint32 &value)
   return false;
 }
 
-bool Bson :: get(const char *key, soft::StdInt &value)
+bool Bson :: get(const char *key, soft::StdInt &value) const
 {
   return getInt32(key, value);
 }
 
-bool Bson :: get(char const *key, soft::StdDouble &value)
+bool Bson :: get(char const *key, soft::StdDouble &value) const
 {
   return getDouble(key, value);
 }
 
-bool Bson :: get(const char *key, soft::StdString &value)
+bool Bson :: get(const char *key, soft::StdString &value) const
 {
   QString temp;
   auto ret = getString(key, temp);
@@ -269,7 +269,7 @@ bool Bson :: get(const char *key, soft::StdString &value)
   return ret;
 }
 
-bool Bson :: getString(char const * key, QString &value)
+bool Bson :: getString(char const * key, QString &value) const
 {
   bson_iter_t iter;
   if (bson_iter_init_find(&iter, bson.get(), key) &&
@@ -282,7 +282,7 @@ bool Bson :: getString(char const * key, QString &value)
   return false;
 }
 
-bool Bson :: getStringList (char const * key, QStringList &value)
+bool Bson :: getStringList (char const * key, QStringList &value) const
 {
   bson_iter_t iter;
   bson_iter_t subiter;
@@ -301,27 +301,27 @@ bool Bson :: getStringList (char const * key, QStringList &value)
   return false;
 }  
 
-bool Bson :: getIntArray(char const *key, soft::StdIntArray &value)
+bool Bson :: getIntArray(char const *key, soft::StdIntArray &value) const
 {
   return get(key, value);
 }
 
-bool Bson :: getDoubleArray(char const *key, soft::StdDoubleArray &value)
+bool Bson :: getDoubleArray(char const *key, soft::StdDoubleArray &value) const
 {
   return get(key, value);
 }
 
-bool Bson :: getDoubleArray2D(char const *key, soft::StdDoubleArray2D &value)
+bool Bson :: getDoubleArray2D(char const *key, soft::StdDoubleArray2D &value) const
 {
   return get(key, value);
 }
 
-bool Bson :: getDoubleArray3D(char const *key, soft::StdDoubleArray3D &value)
+bool Bson :: getDoubleArray3D(char const *key, soft::StdDoubleArray3D &value) const
 {
   return get(key, value);
 }
 
-bool Bson :: get(char const *key, soft::StdIntArray &value)
+bool Bson :: get(char const *key, soft::StdIntArray &value) const
 {
   bson_iter_t iter;
   bson_iter_t subiter;
@@ -339,7 +339,7 @@ bool Bson :: get(char const *key, soft::StdIntArray &value)
   return false;
 }
 
-bool Bson :: get(char const *key, soft::StdDoubleArray &value)
+bool Bson :: get(char const *key, soft::StdDoubleArray &value) const
 {
   bson_iter_t iter;
   bson_iter_t subiter;
@@ -357,7 +357,7 @@ bool Bson :: get(char const *key, soft::StdDoubleArray &value)
   return false;
 }
 
-bool Bson :: get(char const *key, soft::StdDoubleArray2D &value)
+bool Bson :: get(char const *key, soft::StdDoubleArray2D &value) const
 {
   bson_iter_t iter;
   bson_iter_t subiter;
@@ -382,7 +382,7 @@ bool Bson :: get(char const *key, soft::StdDoubleArray2D &value)
   return false;
 }
 
-Bson Bson :: getBson(char const *key)
+Bson Bson :: getBson(char const *key) const
 {
   bson_iter_t iter;
 
@@ -397,7 +397,7 @@ Bson Bson :: getBson(char const *key)
   return Bson();
 }
 
-bool Bson :: get(char const *key, soft::StdDoubleArray3D &value)
+bool Bson :: get(char const *key, soft::StdDoubleArray3D &value) const
 {
   bson_iter_t iter;
   bson_iter_t subiter;
@@ -429,7 +429,7 @@ bool Bson :: get(char const *key, soft::StdDoubleArray3D &value)
   return false;
 }
 
-bool Bson :: getInt64(char const * key, qint64 &value)
+bool Bson :: getInt64(char const * key, qint64 &value) const
 {
   bson_iter_t iter;
   if (bson_iter_init_find(&iter, bson.get(), key) &&
@@ -441,7 +441,7 @@ bool Bson :: getInt64(char const * key, qint64 &value)
   return false;
 }
 
-bool Bson :: getDouble(char const *key, double &value)
+bool Bson :: getDouble(char const *key, double &value) const
 {
   bson_iter_t iter;
   if (bson_iter_init_find(&iter, bson.get(), key) &&
@@ -453,7 +453,7 @@ bool Bson :: getDouble(char const *key, double &value)
   return false;
 }
 
-bool Bson :: getFloat(char const *key, float &value)
+bool Bson :: getFloat(char const *key, float &value) const
 {
   bson_iter_t iter;
   if (bson_iter_init_find(&iter, bson.get(), key) &&
