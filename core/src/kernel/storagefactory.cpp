@@ -11,8 +11,8 @@ SOFT_BEGIN_NAMESPACE
 class StorageFactory::Private
 {
   friend class StorageFactory;
-   typedef IStorageStrategy*(*createFunc)(const char*, const char*);
-  QMap<QString, createFunc> map;
+  using MapType = QMap<QString, StorageFactory::CreateFunc>;
+  MapType map;
 };
 
 StorageFactory :: StorageFactory()
@@ -24,7 +24,7 @@ StorageFactory :: ~StorageFactory()
    delete d;
 }
 
-bool StorageFactory :: registerStrategy(const char *name, IStorageStrategy*(*createFunc)(const char*, const char*))
+bool StorageFactory :: registerStrategy(const char *name, StorageFactory::CreateFunc createFunc)
 {
    d->map[name] = createFunc;
    return true;
@@ -32,12 +32,13 @@ bool StorageFactory :: registerStrategy(const char *name, IStorageStrategy*(*cre
 
 IStorageStrategy* StorageFactory :: create(const char *name, const char *uri, const char *options) const
 {
-  if (!d->map.contains(name)) {
+  auto it = d->map.find(name);
+  if(it == d->map.end()) {
     QTextStream(stderr) << "StorageFactory cannot create storage strategy: " << name << " " << uri << endl;
     return nullptr;
   }
   
-  IStorageStrategy*(*createFunc)(const char*, const char*) = d->map.value(name);
+  CreateFunc createFunc = *it;
   return (*createFunc)(uri, options);
 }
 
