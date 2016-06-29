@@ -304,6 +304,38 @@ bool Bson :: get(char const *key, soft::StdDoubleArray2D &value)
   return false;
 }
 
+bool Bson :: get(char const *key, soft::StdDoubleArray3D &value)
+{
+  bson_iter_t iter;
+  bson_iter_t subiter;
+  bson_iter_t subsubiter;
+  bson_iter_t subsubsubiter;
+  value.clear();
+  if (bson_iter_init_find(&iter, bson.get(), key) &&
+      BSON_ITER_HOLDS_ARRAY(&iter) &&
+      bson_iter_recurse(&iter, &subiter)) {
+    while (bson_iter_next(&subiter) &&
+	   BSON_ITER_HOLDS_ARRAY(&subiter) &&
+	   bson_iter_recurse(&subiter, &subsubiter)) {
+      StdDoubleArray2D inner;
+      while(bson_iter_next(&subsubiter) &&
+	   BSON_ITER_HOLDS_ARRAY(&subsubiter) &&
+	    bson_iter_recurse(&subsubiter, &subsubsubiter)) {
+	StdDoubleArray innerinner;
+	while (bson_iter_next(&subsubsubiter) &&
+	       BSON_ITER_HOLDS_DOUBLE(&subsubsubiter)) {
+	  auto v = bson_iter_value(&subsubsubiter);
+	  innerinner.push_back(v->value.v_double);      
+	}
+	inner.push_back(innerinner);
+      }
+      value.push_back(inner);
+    }
+    return true;
+  }
+  return false;
+}
+
 bool Bson :: getInt64(char const * key, qint64 &value)
 {
   bson_iter_t iter;

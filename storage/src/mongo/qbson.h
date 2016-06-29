@@ -49,6 +49,7 @@ public:
    bool get(char const *key, soft::StdIntArray &value);
    bool get(char const *key, soft::StdDoubleArray &value);
    bool get(char const *key, soft::StdDoubleArray2D &value);
+   bool get(char const *key, soft::StdDoubleArray3D &value);
    
    bool getInt32(const char *key, qint32 &value);
    bool getInt64(const char *key, qint64 &value);

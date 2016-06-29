@@ -247,3 +247,36 @@ TEST(QBsonTest, appendDoubleArray2D)
   bson.get("double_array2d", copy);
   ASSERT_EQ(copy.size(), ix.size());
 }
+
+TEST(QBsonTest, appendDoubleArray3D)
+{
+  using bson::Bson;
+  Bson bson;
+  
+  StdDoubleArray3D ix(3);
+  StdDoubleArray2D id(1);
+  id[0] = {1.0, 2.0, 3.0};
+  ix[0] = id;
+  bson.append("double_array3d", ix);
+  ASSERT_TRUE(bson.hasField("double_array3d"));
+}
+
+
+TEST(QBsonTest, getDoubleArray3D)
+{
+  using bson::Bson;
+  Bson bson;
+  
+  StdDoubleArray3D ix(3);
+  StdDoubleArray2D id(1);
+  id[0] = {1.0, 2.0, 3.0};
+  ix[0] = id;
+  bson.append("double_array3d", ix);
+  ASSERT_TRUE(bson.hasField("double_array3d"));
+
+  StdDoubleArray3D copy;
+  bson.get("double_array3d", copy);
+  ASSERT_EQ(copy, ix);
+}
+			    
+
