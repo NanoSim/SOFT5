@@ -7,8 +7,6 @@ set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.cjs)
 set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.hjs)
 
-message("softshell modules: ${softshell_MODULES_DIR}")
-message("template: ${C_SOURCE_TEMPLATE}")
 # Run a json entity through the soft-forge code generator to create
 # a header and source file
 function (add_forge entity output_src output_hdr)

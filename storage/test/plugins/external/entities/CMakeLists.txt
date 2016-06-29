@@ -7,7 +7,6 @@ set (SRC_LIST ${SRC_LIST})
 # Run a json entity through the soft-forge code generator to create
 # a header and source file
 function (add_forge entity output_src output_hdr)
-#  message("outp: ${entity} ${output_src} ${output_hdr}")
   add_custom_command(
     OUTPUT ${output_hdr}
     COMMAND soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}
