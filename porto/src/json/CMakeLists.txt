@@ -12,7 +12,7 @@ set(${PROJECT_NAME}_INCLUDE_DIRS
   ${PROJECT_SOURCE_DIR}
   CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
   
-include_directories (${porto-json_INCLUDE_DIRS}  ${porto-codegen-entities_INCLUDE_DIRS})
+include_directories (${PROJECT_NAME} ${porto-json_INCLUDE_DIRS}  ${porto-codegen-entities_INCLUDE_DIRS})
 
 set (LINK_LIBS Qt5::Core 
   ${softc_LIBS} 

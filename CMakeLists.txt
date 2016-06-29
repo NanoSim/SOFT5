@@ -119,9 +119,10 @@ set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
 # Core library
 add_subdirectory(core/src/kernel)
-if (WITH_TESTS)
-add_subdirectory(core/test/kernel)
-endif (WITH_TESTS)
+
+if (WITH_FOREIGN_C)
+  add_subdirectory(foreign/c/src/softc)
+endif (WITH_FOREIGN_C)
 
 # Storage
 if (WITH_STORAGE_HD5)
@@ -184,7 +185,6 @@ endif(WITH_WEB)
 
 # Foreign
 if (WITH_FOREIGN_C)
-  add_subdirectory(foreign/c/src/softc)
   if (WITH_TESTS)
     add_subdirectory(foreign/c/test/softc)
     add_subdirectory(foreign/c/test/storage)	
@@ -219,22 +219,26 @@ if (WITH_NUMERICS)
 endif (WITH_NUMERICS)
 
 if (WITH_PORTO)
-set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/entities)
-set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.cjs)
-set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.hjs)
+  set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/entities)
+  set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.cjs)
+  set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.hjs)
 
   add_subdirectory(porto/src/entities)
   add_subdirectory(porto/src/json) 
   add_subdirectory(porto/src/thirdParty/chemkinReader)
-  
+  add_subdirectory(porto/test/codegen)
+
  if (WITH_TESTS)
     add_subdirectory(porto/test/json)
     add_subdirectory(porto/test/thirdParty/chemkinReader)
-    add_subdirectory(porto/test/parscale)
-    add_subdirectory(porto/test/codegen)
-  endif (WITH_TESTS)
+    add_subdirectory(porto/test/parscale)  
+ endif (WITH_TESTS)
 
 endif (WITH_PORTO)
+
+if (WITH_TESTS)
+add_subdirectory(core/test/kernel)
+endif (WITH_TESTS)
 
 
 # Documentation

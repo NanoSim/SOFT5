@@ -39,6 +39,7 @@ foreach(JSON_SRC ${json-sources})
 endforeach(JSON_SRC ${json-sources})
 
 set_source_files_properties(${SRC_LIST} PROPERTIES GENERATED TRUE)
+message ("softc include dirs: ${softc_INCLUDE_DIRS}")
 include_directories(${soft-kernel_INCLUDE_DIRS} ${softc_INCLUDE_DIRS})
 set (LINK_LIBS ${LINK_LIBS}
   ${soft-kernel_LIBS}
