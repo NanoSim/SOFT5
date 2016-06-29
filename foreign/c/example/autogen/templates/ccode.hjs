@@ -63,6 +63,9 @@
 #define ENTITY_@{ENTITY}_H_DEF
 
 #include <stddef.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct _@{entity}_s @{entity}_s;
 typedef struct _@{entity}_allocatable_s @{entity}_allocatable_s;
@@ -85,6 +88,10 @@ void @{entity}_free(@{entity}_s *self);
 @{entity}_dimensions_s * const @{entity}_dims(@{entity}_s *self);
 @{entity}_allocatable_s * @{entity}_allocatables(@{entity}_s *self);
 @{declGetDataFunction.join('\n');}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ENTITY_@{ENTITY}_H_DEF */
 

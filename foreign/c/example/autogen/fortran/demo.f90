@@ -23,7 +23,7 @@ contains
 
     ! Setup entity 
     simple = TSimple(ctx%simple)
-
+    
     ! Multiply matrix A and vector x
     do j = 1, simple%dimensions%NJ
        tmp = 0.0

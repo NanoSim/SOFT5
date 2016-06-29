@@ -107,6 +107,8 @@
       default:
 	throw("Unsupported rank from stringtype");
       };
+    case 'StdBlob':
+        return "ByteArray";
     default:
       throw("Unimplemented" + entry.type);
       break;

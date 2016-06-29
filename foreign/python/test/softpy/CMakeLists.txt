@@ -1,7 +1,7 @@
 project(foreign-softpy-test C CXX)
 
 find_package(PythonLibs)
-message("PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
+#message("PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
 set(Python_ADDITIONAL_VERSIONS "${PYTHONLIBS_VERSION_STRING}")
 find_package(PythonInterp)
 
