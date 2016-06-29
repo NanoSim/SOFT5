@@ -63,11 +63,13 @@
 	/* erase previous */
 	this.mongocollection.remove({id: entity.id});
 	
+print("Mongo.write, entity: ", entity.id);
 	entity._id = entity.id;
 	var result = this.mongocollection.insert(entity);
 	if (isFunction(callback)) {
 	    return callback(result);
 	}
+print("Mongo.write, result: ", result);
 	return result;
     };
 
