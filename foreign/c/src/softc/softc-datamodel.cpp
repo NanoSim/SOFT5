@@ -3,6 +3,7 @@
 #include "softc-datamodel-private.hpp"
 #include "softc-string.h"
 #include "softc-string-private.hpp"
+#include "softc-bytearray-private.hpp"
 #include <cstring>
 #include <cstdlib>      // for malloc
 #include <string>
@@ -164,11 +165,10 @@ bool softc_datamodel_append_bool (softc_datamodel_t *model, const char *key, boo
   return false;
 }
 
-bool softc_datamodel_append_blob (softc_datamodel_t *model, const char *key, const unsigned char *value, size_t length)
+bool softc_datamodel_append_blob (softc_datamodel_t *model, const char *key, const softc_bytearray_s value)
 {
   if (model->ref) {
-    soft::StdBlob blob;
-    ptrToArray(blob, value, length);
+    soft::StdBlob blob(value->bytearray.begin(), value->bytearray.end());
     return model->ref->appendByteArray(key, blob);
   }
   return false;
@@ -437,14 +437,13 @@ bool softc_datamodel_get_bool (const softc_datamodel_t *model, const char *key, 
   return false;
 }
 
-bool softc_datamodel_get_blob (const softc_datamodel_t *model, const char *key, unsigned char **value, size_t *length)
+bool softc_datamodel_get_blob (const softc_datamodel_t *model, const char *key, softc_bytearray_s *value)
 {
   if (model->ref) {
     soft::StdBlob ret;
     auto isOk = model->ref->getByteArray(key, ret);
     if (isOk) {
-      arrayToPtr(value, ret);
-      *length = ret.size();
+      (*value)->bytearray =QByteArray((const char*)ret.data(), (int)ret.size());
     }
   }
   return false;

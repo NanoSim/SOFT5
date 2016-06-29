@@ -8,7 +8,7 @@
    END 
  
   ELEMENTS
-   H O C 
+   H O C
    END
    SPECIES
    CH4(S1) CH3(S1) H(S2) CH4

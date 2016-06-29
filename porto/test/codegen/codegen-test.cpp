@@ -48,7 +48,7 @@ TEST(codegen, storeSimple)
 TEST(coden, chemkinTest)
 {
   using namespace soft;
-  const std::string chemfile(SOURCE_DIR  "/test.inp");
+  const std::string chemfile(SOURCE_DIR  "/SurfaceChemkin.inp");
   const std::string thermfile(SOURCE_DIR "/thermo.dat");
   IO::ChemkinReader chemkinReader(chemfile, thermfile);
   chemkinReader.read();
@@ -89,6 +89,7 @@ TEST(coden, chemkinTest)
     chemkinReaction.A = arrhenius.A;
     chemkinReaction.b = arrhenius.n;
     chemkinReaction.Ea = arrhenius.E;
+    std::cout << chemkinReaction.A << std::endl;
 
     if (reaction.hasLOW()) {
       ASSERT_EQ(low.size(), 3);      

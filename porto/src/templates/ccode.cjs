@@ -112,6 +112,9 @@
 	    else
 	      getFunction += 'string';
 	    break;
+        case 'softc_bytearray_s':
+	    getFunction += 'blob';
+	    break;	
 	default:
 	    throw ("Unimplemented type: " + entry.type);
 	    getFunction += "undefined";
@@ -145,6 +148,9 @@
 	    else
 	      appendFunction += 'string';
             break;
+        case 'softc_bytearray_s':
+	    appendFunction += 'blob';
+	    break;	
 	default:
 	    appendFunction += "undefined";
 	};
