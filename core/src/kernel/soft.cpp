@@ -66,7 +66,7 @@ static bool registerPlugin(QString const &file)
     if (isOk) {
       auto pluginPtr = qobject_cast<IStrategyPlugin*>(loader->instance());
       if (pluginPtr) {
-	pluginPtr->registerStrategy();
+        pluginPtr->registerStrategy();
         return true;
       }
     }
