@@ -9,7 +9,7 @@ softc_bytearray_s softc_bytearray_create(const unsigned char *data, size_t len)
 
 const unsigned char *from_softc_bytearray(const softc_bytearray_s bytearray)
 {
-  return s->data();
+  return bytearray->data();
 }
 
 void softc_bytearray_destroy(softc_bytearray_s bytearray)

@@ -20,6 +20,11 @@ struct _softc_bytearray_s
     return *this;
   }
 
+  const unsigned char *data()
+  {
+    return (const unsigned char *)bytearray.constData();
+  }
+
   QByteArray bytearray;
 };
 
