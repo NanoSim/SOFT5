@@ -190,3 +190,8 @@ void sim_register_post_finalize(sim_application_t* application, SIM_fn_prototype
 {
   application->user_post_finalize = fn;
 }
+
+void sim_register_toolkit (sim_application_t *application, const char* filename)
+{
+  
+}

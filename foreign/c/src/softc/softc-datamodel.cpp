@@ -1,7 +1,12 @@
-#include <cstring>
 #include "softtypes.h"
 #include "softc-datamodel.h"
 #include "softc-datamodel-private.hpp"
+#include "softc-string.h"
+#include "softc-string-private.hpp"
+#include "softc-bytearray-private.hpp"
+#include <cstring>
+#include <cstdlib>      // for malloc
+#include <string>
 
 template <typename T>
 void arrayToPtr(T **dest, std::vector<T> const &source)
@@ -39,7 +44,7 @@ void ptrToArray(std::vector<T> &dest, const T *src, size_t length)
 }
 
 template <typename T>
-void ptrToArray(std::vector<std::vector<T>> &dest, const T **src, size_t i, size_t j)
+void ptrToArray(std::vector<std::vector<T>> &dest, const T* const* const& src, size_t i, size_t j)
 {
   dest.resize(j);
   for (size_t idx = 0; idx < j; ++idx) {
@@ -48,7 +53,7 @@ void ptrToArray(std::vector<std::vector<T>> &dest, const T **src, size_t i, size
 }
 
 template <typename T>
-void ptrToArray(std::vector<std::vector<std::vector<T> > > &dest, const T ***src, size_t i, size_t j, size_t k)
+void ptrToArray(std::vector<std::vector<std::vector<T> > > &dest, const T* const* const* src, size_t i, size_t j, size_t k)
 {
   dest.resize(k);
   for (size_t idx = 0; idx < k; ++idx) {
@@ -64,10 +69,10 @@ bool softc_datamodel_append_dimension    (softc_datamodel_t *model, const char *
   return false;
 }
 
-bool softc_datamodel_append_string (softc_datamodel_t *model, const char *key, const char *value)
+bool softc_datamodel_append_string (softc_datamodel_t *model, const char *key, const softc_string_s value)
 {
-  if (model->ref) {
-    return model->ref->appendString(key, value);    
+  if (model->ref && value) {
+    return model->ref->appendString(key, value->str);    
   }
   return false;
 }
@@ -160,22 +165,23 @@ bool softc_datamodel_append_bool (softc_datamodel_t *model, const char *key, boo
   return false;
 }
 
-bool softc_datamodel_append_blob (softc_datamodel_t *model, const char *key, const unsigned char *value, size_t length)
+bool softc_datamodel_append_blob (softc_datamodel_t *model, const char *key, const softc_bytearray_s value)
 {
   if (model->ref) {
-    soft::StdBlob blob;
-    ptrToArray(blob, value, length);
+    soft::StdBlob blob(value->bytearray.begin(), value->bytearray.end());
     return model->ref->appendByteArray(key, blob);
   }
   return false;
 }
 
-bool softc_datamodel_append_string_list (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements)
+bool softc_datamodel_append_string_list (softc_datamodel_t *model, const char *key, const softc_string_s *value, size_t n_elements)
 {
   if (model->ref) {
     soft::StdStringList stringList(n_elements);
     for (size_t i = 0; i < n_elements; ++i) {
-      stringList[i].assign(value[i]);      
+      if (value[i]) {     // Silently treat nullptr as empty strings (no error returned)
+        stringList[i] = value[i]->str;      
+      }
     }
     return model->ref->appendStringArray(key, stringList);
   }
@@ -192,12 +198,12 @@ bool softc_datamodel_append_array_int32  (softc_datamodel_t *model, const char *
   return false;
 }
 
-bool softc_datamodel_append_array_int32_2d  (softc_datamodel_t *model, const char *key, const int32_t **value, size_t size_i, size_t size_j)
+bool softc_datamodel_append_array_int32_2d  (softc_datamodel_t *model, const char *key, const int32_t* const* value, size_t size_i, size_t size_j)
 {
   return false;
 }
 
-bool softc_datamodel_append_array_int32_3d  (softc_datamodel_t *model, const char *key, const int32_t ***value, size_t size_i, size_t size_j, size_t size_k)
+bool softc_datamodel_append_array_int32_3d  (softc_datamodel_t *model, const char *key, const int32_t* const* const*value, size_t size_i, size_t size_j, size_t size_k)
 {
   return false;
 }
@@ -212,7 +218,7 @@ bool softc_datamodel_append_array_double (softc_datamodel_t *model, const char *
   return false;
 }
 
-bool softc_datamodel_append_array_double_2d (softc_datamodel_t *model, const char *key, const double **value, size_t size_i, size_t size_j)
+bool softc_datamodel_append_array_double_2d (softc_datamodel_t *model, const char *key, const double* const* value, size_t size_i, size_t size_j)
 {
   if (model->ref) {
     soft::StdDoubleArray2D valueVec2D;
@@ -222,7 +228,7 @@ bool softc_datamodel_append_array_double_2d (softc_datamodel_t *model, const cha
   return false;
 }
 
-bool softc_datamodel_append_array_double_3d (softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k)
+bool softc_datamodel_append_array_double_3d (softc_datamodel_t *model, const char *key, const double* const* const* value, size_t size_i, size_t size_j, size_t size_k)
 {
   if (model->ref) {
     soft::StdDoubleArray3D valueVec3D;
@@ -275,14 +281,12 @@ bool softc_datamodel_get_array_double_3d (const softc_datamodel_t *model, const 
   return false;
 }
 
-bool softc_datamodel_get_string (const softc_datamodel_t *model, const char *key, char **value)
+bool softc_datamodel_get_string (const softc_datamodel_t *model, const char *key, softc_string_s *value)
 {
-  if (model->ref) {
+  if (model->ref && value && *value) {
     soft::StdString str;
     if (model->ref->getString(key, str)) {
-      *value = (char *)malloc(str.size()+1);
-      std::copy(str.begin(), str.end(), *value);
-      (*value)[str.size()] = '\0';
+      *value = softc_string_create( str.c_str() );
       return true;
     }
   }
@@ -433,31 +437,28 @@ bool softc_datamodel_get_bool (const softc_datamodel_t *model, const char *key, 
   return false;
 }
 
-bool softc_datamodel_get_blob (const softc_datamodel_t *model, const char *key, unsigned char **value, size_t *length)
+bool softc_datamodel_get_blob (const softc_datamodel_t *model, const char *key, softc_bytearray_s *value)
 {
   if (model->ref) {
     soft::StdBlob ret;
     auto isOk = model->ref->getByteArray(key, ret);
     if (isOk) {
-      arrayToPtr(value, ret);
-      *length = ret.size();
+      (*value)->bytearray =QByteArray((const char*)ret.data(), (int)ret.size());
     }
   }
   return false;
 }
 
-bool softc_datamodel_get_string_list (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements)
+bool softc_datamodel_get_string_list (const softc_datamodel_t *model, const char *key, softc_string_s **value, size_t *n_elements)
 {
   if (model->ref) {
     soft::StdStringList source;
     auto isOk = model->ref->getStringArray(key, source);
     if (isOk) {
       auto siz = source.size();
-      *value = (char **)malloc(siz*sizeof(char *));
+      *value = (softc_string_s *)malloc(siz*sizeof(softc_string_s));
       for (size_t i = 0; i < siz; ++i) {
-	(*value)[i] = (char *)malloc((source[i].size() + 1)*sizeof(char));
-	memcpy((*value)[i], source[i].c_str(), source[i].size());
-	(*value)[i][source[i].size()] = '\0';	
+        (*value)[i] = softc_string_create( source[i].c_str() );
       }      
       *n_elements = source.size();
       return true;

@@ -2,6 +2,7 @@
 
 var driverInfo = {
     driver: 'mongodb',
+    uri: 'mongodb://localhost',
     database: 'demo',
     collection: 'guess'
 };

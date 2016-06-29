@@ -46,6 +46,7 @@ find_package (Qt5Concurrent REQUIRED)
 set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR    ON)
 set (CMAKE_AUTOMOC                ON)
+set (SOFT_ROOTDIR ${CMAKE_SOURCE_DIR})
 
 if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
   find_package(HDF5 REQUIRED)
@@ -62,8 +63,9 @@ set (SOFT_PATCH_VERSION 5)
 # Tests
 # Run them with "ctest -V" or "make check" to get verbose output.
 if (WITH_TESTS)
-  enable_testing()
+  enable_testing()  
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
+
 endif (WITH_TESTS)
 
 # Define content of PATH (Windows), LD_LIBRARY_PATH (Unix) and SOFTSTORAGE
@@ -136,7 +138,7 @@ if (WITH_STORAGE_MONGO)
   add_subdirectory(storage/src/mongo)
   add_subdirectory(storage/src/plugins/mongo)
   if (WITH_TESTS)
-    #add_subdirectory(storage/test/mongo)
+    add_subdirectory(storage/test/mongo)
     add_subdirectory(storage/test/plugins/mongo)
   endif(WITH_TESTS)
 endif (WITH_STORAGE_MONGO)
@@ -217,11 +219,21 @@ if (WITH_NUMERICS)
 endif (WITH_NUMERICS)
 
 if (WITH_PORTO)
+  set (ENTITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/entities)
+  set (C_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.cjs)
+  set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/porto/src/templates/ccode.hjs)
+
+  add_subdirectory(porto/src/entities)
+  add_subdirectory(porto/src/json) 
+  add_subdirectory(porto/src/thirdParty/chemkinReader)
   add_subdirectory(porto/test/codegen)
-  add_subdirectory(porto/src/json)
-  if (WITH_TESTS)
+
+ if (WITH_TESTS)
     add_subdirectory(porto/test/json)
-  endif (WITH_TESTS)
+    add_subdirectory(porto/test/thirdParty/chemkinReader)
+    add_subdirectory(porto/test/parscale)  
+ endif (WITH_TESTS)
+
 endif (WITH_PORTO)
 
 if (WITH_TESTS)

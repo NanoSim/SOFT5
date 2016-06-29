@@ -54,7 +54,66 @@
 		getFunction += "_" + entry.rank + "d";
 	    }
 	    break;
+	case 'int8_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'int8';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'uint8_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'uint8';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'int16_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'int16';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'uint16_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'uint16';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'int64_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'int64';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'uint64_t': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'uint64';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+	case 'bool': /* TODO: remove underscore and make general */
+	    if (entry.rank > 0) { getFunction += "array_"; }
+	    getFunction += 'bool';
+	    if (entry.rank > 1) {
+		getFunction += "_" + entry.rank + "d";
+	    }
+	    break;
+
+        case 'softc_string_s':
+            if (entry.rank > 2) 
+              throw("not implemented");
+            else if (entry.rank == 1)
+	      getFunction += 'string_list';
+	    else
+	      getFunction += 'string';
+	    break;
 	default:
+	    throw ("Unimplemented type: " + entry.type);
 	    getFunction += "undefined";
 	};
 	return getFunction;
@@ -78,6 +137,14 @@
 		appendFunction += "_" + entry.rank + "d";
 	    }
 	    break;
+        case 'softc_string_s':
+            if (entry.rank > 2) 
+              throw("not implemented");
+            else if (entry.rank == 1)
+	      appendFunction += 'string_list';
+	    else
+	      appendFunction += 'string';
+            break;
 	default:
 	    appendFunction += "undefined";
 	};
@@ -88,7 +155,11 @@
 	setList = [];
 	attributes.forEach(function (entry) {
 	    var str = dataModelAppendFunction(entry);
-	    str += " (data_model, \"" + entry.name + "\", (const " + entry.type + capi.dims_to_ptr(entry.rank) + ")self->props." + entry.name;
+	    if (entry.rank == 0) {
+	      str += " (data_model, \"" + entry.name + "\", self->props." + entry.name;
+	    } else {    
+	      str += " (data_model, \"" + entry.name + "\", (const " + entry.type + capi.dims_to_ptr(entry.rank) + ")self->props." + entry.name;
+	    }	      
 	    if (entry.rank > 0) {
 		str += ", " + entry.dims.join(",");
 	    }

@@ -22,6 +22,11 @@
 	    "unit": "s"
 	},
 	{
+	    "name": "sample_interval",
+	    "type": "double",
+	    "unit": "s"
+	},
+	{
 	    "name": "dt",
 	    "type": "double",
 	    "unit": "s"

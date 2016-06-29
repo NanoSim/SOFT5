@@ -8,6 +8,7 @@
 #include "softc-block.h"
 #include "softc-block-private.h"
 #include "softc-allocatable.h"
+#include "softc-string.h"
 
 struct _softc_allocatable_s
 {
@@ -253,6 +254,8 @@ typedef void(*free_fptr)(softc_allocatable_s*);
   IMPL_SOFTC_ALLOCATABLE_RESIZEV(type_t)		\
   IMPL_SOFTC_ALLOCATABLE_SHALLOW_COPY(type_t)
 
+IMPL_ALLOC(char);
+IMPL_ALLOC(softc_string_s);
 IMPL_ALLOC(double);
 IMPL_ALLOC(float);
 IMPL_ALLOC(int);
