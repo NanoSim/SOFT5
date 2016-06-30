@@ -107,6 +107,24 @@ void Collection :: addEntity(std::string const &label,
   addRelation(label, "id", uuid);
 }
 
+void Collection :: findEntity(std::string const &label,
+			      std::string &name,
+			      std::string &version,
+			      std::string &ns,
+			      std::string &uuid) const
+{
+  auto findFirstTriplet = [this, label](std::string const &rel) -> std::string {
+    auto t = this->d->tripletStore.findTriplets(label, rel);
+    if (t.size() > 0) return t.front();
+    return std::string();
+  };
+  
+  name = findFirstTriplet("name");
+  version = findFirstTriplet("version");
+  ns = findFirstTriplet("namespace");
+  uuid = findFirstTriplet("id");
+}
+
 // Attaches the entity to this collection so that it is loaded and stored
 // with the collection.
 void Collection :: attachEntity(std::string const &label, IEntity *entity) {

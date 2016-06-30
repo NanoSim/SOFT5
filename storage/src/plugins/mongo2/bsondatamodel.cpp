@@ -14,11 +14,23 @@ SOFT_BEGIN_NAMESPACE
 #define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
 
 struct BsonDataModel :: Private
-{
+{  
   using DataModelMap = QMap<QString, IDataModel *>;
 
   DataModelMap dataModelMap;
 };
+
+StdStringList BsonDataModel :: getModelLabels() const
+{
+  StdStringList ret(d->dataModelMap.size());
+  auto keys = d->dataModelMap.keys();
+  std::transform(keys.begin(), keys.end(), ret.begin(),
+		 [](QString &key) -> std::string {
+		   return key.toStdString();
+		 });
+  
+  return ret;
+}
 
 BsonDataModel :: BsonDataModel()
   : IDataModel()

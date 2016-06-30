@@ -94,7 +94,11 @@ void MongoStrategy :: store (IDataModel const *model)
   metaObj.append("properties", propObj);
   metaObj.append("dimensions", dimsObj);
 
-  mongoc_collection_insert(d->collection, MONGOC_INSERT_NONE, metaObj.bsonPtr().get(), 0, &error);
+  mongoc_collection_insert(d->collection, MONGOC_INSERT_NONE, metaObj.bsonPtr().get(), 0, &error);  
+  for (auto subLabel : bsonModel->getModelLabels()) {
+    auto subDataModel = bsonModel->getModel(subLabel.c_str());
+    if (nullptr != subDataModel) this->store(subDataModel);
+  }
   if (error.code) throw std::runtime_error(error.message);
 }
 
@@ -105,22 +109,28 @@ void MongoStrategy :: startRetrieve (IDataModel *model) const
   auto dimsObj = bsonModel->dimsObject;
   const bson_t *doc;
 
-  auto query = BCON_NEW("$query", "{", "uuid", BCON_UTF8(model->id().c_str()), "}");
-  auto cursor = mongoc_collection_find (d->collection, MONGOC_QUERY_NONE, 0, 0, 0, query, NULL, NULL);
-                
-  if (mongoc_cursor_more(cursor) && mongoc_cursor_next(cursor, &doc)) {
-    bson::Bson metaObj(bson_copy(doc));
-    bsonModel->propertyObject = metaObj.getBson("properties");
-    bsonModel->dimsObject = metaObj.getBson("dimensions");
-    QTextStream(stdout) << metaObj.asString();
-  } else {
-    // TODO: Implement proper error handling
-    QTextStream(stderr) << "Couldn't find entity with id " << QString::fromStdString(model->id()) << " in selected database" << endl;
+  {
+    auto query = BCON_NEW("$query", "{", "uuid", BCON_UTF8(model->id().c_str()), "}");
+    auto cursor = mongoc_collection_find (d->collection, MONGOC_QUERY_NONE, 0, 0, 0, query, NULL, NULL);
+    
+    if (mongoc_cursor_more(cursor) && mongoc_cursor_next(cursor, &doc)) {
+      bson::Bson metaObj(bson_copy(doc));
+      bsonModel->propertyObject = metaObj.getBson("properties");
+      bsonModel->dimsObject = metaObj.getBson("dimensions");
+      QTextStream(stdout) << metaObj.asString();
+    } else {
+      // TODO: Implement proper error handling
+      QTextStream(stderr) << "Couldn't find entity with id " << QString::fromStdString(model->id()) << " in selected database" << endl;
+    }
+    
+    mongoc_cursor_destroy(cursor);
+    bson_destroy(query);
   }
 
-  mongoc_cursor_destroy(cursor);
-  bson_destroy(query);
-  bson::Bson metaObj;
+  for (auto subLabel : bsonModel->getModelLabels()) {
+    auto subDataModel = bsonModel->getModel(subLabel.c_str());
+    if (nullptr != subDataModel) this->startRetrieve(subDataModel);
+  }
 }
 
 void MongoStrategy :: endRetrieve (IDataModel *model) const

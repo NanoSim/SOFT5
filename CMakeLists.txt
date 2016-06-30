@@ -229,7 +229,9 @@ if (WITH_PORTO)
   add_subdirectory(porto/src/thirdParty/chemkinReader)
   add_subdirectory(porto/test/codegen)
   add_subdirectory(porto/src/json) 
-
+  add_subdirectory(porto/src/dft-prepare)
+  add_subdirectory(porto/src/remark-wrapper)
+  
  if (WITH_TESTS)
     add_subdirectory(porto/test/json)
     add_subdirectory(porto/test/thirdParty/chemkinReader)

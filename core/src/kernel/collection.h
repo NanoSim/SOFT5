@@ -36,8 +36,14 @@ public:
                  std::string const &version,
                  std::string const &ns,
                  std::string const &uuid);
-  void attachEntity(std::string const &label, IEntity *entity);
 
+  void findEntity(std::string const &label,
+		  std::string &name,
+                 std::string &version,
+                 std::string &ns,
+                 std::string &uuid) const;
+  void attachEntity(std::string const &label, IEntity *entity);
+  
 
   void addDim(std::string const &label,
               std::string const &description = std::string());

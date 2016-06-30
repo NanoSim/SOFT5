@@ -205,15 +205,30 @@ TEST(codegen, collectionWithFileAndReference)
   auto buffer = data.readAll();
   file.data = toStdBlob(buffer);
   data.close();
-
   
   soft::Collection collection;
   collection.setName("thermo");
   collection.setVersion("1.0");
-  collection.registerEntity("file1", &file);
-  collection.registerEntity("ref", &reference);
+  collection.attachEntity("file1", &file);
+  collection.attachEntity("ref", &reference);
+  collection.connect("file1", "has-info", "ref");
 
-  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=collectiontest");
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=collectiontest3");
   storage.save(&collection);
+
+  soft::Collection copyCollection(collection.id());
+  soft::Reference refCopy;
+  copyCollection.attachEntity("myref", &refCopy);
+  storage.load(&copyCollection);
+  std::string name, version, ns, id;
+  copyCollection.findEntity("ref", name, version, ns, id);
+  soft::Reference refCopy2(id);
+  storage.load(&refCopy2);
+  ASSERT_EQ(refCopy.sha1, reference.sha1);
+  ASSERT_EQ(refCopy2.sha1, reference.sha1);
+  ASSERT_EQ(refCopy.uri, reference.uri);
+  ASSERT_EQ(refCopy2.uri, reference.uri);
+  ASSERT_EQ(refCopy.created, reference.created);
+  ASSERT_EQ(refCopy2.created, reference.created);
 
 }
