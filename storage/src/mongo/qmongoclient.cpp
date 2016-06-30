@@ -192,7 +192,8 @@ void my_handler (mongoc_log_level_t  log_level,
 
 void Client :: initialize()
 {
-  mongoc_log_set_handler(my_handler, nullptr);
+  //  mongoc_log_set_handler(my_handler, nullptr);
+  mongoc_log_set_handler(NULL, NULL);
   mongoc_init();
 }
 
