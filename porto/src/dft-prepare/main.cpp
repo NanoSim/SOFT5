@@ -36,7 +36,7 @@ int main(int argc, char **argv)
   
   QFileInfo dftPathInfo(dftPath);
   soft::Reference reference;
-  reference.uri          = dftPathInfo.absolutePath().toStdString();
+  reference.uri          = dftPathInfo.absoluteFilePath().toStdString();
   reference.created      = dftPathInfo.created().toString("dd-mm-yyyy").toStdString();
   reference.owner        = dftPathInfo.owner().toStdString();
   reference.lastModified = dftPathInfo.lastModified().toString("dd-mm-yyyy").toStdString();  
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   file.filename          = dftBoundInfo.fileName().toStdString();
   file.suffix            = dftBoundInfo.suffix().toStdString();
   file.size              = dftBoundInfo.size();
-  file.data              = dataFromFile(dftBoundInfo.fileName());
+  file.data              = dataFromFile(dftBoundInfo.absoluteFilePath());
 
   soft::Collection collection;
   collection.setName("DFTPrep");
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   collection.attachEntity("dftPath", &reference);
   collection.attachEntity("dftBoundayFile", &file);
   
-  soft::Storage storage("mongo2", "http://localhost", "db=porto;coll=demo");
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
   storage.save(&collection);
 
   return 0;
