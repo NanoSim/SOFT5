@@ -1,7 +1,6 @@
 #include <stdexcept>
 #include <QtCore>
 #include <mongoc.h>
-#include <mongoc-collection.h>
 #include "bsondatamodel.h"
 #include "mongostrategy.h"
 
