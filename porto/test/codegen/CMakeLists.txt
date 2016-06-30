@@ -17,11 +17,11 @@ if(GTEST_FOUND)
   target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} ${soft-kernel_LIBS} ${porto-codegen-entities_LIBS} ${porto-entities_LIBS} ${porto-chemkinreader_LIBS}) 
 
   add_test(${PROJECT_NAME}
-    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${soft-storage-plugins-mongo_BINARY_DIR})
+    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-mongo2_BINARY_DIR}")
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${porto-codegen-entities_BINARY_DIR}:${porto-chemkinreader_BINARY_DIR}:${soft-storage-plugins-mongo2}")
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${porto-codegen-entities_BINARY_DIR}:${porto-chemkinreader_BINARY_DIR}:${soft-storage-plugins-mongo2_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
       ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")

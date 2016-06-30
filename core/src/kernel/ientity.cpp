@@ -27,7 +27,7 @@ IEntity :: IEntity(std::string const &id)
 {}
 
 IEntity :: IEntity(IEntity const *other)
-  : d(new IEntity::Private(other->id()))
+  : d(other != nullptr ? new IEntity::Private(other->id()) : new IEntity::Private())
 {}
 
 IEntity :: ~IEntity()

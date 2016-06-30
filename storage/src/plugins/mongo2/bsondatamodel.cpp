@@ -1,4 +1,7 @@
 #include <stdexcept>
+#include <cstring>
+#include <algorithm>
+#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -124,8 +127,10 @@ bool BsonDataModel :: appendDoubleArray3D (const char *key, StdDoubleArray3D con
 
 bool BsonDataModel :: appendByteArray (const char *key, StdBlob const &value) 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  qDebug() << "input size: == " << value.size();
+  QByteArray buffer((const char*)value.data(), value.size());
+  qDebug() << "buffer size: ==" << buffer.size();
+  return propertyObject.appendBinary(key, buffer);
 }
 
 bool BsonDataModel :: appendStringArray (const char *key, StdStringList const &value) 
@@ -234,18 +239,23 @@ bool BsonDataModel :: getDoubleArray3D (const char *key, StdDoubleArray3D &value
   return propertyObject.get(key, value);
 }
 
+static std::vector<unsigned char> toUCharVector(QByteArray const &bytes)
+{
+  std::vector<unsigned char> cp(bytes.size());
+  std::memcpy(cp.data(), bytes.constData(), bytes.size());
+  return cp;
+}
+
 bool BsonDataModel :: getByteArray (const char *key, StdBlob &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
-  /*
   QByteArray buffer;
-  auto ret = propertyObject.getBinary(key, value);
-  if (!ret) return false;
-
-  value.resize(buffer.size());
-  std::copy(buffer.constBegin(), buffer.constEnd(), value.begin());
-  */
+  auto ret = propertyObject.getBinary(key, buffer);
+  if (ret) {
+    qDebug() << "output size: == " << buffer.size();
+    value = toUCharVector(buffer);
+    qDebug() << "outputvec size: == " << value.size();
+  }
+  return ret;
 }
 
 bool BsonDataModel :: getStringArray (const char *key, StdStringList &value) const 

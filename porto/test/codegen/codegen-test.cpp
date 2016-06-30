@@ -8,6 +8,7 @@
 #include "physics.hxx"
 #include "chemkin_reaction.hxx"
 #include "reference.hxx"
+#include "file.hxx"
 
 TEST(codegen, dummy)
 {
@@ -116,14 +117,64 @@ TEST(codegen, chemkinTest)
   }      
 }
 
+static soft::StdBlob toStdBlob(QByteArray const &bytes)
+{
+  soft::StdBlob blob(bytes.size());
+  std::memcpy(blob.data(), bytes.constData(), bytes.size());
+  return blob;
+}
+
 TEST(codegen, reference)
 {
   soft::Reference reference;
-  QFileInfo info ("/tmp/thermo.dat");
+  QFileInfo info ("/tmp/thermo-edited.dat");
   reference.uri = "file://" + info.absoluteFilePath().toStdString();
   reference.created = info.created().toString("dd-mm-yyyy").toStdString();
   reference.owner = info.owner().toStdString();
   reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();  
-  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=coll");
+
+  QFile file(info.absoluteFilePath());
+  if (!file.open(QIODevice::ReadOnly)) {
+    FAIL();
+  }
+  QByteArray buffer = file.readAll();
+  QCryptographicHash hash(QCryptographicHash::Sha1);
+  hash.addData(buffer.data(), buffer.length()); 
+  reference.sha1 = toStdBlob(hash.result());
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=reference");
   storage.save(&reference);
 }
+
+TEST(codegen, file)
+{
+  soft::File file;
+  QFileInfo info ("/tmp/thermo-edited.dat");
+  QFile data(info.absoluteFilePath());
+  if (!data.open(QIODevice::ReadOnly)) {
+    FAIL();
+  }
+  file.filename = info.fileName().toStdString();
+  file.suffix = info.suffix().toStdString();
+  file.size = info.size();
+  auto buffer = data.readAll();
+  file.data = toStdBlob(buffer);
+  
+  data.close();
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=filetest");
+  storage.save(&file);
+
+  soft::File filecopy(file.id());
+  storage.load(&filecopy);
+
+  ASSERT_TRUE(filecopy.filename == file.filename);
+  ASSERT_TRUE(filecopy.suffix == file.suffix);
+  QTextStream(stdout) << filecopy.data.size() << " -> " << file.data.size() << endl;
+  ASSERT_TRUE(filecopy.data.size() == file.data.size());
+  QFile dataCopy(info.absoluteFilePath() + ".copy");
+  if (!dataCopy.open(QIODevice::WriteOnly |QIODevice::Truncate)) {
+    FAIL();
+  }
+
+  dataCopy.write((const char*)filecopy.data.data(), (quint64)filecopy.data.size());
+}
+
