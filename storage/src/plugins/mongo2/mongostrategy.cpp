@@ -109,10 +109,14 @@ void MongoStrategy :: startRetrieve (IDataModel *model) const
   auto query = BCON_NEW("$query", "{", "uuid", BCON_UTF8(model->id().c_str()), "}");
   auto cursor = mongoc_collection_find (d->collection, MONGOC_QUERY_NONE, 0, 0, 0, query, NULL, NULL);
                 
-  while (mongoc_cursor_more(cursor) && mongoc_cursor_next(cursor, &doc)) {
-    auto str = bson_as_json(doc, NULL);
-    std::cout << str << std::endl;
-    bson_free(str);
+  if (mongoc_cursor_more(cursor) && mongoc_cursor_next(cursor, &doc)) {
+    bson::Bson metaObj(bson_copy(doc));
+    bsonModel->propertyObject = metaObj.getBson("properties");
+    bsonModel->dimsObject = metaObj.getBson("dimensions");
+    QTextStream(stdout) << metaObj.asString();
+  } else {
+    // TODO: Implement proper error handling
+    QTextStream(stderr) << "Couldn't find entity with id " << QString::fromStdString(model->id()) << " in selected database" << endl;
   }
 
   mongoc_cursor_destroy(cursor);
