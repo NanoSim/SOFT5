@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <Soft>
 #include <collection.h>
+#include <ientity.h>
 #include <chemkinReader.h>
 #include "simple.hxx"
 #include "financial.hxx"
@@ -124,6 +125,17 @@ static soft::StdBlob toStdBlob(QByteArray const &bytes)
   return blob;
 }
 
+static QByteArray sha1(QString const &filename) {
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly)) {
+    return QByteArray();
+  }
+  QByteArray buffer = file.readAll();
+  QCryptographicHash hash(QCryptographicHash::Sha1);
+  hash.addData(buffer.data(), buffer.length()); 
+  return hash.result();
+}
+
 TEST(codegen, reference)
 {
   soft::Reference reference;
@@ -132,15 +144,8 @@ TEST(codegen, reference)
   reference.created = info.created().toString("dd-mm-yyyy").toStdString();
   reference.owner = info.owner().toStdString();
   reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();  
-
-  QFile file(info.absoluteFilePath());
-  if (!file.open(QIODevice::ReadOnly)) {
-    FAIL();
-  }
-  QByteArray buffer = file.readAll();
-  QCryptographicHash hash(QCryptographicHash::Sha1);
-  hash.addData(buffer.data(), buffer.length()); 
-  reference.sha1 = toStdBlob(hash.result());
+  reference.sha1 = toStdBlob(sha1(info.absoluteFilePath()));
+  
   soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=reference");
   storage.save(&reference);
 }
@@ -178,3 +183,37 @@ TEST(codegen, file)
   dataCopy.write((const char*)filecopy.data.data(), (quint64)filecopy.data.size());
 }
 
+TEST(codegen, collectionWithFileAndReference)
+{
+  soft::File file;
+  soft::Reference reference;
+
+  QFileInfo info ("/tmp/thermo-edited.dat");
+  QFile data(info.absoluteFilePath());
+  if (!data.open(QIODevice::ReadOnly)) {
+    FAIL();
+  }
+  reference.uri = "file://" + info.absoluteFilePath().toStdString();
+  reference.created = info.created().toString("dd-mm-yyyy").toStdString();
+  reference.owner = info.owner().toStdString();
+  reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();  
+  reference.sha1 = toStdBlob(sha1(info.absoluteFilePath()));
+ 
+  file.filename = info.fileName().toStdString();
+  file.suffix = info.suffix().toStdString();
+  file.size = info.size();
+  auto buffer = data.readAll();
+  file.data = toStdBlob(buffer);
+  data.close();
+
+  
+  soft::Collection collection;
+  collection.setName("thermo");
+  collection.setVersion("1.0");
+  collection.registerEntity("file1", &file);
+  collection.registerEntity("ref", &reference);
+
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=collectiontest");
+  storage.save(&collection);
+
+}
