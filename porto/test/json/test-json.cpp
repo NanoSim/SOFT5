@@ -3,8 +3,8 @@
 #include <gtest/gtest.h>
 #include <json.h>
 #include <collection.h>
-#include "financial.h"
-#include "physics.h"
+#include "financial.hxx"
+#include "physics.hxx"
 #include "json/jsonmodel.h"
 #include "softc/softc-datamodel-private.hpp"
 

@@ -12,7 +12,7 @@ TEST (MongoPluginTest2, checkRegistered)
 
 TEST (MongoPluginTest2, storeData)
 {
-  auto storage = new soft::Storage("mongo2", "mongodb://localhost", "db=portotest;coll=coll");
+  auto storage = new soft::Storage("mongo2", "mongodb://localhost", "db=plugintest;coll=coll");
   ASSERT_TRUE(nullptr != storage);
 
   soft::Chemkin_reaction reaction(0, 0, 0, 0, 0);

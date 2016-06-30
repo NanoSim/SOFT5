@@ -28,7 +28,7 @@ FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.json)
 foreach(JSON_SRC ${json-sources})
 #  message("${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}")
   string(REGEX REPLACE "\.json$" ".cpp" GEN_SRC ${JSON_SRC})
-  string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
+  string(REGEX REPLACE "\.json$" ".hxx" GEN_HDR ${JSON_SRC})
 #  message("${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC} - ${GEN_SRC}")		
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
     ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}

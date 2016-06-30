@@ -63,6 +63,8 @@
 #define ENTITY_@{ENTITY}_H_DEF
 
 #include <stddef.h>
+#include <softc/softc-string.h>
+#include <softc/softc-bytearray.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1,11 +1,13 @@
+#include <QtCore>
 #include <gtest/gtest.h>
 #include <Soft>
 #include <collection.h>
 #include <chemkinReader.h>
-#include "simple.h"
-#include "financial.h"
-#include "physics.h"
-#include "chemkin_reaction.h"
+#include "simple.hxx"
+#include "financial.hxx"
+#include "physics.hxx"
+#include "chemkin_reaction.hxx"
+#include "reference.hxx"
 
 TEST(codegen, dummy)
 {
@@ -45,7 +47,7 @@ TEST(codegen, storeSimple)
   storage.save(&simple);
 }
 
-TEST(coden, chemkinTest)
+TEST(codegen, chemkinTest)
 {
   using namespace soft;
   const std::string chemfile(SOURCE_DIR  "/SurfaceChemkin.inp");
@@ -62,6 +64,8 @@ TEST(coden, chemkinTest)
   StdUInt ntroe = 0;
   StdUInt nenhancement_factors = 0;
   StdUInt nplog = 0;
+
+  auto storage = new soft::Storage("mongo2", "mongodb://localhost", "db=portotest;coll=coll");
   
   int ridx = 0;
   for (auto reaction: reactions) {
@@ -107,5 +111,19 @@ TEST(coden, chemkinTest)
     ASSERT_EQ(chemkinReaction.b, arrhenius.n);
     ASSERT_EQ(chemkinReaction.Ea, arrhenius.E);
     ridx++;
+
+    storage->save(&chemkinReaction);
   }      
+}
+
+TEST(codegen, reference)
+{
+  soft::Reference reference;
+  QFileInfo info ("/tmp/thermo.dat");
+  reference.uri = "file://" + info.absoluteFilePath().toStdString();
+  reference.created = info.created().toString("dd-mm-yyyy").toStdString();
+  reference.owner = info.owner().toStdString();
+  reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();  
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=coll");
+  storage.save(&reference);
 }

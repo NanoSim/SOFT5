@@ -58,7 +58,7 @@ SOFT_BEGIN_NAMESPACE
 class @{Entity} : public IEntity
 {
  public:
-  SOFT_ENTITY_METADATA(SOFT_META_STRING(@{Entity}), SOFT_META_STRING(@soft.model.namespace), SOFT_META_STRING(@soft.model.version))
+  SOFT_ENTITY_METADATA("@{Entity}", "@soft.model.namespace", "@soft.model.version")
     @{createArgs.length == 1 ? "explicit " : ""}@{Entity} (@{createArgs.join(", ")});
   explicit @{Entity}(std::string const &);
   explicit @{Entity}(IEntity const *);
