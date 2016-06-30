@@ -1,9 +1,13 @@
+#include <stdexcept>
 #include <QtCore>
-
+#include <mongoc.h>
+#include <mongoc-collection.h>
 #include "bsondatamodel.h"
 #include "mongostrategy.h"
 
 SOFT_BEGIN_NAMESPACE
+
+#define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
 
 const char *MongoStrategy::staticMetaType = "http://sintef.no/soft/TR/storage-strategy#mongo:0.2-SNAPSHOT-1";
 
@@ -95,18 +99,25 @@ void MongoStrategy :: store (IDataModel const *model)
   if (error.code) throw std::runtime_error(error.message);
 }
 
-
-void MongoStrategy :: retrieve (IDataModel *model) const
+void MongoStrategy :: startRetrieve (IDataModel *model) const
 {
   auto bsonModel = dynamic_cast<BsonDataModel*>(model);
   auto propObj = bsonModel->propertyObject;
   auto dimsObj = bsonModel->dimsObject;
-  
-}
+  const bson_t *doc;
 
-void MongoStrategy :: startRetrieve (IDataModel *model) const
-{
-  auto bsonModel = dynamic_cast<BsonDataModel*>(model);
+  auto query = BCON_NEW("$query", "{", "uuid", BCON_UTF8(model->id().c_str()), "}");
+  auto cursor = mongoc_collection_find (d->collection, MONGOC_QUERY_NONE, 0, 0, 0, query, NULL, NULL);
+                
+  while (mongoc_cursor_more(cursor) && mongoc_cursor_next(cursor, &doc)) {
+    auto str = bson_as_json(doc, NULL);
+    std::cout << str << std::endl;
+    bson_free(str);
+  }
+
+  mongoc_cursor_destroy(cursor);
+  bson_destroy(query);
+  bson::Bson metaObj;
 }
 
 void MongoStrategy :: endRetrieve (IDataModel *model) const

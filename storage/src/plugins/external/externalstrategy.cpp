@@ -124,7 +124,10 @@ void ExternalStrategy::store (IDataModel const *model)
   fn(&datamodel, qPrintable(d->uri), qPrintable(d->options));
 }
 
-void ExternalStrategy::retrieve (IDataModel *model) const
+void ExternalStrategy::endRetrieve (IDataModel *model) const
+{}
+
+void ExternalStrategy::startRetrieve (IDataModel *model) const
 {
   typedef int(*LoadPrototype)(struct _softc_datamodel_t*, const char*, const char*);
   ExternalModel *extModel = dynamic_cast<ExternalModel*>(model);

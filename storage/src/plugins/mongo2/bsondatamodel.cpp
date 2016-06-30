@@ -1,3 +1,6 @@
+#include <stdexcept>
+#include <QMap>
+#include <QString>
 #include <QStringList>
 #include <QVector>
 #include <QList>
@@ -7,8 +10,16 @@ SOFT_BEGIN_NAMESPACE
 
 #define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
 
+struct BsonDataModel :: Private
+{
+  using DataModelMap = QMap<QString, IDataModel *>;
+
+  DataModelMap dataModelMap;
+};
+
 BsonDataModel :: BsonDataModel()
   : IDataModel()
+  , d (new BsonDataModel :: Private())
 {}
 
 BsonDataModel :: ~BsonDataModel() 
@@ -239,8 +250,7 @@ bool BsonDataModel :: getByteArray (const char *key, StdBlob &value) const
 
 bool BsonDataModel :: getStringArray (const char *key, StdStringList &value) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  return propertyObject.get(key, value);
 }
 
 bool BsonDataModel :: getArray (const char *key, IDataModel * value) const 
@@ -249,15 +259,22 @@ bool BsonDataModel :: getArray (const char *key, IDataModel * value) const
   return false;
 }
 
-IDataModel * BsonDataModel :: getModel (const char * model) const 
+IDataModel * BsonDataModel :: getModel (const char *k) const 
 {
-  NOT_IMPLEMENTED;
-  return false;
+  auto key = QString::fromLocal8Bit(k);
+  if (d->dataModelMap.contains(key)) {
+    return d->dataModelMap.value(key);
+  }
+  return nullptr;
 }
 
-bool BsonDataModel :: appendModel (const char *key, IDataModel *model) 
-{
-  NOT_IMPLEMENTED;
+bool BsonDataModel :: appendModel (const char *k, IDataModel *model) 
+{  
+  auto key = QString::fromLocal8Bit(k);
+  if (!d->dataModelMap.contains(key)) {
+    d->dataModelMap.insert(key, model);
+    return true;
+  }
   return false;
 } 
 

@@ -62,6 +62,10 @@ public:
 
   bson::Bson propertyObject;
   bson::Bson dimsObject;
+
+private:
+  struct Private;
+  std::unique_ptr<Private> d;
 };
 
 SOFT_END_NAMESPACE

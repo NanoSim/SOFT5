@@ -16,11 +16,6 @@ void softc_storage_strategy_store(softc_storage_strategy_t *s, const softc_datam
   softc_storage_strategy_private_store(s, m);
 }
 
-void softc_storage_strategy_retrieve(softc_storage_strategy_t *s, softc_datamodel_t *m)
-{
-  softc_storage_strategy_private_retrieve(s, m);
-}
-
 void softc_storage_strategy_start_retrieve(softc_storage_strategy_t *s, softc_datamodel_t *m)
 {
   softc_storage_strategy_private_start_retrieve(s, m);

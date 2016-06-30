@@ -16,10 +16,11 @@ public:
   ExternalStrategy& operator= (ExternalStrategy const&) =delete;
   virtual ~ExternalStrategy();
 
-  IDataModel      *dataModel   () const   override;
-  void             store       (IDataModel const *) override;
-  void             retrieve    (IDataModel *) const override;
-  
+  IDataModel      *dataModel     () const override;
+  void             store         (IDataModel const *) override;
+  void             startRetrieve (IDataModel *) const override;
+  void             endRetrieve   (IDataModel *) const override;
+ 
   const char *metaType() const override;
   static IStorageStrategy* create(char const *uri, char const *opts);
   static const char *staticMetaType;

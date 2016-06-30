@@ -306,6 +306,15 @@ bool Bson :: get(const char *key, soft::StdString &value) const
   return ret;
 }
 
+bool Bson :: get(char const *key, soft::StdStringList &value) const
+{
+  QStringList v;
+  auto ret = getStringList(key, v);
+  value = fromQStringList(v);
+  return ret;
+}
+
+
 bool Bson :: getString(char const * key, QString &value) const
 {
   bson_iter_t iter;

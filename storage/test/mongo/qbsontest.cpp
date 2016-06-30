@@ -316,3 +316,34 @@ TEST(QBsonTest, appendInt)
   bson::Bson test;
   test.append("i", 20303);
 }
+
+TEST(QBsonTest, appendAndGet)
+{
+  StdInt i, i_copy;
+  StdDouble d, d_copy;
+  StdString str, str_copy;
+  StdStringList strList, strList_copy;
+  StdIntArray intArray, intArray_copy;
+  StdDoubleArray dblArray, dblArray_copy;
+  StdDoubleArray dblArray2D, dblArray2D_copy;
+  StdDoubleArray dblArray3D, dblArray3D_copy;
+  bson::Bson bson;
+  bson.append("i", i);
+  bson.append("d", d);
+  bson.append("str", str);
+  bson.append("strList", strList);
+  bson.append("intArray", intArray);
+  bson.append("dblArray", dblArray);
+  bson.append("dblArray2D", dblArray2D);
+  bson.append("dblArray2D", dblArray3D);
+
+  bson.get("i", i_copy);
+  bson.get("d", d_copy);
+  bson.get("str", str_copy);
+  bson.get("strList", strList_copy);
+  bson.get("intArray", intArray_copy);
+  bson.get("dblArray", dblArray_copy);
+  bson.get("dblArray2D", dblArray2D_copy);
+  bson.get("dblArray2D", dblArray3D_copy);
+
+}

@@ -19,7 +19,6 @@ public:
 
   IDataModel* dataModel() const   override;
   void store (IDataModel const *) override;
-  void retrieve (IDataModel *) const override;
   void startRetrieve (IDataModel *model) const;
   void endRetrieve (IDataModel *model) const;
 
