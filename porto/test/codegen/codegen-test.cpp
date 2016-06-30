@@ -230,5 +230,4 @@ TEST(codegen, collectionWithFileAndReference)
   ASSERT_EQ(refCopy2.uri, reference.uri);
   ASSERT_EQ(refCopy.created, reference.created);
   ASSERT_EQ(refCopy2.created, reference.created);
-
 }

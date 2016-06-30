@@ -1,6 +1,7 @@
 #include <Soft>
 #include <QtCore>
 #include <cstring>
+#include <cstdio>
 #include <reference.hxx>
 #include <file.hxx>
 
@@ -55,8 +56,12 @@ int main(int argc, char **argv)
   collection.attachEntity("dftPath", &reference);
   collection.attachEntity("dftBoundayFile", &file);
   
+  freopen("mongo.log", "w", stdout);
   soft::Storage storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
   storage.save(&collection);
 
+  fclose(stdout);
+  stdout = fdopen(1, "w");
+  QTextStream(stdout) << collection.id().c_str() << endl;
   return 0;
 }

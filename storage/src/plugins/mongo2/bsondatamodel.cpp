@@ -1,7 +1,6 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
-#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -139,9 +138,7 @@ bool BsonDataModel :: appendDoubleArray3D (const char *key, StdDoubleArray3D con
 
 bool BsonDataModel :: appendByteArray (const char *key, StdBlob const &value) 
 {
-  qDebug() << "input size: == " << value.size();
   QByteArray buffer((const char*)value.data(), value.size());
-  qDebug() << "buffer size: ==" << buffer.size();
   return propertyObject.appendBinary(key, buffer);
 }
 
@@ -263,9 +260,7 @@ bool BsonDataModel :: getByteArray (const char *key, StdBlob &value) const
   QByteArray buffer;
   auto ret = propertyObject.getBinary(key, buffer);
   if (ret) {
-    qDebug() << "output size: == " << buffer.size();
     value = toUCharVector(buffer);
-    qDebug() << "outputvec size: == " << value.size();
   }
   return ret;
 }
