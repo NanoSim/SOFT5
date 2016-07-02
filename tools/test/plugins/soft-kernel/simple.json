@@ -2,10 +2,22 @@
     "name": "simple",
     "version": "0.1",
     "namespace": "ns",
+    "dimensions:": [
+        {
+            "name": "N"
+        }
+    ],
     "properties": [
         {
             "name": "a",
             "type": "int"
+        },
+        {
+            "name": "avec",
+            "type": "int",
+            "dims": [
+                "N"
+            ]
         }
     ]
 }

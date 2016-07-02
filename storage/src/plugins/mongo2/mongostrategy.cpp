@@ -117,7 +117,6 @@ void MongoStrategy :: startRetrieve (IDataModel *model) const
       bson::Bson metaObj(bson_copy(doc));
       bsonModel->propertyObject = metaObj.getBson("properties");
       bsonModel->dimsObject = metaObj.getBson("dimensions");
-      QTextStream(stdout) << metaObj.asString();
     } else {
       // TODO: Implement proper error handling
       std::string const what_arg = model->id();
