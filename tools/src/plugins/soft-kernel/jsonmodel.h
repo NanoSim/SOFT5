@@ -2,15 +2,14 @@
 #define JSONMODEL_H_DEF
 
 #include <softtypes.h>
-#include "softns.h"
-#include "idatamodel.h"
+#include <softns.h>
+#include <idatamodel.h>
 
 class QJsonObject;
 SOFT_BEGIN_NAMESPACE
 
 class JSONModel : public IDataModel
 {
-  friend class JSONStrategy;
 public:
   JSONModel();
   virtual ~JSONModel();

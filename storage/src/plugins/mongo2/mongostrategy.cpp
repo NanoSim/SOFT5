@@ -120,7 +120,8 @@ void MongoStrategy :: startRetrieve (IDataModel *model) const
       QTextStream(stdout) << metaObj.asString();
     } else {
       // TODO: Implement proper error handling
-      QTextStream(stderr) << "Couldn't find entity with id " << QString::fromStdString(model->id()) << " in selected database" << endl;
+      std::string const what_arg = model->id();
+      throw std::invalid_argument(what_arg);
     }
     
     mongoc_cursor_destroy(cursor);
