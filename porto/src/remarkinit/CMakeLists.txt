@@ -1,4 +1,4 @@
-project (porto-remarkinit CXX)
+project (porto-remarkinit C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -22,6 +22,7 @@ target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 set(${PROJECT_NAME}_INCLUDE_DIRS
   ${PROJECT_SOURCE_DIR}
   ${porto-entities_INCLUDE_DIRS}
+  ${porto-remarcreader_INCLUDE_DIRS}
   CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 set(${PROJECT_NAME}_LIBS
