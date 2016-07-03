@@ -10,6 +10,7 @@ namespace IO
     RemarcReader(std::string const remarcFile);
     ~RemarcReader();
     void read();
+    void write();
 
     double T_min; // Lower temperature bound
     double T_max; // Upper temperature bound
