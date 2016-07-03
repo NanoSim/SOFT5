@@ -386,12 +386,12 @@ void GenericEntity :: save(IDataModel *dataModel) const
     auto propName = obj.value("name").toString();
     auto propType = obj.value("type").toString();
     auto propRank = obj.contains("dims") ? obj.value("dims").toArray().size() : 0;
-    PropertyClass pc(propType, propRank);
     auto propValue = data.value(propName);
     if (!propValue.isUndefined()) {
+      PropertyClass pc(propType, propRank);
       auto it = appendMap.find(pc);
       if (it != appendMap.end()) {
-	(*it->second)(dataModel, qPrintable(propName), propValue);
+        (*it->second)(dataModel, qPrintable(propName), propValue);
       }
     }
   }
@@ -408,8 +408,7 @@ void GenericEntity :: load(IDataModel const *dataModel)
     auto propName = obj.value("name").toString();
     auto propType = obj.value("type").toString();
     auto propRank = obj.contains("dims") ? obj.value("dims").toArray().size() : 0;
-    PropertyClass pc(propType, propRank);
-    
+    PropertyClass pc(propType, propRank);    
     auto it = getMap.find(pc);
     if (it != getMap.end()) {
       QJsonValue propValue;

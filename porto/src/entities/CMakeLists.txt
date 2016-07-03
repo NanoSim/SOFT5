@@ -47,17 +47,21 @@ foreach(JSON_SRC ${json-sources})
   string(REGEX REPLACE "\.json$" ".cxx" GEN_CPPSRC ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".hxx" GEN_CPPHDR ${JSON_SRC})
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
-    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_SRC}
-    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_HDR}
-    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_CPPSRC}
-    ${${PROJECT_NAME}_BINARY_DIR}/${GEN_CPPHDR})
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_CPPSRC}
+    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_CPPHDR})
 
   list(APPEND SRC_LIST ${GEN_SRC})  
   list(APPEND SRC_LIST ${GEN_CPPSRC})  
 endforeach(JSON_SRC ${json-sources})
 
 set_source_files_properties(${SRC_LIST} PROPERTIES GENERATED TRUE)
-include_directories(${soft-kernel_INCLUDE_DIRS} ${softc_INCLUDE_DIRS})
+include_directories(
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${soft-kernel_INCLUDE_DIRS}
+  ${softc_INCLUDE_DIRS})
+
 set (LINK_LIBS ${LINK_LIBS}
   ${soft-kernel_LIBS}
   ${softc_LIBS})
