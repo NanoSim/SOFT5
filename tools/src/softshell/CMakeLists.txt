@@ -21,6 +21,7 @@ target_link_libraries (${PROJECT_NAME} ${LINK_LIBS})
 install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 install (DIRECTORY modules/soft DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
 install (DIRECTORY modules/utils DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
+install (DIRECTORY modules/porto DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
 
 set(softshell-modules-path ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 

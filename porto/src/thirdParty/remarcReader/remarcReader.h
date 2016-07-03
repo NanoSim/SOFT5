@@ -7,7 +7,7 @@ namespace IO
   {
     const std::string remarcFile;
   public:
-    RemarcReader(std::string const remarcFile);
+    RemarcReader(std::string const &);
     ~RemarcReader();
     void read();
     void write();

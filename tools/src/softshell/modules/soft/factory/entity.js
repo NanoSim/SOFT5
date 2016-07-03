@@ -57,6 +57,7 @@
 	def += "b.prototype.translate = function(a){require('soft.translator').translate(a,this);};";
 	def += "return b.prototype.constructor;})();";
 
+        print(def);
 	if (isFunction(callback)){
 	    callback(undefined, def);
 	}

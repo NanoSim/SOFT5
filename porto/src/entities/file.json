@@ -1,7 +1,7 @@
 {
     "name": "file",
     "version": "0.1-SNAPSHOT-1",
-    "namespace": "http:\/\/info.emmc.eu",
+    "namespace": "http://info.emmc.eu",
     "description": "Entity to represent files in",
     "properties": [
         {

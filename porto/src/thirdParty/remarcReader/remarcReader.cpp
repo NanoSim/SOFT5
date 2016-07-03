@@ -4,7 +4,7 @@
 namespace IO
 {
 
-RemarcReader :: RemarcReader(std::string const remarcFile)
+RemarcReader :: RemarcReader(std::string const &remarcFile)
   : remarcFile(remarcFile)
 {}
 
@@ -13,7 +13,7 @@ RemarcReader :: ~RemarcReader()
 
 void RemarcReader :: write()
 {
-QString filename = QString::fromStdString(remarcFile);
+  QString filename = QString::fromStdString(remarcFile);
   QFileInfo info(QDir::current(), filename);
   QFile file(info.absoluteFilePath());
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {

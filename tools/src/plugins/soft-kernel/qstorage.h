@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QString>
 #include <Soft>
+#include "qentity.h"
 
-class QEntity;
 class QStorage : public QObject
 {
   Q_OBJECT
@@ -16,8 +16,8 @@ public:
   virtual ~QStorage();
 
 public slots:
-  void save (QEntity const *);
-  void load (QEntity *);
+  void save (QEntity *entity);
+  void load (QEntity *entity);
 
 private:
   QScopedPointer<soft::Storage> storage;

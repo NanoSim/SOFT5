@@ -48,6 +48,12 @@ namespace {
     dm->appendDouble(key, value.toDouble());
   }
 
+  static void appendInt64(IDataModel* dm, const char* key, QJsonValue const &value)
+  {
+    assert(value.isDouble());
+    dm->appendInt64(key, (qint64)value.toInt());
+  }
+
   static void appendInt32(IDataModel* dm, const char* key, QJsonValue const &value)
   {
     assert(value.isDouble());
@@ -277,6 +283,13 @@ namespace {
     value = QJsonValue(v);
   }
 
+  static void getInt64(IDataModel const* dm, const char* key, QJsonValue &value)
+  {
+    soft::StdInt64 v;
+    dm->getInt64(key, v);
+    value = QJsonValue((int)v);
+  }
+
   static void getInt32Array(IDataModel const* dm, const char* key, QJsonValue &value)
   {
     soft::StdIntArray stdIntArray;
@@ -314,7 +327,7 @@ static std::map<PropertyClass, GetFnPtr> getMap = {
   {qMakePair<QString,int>("int16",   0), &getNotImplemented},
   {qMakePair<QString,int>("uint16",  0), &getNotImplemented},
   {qMakePair<QString,int>("uint32",  0), &getNotImplemented},
-  {qMakePair<QString,int>("int64",   0), &getNotImplemented},
+  {qMakePair<QString,int>("int64",   0), &getInt64},
   {qMakePair<QString,int>("uint64",  0), &getNotImplemented}
 };
  
@@ -340,7 +353,7 @@ static std::map<PropertyClass, AppendFnPtr> appendMap = {
   {qMakePair<QString,int>("int16",   0), &appendNotImplemented},
   {qMakePair<QString,int>("uint16",  0), &appendNotImplemented},
   {qMakePair<QString,int>("uint32",  0), &appendNotImplemented},
-  {qMakePair<QString,int>("int64",   0), &appendNotImplemented},
+  {qMakePair<QString,int>("int64",   0), &appendInt64},
   {qMakePair<QString,int>("uint64",  0), &appendNotImplemented}
 
 };
@@ -419,13 +432,19 @@ void GenericEntity :: load(IDataModel const *dataModel)
 }
 
 IEntity* GenericEntity :: create (const std::string &uuid)
-{}
+{
+    NOT_IMPLEMENTED
+}
 
 std::vector<std::string> GenericEntity :: dimensions() const
-{}
+{
+    NOT_IMPLEMENTED
+}
 
 int GenericEntity :: getDimensionSize(std::string const &) const
-{}
+{
+    NOT_IMPLEMENTED
+}
 
 void GenericEntity :: setSchema(std::string const &json)
 {

@@ -1,5 +1,5 @@
-#ifndef PORTO_JSON_JSON_H
-#define PORTO_JSON_JSON_H
+#ifndef REMARCINIT_H_DEF
+#define REMARCINIT_H_DEF
 
 #include <softc/softc-storage-plugin.h>
 

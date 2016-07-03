@@ -14,7 +14,7 @@ QStorage :: QStorage(QString const &driver,
 QStorage ::  ~QStorage()
 {}
 
-void QStorage :: save (QEntity const *entity)
+void QStorage :: save (QEntity *entity)
 {
   try {
     storage->save(entity->entity.data());

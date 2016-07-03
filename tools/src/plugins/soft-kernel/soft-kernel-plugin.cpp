@@ -24,14 +24,9 @@
 }
 
 Q_DECLARE_METATYPE (QEntity*)
-Q_DECLARE_METATYPE (const QEntity*)
 Q_DECLARE_METATYPE (QGenericEntity*)
-Q_DECLARE_METATYPE (QGenericEntity const*)
 Q_DECLARE_METATYPE (QCollection*)
-Q_DECLARE_METATYPE (QCollection const*)
 Q_DECLARE_METATYPE (QStorage*)
-Q_DECLARE_METATYPE (QStorage const*)
-
 
 SoftKernelPlugin :: ~SoftKernelPlugin()
 {}

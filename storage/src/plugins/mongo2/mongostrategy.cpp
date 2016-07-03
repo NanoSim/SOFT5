@@ -94,6 +94,8 @@ void MongoStrategy :: store (IDataModel const *model)
   metaObj.append("properties", propObj);
   metaObj.append("dimensions", dimsObj);
 
+  auto remove = BCON_NEW("uuid", BCON_UTF8(model->id().c_str()));
+  mongoc_collection_remove(d->collection, MONGOC_REMOVE_SINGLE_REMOVE, remove, NULL, NULL);
   mongoc_collection_insert(d->collection, MONGOC_INSERT_NONE, metaObj.bsonPtr().get(), 0, &error);  
   for (auto subLabel : bsonModel->getModelLabels()) {
     auto subDataModel = bsonModel->getModel(subLabel.c_str());
