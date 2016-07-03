@@ -2,17 +2,11 @@
 
 QEntity :: QEntity(QObject *parent)
   : QObject(parent)
-  , generic(new soft::GenericEntity())
-{}
-  
-QEntity :: QEntity(QEntity const &other)
-  : QObject()
-  , generic(other.generic)
 {}
 
-QEntity :: QEntity(QString const &id, QObject *parent)
+QEntity :: QEntity(soft::IEntity *entity, QObject *parent)
   : QObject(parent)
-  , generic(new soft::GenericEntity(qPrintable(id)))
+  , entity(entity)
 {}
 
 QEntity :: ~QEntity()
@@ -20,40 +14,26 @@ QEntity :: ~QEntity()
 
 QString QEntity :: id() const
 {
-  return QString::fromStdString(generic->id());
+  return QString::fromStdString(entity->id());
 }
 
 QString QEntity :: metaName() const
 {
-  return QString(); // ::fromStdString(generic->id());
+  return QString::fromStdString(entity->metaName());
 }
 
 QString QEntity :: metaNamespace() const
 {
-  return QString();
+  return QString::fromStdString(entity->metaNamespace());
 }
 
 QString QEntity :: metaVersion() const
 {
-  return QString();
+  return QString::fromStdString(entity->metaVersion());
 }
 
-void QEntity :: debug() const
+soft::IEntity *QEntity :: ref() const
 {
-  generic->debug();
+  return entity.data();
 }
 
-void QEntity :: setSchema(QString const& schema)
-{
-  generic->setSchema(schema.toStdString());
-}
-
-QVariant QEntity :: property(QString const &key) const
-{
-  return generic->property(key);
-}
-
-void QEntity :: setProperty(QString const& key, QVariant const &value)
-{
-  generic->setProperty(key,value);
-}

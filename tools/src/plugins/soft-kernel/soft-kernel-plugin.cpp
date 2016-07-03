@@ -1,10 +1,12 @@
 #include <QtCore>
 #include <QtScript>
-#include "qentity.h"
+#include "qgenericentity.h"
+#include "qcollection.h"
 #include "qstorage.h"
 #include "register.hh"
 #include "soft-kernel-plugin.h"
 
+// Not used, but still cool. allows for custom prototyping from JavaScript on registered types
 #define Q_SCRIPT_DECLARE_QMETAOBJECT_MY(T, _Arg1) \
   template<> inline QScriptValue qscriptQMetaObjectConstructor<T>(QScriptContext *ctx, QScriptEngine *eng, T *) \
 {                                                                       \
@@ -22,9 +24,14 @@
 }
 
 Q_DECLARE_METATYPE (QEntity*)
-Q_DECLARE_METATYPE (QEntity)
+Q_DECLARE_METATYPE (const QEntity*)
+Q_DECLARE_METATYPE (QGenericEntity*)
+Q_DECLARE_METATYPE (QGenericEntity const*)
+Q_DECLARE_METATYPE (QCollection*)
+Q_DECLARE_METATYPE (QCollection const*)
 Q_DECLARE_METATYPE (QStorage*)
-Q_SCRIPT_DECLARE_QMETAOBJECT_MY(QEntity, QObject*)
+Q_DECLARE_METATYPE (QStorage const*)
+
 
 SoftKernelPlugin :: ~SoftKernelPlugin()
 {}
@@ -42,13 +49,14 @@ static QScriptValue createSoftStorage (QScriptContext *ctx, QScriptEngine *engin
   return engine->newQObject(storage, QScriptEngine::ScriptOwnership);
 }
 
-static QScriptValue createSoftEntity (QScriptContext *ctx, QScriptEngine *engine)
+template <class T>
+QScriptValue createSoftEntity (QScriptContext *ctx, QScriptEngine *engine)
 {
-  QEntity *entity = nullptr;
+  T *entity = nullptr;
   if (ctx->argumentCount() == 0) {
-    entity = new QEntity();
+    entity = new T();
   } else if(ctx->argumentCount() == 1) {
-    entity = new QEntity(ctx->argument(0).toString());
+    entity = new T(ctx->argument(0).toString());
   } else {
     ctx->throwError("Syntax error");
     return engine->nullValue();
@@ -62,13 +70,11 @@ void SoftKernelPlugin :: registerPlugin (QScriptEngine *engine)
   auto globalObj = engine->globalObject();
   auto soft = engine->newObject();
 
-  //  auto entityproto = engine->scriptValueFromQMetaObject<QEntity>();
-  
   globalObj.setProperty("soft", soft);
   globalObj.setProperty("porto", soft);
-  //  soft.setProperty("IEntity", entityproto);
   
-  registerConstructor<QStorage> (engine, soft, "Storage", createSoftStorage);
-  registerConstructor<QEntity> (engine, soft, "Entity", createSoftEntity);
+  registerConstructor<QStorage> (engine, soft, "Storage",   &createSoftStorage);
+  registerConstructor<QEntity> (engine, soft, "Entity",     &createSoftEntity<QGenericEntity>);
+  registerConstructor<QEntity> (engine, soft, "Collection", &createSoftEntity<QCollection>);
 }
 

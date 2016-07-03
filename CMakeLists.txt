@@ -179,6 +179,9 @@ endif(WITH_PLUGIN_HD5)
 
 if (WITH_PLUGIN_SOFT_KERNEL)
   add_subdirectory(tools/src/plugins/soft-kernel)
+  if (WITH_TESTS)
+    add_subdirectory(tools/test/plugins/soft-kernel)
+  endif (WITH_TESTS)
 endif(WITH_PLUGIN_SOFT_KERNEL)
 
 if (WITH_HSM)

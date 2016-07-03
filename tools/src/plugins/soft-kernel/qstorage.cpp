@@ -17,7 +17,7 @@ QStorage ::  ~QStorage()
 void QStorage :: save (QEntity const *entity)
 {
   try {
-    storage->save(entity->generic.data());
+    storage->save(entity->entity.data());
   } catch(const std::invalid_argument& ia) {
     std::cerr << "Invalid argument: " << ia.what() << "\n";
   } catch(const std::runtime_error& re) {
@@ -29,7 +29,7 @@ void QStorage :: save (QEntity const *entity)
 void QStorage :: load (QEntity *entity)
 {
   try {
-    storage->load(entity->generic.data());
+    storage->load(entity->entity.data());
   } catch(const std::invalid_argument& ia) {
     std::cerr << "Invalid argument: " << ia.what() << "\n";
   } catch(const std::runtime_error& re) {

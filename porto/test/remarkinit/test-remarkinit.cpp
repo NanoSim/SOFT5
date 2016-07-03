@@ -45,9 +45,9 @@ TEST(PortoRemarkInitTest, ReadFromEntity)
   ASSERT_DOUBLE_EQ(remarcConfig->T_min, 0.0);
   ASSERT_DOUBLE_EQ(remarcConfig->T_max, 100.0);
   ASSERT_DOUBLE_EQ(remarcConfig->Delta_T, 10.0);
-  ASSERT_DOUBLE_EQ(remarcConfig->barrierHeight, 0.1);                /* Estimated uncertainty in barrier height */  
-  ASSERT_DOUBLE_EQ(remarcConfig->adsoptionEnergy, 0.2);              /* Estimated uncertainty in adsorption energy */
-  ASSERT_DOUBLE_EQ(remarcConfig->p, .3);                             /* Gas pressure */
+  ASSERT_DOUBLE_EQ(remarcConfig->barrierHeight, 0.1);     /* Estimated uncertainty in barrier height */  
+  ASSERT_DOUBLE_EQ(remarcConfig->adsoptionEnergy, 0.2);   /* Estimated uncertainty in adsorption energy */
+  ASSERT_DOUBLE_EQ(remarcConfig->p, .3);                  /* Gas pressure */
   ASSERT_FALSE(remarcConfig->useFreqToCalcRateConstants); /* Should frequencies be used to calculate rate constants? */
   ASSERT_FALSE(remarcConfig->useFreqToCleanSurface);      /* Should frequencies be used for clean surface? */
   ASSERT_FALSE(remarcConfig->useQuantum);                 /* Quantum (true) or classical (false) vibrational partition functions for rate constant calcuations */

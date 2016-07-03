@@ -145,6 +145,14 @@ void Collection :: addDim(std::string const &label,
   NOT_IMPLEMENTED
 }
 
+void Collection :: addDimMap(std::string const &label,
+                             std::string const &entityDim,
+                             std::string const &collectionDim)
+{
+  NOT_IMPLEMENTED
+}
+
+
 void Collection :: addRelation(std::string const &subject,
                    std::string const &predicate,
                    std::string const &object)
