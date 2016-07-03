@@ -6,6 +6,9 @@ print (entity.id());
 entity.setSchema(schema);
 entity.setProperty("a", 42);
 entity.setProperty("avec", [1,2,3,4]);
+entity.setProperty("mtx", [[[1,2,3],[4,5,6],[7,8,9]],
+                           [[1,2,3],[4,5,6],[7,8,9]],
+                           [[1,2,3],[4,5,6],[7,8,9]]]);
 /*
 entity.setProperty("b", [1,2,3,4]);
 entity.setProperty("c", 3.14);
@@ -19,4 +22,4 @@ var entity2 = new soft.Entity(id);
 entity2.setSchema(schema);
 storage.load(entity2);
 
-print (entity2.property("avec"));
+print (entity2.property("mtx"));

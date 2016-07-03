@@ -18,6 +18,13 @@
             "dims": [
                 "N"
             ]
+        },
+	{
+            "name": "mtx",
+            "type": "double",
+            "dims": [
+                "N","N","N"
+            ]
         }
     ]
 }
