@@ -1,11 +1,11 @@
 #include <Soft>
 #include <QtCore>
 
-#include <collection.h>
-#include <storage.h>
-#include <reference.hxx>
-#include <file.hxx>
+#include "common.h"
 #include "remark.h"
+#include "portoinput.h"
+#include "portooutput.h"
+
 int main(int argc, char **argv)
 {
   ::soft::init(argc, argv); 
@@ -15,23 +15,24 @@ int main(int argc, char **argv)
   }
 
   soft::Collection collection(argv[1]);
-  soft::Storage storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
-
-  soft::Reference reference;
-  soft::File file;
-
   collection.setName("DFTPrep");
   collection.setVersion("0.1");
-  collection.attachEntity("dftPath", &reference);
-  collection.attachEntity("dftBoundayFile", &file);
-
+  
+  soft::Storage storage(const_global_driver, const_global_uri, const_global_options);
   storage.load(&collection);
 
-  Remark *r = new Remark();
+  PortoInput *input = new PortoInput(&collection);
+  Remark *remarc = new Remark(&collection);
+  PortoOutput *output = new PortoOutput(&collection);
 
-  QObject::connect(r, SIGNAL(finished()), r, SLOT(deleteLater()));
-  QObject::connect(r, SIGNAL(finished()), QCoreApplication::instance(), SLOT(quit()));
+  QObject::connect(input, SIGNAL(finished()), remarc, SLOT(run()));
+  QObject::connect(input, SIGNAL(finished()), input, SLOT(deleteLater()));
+  QObject::connect(remarc, SIGNAL(finished()), output, SLOT(run()));
+  QObject::connect(remarc, SIGNAL(finished()), remarc, SLOT(deleteLater()));
+  QObject::connect(output, SIGNAL(finished()), output, SLOT(deleteLater()));
+  QObject::connect(output, SIGNAL(finished()), QCoreApplication::instance(), SLOT(quit()));
 
-  r->run(collection);
+  input->run();
+
   return QCoreApplication::instance()->exec();
 }

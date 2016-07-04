@@ -2,10 +2,10 @@
 #include <iostream>
 #include <QtCore>
 #include <Soft>
-#include <softc/softc-storage-plugin.h>
 #include <softc/softc-datamodel-private.hpp>
 #include <chemkinReader.h>
 #include "chemkinreaction.hxx"
+#include "chemkin.h"
 
 static char const defaultChemFile[]  = "SurfaceChemkin.inp";
 static char const defaultThermFile[] = "thermo.dat";

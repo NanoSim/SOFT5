@@ -1,18 +1,19 @@
 #pragma once
 #include <QObject>
 #include <collection.h>
-class QProcess;
 
+class QProcess;
 class Remark : public QObject
 {
   Q_OBJECT
   
 public:  
-  explicit Remark(QObject *parent = nullptr);
+  Remark(soft::Collection *, QObject *parent = nullptr);
   virtual ~Remark();
-  void run(soft::Collection &collection);
 
 public slots:
+  void run();
+  void exited();
   void started();
   void readStdout();
   void readStderr();
@@ -22,4 +23,5 @@ signals:
   
 private:
   QProcess *process;
+  soft::Collection *collection;
 };
