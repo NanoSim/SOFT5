@@ -40,10 +40,17 @@ void PortoOutput :: run()
   auto chemfileRef = dynamic_cast<soft::Reference const*>(collection->findInstance("surfaceChemkinRef"));
   assert(nullptr != chemfileRef);
   // Verify that the surface file exists
-  assert(QFileInfo::exists(QString::fromStdString(chemfileRef->uri)));
+  QFileInfo chemicalInfo(QString::fromStdString(chemfileRef->uri));
+  assert(chemicalInfo.exists());
+
+  // Copy the SurfaceChemkin to the same working directory we have thermo.dat
+  QFile::copy(chemicalInfo.absoluteFilePath(), thermoFileInfo.absolutePath()+"/"+chemicalInfo.fileName());  
 
   // Run the external storage on the Chemkin file to read data into the entities.
-  QString url = QString("chemkin://%1&thermo=%2").arg(QString::fromStdString(chemfileRef->uri)).arg(thermoFileInfo.filePath());
+  QString url = QString("chemkin://%1?chem=%2&thermo=%3")
+    .arg(thermoFileInfo.absolutePath())
+    .arg(chemicalInfo.fileName())
+    .arg(thermoFileInfo.fileName());
   auto chemkinStorage = new soft::Storage("external", qPrintable(url), "");
 
   auto chemkinCollection = new soft::Collection();
