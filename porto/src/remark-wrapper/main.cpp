@@ -4,6 +4,7 @@
 #include <collection.h>
 #include <storage.h>
 #include <reference.hxx>
+#include <file.hxx>
 #include "remark.h"
 int main(int argc, char **argv)
 {
@@ -14,13 +15,23 @@ int main(int argc, char **argv)
   }
 
   soft::Collection collection(argv[1]);
-  soft::Storage storage("mongo2", "http://localhost", "db=porto;coll=demo");
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
+
+  soft::Reference reference;
+  soft::File file;
+
+  collection.setName("DFTPrep");
+  collection.setVersion("0.1");
+  collection.attachEntity("dftPath", &reference);
+  collection.attachEntity("dftBoundayFile", &file);
+
   storage.load(&collection);
 
-  Remark *r = new Remark;
+  Remark *r = new Remark();
+
   QObject::connect(r, SIGNAL(finished()), r, SLOT(deleteLater()));
   QObject::connect(r, SIGNAL(finished()), QCoreApplication::instance(), SLOT(quit()));
 
-  r->run();  
+  r->run(collection);
   return QCoreApplication::instance()->exec();
 }

@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
 		
   auto &dftPath = argv[1]; // dft-path
-  auto &dftBound = argv[2]; // remarc.in
+  auto &dftBound = argv[2]; // remarc.in / thermo.dat
   
   QFileInfo dftPathInfo(dftPath);
   soft::Reference reference;
@@ -44,6 +44,7 @@ int main(int argc, char **argv)
   reference.lastModified = dftPathInfo.lastModified().toString("dd-mm-yyyy").toStdString();  
   reference.sha1 = toStdBlob("0");
 
+  // store Thermo.dat as a file entity in the backend
   QFileInfo dftBoundInfo(dftBound);
   soft::File file;
   file.filename          = dftBoundInfo.fileName().toStdString();

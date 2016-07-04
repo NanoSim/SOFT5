@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <collection.h>
 class QProcess;
 
 class Remark : public QObject
@@ -9,7 +10,7 @@ class Remark : public QObject
 public:  
   explicit Remark(QObject *parent = nullptr);
   virtual ~Remark();
-  void run();
+  void run(soft::Collection &collection);
 
 public slots:
   void started();

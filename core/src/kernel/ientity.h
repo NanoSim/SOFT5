@@ -11,10 +11,10 @@ class IDataModel;
 
 #define SOFT_META_STRING(x) std::string(#x);
 #define SOFT_ENTITY_METADATA(name,ns,ver)	\
-  virtual std::string metaType() const override {return name;} \
-  virtual std::string metaName() const override {return name;} \
-  virtual std::string metaNamespace() const override {return ns;} \
-  virtual std::string metaVersion() const override {return ver;}
+  virtual std::string metaType() const override {return #name;} \
+  virtual std::string metaName() const override {return #name;} \
+  virtual std::string metaNamespace() const override {return #ns;} \
+  virtual std::string metaVersion() const override {return #ver;}
 
 class IEntity
 {
