@@ -49,7 +49,7 @@ TEST(codegen, collectionAdd)
 TEST(codegen, storeSimple)
 {
   using namespace soft;
-  soft::Storage storage("mongo", "mongodb://localhost", "db=codegentest;coll=coll");
+  soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=coll");
   Simple simple(0,0,0,0);
   storage.save(&simple);
 }

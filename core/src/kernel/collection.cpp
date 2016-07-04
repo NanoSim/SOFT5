@@ -193,7 +193,11 @@ void Collection :: load (IDataModel const *dataModel)
       auto ie = d->entityMap.find(l);
       if (ie != d->entityMap.end()) {
         IEntity *e = ie->second;
-        ie->second->load(dm);
+        dm->setMetaName(e->metaName());
+        dm->setMetaVersion(e->metaVersion());
+        dm->setMetaNamespace(e->metaNamespace());
+        e->load(dm);
+        e->setId(dm->id());
       }
     }
   }
@@ -209,12 +213,18 @@ void Collection :: save (IDataModel *dataModel) const
   dataModel->appendString("triplets", d->tripletStore.toCSV());
 
   // Also perform a save on all attached entities.
-  for(auto &e: d->entityMap) {
+  for(auto &ie: d->entityMap) {
     // Creates an empty clone of the same data model type
     // TODO: Who owns this data model now? Needs to be freed at some point?
     auto dm = dataModel->createModel();
-    e.second->save(dm);
-    dataModel->appendModel(e.first.c_str(), dm);
+    IEntity *e = ie.second;
+    dm->setId(e->id());
+    dm->setMetaName(e->metaName());
+    dm->setMetaVersion(e->metaVersion());
+    dm->setMetaNamespace(e->metaNamespace());
+
+    e->save(dm);
+    dataModel->appendModel(ie.first.c_str(), dm);
   }
 }
 
