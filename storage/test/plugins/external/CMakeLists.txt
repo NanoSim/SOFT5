@@ -21,7 +21,7 @@ if(GTEST_FOUND)
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${soft-storage-plugins-external_BINARY_DIR}:${porto-json_BINARY_DIR}")
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${plot-entities_BINARY_DIR}:${soft-storage-plugins-external_BINARY_DIR}:${porto-json_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
       ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
