@@ -19,7 +19,7 @@ TEST(codegen, dummy)
 TEST(codegen, construct)
 {
   using namespace soft;
-  Simple *simple = new Simple (3,2,3,0); 
+  Simple *simple = new Simple (3,2,3,0);
   ASSERT_TRUE(nullptr != simple);
 
   auto dims = simple->dimensions();
@@ -28,13 +28,18 @@ TEST(codegen, construct)
   ASSERT_STREQ(dims[2].c_str(), "NK");
   ASSERT_STREQ(dims[3].c_str(), "NL");
 
+  ASSERT_EQ(simple->metaName(), "simple");
+  ASSERT_EQ(simple->metaNamespace(), "local");
+  ASSERT_EQ(simple->metaType(), "simple");
+  ASSERT_EQ(simple->metaVersion(), "1.0");
+
   delete simple;
 }
 
 TEST(codegen, collectionAdd)
 {
   using namespace soft;
-  Simple *simple = new Simple (3,2,3,0); 
+  Simple *simple = new Simple (3,2,3,0);
   Collection collection;
   collection.attachEntity("simple1", simple);
   auto instance = collection.findInstance("simple1");
@@ -58,8 +63,8 @@ TEST(codegen, chemkinTest)
   chemkinReader.read();
   auto reactions = chemkinReader.reactions();
   StdDoubleArray A; // preexponential factor
-  StdDoubleArray b; 
-  StdDoubleArray Ea; 
+  StdDoubleArray b;
+  StdDoubleArray Ea;
 
   StdUInt nreactants = 0;
   StdUInt nproducts = 0;
@@ -68,29 +73,29 @@ TEST(codegen, chemkinTest)
   StdUInt nplog = 0;
 
   auto storage = new soft::Storage("mongo2", "mongodb://localhost", "db=portotest;coll=coll");
-  
+
   int ridx = 0;
   for (auto reaction: reactions) {
-    
+
     auto arrhenius = reaction.getArrhenius();
     auto reactants = reaction.getReactants();
     auto products = reaction.getProducts();
     auto low = reaction.getLOW();
     auto troe = reaction.getTROE();
 
-    Chemkin_reaction chemkinReaction(reactants.size(), 
-				     products.size(), 
-				     troe.size(), 
-				     0 /* nenhancement_factors */,
-				     0 /* nplog */);
-  
+    Chemkin_reaction chemkinReaction(reactants.size(),
+             products.size(),
+             troe.size(),
+             0 /* nenhancement_factors */,
+             0 /* nplog */);
+
     for(auto reactant: reactants) {
       chemkinReaction.reactants.push_back(reactant.first);
     }
     for(auto product: products) {
       chemkinReaction.products.push_back(product.first);
-    }    
-    
+    }
+
     chemkinReaction.third_body = reaction.hasThirdBody();
     chemkinReaction.A = arrhenius.A;
     chemkinReaction.b = arrhenius.n;
@@ -98,7 +103,7 @@ TEST(codegen, chemkinTest)
     std::cout << chemkinReaction.A << std::endl;
 
     if (reaction.hasLOW()) {
-      ASSERT_EQ(low.size(), 3);      
+      ASSERT_EQ(low.size(), 3);
       chemkinReaction.A_low = low[0];
       chemkinReaction.b_low = low[1];
       chemkinReaction.Ea_low = low[2];
@@ -115,7 +120,7 @@ TEST(codegen, chemkinTest)
     ridx++;
 
     storage->save(&chemkinReaction);
-  }      
+  }
 }
 
 static soft::StdBlob toStdBlob(QByteArray const &bytes)
@@ -132,7 +137,7 @@ static QByteArray sha1(QString const &filename) {
   }
   QByteArray buffer = file.readAll();
   QCryptographicHash hash(QCryptographicHash::Sha1);
-  hash.addData(buffer.data(), buffer.length()); 
+  hash.addData(buffer.data(), buffer.length());
   return hash.result();
 }
 
@@ -143,9 +148,9 @@ TEST(codegen, reference)
   reference.uri = "file://" + info.absoluteFilePath().toStdString();
   reference.created = info.created().toString("dd-mm-yyyy").toStdString();
   reference.owner = info.owner().toStdString();
-  reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();  
+  reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();
   reference.sha1 = toStdBlob(sha1(info.absoluteFilePath()));
-  
+
   soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=reference");
   storage.save(&reference);
 }
@@ -163,7 +168,7 @@ TEST(codegen, file)
   file.size = info.size();
   auto buffer = data.readAll();
   file.data = toStdBlob(buffer);
-  
+
   data.close();
   soft::Storage storage("mongo2", "mongodb://localhost", "db=codegentest;coll=filetest");
   storage.save(&file);
@@ -196,16 +201,16 @@ TEST(codegen, collectionWithFileAndReference)
   reference.uri = "file://" + info.absoluteFilePath().toStdString();
   reference.created = info.created().toString("dd-mm-yyyy").toStdString();
   reference.owner = info.owner().toStdString();
-  reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();  
+  reference.lastModified = info.lastModified().toString("dd-mm-yyyy").toStdString();
   reference.sha1 = toStdBlob(sha1(info.absoluteFilePath()));
- 
+
   file.filename = info.fileName().toStdString();
   file.suffix = info.suffix().toStdString();
   file.size = info.size();
   auto buffer = data.readAll();
   file.data = toStdBlob(buffer);
   data.close();
-  
+
   soft::Collection collection;
   collection.setName("thermo");
   collection.setVersion("1.0");
