@@ -56,6 +56,7 @@ public slots:
                  QString const &entityDim,
                  QString const &collectionDim);
 
+  QStringList findRelations(QString const &subject, QString const &object);
   int numEntities() const;
   int numRelations() const;
 };

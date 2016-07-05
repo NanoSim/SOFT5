@@ -144,10 +144,13 @@ bool ExternalModel :: appendBool (const char *key, bool value)
   return isOk;
 }
 
-bool ExternalModel :: appendInt32Array (const char *, const std::vector<int32_t> &)
+bool ExternalModel :: appendInt32Array (const char *key, const std::vector<int32_t> &value)
 {
-  NOT_IMPLEMENTED;
-
+    QJsonArray jsonArray;
+    for (auto &v: value) {
+      jsonArray.append(QJsonValue(v));
+    }
+    d->jsonObject.insert(key, jsonArray);
 }
 
 bool ExternalModel :: appendDoubleArray(const char *key, const std::vector<double> &value)
@@ -239,7 +242,7 @@ bool ExternalModel :: getUInt16        (const char *, uint16_t &) const
 
 bool ExternalModel :: getInt32 (const char *key, int32_t &value) const
 {
-   auto it = d->jsonObject.find(key);
+  auto it = d->jsonObject.find(key);
   if (it == d->jsonObject.end()) return false;
 
   if (!(*it).isDouble()) return false;
@@ -264,7 +267,7 @@ bool ExternalModel :: getUInt64        (const char *, uint64_t &) const
 
 bool ExternalModel :: getFloat         (const char *key, float &value) const
 {
-   auto it = d->jsonObject.find(key);
+  auto it = d->jsonObject.find(key);
   if (it == d->jsonObject.end()) return false;
 
   if (!(*it).isDouble()) return false;
@@ -365,6 +368,11 @@ IDataModel* ExternalModel :: getModel(const char *k) const
 const QJsonObject *ExternalModel :: json() const
 {
   return &d->jsonObject;
+}
+
+const QJsonObject *ExternalModel :: dims() const
+{
+    return &d->dimsObject;
 }
 
 void ExternalModel :: setJson(QJsonObject const &obj)

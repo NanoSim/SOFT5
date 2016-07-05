@@ -34,7 +34,8 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
   std::string const chemfile  = chemFileInfo.absoluteFilePath().toStdString();
   std::string const thermfile = thermFileInfo.absoluteFilePath().toStdString();
 
-  soft::Collection coll(datamodel->ref->id());
+  //  soft::Collection coll(datamodel->ref->id());
+  soft::Collection coll(datamodel->ref);
 
   IO::ChemkinReader chemkinReader(chemfile, thermfile);
   chemkinReader.read();
@@ -109,7 +110,9 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
       datamodel->ref->appendModel(label.c_str(),subModel);
     }
     */
-    coll.attachEntity(label, chemkinReaction);
+    if (!datamodel->ref->getModel(label.c_str())) {
+        coll.attachEntity(label, chemkinReaction);
+    }
     ridx++;
   }
   coll.save(datamodel->ref);

@@ -173,3 +173,14 @@ int QCollection :: numRelations() const
   return ref->numRelations();
 }
 
+QStringList QCollection :: findRelations(QString const &subject, QString const &object)
+{
+  soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
+  auto relations = ref->findRelations(subject.toStdString(),
+                                    object.toStdString());
+  QStringList ret;
+  for (auto relation: relations) {
+    ret << QString::fromStdString(relation);
+  }
+  return ret;
+}

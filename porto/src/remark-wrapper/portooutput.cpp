@@ -21,8 +21,8 @@ void PortoOutput :: run()
   std::string metaName, metaVersion, metaNamespace, uuid;
   soft::Storage storage(const_global_driver, const_global_uri, const_global_options);
   collection->findEntity("dftBoundayFile", metaName, metaVersion, metaNamespace, uuid);
-  auto thermoFile = new soft::File(uuid);
-  storage.load(thermoFile);
+  QScopedPointer<soft::File> thermoFile(new soft::File(uuid));
+  storage.load(thermoFile.data());
   assert(nullptr != thermoFile);
 
   // Setup for writing the data contents to a file
@@ -54,20 +54,25 @@ void PortoOutput :: run()
     .arg(thermoFileInfo.absolutePath())
     .arg(chemicalInfo.fileName())
     .arg(thermoFileInfo.fileName());
-  auto chemkinStorage = new soft::Storage("external", qPrintable(url), "");
+  QScopedPointer<soft::Storage> chemkinStorage (new soft::Storage("external", qPrintable(url), ""));
 
   // Read collection from the external storage
-  auto chemkinCollection = new soft::Collection();
-  auto chemkinReaction = new soft::Chemkinreaction(0,0,0,0,0);
-  chemkinCollection->attachEntity("reaction_1", chemkinReaction);
+  QScopedPointer<soft::Collection> chemkinCollection(new soft::Collection());
+  auto chemkinReaction0 = new soft::Chemkinreaction(0,0,0,0,0);
+  auto chemkinReaction1 = new soft::Chemkinreaction(0,0,0,0,0);
+  chemkinCollection->attachEntity("reaction_0", chemkinReaction0);
+  chemkinCollection->attachEntity("reaction_1", chemkinReaction1);
   chemkinCollection->setName("ChemkinCollection");
   chemkinCollection->setVersion("1.0-DEMO");
-  chemkinStorage->load(chemkinCollection);
-  storage.save(chemkinCollection);
-  QTextStream(stdout) << "chemkin collection id:" << QString::fromStdString(chemkinCollection->id()) << endl;
+  chemkinStorage->load(chemkinCollection.data());
+  storage.save(chemkinReaction0);
+  storage.save(chemkinReaction1);
+  storage.save(chemkinCollection.data());
+  collection->addRelation("reactiondata", "has-id", chemkinReaction0->id());
+  collection->addRelation("reactiondata", "has-id", chemkinReaction1->id());
 
   // Attach the chemkin collection to out main collection and write back all changes
-  collection->registerEntity("chemkinCollection", chemkinCollection);
+  collection->registerEntity("chemkinCollection", chemkinCollection.data());
   storage.save(collection);  
   
   emit finished();

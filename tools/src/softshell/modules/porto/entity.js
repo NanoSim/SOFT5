@@ -33,9 +33,9 @@
 	    storage.save(this.generic);
 	};
 	
-	A.prototype.read = function(storage){
-            this.getAll();
+	A.prototype.read = function(storage){            
             storage.load(this.generic);
+            this.getAll();
 	};
 	
 	return A.prototype.constructor;

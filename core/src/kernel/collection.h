@@ -55,6 +55,10 @@ public:
   void addRelation(std::string const &subject,
                    std::string const &predicate,
                    std::string const &object);
+
+  std::list<std::string> findRelations(std::string const &subject,
+                                      std::string const &object);
+  
   void addDimMap(std::string const &label,
                  std::string const &entityDim,
                  std::string const &collectionDim);
