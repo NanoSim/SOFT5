@@ -26,14 +26,16 @@ void PortoOutput :: run()
 
   // Setup for writing the data contents to a file
   QFileInfo thermoFileInfo(QDir::current(), QString::fromStdString(thermoFile->filename));
-  QFile outFile(thermoFileInfo.absoluteFilePath());
-  if (!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-    qWarning() << "Failed to write thermo file." << outFile.errorString();
-    return;
+  {
+    QFile outFile(thermoFileInfo.absoluteFilePath());
+    if (!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qWarning() << "Failed to write thermo file." << outFile.errorString();
+        return;
+    }
+    // Write blob to file
+    outFile.write((const char*)thermoFile->data.data(), (quint64)thermoFile->data.size());
+    outFile.close();
   }
-  // Write blob to file
-  outFile.write((const char*)thermoFile->data.data(), (quint64)thermoFile->data.size());
-
   // Verify that the termo file has indeed been created
   assert(thermoFileInfo.exists());
   
