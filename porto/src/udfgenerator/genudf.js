@@ -6,18 +6,18 @@ porto.ChemkinReaction = entity.using('chemkinReaction', 'eu.nanosim.vasp', '0.1'
 __main__ = function (args)
 {
     try {
-        var inputUUID = args[1];
-        var collection  = new porto.Collection(inputUUID);
         var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
-        storage.load(collection);
         
-        var chemkinCollectionUUID = collection.getUuid("chemKinData");
-        var chemkinCollecton = new porto.Collection(chemkinCollectionUUID);
-        storage.load(chemkinCollecton);
+        var chemkinCollectionId = args[1]);
+        var chemkinCollection = new porto.Collection(chemkinCollectionId);
+	storage.load(chemkinCollection);
+	print("num entities: " + chemkinCollection.numEntities());
         
-        var reactionUUID = chemkinCollecton.getUuid("reaction_1");
-        var reaction = porto.ChemkinReaction(reactionUUID);
-        storage.load(reaction);
+        var reactionId = chemkinCollection.entityId("reaction_1");
+	print("found reaction with uuid: " + reactionId);
+
+        var reaction = new porto.ChemkinReaction(reactionId);
+        reaction.read(storage);
         
 	var controller = require('soft.mvc').create({
 	    model: {

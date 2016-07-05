@@ -34,7 +34,8 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
   std::string const chemfile  = chemFileInfo.absoluteFilePath().toStdString();
   std::string const thermfile = thermFileInfo.absoluteFilePath().toStdString();
 
-  soft::Collection coll;
+  soft::Collection coll(datamodel->ref->id());
+
   IO::ChemkinReader chemkinReader(chemfile, thermfile);
   chemkinReader.read();
   auto reactions = chemkinReader.reactions();
@@ -97,11 +98,18 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
     }
 
     auto const label = QString("reaction_%1").arg(QString::number(ridx)).toStdString();
-    auto subModel = datamodel->ref->getModel(label.c_str());
+    /*
+    auto subModel = datamodel->ref->createModel();//;datamodel->ref->getModel(label.c_str());
     if (nullptr != subModel) {
+      subModel->setId(chemkinReaction->id());
+      subModel->setMetaName(chemkinReaction->metaName());
+      subModel->setMetaVersion(chemkinReaction->metaVersion());
+      subModel->setMetaNamespace(chemkinReaction->metaNamespace());
       chemkinReaction->save(subModel);
+      datamodel->ref->appendModel(label.c_str(),subModel);
     }
-    //    coll.attachEntity(label, chemkinReaction);
+    */
+    coll.attachEntity(label, chemkinReaction);
     ridx++;
   }
   coll.save(datamodel->ref);

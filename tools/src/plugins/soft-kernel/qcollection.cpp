@@ -79,6 +79,38 @@ void QCollection :: addEntity(QString const &label,
 }
 
 
+QString QCollection :: entityId(QString const &label) const
+{
+  std::string n,v,s,u;
+  soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
+  ref->findEntity(label.toStdString(), n, v, s, u);
+  return QString::fromStdString(u);
+}
+
+QString QCollection :: entityName(QString const &label) const
+{
+  std::string n,v,s,u;
+  soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
+  ref->findEntity(label.toStdString(), n, v, s, u);
+  return QString::fromStdString(n);
+}
+
+QString QCollection :: entityVersion(QString const &label) const
+{
+  std::string n,v,s,u;
+  soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
+  ref->findEntity(label.toStdString(), n, v, s, u);
+  return QString::fromStdString(v);
+}
+
+QString QCollection :: entityNamespace(QString const &label) const
+{
+  std::string n,v,s,u;
+  soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
+  ref->findEntity(label.toStdString(), n, v, s, u);
+  return QString::fromStdString(s);
+}
+
 void QCollection :: findEntity(QString const &label,
                                QString &name,
                                QString &version,

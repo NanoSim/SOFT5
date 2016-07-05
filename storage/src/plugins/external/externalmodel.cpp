@@ -3,12 +3,18 @@
 
 SOFT_BEGIN_NAMESPACE
 
+#define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
+
 class ExternalModel :: Private
 {
   friend class ExternalModel;
   Private()
   {}
 
+  using DataModelMap = QMap<QString, IDataModel *>;
+  DataModelMap dataModelMap;
+
+  QJsonObject dimsObject;
   QJsonObject jsonObject;
 };
 
@@ -27,9 +33,12 @@ IDataModel *ExternalModel :: createModel()
   return new ExternalModel;
 }
 
-bool ExternalModel :: appendDimension (const char *, StdUInt)
+bool ExternalModel :: appendDimension (const char *key, StdUInt value)
 {
-  return false;
+  QJsonValue jsonValue((int)value);
+  auto it = d->dimsObject.insert(key, jsonValue);
+  bool isOk = (it != d->dimsObject.end());
+  return isOk;
 }
 
 bool ExternalModel :: appendVariant (const char *key, StdVariant const &value)
@@ -127,11 +136,19 @@ bool ExternalModel :: appendDouble     (const char *key, double value)
   return (d->jsonObject.insert(key, jsonValue) != d->jsonObject.end());
 }
 
-bool ExternalModel :: appendBool       (const char *, bool)
-{}
+bool ExternalModel :: appendBool (const char *key, bool value)
+{
+  QJsonValue jsonValue(value);
+  auto it = d->jsonObject.insert(key, jsonValue);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
+}
 
 bool ExternalModel :: appendInt32Array (const char *, const std::vector<int32_t> &)
-{}
+{
+  NOT_IMPLEMENTED;
+
+}
 
 bool ExternalModel :: appendDoubleArray(const char *key, const std::vector<double> &value)
 {
@@ -143,24 +160,49 @@ bool ExternalModel :: appendDoubleArray(const char *key, const std::vector<doubl
 }
 
 bool ExternalModel :: appendByteArray  (const char *, const std::vector<unsigned char> &)
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
-bool ExternalModel :: appendStringArray(const char *, const std::vector<std::string> &)
-{}
+bool ExternalModel :: appendStringArray(const char *key, const std::vector<std::string> &value)
+{
+  QJsonArray jsonArray;
+  for (auto &v: value) {
+    jsonArray.append(QJsonValue(QString::fromStdString(v)));
+  }
+  auto it = d->jsonObject.insert(key, jsonArray);
+  bool isOk = (it != d->jsonObject.end());
+  return isOk;
+}
 
 bool ExternalModel :: appendArray      (const char *, const IDataModel *)
-{}
-
-bool ExternalModel :: appendModel      (const char *, IDataModel *)
-{}
-
-bool ExternalModel :: getDimension (const char *, StdUInt &) const
 {
+  NOT_IMPLEMENTED;
+}
+
+bool ExternalModel :: appendModel      (const char *k, IDataModel *model)
+{
+  auto key = QString::fromLocal8Bit(k);
+  if (!d->dataModelMap.contains(key)) {
+    d->dataModelMap.insert(key, model);
+    return true;
+  }
   return false;
 }
 
+bool ExternalModel :: getDimension (const char *key, StdUInt &value) const
+{
+  auto it = d->dimsObject.find(key);
+  if (it == d->dimsObject.end()) return false;
+
+  value = (*it).toInt();
+  return true;
+}
+
 bool ExternalModel :: getVariant       (const char *, StdVariant &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
 bool ExternalModel :: getString (const char *key, std::string &str) const
 {
@@ -176,31 +218,59 @@ bool ExternalModel :: getString (const char *key, std::string &str) const
 }
 
 bool ExternalModel :: getInt8          (const char *, int8_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
 bool ExternalModel :: getUInt8         (const char *, uint8_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
 bool ExternalModel :: getInt16         (const char *, int16_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
 bool ExternalModel :: getUInt16        (const char *, uint16_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
-bool ExternalModel :: getInt32         (const char *, int32_t &) const
-{}
+bool ExternalModel :: getInt32 (const char *key, int32_t &value) const
+{
+   auto it = d->jsonObject.find(key);
+  if (it == d->jsonObject.end()) return false;
+
+  if (!(*it).isDouble()) return false;
+  value = (float)(*it).toInt();
+  return true;
+}
 
 bool ExternalModel :: getUInt32        (const char *, uint32_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
 bool ExternalModel :: getInt64         (const char *, int64_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
 bool ExternalModel :: getUInt64        (const char *, uint64_t &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
-bool ExternalModel :: getFloat         (const char *, float &) const
-{}
+bool ExternalModel :: getFloat         (const char *key, float &value) const
+{
+   auto it = d->jsonObject.find(key);
+  if (it == d->jsonObject.end()) return false;
+
+  if (!(*it).isDouble()) return false;
+  value = (float)(*it).toDouble();
+  return true;
+}
 
 bool ExternalModel :: getDouble        (const char *key, double &value) const
 {
@@ -212,11 +282,32 @@ bool ExternalModel :: getDouble        (const char *key, double &value) const
   return true;
 }
 
-bool ExternalModel :: getBool          (const char *, bool &) const
-{}
+bool ExternalModel :: getBool (const char *key, bool &value) const
+{
+  auto it = d->jsonObject.find(key);
+  if (it == d->jsonObject.end()) return false;
 
-bool ExternalModel :: getInt32Array    (const char *, std::vector<int32_t> &) const
-{}
+  if (!(*it).isDouble()) return false;
+  value = (*it).toBool();
+  return true;
+}
+
+bool ExternalModel :: getInt32Array    (const char *key, std::vector<int32_t> &value) const
+{ 
+  auto it = d->jsonObject.find(key);
+  if (it == d->jsonObject.end()) return false;
+  if (!(*it).isArray()) return false;
+  QJsonArray array = (*it).toArray();
+  value.resize(array.size());
+
+  auto array_it = array.constBegin();
+  auto value_it = value.begin();
+  while (array_it !=array.constEnd() && value_it != value.end()) {
+    (*value_it++) = (*array_it++).toInt();
+  }
+
+  return true;
+}
 
 bool ExternalModel :: getDoubleArray   (const char *key, std::vector<double> &value) const
 {
@@ -236,17 +327,40 @@ bool ExternalModel :: getDoubleArray   (const char *key, std::vector<double> &va
 }
 
 bool ExternalModel :: getByteArray     (const char *, std::vector<unsigned char> &) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
-bool ExternalModel :: getStringArray(const char *, std::vector<std::string> &) const
-{}
+bool ExternalModel :: getStringArray(const char *key, std::vector<std::string> &value) const
+{
+  auto it = d->jsonObject.find(key);
+  if (it == d->jsonObject.end()) return false;
+  if (!(*it).isArray()) return false;
+  QJsonArray array = (*it).toArray();
+  value.resize(array.size());
+
+  auto array_it = array.constBegin();
+  auto value_it = value.begin();
+  while (array_it !=array.constEnd() && value_it != value.end()) {
+    (*value_it++) = (*array_it++).toString().toStdString();
+  }
+
+  return true;
+}
 
 bool ExternalModel :: getArray         (const char *, IDataModel *) const
-{}
+{
+  NOT_IMPLEMENTED;
+}
 
-IDataModel* ExternalModel :: getModel(const char *) const 
-{}
-
+IDataModel* ExternalModel :: getModel(const char *k) const 
+{
+  auto key = QString::fromLocal8Bit(k);
+  if (d->dataModelMap.contains(key)) {
+    return d->dataModelMap.value(key);
+  }
+  return nullptr;
+}
 
 const QJsonObject *ExternalModel :: json() const
 {
@@ -260,21 +374,25 @@ void ExternalModel :: setJson(QJsonObject const &obj)
 
 bool ExternalModel :: appendDoubleArray2D (const char *, const std::vector<std::vector<double> >&) 
 {
+  NOT_IMPLEMENTED;
   return false;
 }
 
 bool ExternalModel :: appendDoubleArray3D (const char *, const std::vector<std::vector<std::vector<double> > >&)
 {
+  NOT_IMPLEMENTED;
   return false;
 }
 
 bool ExternalModel :: getDoubleArray2D (const char *, std::vector<std::vector<double> > &) const
 {
+  NOT_IMPLEMENTED;
   return false;
 }
 
 bool ExternalModel :: getDoubleArray3D (const char *, std::vector<std::vector<std::vector<double> > > &) const
 {
+  NOT_IMPLEMENTED;
   return false;
 }
 

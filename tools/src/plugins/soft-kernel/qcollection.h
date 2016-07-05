@@ -28,6 +28,11 @@ public slots:
                  QString const &version,
                  QString const &ns,
                  QString const &uuid);
+
+  QString entityId(QString const &label) const;
+  QString entityName(QString const &label) const;
+  QString entityVersion(QString const &label) const;
+  QString entityNamespace(QString const &label) const;
   
   void findEntity(QString const &label,
 		  QString &name,

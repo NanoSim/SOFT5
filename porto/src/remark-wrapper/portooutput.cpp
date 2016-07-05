@@ -5,6 +5,7 @@
 #include "portooutput.h"
 #include "reference.hxx"
 #include "file.hxx"
+#include "chemkinreaction.hxx"
 #include "common.h"
 
 PortoOutput :: PortoOutput(soft::Collection *collection, QObject *parent)
@@ -55,13 +56,18 @@ void PortoOutput :: run()
     .arg(thermoFileInfo.fileName());
   auto chemkinStorage = new soft::Storage("external", qPrintable(url), "");
 
+  // Read collection from the external storage
   auto chemkinCollection = new soft::Collection();
-  chemkinCollection->setName("ChemkinData");
+  auto chemkinReaction = new soft::Chemkinreaction(0,0,0,0,0);
+  chemkinCollection->attachEntity("reaction_1", chemkinReaction);
+  chemkinCollection->setName("ChemkinCollection");
   chemkinCollection->setVersion("1.0-DEMO");
   chemkinStorage->load(chemkinCollection);
+  storage.save(chemkinCollection);
+  QTextStream(stdout) << "chemkin collection id:" << QString::fromStdString(chemkinCollection->id()) << endl;
 
   // Attach the chemkin collection to out main collection and write back all changes
-  collection->attachEntity("chemkinData", chemkinCollection);  
+  collection->registerEntity("chemkinCollection", chemkinCollection);
   storage.save(collection);  
   
   emit finished();
