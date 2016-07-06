@@ -54,7 +54,7 @@ TEST(codegen, storeSimple)
   storage.save(&simple);
 }
 
-TEST(codegen, chemkinTest)
+TEST(codegen, DISABLED_chemkinTest)
 {
   using namespace soft;
   const std::string chemfile(SOURCE_DIR  "/SurfaceChemkin.inp");
@@ -141,7 +141,7 @@ static QByteArray sha1(QString const &filename) {
   return hash.result();
 }
 
-TEST(codegen, reference)
+TEST(codegen, DISABLED_reference)
 {
   soft::Reference reference;
   QFileInfo info ("/tmp/thermo-edited.dat");
@@ -155,7 +155,7 @@ TEST(codegen, reference)
   storage.save(&reference);
 }
 
-TEST(codegen, file)
+TEST(codegen, DISABLED_file)
 {
   soft::File file;
   QFileInfo info ("/tmp/thermo-edited.dat");
@@ -188,7 +188,7 @@ TEST(codegen, file)
   dataCopy.write((const char*)filecopy.data.data(), (quint64)filecopy.data.size());
 }
 
-TEST(codegen, collectionWithFileAndReference)
+TEST(codegen, DISABLED_collectionWithFileAndReference)
 {
   soft::File file;
   soft::Reference reference;
