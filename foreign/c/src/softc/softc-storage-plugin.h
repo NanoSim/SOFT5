@@ -13,10 +13,10 @@ SOFTC_BEGIN_DECLS
 #define SOFTC_STATUS_OK       0
 #define SOFTC_STATUS_FAILURE  1
 
-int softc_plugin_identify( char* name, int maxlen );
-int softc_plugin_capabilities();
-int softc_plugin_load( softc_datamodel_t* datamodel, const char* uri, const char* options );
-int softc_plugin_save( const softc_datamodel_t* datamodel, const char* uri, const char* options );
+int softc_plugin_identify (char* name, int maxlen);
+int softc_plugin_capabilities ();
+int softc_plugin_load (softc_datamodel_t* datamodel, const char* uri, const char* options);
+int softc_plugin_save (const softc_datamodel_t* datamodel, const char* uri, const char* options);
 
 SOFTC_END_DECLS
 

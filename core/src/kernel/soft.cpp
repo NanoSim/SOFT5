@@ -20,6 +20,7 @@
 
 static const char *storagefactoryid = "ea1ae6168c404a31bcfdd59da91c1e85";
 static const char *pluginDirectory = "/plugins";
+static int verboseLevel = 0;
 
 SOFT_BEGIN_NAMESPACE
 
@@ -71,7 +72,9 @@ static bool registerPlugin(QString const &file)
       }
     }
     else {
-      QTextStream(stderr) << loader->errorString() << endl;
+      if (verboseLevel > 0) {
+        QTextStream(stderr) << loader->errorString() << endl;
+      }
     }
   }
   return false;

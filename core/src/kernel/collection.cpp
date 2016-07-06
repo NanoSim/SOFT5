@@ -107,6 +107,31 @@ void Collection :: addEntity(std::string const &label,
   addRelation(label, "id", uuid);
 }
 
+std::list<std::string> Collection :: findRelations(std::string const &subject,
+                                                  std::string const &object)
+{
+  return d->tripletStore.findTriplets(subject, object);
+}
+
+
+void Collection :: findEntity(std::string const &label,
+			      std::string &name,
+			      std::string &version,
+			      std::string &ns,
+			      std::string &uuid) const
+{
+  auto findFirstTriplet = [this, label](std::string const &rel) -> std::string {
+    auto t = this->d->tripletStore.findTriplets(label, rel);
+    if (t.size() > 0) return t.front();
+    return std::string();
+  };
+  
+  name = findFirstTriplet("name");
+  version = findFirstTriplet("version");
+  ns = findFirstTriplet("namespace");
+  uuid = findFirstTriplet("id");
+}
+
 // Attaches the entity to this collection so that it is loaded and stored
 // with the collection.
 void Collection :: attachEntity(std::string const &label, IEntity *entity) {
@@ -126,6 +151,14 @@ void Collection :: addDim(std::string const &label,
 {
   NOT_IMPLEMENTED
 }
+
+void Collection :: addDimMap(std::string const &label,
+                             std::string const &entityDim,
+                             std::string const &collectionDim)
+{
+  NOT_IMPLEMENTED
+}
+
 
 void Collection :: addRelation(std::string const &subject,
                    std::string const &predicate,
@@ -167,7 +200,11 @@ void Collection :: load (IDataModel const *dataModel)
       auto ie = d->entityMap.find(l);
       if (ie != d->entityMap.end()) {
         IEntity *e = ie->second;
-        ie->second->load(dm);
+        dm->setMetaName(e->metaName());
+        dm->setMetaVersion(e->metaVersion());
+        dm->setMetaNamespace(e->metaNamespace());
+        e->load(dm);
+        e->setId(dm->id());
       }
     }
   }
@@ -183,12 +220,18 @@ void Collection :: save (IDataModel *dataModel) const
   dataModel->appendString("triplets", d->tripletStore.toCSV());
 
   // Also perform a save on all attached entities.
-  for(auto &e: d->entityMap) {
+  for(auto &ie: d->entityMap) {
     // Creates an empty clone of the same data model type
     // TODO: Who owns this data model now? Needs to be freed at some point?
     auto dm = dataModel->createModel();
-    e.second->save(dm);
-    dataModel->appendModel(e.first.c_str(), dm);
+    IEntity *e = ie.second;
+    dm->setId(e->id());
+    dm->setMetaName(e->metaName());
+    dm->setMetaVersion(e->metaVersion());
+    dm->setMetaNamespace(e->metaNamespace());
+
+    e->save(dm);
+    dataModel->appendModel(ie.first.c_str(), dm);
   }
 }
 

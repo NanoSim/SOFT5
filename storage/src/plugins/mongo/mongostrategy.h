@@ -16,9 +16,11 @@ public:
   MongoStrategy& operator= (MongoStrategy const &) =delete;  
   virtual ~MongoStrategy();
 
-  IDataModel* dataModel() const   override;
+  IDataModel* dataModel() const override;
   void store (IDataModel const *) override;
-  void retrieve (IDataModel *) const override;
+  void startRetrieve (IDataModel *) const override;
+  void endRetrieve (IDataModel*) const override;
+
 
   const char *metaType() const;
   static IStorageStrategy* create(char const *uri, char const *opts);

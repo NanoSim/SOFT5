@@ -171,7 +171,7 @@
 }
 #include <stdexcept>
 #include <idatamodel.h>
-#include "@{entity}.h"
+#include "@{entity}.hxx"
 
 SOFT_BEGIN_NAMESPACE
 #define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");

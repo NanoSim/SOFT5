@@ -12,8 +12,8 @@
 #include <QUrl>
 #include <collection.h>
 #include <softc/softc-datamodel-private.hpp>
-#include "financial.h"
-#include "physics.h"
+#include "financial.hxx"
+#include "physics.hxx"
 
 
 int softc_plugin_identify( char* name, int maxlen ) {

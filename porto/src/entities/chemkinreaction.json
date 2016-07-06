@@ -1,5 +1,5 @@
 {
-    "name": "chemkin_reaction",
+    "name": "chemkinReaction",
     "version": "0.1",
     "namespace": "eu.nanosim.vasp",
     "description": "Description of a thermodynamical reaction with rate constant: k(T) = A * T**b * exp(-Ea/(R*T)) where A, b and Ea are parameters, T the temperature and R the molar gas constant (8.31451 J/(mol K)).  See http://www.frad.t.u-tokyo.ac.jp/public/chemkin/CKm_inp.html.en for more details.",

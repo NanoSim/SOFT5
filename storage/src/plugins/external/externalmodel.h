@@ -67,7 +67,7 @@ public:
 private:
   void setJson(QJsonObject const &);
   const QJsonObject *json() const;
-
+  const QJsonObject *dims() const;
   class Private;
   Private *d;
 };

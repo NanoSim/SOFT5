@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>mongo-example.html</title>
+
+</head>
+
+<body>
+
+<h1 id="example-of-using-softshell-to-query-a-mongodb-database">Example of using softshell to query a mongodb database</h1>
+<div class="codehilite"><pre><span class="nv">$ </span>softshell
+SOFT v5.1.5 <span class="o">(</span>GNU LESSER GENERAL PUBLIC LICENSE <span class="o">(</span>v 2.1, February 1999<span class="o">))</span>
+
+For <span class="nb">help</span>, <span class="nb">type</span> :help
+
+
+&gt; var <span class="nv">client</span> <span class="o">=</span> new MongoClient<span class="o">(</span><span class="s2">&quot;mongodb://localhost&quot;</span><span class="o">)</span><span class="p">;</span>
+&gt; var <span class="nv">collection</span> <span class="o">=</span> client.collection<span class="o">(</span><span class="s2">&quot;porto&quot;</span>, <span class="s2">&quot;demo&quot;</span><span class="o">)</span><span class="p">;</span>
+&gt; var <span class="nv">cursor</span> <span class="o">=</span> collection.find<span class="o">({</span><span class="s2">&quot;uuid&quot;</span>:<span class="s2">&quot;{36f217eb-bdfc-4a52-88c3-861ef213b8f7}&quot;</span><span class="o">})</span><span class="p">;</span>
+&gt; var <span class="nv">data</span> <span class="o">=</span> cursor.next<span class="o">()</span><span class="p">;</span>
+&gt; data.asString<span class="o">()</span>
+    <span class="o">{</span> <span class="s2">&quot;_id&quot;</span> : <span class="o">{</span> <span class="s2">&quot;</span><span class="nv">$oid</span><span class="s2">&quot;</span> : <span class="s2">&quot;5775a163945f3f774e434432&quot;</span> <span class="o">}</span>, <span class="s2">&quot;name&quot;</span> : <span class="s2">&quot;&quot;</span>, <span class="s2">&quot;version&quot;</span> : <span class="s2">&quot;&quot;</span>, <span class="s2">&quot;namespace&quot;</span> : <span class="s2">&quot;&quot;</span>, <span class="s2">&quot;uuid&quot;</span> : <span class="s2">&quot;{36f217eb-bdfc-4a52-88c3-861ef213b8f7}&quot;</span>, <span class="s2">&quot;properties&quot;</span> : <span class="o">{</span> <span class="s2">&quot;filename&quot;</span> : <span class="s2">&quot;remarc.in&quot;</span>, <span class="s2">&quot;suffix&quot;</span> : <span class="s2">&quot;in&quot;</span>, <span class="s2">&quot;size&quot;</span> : 628, <span class="s2">&quot;data&quot;</span> : <span class="o">{</span> <span class="s2">&quot;</span><span class="nv">$type</span><span class="s2">&quot;</span> : <span class="s2">&quot;00&quot;</span>, <span class="s2">&quot;</span><span class="nv">$binary</span><span class="s2">&quot;</span> : <span class="s2">&quot;NjAwLiAgICNUX21pbiAoSykKNTAwMC4gICNUX21heCAoSykKMTAuICAgI0RlbHRhX1QgKEspCjAuMiAgICAjZXN0aW1hdGVkIHVuY2VydGFpbnR5IGluIGJhcnJpZXIgaGVpZ2h0IChlbGVjdHJvbiB2b2x0cykKMC4xICAgICNlc3RpbWF0ZWQgdW5jZXJ0YWludHkgaW4gYWRzb3JwdGlvbiBlbmVyZ3kgKGVsZWN0cm9uIHZvbHRzKSAKLjUgICAgI0dhcyBwcmVzc3VyZSAoYXRtKQpZICAgICAgI1Nob3VsZCBmcmVxdWVuY2llcyBiZSB1c2VkIHRvIGNhbGN1bGF0ZSByYXRlIGNvbnN0YW50cz8gKFkgb3IgTikKWSAgICAgICNTaG91bGQgZnJlcXVlbmNpZXMgYmUgdXNlZCBmb3IgY2xlYW4gc3VyZmFjZT8gKFkgb3IgTikKUSAgICAgICNRdWFudHVtIChRKSBvciBjbGFzc2ljYWwgKEMpIHZpYnJhdGlvbmFsIHBhcnRpdGlvbiBmdW5jdGlvbnMgZm9yIHJhdGUgY29uc3RhbnQgY2FsY3VhdGlvbnM/CjEuMEUxMyAjUHJlZmFjdG9yIGZvciByYXRlIGNvbnN0YW50IGNhbGN1bGF0aW9ucyAocy0xKSBpZiBmcmVxdWVuY2llcyBhcmUgbm90IHVzZWQKMS4wRTEzICNQcmVmYWN0b3IgZm9yIGRlc29ycHRpb24gcmF0ZSBjb25zdGFudCBjYWxjdWxhdGlvbnMgKHMtMSkgaWYgZnJlcXVlbmNpZXMgYXJlIG5vdCB1c2VkCg==&quot;</span> <span class="o">}</span> <span class="o">}</span>, <span class="s2">&quot;dimensions&quot;</span> : <span class="o">{</span>  <span class="o">}</span> <span class="o">}</span>
+&gt;
+</pre></div>
+</body>
+</html>

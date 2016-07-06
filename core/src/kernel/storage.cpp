@@ -1,7 +1,7 @@
 #include "storage.h"
 #include "soft.h"
 #include "istoragestrategy.h"
-
+#include "idatamodel.h"
 
 SOFT_BEGIN_NAMESPACE
 
@@ -32,7 +32,12 @@ Storage :: ~Storage()
 
 void Storage :: save (IEntity const *e)
 {
-  auto dataModel = d->strategy->dataModel();
+  IDataModel *dataModel = d->strategy->dataModel();
+  dataModel->setId(e->id());
+  dataModel->setMetaName(e->metaName());
+  dataModel->setMetaVersion(e->metaVersion());
+  dataModel->setMetaNamespace(e->metaNamespace());
+
   e->save(dataModel);
   d->strategy->store(dataModel);
 }
@@ -40,9 +45,14 @@ void Storage :: save (IEntity const *e)
 void Storage :: load (IEntity *e)
 {
   auto dataModel = d->strategy->dataModel();
-  d->strategy->retrieve(dataModel);
+  dataModel->setId(e->id());
+  dataModel->setMetaName(e->metaName());
+  dataModel->setMetaVersion(e->metaVersion());
+  dataModel->setMetaNamespace(e->metaNamespace());
 
+  d->strategy->startRetrieve(dataModel);  
   e->load(dataModel);
+  d->strategy->endRetrieve(dataModel);
 }
 
 IStorageStrategy *Storage :: strategy()

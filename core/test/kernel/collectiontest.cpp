@@ -225,3 +225,25 @@ TEST_F(CollectionTest, saveAndLoadWithEntities) {
   ASSERT_EQ("1.0", e2.version());
   ASSERT_EQ(e.id(), e2.id());
 }
+
+TEST_F(CollectionTest, findEntity)
+{
+  soft::Collection c2;
+  c2.addEntity("lbl1", "foo", "1.0", "space", "647ab24d-2904-4f5d-9d37-581cd3f72367");
+  c2.addEntity("lbl2", "bar", "2.0", "face", "245f8dca-4d42-4d3c-8c5d-8099b6b914d8");
+  c2.addEntity("lbl3", "baz", "1.0", "home", "d1f68e22-919d-44bc-a915-ad3436342b0a");
+  c2.addEntity("lbl4", "qnx", "1.0", "net", "c2b39d37-9f5b-4bba-9040-842465aa5af8");
+
+  std::string name, version, ns, uuid;
+  c2.findEntity("lbl1", name, version, ns, uuid);
+  ASSERT_STREQ(name.c_str(), "foo");
+  ASSERT_STREQ(version.c_str(), "1.0");
+  ASSERT_STREQ(ns.c_str(), "space");
+  ASSERT_STREQ(uuid.c_str(), "647ab24d-2904-4f5d-9d37-581cd3f72367");
+
+  c2.findEntity("lbl3", name, version, ns, uuid);
+  ASSERT_STREQ(name.c_str(), "baz");
+  ASSERT_STREQ(version.c_str(), "1.0");
+  ASSERT_STREQ(ns.c_str(), "home");
+  ASSERT_STREQ(uuid.c_str(), "d1f68e22-919d-44bc-a915-ad3436342b0a");
+}

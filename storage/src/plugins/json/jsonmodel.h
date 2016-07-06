@@ -63,10 +63,10 @@ public:
   bool appendModel(const char *, IDataModel *) override;
   IDataModel* getModel(const char *) const override;
 
-private:
   void setJson(QJsonObject const &);
   const QJsonObject *json() const;
 
+private:
   class Private;
   Private *d;
 };

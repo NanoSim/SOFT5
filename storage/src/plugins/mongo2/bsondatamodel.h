@@ -59,9 +59,14 @@ public:
   virtual bool getArray            (const char *, IDataModel *) const override;
   virtual IDataModel* getModel(const char *) const override;
   virtual bool appendModel(const char *, IDataModel *) override;
-
+  StdStringList getModelLabels() const;
+  
   bson::Bson propertyObject;
   bson::Bson dimsObject;
+
+private:
+  struct Private;
+  std::unique_ptr<Private> d;
 };
 
 SOFT_END_NAMESPACE
