@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <QtCore>
 #include <Soft>
 #include <softc/softc-datamodel-private.hpp>
@@ -50,7 +51,7 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
   StdUInt nenhancement_factors = 0;
   StdUInt nplog = 0;
   int ridx = 0;
-  QList<Chemkinreaction*> reactionsList;
+
   for (auto reaction: reactions) {
     
     auto arrhenius = reaction.getArrhenius();
@@ -59,13 +60,12 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
     auto low = reaction.getLOW();
     auto troe = reaction.getTROE();
 
-    auto chemkinReaction = new Chemkinreaction (reactants.size(), 
-						products.size(), 
-						troe.size(), 
-						0 /* nenhancement_factors */,
-						0 /* nplog */);
-    reactionsList.append(chemkinReaction);
-  
+    std::unique_ptr<Chemkinreaction> chemkinReaction(new Chemkinreaction (reactants.size(), 
+									  products.size(), 
+									  troe.size(), 
+									  0 /* nenhancement_factors */,
+									  0 /* nplog */));
+    
     for(auto reactant: reactants) {
       chemkinReaction->reactants.push_back(reactant.first);
     }
@@ -99,28 +99,13 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
     }
 
     auto const label = QString("reaction_%1").arg(QString::number(ridx)).toStdString();
-    /*
-    auto subModel = datamodel->ref->createModel();//;datamodel->ref->getModel(label.c_str());
-    if (nullptr != subModel) {
-      subModel->setId(chemkinReaction->id());
-      subModel->setMetaName(chemkinReaction->metaName());
-      subModel->setMetaVersion(chemkinReaction->metaVersion());
-      subModel->setMetaNamespace(chemkinReaction->metaNamespace());
-      chemkinReaction->save(subModel);
-      datamodel->ref->appendModel(label.c_str(),subModel);
-    }
-    */
     if (!datamodel->ref->getModel(label.c_str())) {
-        coll.attachEntity(label, chemkinReaction);
+      coll.attachEntity(label, chemkinReaction.get());
     }
     ridx++;
   }
   coll.save(datamodel->ref);
 
-  // Cleanup pointer list
-  while(!reactionsList.isEmpty()) {
-    delete reactionsList.takeFirst();
-  }
   return SOFTC_STATUS_OK;
 }
 
