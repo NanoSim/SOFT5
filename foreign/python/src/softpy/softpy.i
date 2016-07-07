@@ -218,11 +218,11 @@ the same information).
     } else if (PyUnicode_Check(o)) {
       PyObject *bytes = PyUnicode_AsUTF8String(o);
       if (bytes) {
-	str = PyBytes_AS_STRING(bytes);
-	Py_DECREF(bytes);
-	if (!str) return NULL;
-	if ((s = strdup(str))) return s;
-	PyErr_SetString(PyExc_MemoryError, "");
+        str = PyBytes_AS_STRING(bytes);
+        Py_DECREF(bytes);
+        if (!str) return NULL;
+        if ((s = strdup(str))) return s;
+        PyErr_SetString(PyExc_MemoryError, "");
       }
     } else {
       PyErr_SetString(PyExc_TypeError,"must be string or unicode");
@@ -296,7 +296,7 @@ char  *softc_uuidgen();
 /*
  * softc_string_s
  */
-#include "softpy-string.i"
+%include "softpy-string.i"
 
 /*
  * datamodel
@@ -322,7 +322,6 @@ void softc_storage_free_storage_strategy(softc_storage_strategy_t *strategy);
 softc_datamodel_t * softc_storage_strategy_get_datamodel(softc_storage_strategy_t *);
 void softc_storage_strategy_free_datamodel(softc_datamodel_t *datamodel);
 void                softc_storage_strategy_store(softc_storage_strategy_t *, const softc_datamodel_t *);
-void                softc_storage_strategy_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);
 void                softc_storage_strategy_start_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);
 void                softc_storage_strategy_end_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);
 
