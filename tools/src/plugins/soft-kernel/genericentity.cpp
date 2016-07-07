@@ -56,7 +56,8 @@ namespace {
 
   static void appendInt32(IDataModel* dm, const char* key, QJsonValue const &value)
   {
-    assert(value.isDouble());
+    assert(!value.isNull());
+    assert(!value.isUndefined());
     dm->appendInt32(key, value.toInt());
   }
 
@@ -92,7 +93,8 @@ namespace {
     auto valueList = value.toArray();
     soft::StdIntArray array(valueList.size());
     std::transform(valueList.constBegin(), valueList.constEnd(), array.begin(),[] (QJsonValue const &value) {
-        assert(value.isDouble());
+        assert(!value.isUndefined());
+        assert(!value.isNull());
         return value.toInt();
       });
     dm->appendInt32Array(key, array);
@@ -427,13 +429,18 @@ void GenericEntity :: load(IDataModel const *dataModel)
       QJsonValue propValue;
       (*it->second)(dataModel, qPrintable(propName), propValue);
       d->doc.insert(propName, propValue);
+      QJsonDocument doc(d->doc);
     }     
   }
 }
 
 IEntity* GenericEntity :: create (const std::string &uuid)
 {
-    NOT_IMPLEMENTED
+    if (uuid.empty()) {
+      return new GenericEntity();
+    }
+
+    return new GenericEntity(uuid);
 }
 
 std::vector<std::string> GenericEntity :: dimensions() const

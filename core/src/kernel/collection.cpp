@@ -107,6 +107,13 @@ void Collection :: addEntity(std::string const &label,
   addRelation(label, "id", uuid);
 }
 
+std::list<std::string> Collection :: findRelations(std::string const &subject,
+                                                  std::string const &object)
+{
+  return d->tripletStore.findTriplets(subject, object);
+}
+
+
 void Collection :: findEntity(std::string const &label,
 			      std::string &name,
 			      std::string &version,

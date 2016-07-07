@@ -59,7 +59,7 @@ function quote( str ) {
         def += "b.prototype.setAll=function(){"+sets.join("")+"};";
         def += "b.prototype.getAll=function(){"+gets.join("")+"};";
         def += "};return b.prototype.constructor;})();";
-
+	
         return eval(def);
         
 

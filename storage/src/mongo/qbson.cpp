@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QVector>
 #include <QList>
 #include <list>
@@ -270,7 +269,6 @@ bool Bson :: getBinary (char const *key, QByteArray &value) const
   if (bson_iter_init_find(&iter, bson.get(), key) &&
       BSON_ITER_HOLDS_BINARY(&iter)) {
     auto v = bson_iter_value(&iter);
-    qDebug() << "bin size: ==" << v->value.v_binary.data_len;
     value = QByteArray::fromRawData((const char*)v->value.v_binary.data, v->value.v_binary.data_len);
     return true;
   }

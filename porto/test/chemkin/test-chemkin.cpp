@@ -3,7 +3,7 @@
 
 #include "chemkinreaction.hxx"
 
-TEST (ChemkinTest, construct)
+TEST (ChemkinTest, DISABLED_construct)
 {
   auto storage = new soft::Storage("external", "chemkin:///home/thomas/Project/REMARC/src?chem=SurfaceChemkin.inp&thermo=thermo.dat", "");
   ASSERT_TRUE(nullptr != storage);

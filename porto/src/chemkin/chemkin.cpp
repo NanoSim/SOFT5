@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <QtCore>
 #include <Soft>
 #include <softc/softc-datamodel-private.hpp>
@@ -34,7 +35,9 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
   std::string const chemfile  = chemFileInfo.absoluteFilePath().toStdString();
   std::string const thermfile = thermFileInfo.absoluteFilePath().toStdString();
 
-  soft::Collection coll;
+  //  soft::Collection coll(datamodel->ref->id());
+  soft::Collection coll(datamodel->ref);
+
   IO::ChemkinReader chemkinReader(chemfile, thermfile);
   chemkinReader.read();
   auto reactions = chemkinReader.reactions();
@@ -48,7 +51,7 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
   StdUInt nenhancement_factors = 0;
   StdUInt nplog = 0;
   int ridx = 0;
-  QList<Chemkinreaction*> reactionsList;
+
   for (auto reaction: reactions) {
     
     auto arrhenius = reaction.getArrhenius();
@@ -57,13 +60,12 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
     auto low = reaction.getLOW();
     auto troe = reaction.getTROE();
 
-    auto chemkinReaction = new Chemkinreaction (reactants.size(), 
-						products.size(), 
-						troe.size(), 
-						0 /* nenhancement_factors */,
-						0 /* nplog */);
-    reactionsList.append(chemkinReaction);
-  
+    std::unique_ptr<Chemkinreaction> chemkinReaction(new Chemkinreaction (reactants.size(), 
+									  products.size(), 
+									  troe.size(), 
+									  0 /* nenhancement_factors */,
+									  0 /* nplog */));
+    
     for(auto reactant: reactants) {
       chemkinReaction->reactants.push_back(reactant.first);
     }
@@ -97,19 +99,13 @@ int softc_plugin_load (softc_datamodel_t* datamodel, char const *uri, char const
     }
 
     auto const label = QString("reaction_%1").arg(QString::number(ridx)).toStdString();
-    auto subModel = datamodel->ref->getModel(label.c_str());
-    if (nullptr != subModel) {
-      chemkinReaction->save(subModel);
+    if (!datamodel->ref->getModel(label.c_str())) {
+      coll.attachEntity(label, chemkinReaction.get());
     }
-    //    coll.attachEntity(label, chemkinReaction);
     ridx++;
   }
   coll.save(datamodel->ref);
 
-  // Cleanup pointer list
-  while(!reactionsList.isEmpty()) {
-    delete reactionsList.takeFirst();
-  }
   return SOFTC_STATUS_OK;
 }
 

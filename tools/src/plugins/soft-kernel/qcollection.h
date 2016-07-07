@@ -28,6 +28,11 @@ public slots:
                  QString const &version,
                  QString const &ns,
                  QString const &uuid);
+
+  QString entityId(QString const &label) const;
+  QString entityName(QString const &label) const;
+  QString entityVersion(QString const &label) const;
+  QString entityNamespace(QString const &label) const;
   
   void findEntity(QString const &label,
 		  QString &name,
@@ -51,6 +56,7 @@ public slots:
                  QString const &entityDim,
                  QString const &collectionDim);
 
+  QStringList findRelations(QString const &subject, QString const &object);
   int numEntities() const;
   int numRelations() const;
 };

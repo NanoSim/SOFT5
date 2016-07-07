@@ -2,6 +2,7 @@
 #include <iostream>
 #include "qentity.h"
 #include "qstorage.h"
+#include "genericentity.h"
 
 QStorage :: QStorage(QString const &driver,
 	 QString const &uri,
@@ -28,7 +29,7 @@ void QStorage :: save (QEntity *entity)
 
 void QStorage :: load (QEntity *entity)
 {
-  try {
+  try {    
     storage->load(entity->entity.data());
   } catch(const std::invalid_argument& ia) {
     std::cerr << "Invalid argument: " << ia.what() << "\n";

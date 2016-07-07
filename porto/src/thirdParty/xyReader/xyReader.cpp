@@ -1,6 +1,8 @@
 #include <QtCore>
 #include "xyReader.h"
 
+#define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
+
 namespace IO {
   
 XYReader :: XYReader(std::string const &xyfile)
@@ -20,6 +22,8 @@ void XYReader :: read()
     qWarning() << "Unable to read file " << info.absoluteFilePath() << ": " << file.errorString();
     return;
   }
+
+  NOT_IMPLEMENTED
 }
 
 void XYReader :: write()
@@ -31,6 +35,8 @@ void XYReader :: write()
     qWarning() << "Unable to read file " << info.absoluteFilePath() << ": " << file.errorString();
     return;
   }
+
+  NOT_IMPLEMENTED
 }
 
 }
