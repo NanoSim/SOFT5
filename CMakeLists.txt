@@ -131,12 +131,18 @@ function (add_forge entity template_src output_src template_hdr output_hdr)
     COMMAND ${CMAKE_COMMAND} -E env "SOFT_MODULES=${softshell_MODULES_DIR}" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_hdr} ${output_hdr}
     DEPENDS ${entity} ${C_HEADER_TEMPLATE} softshell
     )
+  
+  message("Forge: ${CMAKE_COMMAND} -E env \"SOFT_MODULES=${softshell_MODULES_DIR}\" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_hdr} ${output_hdr}")
 
   add_custom_command(
     OUTPUT ${output_src}
     COMMAND ${CMAKE_COMMAND} -E env "SOFT_MODULES=${softshell_MODULES_DIR}" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_src} ${output_src}
     DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr} softshell
     )
+
+  message("Forge: ${CMAKE_COMMAND} -E env \"SOFT_MODULES=${softshell_MODULES_DIR}\" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_src} ${output_src}")
+
+
 endfunction()
 
 ######################
