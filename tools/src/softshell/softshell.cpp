@@ -20,24 +20,29 @@ QString read(const QString &filename)
    QFile file(filename);
    if (!file.open (QIODevice::ReadOnly | QIODevice::Text))
       return QString();
-  
+
    QTextStream in(&file);
    return in.readAll();
 }
 
-bool reportError( QScriptEngine *engine, const QScriptValue &retval)
+bool reportError( QScriptEngine *engine, const QScriptValue &retval, const QString &programFile)
 {
    if( engine->hasUncaughtException() ) {
       QStringList const backtrace = engine->uncaughtExceptionBacktrace();
-      QTextStream(stderr) << qPrintable(retval.toString()) 
-			  << "\n\t== STACKTRACE ==\n\t" << qPrintable(backtrace.join("\n\t"))
-			  << "\n";
-    
+      QTextStream(stderr) << qPrintable(retval.toString())
+                          << "\n\t== STACKTRACE ==\n\t" << qPrintable(backtrace.join("\n\t"))
+                          << "\n"
+                          << "In: " << programFile
+                          << "\n"
+                          << "Application arguments: " << QCoreApplication::arguments().join(" ")
+                          << "\n";
+
+
 //      engine->clearExceptions();
-    
-      return true;    
-   }  
-   return false;  
+
+      return true;
+   }
+   return false;
 }
 
 QScriptValue exceptionBacktrace(QScriptContext *, QScriptEngine *engine)
@@ -65,7 +70,7 @@ QScriptValue writeline(QScriptContext *context, QScriptEngine *engine)
    if(context->argumentCount() < 1) return engine->undefinedValue();
    QTextStream(stdout) << context->argument(0).toString().toUtf8();
    return engine->undefinedValue();
-  
+
 }
 
 QScriptValue writeFile(QScriptContext *context, QScriptEngine *engine)
@@ -85,11 +90,11 @@ QScriptValue readline(QScriptContext *context, QScriptEngine *engine)
 {
    Q_UNUSED(engine);
    Q_UNUSED(context);
-  
-   QString buffer;  
+
+   QString buffer;
    QTextStream stream(stdin);
    buffer = stream.readLine();
-   return QScriptValue(buffer);  
+   return QScriptValue(buffer);
 }
 
 
@@ -108,7 +113,7 @@ QString findModule(const QString &module)
       QString const file = path + "/" + copyStr.replace(QChar('.'), QChar('/')) + ".js";
 
       if( QFile::exists(file) ) {
-	 return file;
+   return file;
       }
    }
    return QString();
@@ -118,7 +123,7 @@ QScriptValue uuidgen(QScriptContext *context, QScriptEngine *engine)
 {
    Q_UNUSED(context);
    Q_UNUSED(engine);
-   
+
    QScriptValue const ret(QUuid::createUuid().toString());
    return ret;
 }
@@ -126,14 +131,14 @@ QScriptValue uuidgen(QScriptContext *context, QScriptEngine *engine)
 QScriptValue isValidModule(QScriptContext *context, QScriptEngine *engine)
 {
    if(context->argumentCount() != 1) return QScriptValue(false);
-   const QString moduleName = context->argument(0).toString(); 
+   const QString moduleName = context->argument(0).toString();
    return QScriptValue (!findModule(moduleName).isEmpty());
 }
 
 QScriptValue require(QScriptContext *context, QScriptEngine *engine)
 {
    if(context->argumentCount() != 1) return engine->undefinedValue();
-   const QString nsFile = context->argument(0).toString(); 
+   const QString nsFile = context->argument(0).toString();
    const QString filename = findModule(nsFile);
    if( filename.isEmpty() ) {
       return context->throwError(QString("failed to find module %1").arg(nsFile));
@@ -146,13 +151,13 @@ QScriptValue require(QScriptContext *context, QScriptEngine *engine)
       stream << read(filename);
       stream << ";return exports;})({filename:\'" << filename << "\'});";
    }
-  
+
    QScriptContext *parentContext = context->parentContext();
    context->setActivationObject( parentContext->activationObject() );
    context->setThisObject( parentContext->thisObject() );
    QScriptProgram extension(ba, filename, 1);
    const QScriptValue ret =  engine->evaluate(extension);
-   if( reportError(engine, ret) )
+   if( reportError(engine, ret, filename) )
       return engine->undefinedValue();
 
    return ret;
@@ -160,7 +165,7 @@ QScriptValue require(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue importExtension(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("importExtension() takes exactly one argument");
 
    return engine->importExtension(context->argument(0).toString());
@@ -169,7 +174,7 @@ QScriptValue importExtension(QScriptContext *context, QScriptEngine *engine)
 QScriptValue isIncompleteSyntax(QScriptContext *context, QScriptEngine *engine)
 {
    Q_UNUSED(engine);
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isIncompleteSyntax() takes exactly one argument");
    QString const source = context->argument(0).toString();
    QScriptSyntaxCheckResult res = QScriptEngine::checkSyntax(source);
@@ -179,7 +184,7 @@ QScriptValue isIncompleteSyntax(QScriptContext *context, QScriptEngine *engine)
 QScriptValue isErrorSyntax(QScriptContext *context, QScriptEngine *engine)
 {
    Q_UNUSED(engine);
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isErrorSyntax() takes exactly one argument");
    QString const source = context->argument(0).toString();
    QScriptSyntaxCheckResult res = QScriptEngine::checkSyntax(source);
@@ -188,15 +193,15 @@ QScriptValue isErrorSyntax(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue errorMessage(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("errorMessage() takes exactly one argument");
    QString const source = context->argument(0).toString();
    QScriptSyntaxCheckResult res = QScriptEngine::checkSyntax(source);
    if ( res.state() == QScriptSyntaxCheckResult::Error ) {
       return QScriptValue(QString("%1 in line: %2 col: %3")
-			  .arg(res.errorMessage())	
-			  .arg(res.errorLineNumber())
-			  .arg(res.errorColumnNumber()));
+        .arg(res.errorMessage())
+        .arg(res.errorLineNumber())
+        .arg(res.errorColumnNumber()));
    }
    return engine->undefinedValue();
 }
@@ -204,7 +209,7 @@ QScriptValue errorMessage(QScriptContext *context, QScriptEngine *engine)
 QScriptValue isValidSyntax(QScriptContext *context, QScriptEngine *engine)
 {
    Q_UNUSED(engine);
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isValidSyntax() takes exactly one argument");
    QString const source = context->argument(0).toString();
    QScriptSyntaxCheckResult res = QScriptEngine::checkSyntax(source);
@@ -214,7 +219,7 @@ QScriptValue isValidSyntax(QScriptContext *context, QScriptEngine *engine)
 #if 0
 QScriptValue objectToString(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
      return context->throwError("objectToString() takes exactly one argument");
 
    auto value = context->argument(0);
@@ -232,7 +237,7 @@ QScriptValue objectToString(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isArray(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isArray() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isArray());
 }
@@ -240,7 +245,7 @@ QScriptValue isArray(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isBool(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isBool() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isBool());
 }
@@ -248,7 +253,7 @@ QScriptValue isBool(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isDate(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isDate() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isDate());
 }
@@ -256,7 +261,7 @@ QScriptValue isDate(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isError(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isError() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isError());
 }
@@ -264,7 +269,7 @@ QScriptValue isError(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isFunction(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isFunction() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isFunction());
 }
@@ -272,7 +277,7 @@ QScriptValue isFunction(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isNull(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isNull() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isNull());
 }
@@ -280,7 +285,7 @@ QScriptValue isNull(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isNumber(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isNumber() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isNumber());
 }
@@ -288,28 +293,28 @@ QScriptValue isNumber(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isString(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isString() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isString());
 }
 
 QScriptValue isRegExp(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isRegExp() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isRegExp());
 }
 
 QScriptValue isUndefined(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isUndefined() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isUndefined());
 }
 
 QScriptValue isObject(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isObject() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isObject());
 }
@@ -317,7 +322,7 @@ QScriptValue isObject(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isQObject(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isQObject() takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isQObject());
 }
@@ -325,14 +330,14 @@ QScriptValue isQObject(QScriptContext *context, QScriptEngine *engine)
 
 QScriptValue isQMetaObject(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("isQMetaObject () takes exactly one argument");
    return engine->toScriptValue(context->argument(0).isQMetaObject());
 }
 
 QScriptValue fileRead(QScriptContext *context, QScriptEngine *)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("fileRead() takes exactly one argument");
 
    QString const filename = context->argument(0).toString();
@@ -345,14 +350,14 @@ QScriptValue fileRead(QScriptContext *context, QScriptEngine *)
    QTextStream in(&file);
    QScriptValue const retval(in.readAll());
    return retval;
-  
-   //  return engine->toScriptValue(in.readAll());  
+
+   //  return engine->toScriptValue(in.readAll());
 }
 
 
 QScriptValue checkSyntax(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("checkSyntax() takes exactly one argument");
 
    QString const filename = context->argument(0).toString();
@@ -361,26 +366,26 @@ QScriptValue checkSyntax(QScriptContext *context, QScriptEngine *engine)
    {
       return context->throwError("Could not open " + filename + " for reading.");
    }
-  
+
    QTextStream in(&file);
    QScriptSyntaxCheckResult results = QScriptEngine::checkSyntax(in.readAll());
    if( results.state() != QScriptSyntaxCheckResult::Valid )
    {
       QString errorMessage = QString("%1:%2:%3:%4")
-	 .arg(filename)
-	 .arg(QString::number(results.errorLineNumber()))
-	 .arg(QString::number(results.errorColumnNumber()))
-	 .arg(results.errorMessage());
-      return context->throwError(errorMessage);    
+   .arg(filename)
+   .arg(QString::number(results.errorLineNumber()))
+   .arg(QString::number(results.errorColumnNumber()))
+   .arg(results.errorMessage());
+      return context->throwError(errorMessage);
    }
-   return engine->undefinedValue();  
+   return engine->undefinedValue();
 }
 
 QScriptValue load(QScriptContext *context, QScriptEngine *engine)
 {
-   if(context->argumentCount() != 1 ) 
+   if(context->argumentCount() != 1 )
       return context->throwError("load() takes exactly one argument");
-  
+
    QString filename = context->argument(0).toString();
    QFile file(filename);
    if( file.open(QIODevice::Text | QIODevice::ReadOnly) )
@@ -392,11 +397,11 @@ QScriptValue load(QScriptContext *context, QScriptEngine *engine)
       // If the header is a bash-script, ignore the line
       auto ignore = (header.contains (QRegExp("^#\\!\\/.*$")));
       QScriptValue ret = engine->evaluate((ignore ? QString() : header) + in.readAll() , filename);
-      
-      if( reportError(engine, ret) )
-	 return engine->undefinedValue();
-    
-      return ret;    
+
+      if( reportError(engine, ret, filename) )
+   return engine->undefinedValue();
+
+      return ret;
    }
    return context->throwError("Could not open " + filename + " for reading.");
 }
@@ -436,17 +441,17 @@ void loadSoftModule()
       QChar const separator(':');
 #endif
       foreach( QString const & p, env.value("SOFT_MODULES").split(separator) ) {
-	 qApp->addLibraryPath(p);
+   qApp->addLibraryPath(p);
       }
    }
 
 }
 
 template <class Function>
-static void registerFunction (QScriptEngine *engine, 
-			      QString const & name, 
-			      Function fn, 
-			      QString const & doc = QString())
+static void registerFunction (QScriptEngine *engine,
+            QString const & name,
+            Function fn,
+            QString const & doc = QString())
 {
    auto scriptFunction = engine->newFunction(fn);
    if (!doc.isEmpty()) {
@@ -456,11 +461,11 @@ static void registerFunction (QScriptEngine *engine,
 }
 
 template <class Function>
-static void registerFunction (QScriptEngine *engine, 
-			      QString const & name, 
-			      Function fn, 
-			      QScriptValue *obj,
-			      QString const & doc = QString())
+static void registerFunction (QScriptEngine *engine,
+            QString const & name,
+            Function fn,
+            QScriptValue *obj,
+            QString const & doc = QString())
 {
    auto scriptFunction = engine->newFunction(fn);
    if (!doc.isEmpty()) {
@@ -503,7 +508,7 @@ void registerBase(QScriptEngine *engine)
    registerFunction(engine, "isNumber", isNumber);
    registerFunction(engine, "isString", isString);
    registerFunction(engine, "isRegExp", isRegExp);
-   registerFunction(engine, "isUndefined", isUndefined); 
+   registerFunction(engine, "isUndefined", isUndefined);
    registerFunction(engine, "isObject", isObject);
    registerFunction(engine, "isQObject", isQObject);
    registerFunction(engine, "isQMetaObject", isQMetaObject);
@@ -514,41 +519,41 @@ ANONYMOUS_END_NAMESPACE
 
 int startRepl (soft::ScriptEngine const &e)
 {
-   auto engine = static_cast<QScriptEngine*>(e.ref());
-   
-   loadSoftModule();
-   registerBase(engine);
-   
-   QString programFile = (QCoreApplication::arguments().count() < 2 ?
-			  QString(":/resources/repl.js") :
-			  QCoreApplication::arguments()[1]);
-   
-   QFile file(programFile);
-   if (!file.open (QIODevice::ReadOnly | QIODevice::Text)) {
-     QTextStream(stderr) << file.errorString() << endl;
-     return 1;
-   }
-   //   QFileInfo info(programFile);
-   //   QDir::setCurrent(info.path());
-   
-   QTextStream in(&file);
-   QString buffer;
-   auto header = in.readLine();
-   if (!header.contains(QRegExp("^[#!/]{1}.*$"))) {
-     buffer = header;
-   }
-   
-   buffer += in.readAll();
-   QScriptProgram program(buffer, programFile);
-   auto result = engine->evaluate(program);
-   if (reportError(engine, result)) {
-     return 1;
-   }
-   
-   auto mainFunction = engine->globalObject().property("__main__");
-   auto argList = qScriptValueFromSequence(engine, QCoreApplication::arguments().mid(1));
-   auto args = QScriptValueList() << argList;
-   auto mainReturn = mainFunction.call (QScriptValue(), args);  
-   
-   return mainReturn.toInteger();  
+  auto engine = static_cast<QScriptEngine*>(e.ref());
+
+  loadSoftModule();
+  registerBase(engine);
+
+  QString programFile = (QCoreApplication::arguments().count() < 2 ?
+                           QString(":/resources/repl.js") :
+                           QCoreApplication::arguments()[1]);
+
+  QFile file(programFile);
+  if (!file.open (QIODevice::ReadOnly | QIODevice::Text)) {
+    QTextStream(stderr) << file.errorString() << endl;
+    return 1;
+  }
+  //   QFileInfo info(programFile);
+  //   QDir::setCurrent(info.path());
+
+  QTextStream in(&file);
+  QString buffer;
+  auto header = in.readLine();
+  if (!header.contains(QRegExp("^[#!/]{1}.*$"))) {
+    buffer = header;
+  }
+
+  buffer += in.readAll();
+  QScriptProgram program(buffer, programFile);
+  auto result = engine->evaluate(program);
+  if (reportError(engine, result, program.fileName())) {
+    return 1;
+  }
+
+  auto mainFunction = engine->globalObject().property("__main__");
+  auto argList = qScriptValueFromSequence(engine, QCoreApplication::arguments().mid(1));
+  auto args = QScriptValueList() << argList;
+  auto mainReturn = mainFunction.call (QScriptValue(), args);
+
+  return mainReturn.toInteger();
 }

@@ -32,6 +32,7 @@ m.string_list = ['this', 'is', 'a', 'test', 'string-list']
 
 # Store
 storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
+#storage = softpy.storage_create('mongo2', 'mongodb://localhost/', 'db=something;coll=foo')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 
@@ -42,7 +43,7 @@ softpy.datamodel_set_meta_namespace(model, m._namespace)
 
 softpy.datamodel_append_int32(model, 'int32', m.int32)
 softpy.datamodel_append_double(model, 'double', m.double)
-softpy.datamodel_append_string(model, 'string', softc_string_create(m.string))
+softpy.datamodel_append_string(model, 'string', m.string)
 #softpy.datamodel_append_blob(model, 'blob', m.blob)
 softpy.datamodel_append_array_int32(
     model, 'int32_array', m.int32_array)
@@ -61,6 +62,7 @@ softpy.storage_free(storage)
 
 # Load
 storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
+#storage = softpy.storage_create('mongo2', 'mongodb://localhost/', 'db=something;coll=foo')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 
