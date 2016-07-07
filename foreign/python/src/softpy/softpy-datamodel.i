@@ -10,8 +10,8 @@
 
 %apply (int32_t       *IN_ARRAY1, size_t DIM1)                           {(const int32_t  *value, size_t size)};
 %apply (double        *IN_ARRAY1, size_t DIM1)                           {(const double   *value, size_t size)};
-%apply (double      **IN_ARRAY2D, size_t DIM1, size_t DIM2)              {(const double  **value, size_t size_i, size_t size_j)};
-%apply (double     ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3) {(const double ***value, size_t size_i, size_t size_j, size_t size_k)};
+%apply (double      **IN_ARRAY2D, size_t DIM1, size_t DIM2)              {(const double* const*value, size_t size_i, size_t size_j)};
+%apply (double     ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3) {(const double* const* const*value, size_t size_i, size_t size_j, size_t size_k)};
 bool softc_datamodel_append_dimension      (softc_datamodel_t *model, const char *key, uint32_t value);
 bool softc_datamodel_append_string         (softc_datamodel_t *model, const char *key, const softc_string_s value);
 bool softc_datamodel_append_int8           (softc_datamodel_t *model, const char *key, int8_t value);
