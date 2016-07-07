@@ -2,25 +2,24 @@ cmake_minimum_required(VERSION 3.2)
 include(CPack)
 project(soft5)
 
-option (WITH_WEB "Compile with Web support"               ON)
-option (WITH_HSM "Compile with HSM plugin"                ON)
-option (WITH_STORAGE_HD5 "HDF5 storage support"           ON)
 option (WITH_STORAGE_MONGO "MongoDB storage support"      ON)
 option (WITH_STORAGE_JSON "JSON storage support"          ON)
 option (WITH_STORAGE_EXTERNAL "External storage support"  ON)
-option (WITH_PLUGIN_GSL "Compile GSL plugin"              ON)
-option (WITH_PLUGIN_NLOPT "Compile NLOpt plugin"          ON)
-option (WITH_PLUGIN_HD5 "Compile HD5 plugin"              ON)
-option (WITH_PLUGIN_MONGO "Compile HD5 plugin"            ON)
 option (WITH_PLUGIN_SOFT_KERNEL "Compile kernel plugin"   ON)
 option (WITH_FOREIGN_C "Compile with C API"               ON)
+option (WITH_TESTS "Compile tests"                        ON)
+option (WITH_WEB "Compile with Web support"               OFF)
+option (WITH_HSM "Compile with HSM plugin"                OFF)
+option (WITH_STORAGE_HD5 "HDF5 storage support"           OFF)
+option (WITH_PLUGIN_GSL "Compile GSL plugin"              OFF)
+option (WITH_PLUGIN_NLOPT "Compile NLOpt plugin"          OFF)
+option (WITH_PLUGIN_HD5 "Compile HDF5 plugin"             OFF)
+option (WITH_PLUGIN_MONGO "Compile MongoDB plugin"        OFF)
 option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   OFF)
 option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
-option (WITH_NUMERICS "Compile with SOFT Numerics"        ON)
+option (WITH_NUMERICS "Compile with SOFT Numerics"        OFF)
 option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
-#option (WITH_FOREIGN_HASKELL "Compile with Haskell API" OFF)
-option (WITH_TESTS "Compile tests"                        ON)
-option (WITH_PORTO "Compile porto plugins"                ON)
+option (WITH_PORTO "Compile porto plugins"                OFF)
 
 set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -40,8 +39,8 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package (BSON REQUIRED)
 find_package (Qt5Core REQUIRED)
-find_package (Qt5Network REQUIRED) 
-find_package (Qt5Script REQUIRED) 
+find_package (Qt5Network REQUIRED)
+find_package (Qt5Script REQUIRED)
 find_package (Qt5Concurrent REQUIRED)
 
 set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
@@ -64,7 +63,7 @@ set (SOFT_PATCH_VERSION 5)
 # Tests
 # Run them with "ctest -V" or "make check" to get verbose output.
 if (WITH_TESTS)
-  enable_testing()  
+  enable_testing()
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
 
 endif (WITH_TESTS)
@@ -101,7 +100,7 @@ if ("${LIB64}" STREQUAL "TRUE")
 else()
   set(LIBSUFFIX "")
 endif()
-set(LIB_INSTALL_DIR lib${LIBSUFFIX} CACHE PATH 
+set(LIB_INSTALL_DIR lib${LIBSUFFIX} CACHE PATH
   "Installation directory for libraries")
 mark_as_advanced(LIB_INSTALL_DIR)
 
@@ -112,6 +111,12 @@ set (SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
 set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
+
+#####################
+# add_forge
+#####################
+
+include(cmake/add_forge.cmake)
 
 
 ######################
@@ -124,6 +129,9 @@ add_subdirectory(core/src/kernel)
 if (WITH_FOREIGN_C)
   add_subdirectory(foreign/c/src/softc)
 endif (WITH_FOREIGN_C)
+
+add_subdirectory(tools/src/softshell)
+add_subdirectory(tools/src/forge)
 
 # Storage
 if (WITH_STORAGE_HD5)
@@ -152,18 +160,16 @@ endif (WITH_STORAGE_JSON)
 
 if (WITH_STORAGE_EXTERNAL)
   add_subdirectory(storage/src/plugins/external)
-  if (WITH_TESTS)	
+  if (WITH_TESTS)
     add_subdirectory(storage/test/plugins/external)
-  endif (WITH_TESTS)	
+  endif (WITH_TESTS)
 endif (WITH_STORAGE_EXTERNAL)
 
 # Tools
-add_subdirectory(tools/src/softshell)
 if (WITH_PLUGIN_MONGO)
   add_subdirectory(tools/src/plugins/mongo)
 endif (WITH_PLUGIN_MONGO)
 
-add_subdirectory(tools/src/forge)
 
 if (WITH_PLUGIN_GSL)
   add_subdirectory(tools/src/plugins/gsl)
@@ -197,7 +203,7 @@ endif(WITH_WEB)
 if (WITH_FOREIGN_C)
   if (WITH_TESTS)
     add_subdirectory(foreign/c/test/softc)
-    add_subdirectory(foreign/c/test/storage)	
+    add_subdirectory(foreign/c/test/storage)
   endif (WITH_TESTS)
 endif (WITH_FOREIGN_C)
 
@@ -217,15 +223,11 @@ if (WITH_FOREIGN_PYTHON)
   endif (WITH_TESTS)
 endif (WITH_FOREIGN_PYTHON)
 
-if (WITH_FOREIGN_HASKELL)
-  message("Haskell is currently not supported")
-endif (WITH_FOREIGN_HASKELL)
-
 if (WITH_NUMERICS)
   add_subdirectory(numerics/src/sim)
   if (WITH_TESTS)
     add_subdirectory(numerics/test/sim)
-  endif(WITH_TESTS)  
+  endif(WITH_TESTS)
 endif (WITH_NUMERICS)
 
 if (WITH_PORTO)
@@ -244,7 +246,7 @@ if (WITH_PORTO)
   add_subdirectory(porto/src/xyplot)
   add_subdirectory(porto/src/dft-prepare)
   add_subdirectory(porto/src/remark-wrapper)
-  
+
  if (WITH_TESTS)
    add_subdirectory(porto/test/json)
    add_subdirectory(porto/test/chemkin)
@@ -252,7 +254,7 @@ if (WITH_PORTO)
 #    add_subdirectory(porto/test/xyplot)
    add_subdirectory(porto/test/thirdParty/chemkinReader)
    add_subdirectory(porto/test/thirdParty/remarcReader)
-   add_subdirectory(porto/test/parscale)  
+   add_subdirectory(porto/test/parscale)
  endif (WITH_TESTS)
 
 endif (WITH_PORTO)
