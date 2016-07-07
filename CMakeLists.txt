@@ -121,6 +121,14 @@ set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 # a header and source file
 function (add_forge entity template_src output_src template_hdr output_hdr)
 
+  if ("" STREQUAL "${softshell_APP}")
+    message(FATAL_ERROR "softshell_APP not defined")
+  endif()
+
+  if ("" STREQUAL "${soft-forge_APP}")
+    message(FATAL_ERROR "soft-forge_APP not defined")
+  endif()
+
   # Note: To force the softshell to be run with the SOFT_MODULES environment variable, CMake has to be invoked
   #       as a wrapper to the softshell application, using the -E switch.
   # Note: Dependencies are set up to softshell so that the build order is conserved even when running with a
@@ -129,19 +137,14 @@ function (add_forge entity template_src output_src template_hdr output_hdr)
   add_custom_command(
     OUTPUT ${output_hdr}
     COMMAND ${CMAKE_COMMAND} -E env "SOFT_MODULES=${softshell_MODULES_DIR}" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_hdr} ${output_hdr}
-    DEPENDS ${entity} ${C_HEADER_TEMPLATE} softshell
+    DEPENDS ${entity} ${C_HEADER_TEMPLATE} softshell ${soft-forge_APP}
     )
   
-  message("Forge: ${CMAKE_COMMAND} -E env \"SOFT_MODULES=${softshell_MODULES_DIR}\" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_hdr} ${output_hdr}")
-
   add_custom_command(
     OUTPUT ${output_src}
     COMMAND ${CMAKE_COMMAND} -E env "SOFT_MODULES=${softshell_MODULES_DIR}" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_src} ${output_src}
-    DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr} softshell
+    DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr} softshell ${soft-forge_APP}
     )
-
-  message("Forge: ${CMAKE_COMMAND} -E env \"SOFT_MODULES=${softshell_MODULES_DIR}\" ${softshell_APP} ${soft-forge_APP} ${entity} ${template_src} ${output_src}")
-
 
 endfunction()
 
@@ -157,6 +160,7 @@ if (WITH_FOREIGN_C)
 endif (WITH_FOREIGN_C)
 
 add_subdirectory(tools/src/softshell)
+add_subdirectory(tools/src/forge)
 
 # Storage
 if (WITH_STORAGE_HD5)
@@ -195,7 +199,6 @@ if (WITH_PLUGIN_MONGO)
   add_subdirectory(tools/src/plugins/mongo)
 endif (WITH_PLUGIN_MONGO)
 
-add_subdirectory(tools/src/forge)
 
 if (WITH_PLUGIN_GSL)
   add_subdirectory(tools/src/plugins/gsl)
