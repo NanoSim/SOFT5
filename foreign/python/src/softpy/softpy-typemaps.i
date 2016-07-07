@@ -32,6 +32,7 @@
 
 
 /* Converts Python sequence of strings to (char **, size_t) */
+/*
 %typemap("doc") (char **IN_STRING_LIST, size_t LEN) "Sequence of strings."
 %typemap(in,numinputs=1) (char **IN_STRING_LIST, size_t LEN) {
   if (PySequence_Check($input)) {
@@ -43,7 +44,7 @@
       $1[i] = pystring(o);
       Py_DECREF(o);
       if (!$1[i]) {
-	return NULL;
+        return NULL;
       }
     }
   } else {
@@ -54,8 +55,10 @@
 %typemap(freearg) (char **IN_STRING_LIST, size_t LEN) {
   free((char *) $1);
 }
+*/
 
 /* Converts (char ***, size_t) to a sequence of strings */
+/*
 %typemap("doc") (char ***ARGOUT_STRING_LIST, size_t *LEN) "List of strings."
 %typemap(in,numinputs=0) (char ***ARGOUT_STRING_LIST, size_t *LEN) (char **s, size_t len) {
   $1 = &s;
@@ -70,6 +73,7 @@
   }
   free(*$1);
 }
+*/
 
 
 /* Converts (char ***) to a sequence of strings */
@@ -149,7 +153,7 @@
  * Consider to replace a general bool with a ``typedef bool status_t;`` */
 %typemap(out) bool {
   if (!$1) SWIG_exception(SWIG_RuntimeError,
-			  "false return value in softc_$symname()");
+                          "false return value in softc_$symname()");
   $result = Py_None;
   Py_INCREF(Py_None); // Py_None is a singleton so increment its reference if used.
 }
@@ -233,7 +237,7 @@
     for (j=0; j<nj; j++) {
       double v = (*$1)[i][j];
       *((double *)((char *)array_data(arr) +
-		   i*array_stride(arr, 0) + j*array_stride(arr, 1))) = v;
+                   i*array_stride(arr, 0) + j*array_stride(arr, 1))) = v;
     }
   }
   $result = arr;
@@ -274,7 +278,7 @@
 
 /* Typemap for argout array_double_3d */
 %typemap(in,numinputs=0) (double ****ARGOUT_ARRAY3D,
-			  size_t *DIM1, size_t *DIM2, size_t *DIM3)
+                          size_t *DIM1, size_t *DIM2, size_t *DIM3)
   (double ***tmp, size_t ni, size_t nj, size_t nk)
 {
   $1 = &tmp;
@@ -283,7 +287,7 @@
   $2 = &nk;
 }
 %typemap(argout) (double ****ARGOUT_ARRAY3D,
-		  size_t *DIM1, size_t *DIM2, size_t *DIM3)
+                  size_t *DIM1, size_t *DIM2, size_t *DIM3)
 {
   int i, j, k;
   size_t ni=*$4, nj=*$3, nk=*$2;
@@ -292,11 +296,11 @@
   for (i=0; i<ni; i++) {
     for (j=0; j<nj; j++) {
       for (k=0; k<nk; k++) {
-	double v = (*$1)[i][j][k];
-	*((double *)((char *)array_data(arr) +
-		     i*array_stride(arr, 0) +
-		     j*array_stride(arr, 1) +
-		     k*array_stride(arr, 2))) = v;
+        double v = (*$1)[i][j][k];
+        *((double *)((char *)array_data(arr) +
+                     i*array_stride(arr, 0) +
+                     j*array_stride(arr, 1) +
+                     k*array_stride(arr, 2))) = v;
       }
     }
   }

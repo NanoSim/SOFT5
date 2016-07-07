@@ -283,7 +283,7 @@ bool softc_datamodel_get_array_double_3d (const softc_datamodel_t *model, const 
 
 bool softc_datamodel_get_string (const softc_datamodel_t *model, const char *key, softc_string_s *value)
 {
-  if (model->ref && value && *value) {
+  if (model->ref && value) {
     soft::StdString str;
     if (model->ref->getString(key, str)) {
       *value = softc_string_create( str.c_str() );
