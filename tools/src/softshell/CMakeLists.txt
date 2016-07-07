@@ -32,3 +32,8 @@ set(${PROJECT_NAME}_MODULES_DIR
 set(${PROJECT_NAME}_APPDIR
   ${softshell_BINARY_DIR}
   CACHE INTERNAL "${PROJECT_NAME}: appdir" FORCE)
+
+set(${PROJECT_NAME}_APP
+  ${softshell_BINARY_DIR}/softshell
+  CACHE INTERNAL "${PROJECT_NAME}: app" FORCE)
+
