@@ -1,5 +1,5 @@
 \defgroup soft-foreign SOFT Foreign
-\brief A Collection of foreign language bindings
+\brief A collection of foreign language bindings
 
 This is a collection of language bindings for interfacing with SOFT
 from other programming languages.
