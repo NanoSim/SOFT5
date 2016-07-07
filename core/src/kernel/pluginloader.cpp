@@ -37,6 +37,10 @@ PluginLoader :: ~PluginLoader()
   delete d;
 }
 
+/*!
+  Adds a \a path to the current list of plugin paths.
+  \a path directory to add to the current load path.
+ */
 bool PluginLoader :: addLoadPath (const char *path)
 {
   auto const p = QString::fromLocal8Bit(path);

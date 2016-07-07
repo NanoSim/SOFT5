@@ -106,54 +106,6 @@ TEST_F(CollectionTest, DISABLED_registerAndFetch) {
   ASSERT_STREQ(e->id().c_str(), subCollection.id().c_str());
 }
 
-TEST_F (CollectionTest, DISABLED_findConnections1) {
-  // TODO: Presently disabled, pending API change for connections and
-  // relations. See test below.
-
-  soft::Collection a;
-  soft::Collection b;
-  soft::Collection collection;
-  collection.registerEntity("sub", &a);
-  collection.registerEntity("obj", &b);
-  collection.connect("sub", "has-a", "obj");
-  auto p = collection.findRelations("sub");
-
-  ASSERT_EQ(1, p.size());
-  // ASSERT_STREQ(p.front().object().c_str(), "obj");
-  // ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
-}
-
-TEST_F (CollectionTest, DISABLED_findConnections2) {
-  soft::Collection a;
-  soft::Collection b;
-  soft::Collection collection;
-  collection.registerEntity("sub", &a);
-  collection.registerEntity("obj", &b);
-  collection.connect("sub", "has-a", "obj");
-  collection.connect("obj", "owned-by", "sub");
-
-  /*
-  TODO: We must resolve this API change
-  subj ----parent-of----> obj
-  obj ----child-of----> subj
-
-  collection.connect("obj1", "subj");
-  collection.connect("obj2", "subj");
-  collection.findConnections("subj")
-
-  auto p = collection.findRelations("sub");
-  auto p = collection.findRelations("connected-to");
-
-  auto p = collection.findConnections("subj");
-  auto p = collection.findReverseConnections("obj"); // Name can be revised
-  */
-  auto p = collection.findRelations("sub");
-
-  ASSERT_EQ(1, p.size());
-  // ASSERT_STREQ(p.front().object().c_str(), "obj");
-  // ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
-}
-
 TEST(Collection, instanciateFromDataModel) {
 
   soft::Collection recepie;
