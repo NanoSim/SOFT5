@@ -78,9 +78,9 @@ softc_collection_s * softc_collection_create(const char *id)
   *self = (softc_collection_s) {SOFTC_ENTITY_VTABLE_NAME(softc_collection),
 				softc_uuidgen(),
 				(softc_collection_dimensions_s)
-				{},
+				{0},
 				(softc_collection_properties_s)
-				{}
+				{0}
   };
   return self;
 }
