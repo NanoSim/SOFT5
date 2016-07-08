@@ -1,6 +1,4 @@
-/**
-   @mainpage GSL Plugin
-
+/*!
    This is a Soft plugin that wraps the GNU Scientific Library and
    for Qt/C++ utilization and scriptability.
 
