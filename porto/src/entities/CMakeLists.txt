@@ -9,51 +9,24 @@ set (C_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/ccode.hjs)
 set (CPP_SOURCE_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/cppcode.cjs)
 set (CPP_HEADER_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../templates/cppcode.hjs)
 
-# Run a json entity through the soft-forge code generator to create
-# a header and source fil
-function (add_forge entity output_src output_hdr output_cppsrc output_cpphdr)  
-  add_custom_command(    
-    OUTPUT ${output_hdr}
-    COMMAND SOFT_MODULES=${softshell_MODULES_DIR} soft-forge ${entity} ${C_HEADER_TEMPLATE} ${output_hdr}
-    DEPENDS ${entity} ${C_HEADER_TEMPLATE}
-    )
-
-  add_custom_command(
-    OUTPUT ${output_src}
-    COMMAND SOFT_MODULES=${softshell_MODULES_DIR} soft-forge ${entity} ${C_SOURCE_TEMPLATE} ${output_src}
-    DEPENDS ${entity} ${C_SOURCE_TEMPLATE} ${output_hdr}
-    )
-
-  add_custom_command(    
-    OUTPUT ${output_cpphdr}
-    COMMAND SOFT_MODULES=${softshell_MODULES_DIR} soft-forge ${entity} ${CPP_HEADER_TEMPLATE} ${output_cpphdr}
-    DEPENDS ${entity} ${CPP_HEADER_TEMPLATE}
-    )
-
-  add_custom_command(
-    OUTPUT ${output_cppsrc}
-    COMMAND SOFT_MODULES=${softshell_MODULES_DIR} soft-forge ${entity} ${CPP_SOURCE_TEMPLATE} ${output_cppsrc}
-    DEPENDS ${entity} ${CPP_SOURCE_TEMPLATE} ${output_cpphdr}
-    )
-endfunction()
-
-
 # Find all .json files in current source dir and run through
 # soft-forge
 FILE(GLOB json-sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.json)
-foreach(JSON_SRC ${json-sources}) 
+foreach(JSON_SRC ${json-sources})
   string(REGEX REPLACE "\.json$" ".c" GEN_SRC ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".h" GEN_HDR ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".cxx" GEN_CPPSRC ${JSON_SRC})
   string(REGEX REPLACE "\.json$" ".hxx" GEN_CPPHDR ${JSON_SRC})
   add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_CPPSRC}
-    ${CMAKE_CURRENT_BINARY_DIR}/${GEN_CPPHDR})
+    ${C_SOURCE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/${GEN_SRC}
+    ${C_HEADER_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/${GEN_HDR})
 
-  list(APPEND SRC_LIST ${GEN_SRC})  
-  list(APPEND SRC_LIST ${GEN_CPPSRC})  
+  add_forge(${CMAKE_CURRENT_SOURCE_DIR}/${JSON_SRC}
+    ${CPP_SOURCE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/${GEN_CPPSRC}
+    ${CPP_HEADER_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/${GEN_CPPHDR})
+
+  list(APPEND SRC_LIST ${GEN_SRC})
+  list(APPEND SRC_LIST ${GEN_CPPSRC})
 endforeach(JSON_SRC ${json-sources})
 
 set_source_files_properties(${SRC_LIST} PROPERTIES GENERATED TRUE)
