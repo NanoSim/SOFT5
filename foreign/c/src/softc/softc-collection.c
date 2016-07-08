@@ -16,10 +16,16 @@ typedef struct _softc_collection_dimensions_s softc_collection_dimensions_s;
 typedef struct _softc_collection_properties_s softc_collection_properties_s;
 
 struct _softc_collection_dimensions_s
-{};
+{
+   /* C requires that a struct or union has at least one member*/
+   int dummy;
+};
 
 struct _softc_collection_properties_s
-{};
+{
+   /* C requires that a struct or union has at least one member*/
+   int dummy;
+};
 
 struct _softc_collection_s {
   const struct softc_entity_vtable_ *vtable_;
