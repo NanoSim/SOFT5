@@ -117,6 +117,7 @@ set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 # Additional CMake scripts
 ############################
 
+include(GenerateExportHeader)
 include(cmake/add_forge.cmake)
 include(cmake/install_runtime_library.cmake)
 

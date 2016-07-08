@@ -6,6 +6,7 @@
 #include "softns.h"
 #include "ientity.h"
 #include <memory>
+#include "soft-kernel_export.h"
 
 SOFT_BEGIN_NAMESPACE
 
@@ -13,7 +14,7 @@ SOFT_BEGIN_NAMESPACE
 struct RelationTriplet {
 };
 
-class Collection : public IEntity
+class SOFT_KERNEL_EXPORT  Collection : public IEntity
 {
 public:
   SOFT_ENTITY_METADATA("Collection", "http://emmc.eu/TR/metadata-entity", "1.0-SNAPSHOT-4")
