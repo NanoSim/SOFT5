@@ -474,7 +474,7 @@ bool JSONModel :: getArray         (const char *, IDataModel *) const
 
 IDataModel* JSONModel :: getModel         (const char *) const
 {
-  return false;
+  return NULL;
 }
 
 const QJsonObject *JSONModel :: propsJson() const
