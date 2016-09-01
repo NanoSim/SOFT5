@@ -218,10 +218,13 @@ the same information).
     } else if (PyUnicode_Check(o)) {
       PyObject *bytes = PyUnicode_AsUTF8String(o);
       if (bytes) {
-	str = PyBytes_AS_STRING(bytes);
+	if (!(str = PyBytes_AS_STRING(bytes))) {
+	  Py_DECREF(bytes);
+	  return NULL;
+	}
+	s = strdup(str);
 	Py_DECREF(bytes);
-	if (!str) return NULL;
-	if ((s = strdup(str))) return s;
+	if (s) return s;
 	PyErr_SetString(PyExc_MemoryError, "");
       }
     } else {
