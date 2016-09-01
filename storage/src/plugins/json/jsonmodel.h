@@ -37,7 +37,6 @@ public:
   bool appendByteArray     (const char *, StdBlob const &) override;
   bool appendStringArray   (const char *, StdStringList const &) override;
   bool appendArray         (const char *, IDataModel const *) override;
-  bool appendModel         (const char *, IDataModel const *) override;
 
   bool getDimension        (const char *, StdUInt &) const override;
   bool getVariant          (const char *, StdVariant &) const override;
@@ -60,12 +59,14 @@ public:
   bool getByteArray        (const char *, StdBlob &) const override;
   bool getStringArray      (const char *, StdStringList &) const override;
   bool getArray            (const char *, IDataModel *) const override;
-  bool getModel            (const char *, IDataModel *) const override;
 
-private:
+  bool appendModel(const char *, IDataModel *) override;
+  IDataModel* getModel(const char *) const override;
+
   void setJson(QJsonObject const &);
   const QJsonObject *json() const;
 
+private:
   class Private;
   Private *d;
 };

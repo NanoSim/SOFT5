@@ -38,6 +38,7 @@ ui_*.h
 *.Debug
 *.Release
 *~
+.*.swp
 moc_*.cpp
 CMakeCache*
 CMakeFiles/
@@ -49,3 +50,4 @@ CMakeFiles/
 \#*\#
 
 .gdb_history
+*.swp

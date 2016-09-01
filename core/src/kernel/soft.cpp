@@ -9,6 +9,8 @@
 #include <QTextStream>
 #include <QProcessEnvironment>
 #include <QDebug>
+#include <string>
+#include <list>
 #include "soft.h"
 
 #include "storagefactory.h"
@@ -18,6 +20,7 @@
 
 static const char *storagefactoryid = "ea1ae6168c404a31bcfdd59da91c1e85";
 static const char *pluginDirectory = "/plugins";
+static int verboseLevel = 0;
 
 SOFT_BEGIN_NAMESPACE
 
@@ -64,15 +67,14 @@ static bool registerPlugin(QString const &file)
     if (isOk) {
       auto pluginPtr = qobject_cast<IStrategyPlugin*>(loader->instance());
       if (pluginPtr) {
-	pluginPtr->registerStrategy();
-      }
-      else {
-	return false;
+        pluginPtr->registerStrategy();
+        return true;
       }
     }
     else {
-      QTextStream(stderr) << loader->errorString() << endl;
-      return false;
+      if (verboseLevel > 0) {
+        QTextStream(stderr) << loader->errorString() << endl;
+      }
     }
   }
   return false;
@@ -105,6 +107,16 @@ static QList<QDir> pluginsDirList()
   }
 
   return list;
+}
+
+std::list<std::string> pluginsDirectories()
+{
+  std::list<std::string> ret;
+  for(const auto dir: pluginsDirList()) {
+    std::string path = dir.absolutePath().toStdString();
+    ret.push_back(path);
+  }
+  return ret;
 }
 
 static bool registerStoragePlugins()

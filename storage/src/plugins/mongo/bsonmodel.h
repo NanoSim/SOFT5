@@ -37,7 +37,6 @@ public:
   bool appendByteArray  (const char *, const std::vector<unsigned char> &) override;
   bool appendStringArray(const char *, const std::vector<std::string> &) override;
   bool appendArray      (const char *, const IDataModel *) override;
-  bool appendModel      (const char *, const IDataModel *) override;
 
   bool getDimension     (const char *, StdUInt &) const override;
   bool getVariant       (const char *, StdVariant &) const override;
@@ -60,25 +59,10 @@ public:
   bool getByteArray     (const char *, std::vector<unsigned char> &) const override;
   bool getStringArray   (const char *, std::vector<std::string> &) const override;
   bool getArray         (const char *, IDataModel *) const override;
-  bool getModel         (const char *, IDataModel *) const override;
 
-  /*
-    void appendVariant(const char *, StdVariant const & value) override;
-    void appendInt32(const char *key, int value) override;
-    void appendString(const char *key, const std::string &str) override;
-    void appendDouble(const char *key, double value) override; 
-    void appendBool(const char *key, bool value) override; 
-    void appendArray(const char *key, IDataModel *model) override; 
-    void appendModel(const char *key, IDataModel *model) override; 
-    void appendDoubleArray(const char *key, const double *value, size_t length) override; 
-    void appendByteArray(const char* key, const unsigned char *data, size_t size) override;
-    bool getVariant(const char *, StdVariant &) const override;
-    bool getInt32(const char *, int *) const override;
-    bool getDouble(const char *, double *) const override;
-    bool getBool(const char *, bool *) const override;
-    bool getDoubleArray(const char *, double **, size_t *len) const override;
-    bool getString(const char *key, std::string &str) const override;
-  */
+  bool appendModel(const char *, IDataModel *) override;
+  IDataModel* getModel(const char *) const override;
+
   const _bson_t *bson() const;
 private:
   class Private;

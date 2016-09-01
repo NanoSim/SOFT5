@@ -15,8 +15,10 @@ public:
    StorageFactory (StorageFactory const &) =delete;
    virtual ~StorageFactory();
    StorageFactory& operator= (StorageFactory const &) =delete;
+
+   typedef IStorageStrategy*(*CreateFunc)(const char*, const char*);
   
-   bool registerStrategy(const char *name, IStorageStrategy*(*createFunc)(const char*, const char*));
+   bool registerStrategy(const char *name, CreateFunc createFunc);
    IStorageStrategy* create(const char *name, const char *uri, const char *options) const;
    int driverCount() const;
    std::string driverName(int n) const;

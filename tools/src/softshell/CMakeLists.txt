@@ -21,3 +21,19 @@ target_link_libraries (${PROJECT_NAME} ${LINK_LIBS})
 install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 install (DIRECTORY modules/soft DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
 install (DIRECTORY modules/utils DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
+install (DIRECTORY modules/porto DESTINATION ${SCRIPT_MODULES_INSTALL_DIR})
+
+set(softshell-modules-path ${CMAKE_CURRENT_SOURCE_DIR}/modules)
+
+set(${PROJECT_NAME}_MODULES_DIR
+  ${softshell-modules-path}
+  CACHE INTERNAL "${PROJECT_NAME}: modules_dir" FORCE)
+
+set(${PROJECT_NAME}_APPDIR
+  ${softshell_BINARY_DIR}
+  CACHE INTERNAL "${PROJECT_NAME}: appdir" FORCE)
+
+set(${PROJECT_NAME}_APP
+  ${softshell_BINARY_DIR}/softshell
+  CACHE INTERNAL "${PROJECT_NAME}: app" FORCE)
+

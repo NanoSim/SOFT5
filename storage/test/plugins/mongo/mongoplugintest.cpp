@@ -1,6 +1,8 @@
+#include <QtCore>
 #include <algorithm>
 #include <gtest/gtest.h>
 #include <Soft>
+#include <qbson.h>
 #include "testentity.h"
 
 class MongoPluginTest : public ::testing::Test {
@@ -30,4 +32,24 @@ TEST_F(MongoPluginTest, storeData)
 
   TestEntity cpy;
   storage->load(&cpy);
+}
+
+TEST_F(MongoPluginTest, QBson_test)
+{
+  soft::bson::Bson document;
+  soft::bson::Bson entity;
+  soft::bson::Bson properties;
+  soft::bson::Bson meta;
+  soft::bson::Bson dimensions;
+  dimensions.appendInt32("NI", 3);
+  dimensions.appendInt32("NJ", 3);
+  meta.appendString("name", "Foo");
+  meta.appendString("version", "0.1-SNAPSHOT-1");
+  meta.appendString("namespace", "demo");
+  properties.appendString("name", "Something");
+  entity.appendBson("properties",properties);
+  entity.appendBson("meta",meta);
+  entity.appendBson("dimensions",dimensions);
+  document.appendBson("671d0a9c-0d71-426d-8d33-a85c8f3321f9", entity);
+  QTextStream(stdout) << document.asString();
 }

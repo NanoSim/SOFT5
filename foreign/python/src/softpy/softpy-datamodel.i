@@ -5,14 +5,15 @@
  * Wrap softc_datamodel_append_*()
  * -------------------------------
  */
-%apply (char    **IN_STRING_LIST, size_t LEN)                            {(const char    **value, size_t n_elements)};
+//%apply (char    **IN_STRING_LIST, size_t LEN)                            {(const char    **value, size_t n_elements)};
 %apply (unsigned char  *IN_BYTES, size_t LEN)                            {(unsigned char  *value, size_t length)};
+
 %apply (int32_t       *IN_ARRAY1, size_t DIM1)                           {(const int32_t  *value, size_t size)};
 %apply (double        *IN_ARRAY1, size_t DIM1)                           {(const double   *value, size_t size)};
-%apply (double      **IN_ARRAY2D, size_t DIM1, size_t DIM2)              {(const double  **value, size_t size_i, size_t size_j)};
-%apply (double     ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3) {(const double ***value, size_t size_i, size_t size_j, size_t size_k)};
+%apply (double      **IN_ARRAY2D, size_t DIM1, size_t DIM2)              {(const double* const*value, size_t size_i, size_t size_j)};
+%apply (double     ***IN_ARRAY3D, size_t DIM1, size_t DIM2, size_t DIM3) {(const double* const* const*value, size_t size_i, size_t size_j, size_t size_k)};
 bool softc_datamodel_append_dimension      (softc_datamodel_t *model, const char *key, uint32_t value);
-bool softc_datamodel_append_string         (softc_datamodel_t *model, const char *key, const char *value);
+bool softc_datamodel_append_string         (softc_datamodel_t *model, const char *key, const softc_string_s value);
 bool softc_datamodel_append_int8           (softc_datamodel_t *model, const char *key, int8_t value);
 bool softc_datamodel_append_uint8          (softc_datamodel_t *model, const char *key, uint8_t value);
 bool softc_datamodel_append_int16          (softc_datamodel_t *model, const char *key, int16_t value);
@@ -25,26 +26,26 @@ bool softc_datamodel_append_float          (softc_datamodel_t *model, const char
 bool softc_datamodel_append_double         (softc_datamodel_t *model, const char *key, double value);
 bool softc_datamodel_append_bool           (softc_datamodel_t *model, const char *key, bool value);
 //bool softc_datamodel_append_blob           (softc_datamodel_t *model, const char *key, unsigned char  *value, size_t length);
-bool softc_datamodel_append_string_list    (softc_datamodel_t *model, const char *key, const char **value, size_t n_elements);
+bool softc_datamodel_append_string_list    (softc_datamodel_t *model, const char *key, const softc_string_s *strlist, size_t n_elements);
 bool softc_datamodel_append_array_int32    (softc_datamodel_t *model, const char *key, const int32_t  *value, size_t size);
 bool softc_datamodel_append_array_double   (softc_datamodel_t *model, const char *key, const double   *value, size_t size);
-bool softc_datamodel_append_array_double_2d(softc_datamodel_t *model, const char *key, const double  **value, size_t size_i, size_t size_j);
-bool softc_datamodel_append_array_double_3d(softc_datamodel_t *model, const char *key, const double ***value, size_t size_i, size_t size_j, size_t size_k);
-%clear (char         **value, size_t n_elements);
+bool softc_datamodel_append_array_double_2d (softc_datamodel_t *model, const char *key, const double* const* value, size_t size_i, size_t size_j);
+bool softc_datamodel_append_array_double_3d (softc_datamodel_t *model, const char *key, const double* const* const* value, size_t size_i, size_t size_j, size_t size_k);
+//%clear (char         **value, size_t n_elements);
 %clear (unsigned char *value, size_t length);
 %clear (int32_t       *value, size_t size);
 %clear (double        *value, size_t size);
 %clear (double       **value, size_t size_i, size_t size_j);
 %clear (double      ***value, size_t size_i, size_t size_j, size_t size_k);
 
-
 /*
  * Wrap softc_datamodel_get_*()
  * ----------------------------
  */
+/*
 %typemap(in,numinputs=0) char **value (char *temp)        { $1 = &temp; };
 %typemap(argout)         char **value                     { $result = PyString_FromString(*$1); };
-
+*/
 %typemap(in,numinputs=0) int8_t *value (int8_t temp)      { $1 = &temp; };
 %typemap(argout)         int8_t *value                    { $result = PyInt_FromLong(*$1); };
 
@@ -79,7 +80,7 @@ bool softc_datamodel_append_array_double_3d(softc_datamodel_t *model, const char
 %typemap(argout)         bool *value                      { $result = PyBool_FromLong(*$1); };
 
 
-%apply (char         ***ARGOUT_STRING_LIST, size_t *LEN)  {(char         ***value, size_t *n_elements)};
+//%apply (char         ***ARGOUT_STRING_LIST, size_t *LEN)  {(char         ***value, size_t *n_elements)};
 %apply (unsigned char       **ARGOUT_BYTES, size_t *LEN)  {(unsigned char **value, size_t *length)};
 %apply (unsigned char **ARGOUTVIEWM_ARRAY1, size_t *DIM1) {(unsigned char **value, size_t *size)};
 %apply (int32_t       **ARGOUTVIEWM_ARRAY1, size_t *DIM1) {(int32_t       **value, size_t *size)};
@@ -87,7 +88,7 @@ bool softc_datamodel_append_array_double_3d(softc_datamodel_t *model, const char
 %apply (double           ***ARGOUT_ARRAY2D, size_t *DIM1, size_t *DIM2) {(double       ***value, size_t *size_i, size_t *size_j)};
 %apply (double          ****ARGOUT_ARRAY3D, size_t *DIM1, size_t *DIM2, size_t *DIM3) {(double        ****value, size_t *size_i, size_t *size_j, size_t *size_k)};
 bool softc_datamodel_get_dimension       (const softc_datamodel_t *model, const char *key, uint32_t *value);
-bool softc_datamodel_get_string          (const softc_datamodel_t *model, const char *key, char **value);
+bool softc_datamodel_get_string          (const softc_datamodel_t *model, const char *key, softc_string_s *value);
 bool softc_datamodel_get_int8            (const softc_datamodel_t *model, const char *key, int8_t *value);
 bool softc_datamodel_get_uint8           (const softc_datamodel_t *model, const char *key, uint8_t *value);
 bool softc_datamodel_get_int16           (const softc_datamodel_t *model, const char *key, int16_t *value);
@@ -100,7 +101,7 @@ bool softc_datamodel_get_float           (const softc_datamodel_t *model, const 
 bool softc_datamodel_get_double          (const softc_datamodel_t *model, const char *key, double *value);
 bool softc_datamodel_get_bool            (const softc_datamodel_t *model, const char *key, bool *value);
 //bool softc_datamodel_get_blob            (const softc_datamodel_t *model, const char *key, unsigned char **value, size_t *length);
-bool softc_datamodel_get_string_list     (const softc_datamodel_t *model, const char *key, char ***value, size_t *n_elements);
+bool softc_datamodel_get_string_list     (const softc_datamodel_t *model, const char *key, softc_string_s **strlist, size_t *n_elements);
 bool softc_datamodel_get_array_int32     (const softc_datamodel_t *model, const char *key, int32_t **value, size_t *size);
 bool softc_datamodel_get_array_double    (const softc_datamodel_t *model, const char *key, double **value, size_t *size);
 bool softc_datamodel_get_array_double_2d (const softc_datamodel_t *model, const char *key, double ***value, size_t *size_i, size_t *size_j);
@@ -116,7 +117,7 @@ bool softc_datamodel_get_array_double_3d (const softc_datamodel_t *model, const 
 %clear float *value;
 %clear double *value;
 %clear bool *value;
-%clear (char ***value, size_t *n_elements);
+//%clear (char ***value, size_t *n_elements);
 %clear (unsigned char **value, size_t *length);
 %clear (int32_t **value, size_t *size);
 %clear (double **value, size_t *size);

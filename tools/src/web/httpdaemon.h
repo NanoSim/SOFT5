@@ -1,6 +1,13 @@
 #pragma once
 #include <QTcpServer>
 
+/*!
+  \class HttpDaemon
+  \ingroup soft-tools
+  \brief The HttpDaemon class defines a simple web-server
+
+  \todo {add more comments here}
+ */
 class HttpDaemon : public QTcpServer
 {
   Q_OBJECT

@@ -34,6 +34,11 @@
 	case 'bool':
 	case 'boolean':
 	    return "bool";
+	case 'string':
+        case 'string_list':
+	    return "softc_string_s";
+        case 'blob':
+	    return "softc_bytearray_s";
 	default:
 	    return "undefined";
 	};	

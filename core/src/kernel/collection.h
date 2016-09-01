@@ -5,40 +5,19 @@
 #include <list>
 #include "softns.h"
 #include "ientity.h"
+#include <memory>
 
 SOFT_BEGIN_NAMESPACE
-
-class Collection;
-
-class RelationTriplet
-{
-public:
-  public:
-  RelationTriplet(std::string const &s,
-		  std::string const &p,
-		  std::string const &o);
-
-  std::string subject() const;
-  std::string predicate() const;
-  std::string object() const;
-private:
-  friend class Collection;
-  class Private;
-  Private *d;    
-};
-
-typedef struct DimMap_ DimMap;
-typedef struct Dim_ Dim;
-typedef struct EntityRef_ EntityRef;
 
 class Collection : public IEntity
 {
 public:
   SOFT_ENTITY_METADATA("Collection", "http://emmc.eu/TR/metadata-entity", "1.0-SNAPSHOT-4")
-  
+
   Collection();
   explicit Collection(std::string const &id);
   explicit Collection(const IEntity *ptr);
+  explicit Collection(IDataModel const *dm);
   virtual ~Collection();
 
   std::string name() const;
@@ -47,43 +26,48 @@ public:
   static IEntity* create (std::string const &uuid = std::string());
   void setName(std::string const &name);
   void setVersion(std::string const &version);
-  void registerEntity(std::string const &label, IEntity const *entity);		      
+  void registerEntity(std::string const &label, IEntity const *entity);
   void addEntity(std::string const &label,
-		 std::string const &name,
-		 std::string const &version,
-		 std::string const &ns,
-		 std::string const &uuid);
+                 std::string const &name,
+                 std::string const &version,
+                 std::string const &ns,
+                 std::string const &uuid);
+
+  void findEntity(std::string const &label,
+		  std::string &name,
+		  std::string &version,
+		  std::string &ns,
+		  std::string &uuid) const;
+  void attachEntity(std::string const &label, IEntity *entity);
+  
 
   void addDim(std::string const &label,
-	      std::string const &description = std::string());
+              std::string const &description = std::string());
+  // TODO: Not fully implemented.
   void connect(std::string const &subject,
-		   std::string const &predicate,
-		   std::string const &object);
-  
+               std::string const &predicate,
+               std::string const &object);
+
   void addRelation(std::string const &subject,
-		   std::string const &predicate,
-		   std::string const &object);
-  void addDimMap(std::string const &label,
-		 std::string const &entityDim,
-		 std::string const &collectionDim);
+                   std::string const &predicate,
+                   std::string const &object);
+
+  std::list<std::string> findRelations(std::string const &subject,
+				       std::string const &predicate);
   
+  void addDimMap(std::string const &label,
+                 std::string const &entityDim,
+                 std::string const &collectionDim);
+
   int numEntities() const;
-  int numDims() const;
   int numRelations() const;
-  int numDimMaps() const;
 
   IEntity const *findInstance(std::string const &label) const;
-  std::list<RelationTriplet> findRelations(std::string const &subject) const;
-
   virtual void save (IDataModel *) const override;
   virtual void load (IDataModel const *) override;
+
   virtual std::vector<std::string> dimensions() const override;
-  
- protected:
-  std::list<DimMap> dimMapList() const;
-  std::list<RelationTriplet> relationList() const;
-  std::list<Dim> dimList() const;
-  std::list<EntityRef> entityList() const;
+  virtual int getDimensionSize(std::string const &dim) const override;
 
 private:
   class Private;
@@ -93,4 +77,4 @@ private:
 SOFT_END_NAMESPACE
 
 
-#endif 
+#endif

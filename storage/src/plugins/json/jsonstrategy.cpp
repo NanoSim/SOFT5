@@ -57,7 +57,12 @@ void JSONStrategy :: store (IDataModel const *model)
   file.write(doc.toJson());
 }
 
-void JSONStrategy :: retrieve (IDataModel *model) const
+
+void JSONStrategy :: endRetrieve (IDataModel *model) const
+{
+}
+
+void JSONStrategy :: startRetrieve (IDataModel *model) const
 {
   JSONModel *jsonModel = dynamic_cast<JSONModel*>(model);
   QFile file(d->uri);

@@ -16,6 +16,7 @@
 	    };
 	    
 	    A.prototype.store = function(){
+print("Entity.store: ", this.id, " Driver: ", driverInfo.uri, ", ", driverInfo.database, ", ", driverInfo.collection);
 		this.storage.write(this);
 	    };
 	    

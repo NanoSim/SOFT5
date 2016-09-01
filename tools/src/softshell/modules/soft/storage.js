@@ -15,10 +15,12 @@
    
     // Factory method for creating new storage driver instances
     StorageDriverFactory.prototype.createStorageDriver = function (options) {
+	print("StorageDriverFactory.prototype.createStorageDriver");
 	switch (options.driver) {
 	case "mongo":
 	case "mongodb":
 	    MongoDriver = require('soft.storage.mongo').driver();
+print("Creating MongoDriver: ", options.uri);
 	    return new MongoDriver(options);
 	    break;
 	case "json":

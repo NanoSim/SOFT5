@@ -5,6 +5,8 @@
 SOFT_BEGIN_NAMESPACE
 MONGO_BEGIN_NAMESPACE
 
+#define NOT_IMPLEMENTED throw std::runtime_error("Not implemented");
+
 bool Collection :: Undefined = false;
 
 using soft::bson::Bson;
@@ -83,6 +85,8 @@ bool Collection :: insert(Bson* bson)
 
 bool Collection :: insertBulk(QVector<Bson*> bson)
 {
+  NOT_IMPLEMENTED
+#if 0
     bson_error_t error;
     mongoc_insert_flags_t flags = MONGOC_INSERT_NONE;
     quint32 n = bson.size();
@@ -105,6 +109,8 @@ bool Collection :: insertBulk(QVector<Bson*> bson)
     mongoc_write_concern_destroy(wconc);
     delete [] bulk;
     return isOk;
+#endif
+    return false;
 }
 
 bool Collection :: remove(Bson * selector)

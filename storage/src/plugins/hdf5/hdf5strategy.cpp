@@ -326,10 +326,6 @@ void HDF5Strategy :: store (IDataModel const *model)
   h5.close();
 }
 
-void HDF5Strategy :: retrieve (IDataModel *) const
-{
-}
-
 void HDF5Strategy :: startRetrieve (IDataModel *model) const
 {
   using std::placeholders::_1;

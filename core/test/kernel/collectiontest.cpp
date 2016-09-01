@@ -4,6 +4,9 @@
 #include <collection.h>
 #include <istoragestrategy.h>
 #include <idatamodel.h>
+#include <json/jsonmodel.h>
+#include "collection_test_entity.h"
+#include <softc/softc-entity.h>
 
 //static const char * driver  = "mongo";
 static const char * driver = "json";
@@ -17,7 +20,7 @@ class CollectionTest : public ::testing::Test {
 protected:
   CollectionTest() {
   }
-  
+
   virtual ~CollectionTest(){
   }
 
@@ -31,10 +34,10 @@ protected:
     delete storageStrategy_;
     storageStrategy_ = nullptr;
   }
-  
+
   virtual void SetUp(){
   }
-  
+
   virtual void TearDown(){
   }
 
@@ -70,43 +73,12 @@ TEST_F(CollectionTest, StaticCreate) {
   delete coll;
 }
 
-
-TEST_F(CollectionTest, metaType) {
-  /*
-  const char *uuid = "bb1bb66e-fa49-40a2-8796-6e2ba6e3c50f";
-
-  soft::IEntity *e = soft::Collection::create(uuid);
-  ASSERT_STREQ("http://emmc.eu/TR/metadata-entity#Collection:1.0-SNAPSHOT-4", e->metaType());
-  delete e;
-  */
-}
-
-TEST_F(CollectionTest, save1) {
+TEST_F(CollectionTest, createAsEntity) {
   soft::IEntity *e = soft::Collection::create();
   ASSERT_TRUE(e != NULL);
-
-  ASSERT_TRUE(storageStrategy_ != NULL);
-  ASSERT_STREQ("http://sintef.no/soft/TR/storage-strategy#json:0.1-SNAPSHOT-1", storageStrategy_->metaType());
-
-  // soft::IDataModel const* model = CollectionTest::storageStrategy_->dataModel();
-  //  ASSERT_TRUE(model != NULL);
-  //  auto model = storageStrategy_->dataModel();
-  //  ASSERT_TRUE(model != NULL);
-
-  //  model->appendInt32("test", 42);
-  //  storageStrategy_->store(model);
-  
   delete e;
 }
 
-TEST_F(CollectionTest, load1) {
-  soft::IEntity *e = soft::Collection::create();
-  ASSERT_TRUE(e != NULL);
-
-  //  auto model = storageStrategy_->dataModel();
-  //  ASSERT_TRUE(model != NULL);
-  delete e;
-}
 
 TEST_F(CollectionTest, registerEntity) {
   soft::IEntity *e = soft::Collection::create();
@@ -123,7 +95,7 @@ TEST_F(CollectionTest, collection) {
   collection.addRelation("label2", "inherits", "label3");
 }
 
-TEST_F(CollectionTest, registerAndFetch) {
+TEST_F(CollectionTest, DISABLED_registerAndFetch) {
   soft::Collection subCollection;
   soft::Collection collection;
   collection.registerEntity("subCollection", &subCollection);
@@ -134,30 +106,96 @@ TEST_F(CollectionTest, registerAndFetch) {
   ASSERT_STREQ(e->id().c_str(), subCollection.id().c_str());
 }
 
-TEST_F (CollectionTest, findConnections1) {
-  soft::Collection a;
-  soft::Collection b;
-  soft::Collection collection;
-  collection.registerEntity("sub", &a);
-  collection.registerEntity("obj", &b);
-  collection.connect("sub", "has-a", "obj");
-  auto p = collection.findRelations("sub");
+TEST(Collection, instanciateFromDataModel) {
 
-  ASSERT_TRUE(p.size() == 1);
-  ASSERT_STREQ(p.front().object().c_str(), "obj");
-  ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
+  soft::Collection recepie;
+  soft::Collection baking_log;
+
+  soft::Collection mums_cookies;
+
+  // Confirm that we have been able to populate the collection.
+  mums_cookies.setName("Mums best cookies!");
+  mums_cookies.setVersion("1-with-some-improvements");
+  ASSERT_EQ("Mums best cookies!", mums_cookies.name());
+  ASSERT_EQ("1-with-some-improvements", mums_cookies.version());
+
+  mums_cookies.registerEntity("cookie-recepie", &recepie);
+  mums_cookies.registerEntity("cooking-competition-baking-log", &baking_log);
+  ASSERT_EQ(2, mums_cookies.numEntities()) << "mums_cookies numEntities";
+
+  mums_cookies.addRelation("cookie-recepie", "loged-in", "cooking-competition-baking-log");
+  // TODO: Relations not yet implemented
+  // ASSERT_EQ(1, mums_cookies.numRelations());
+
+  // TODO: Can this fail?
+  soft::JSONModel dm;
+  mums_cookies.save((soft::IDataModel *)(&dm));
+
+  // ... mum shelves her cookie activities and pursue other activities
+  // while a generation passes. Until one day ...
+
+  soft::Collection grandmas_cookies;
+  grandmas_cookies.load(&dm);
+
+  // Confirm that what we retrieve from the collection through the
+  // data model is exactly what we sent in.
+  ASSERT_EQ("Mums best cookies!", grandmas_cookies.name());
+  ASSERT_EQ("1-with-some-improvements", grandmas_cookies.version());
+
+  // TODO: Relations not yet implemented
+  // ASSERT_EQ(1, grandmas_cookies.numRelations());
+
+  ASSERT_EQ(2, grandmas_cookies.numEntities()) << "grandmas_cookies numEntities";
+
+
+  // TODO: Check that I got a label here
 }
 
-TEST_F (CollectionTest, findConnections2) {
-  soft::Collection a;
-  soft::Collection b;
-  soft::Collection collection;
-  collection.registerEntity("sub", &a);
-  collection.registerEntity("obj", &b);
-  collection.connect("sub", "has-a", "obj");
-  collection.connect("obj", "owned-by", "sub");
-  auto p = collection.findRelations("sub");
-  ASSERT_TRUE(p.size() == 1);
-  ASSERT_STREQ(p.front().object().c_str(), "obj");
-  ASSERT_STREQ(p.front().predicate().c_str(), "has-a");
+TEST_F(CollectionTest, saveAndLoadWithEntities) {
+  soft::Collection c;
+  soft::Collection e;
+
+  e.setName("My-sub-entity");
+  e.setVersion("1.0");
+  c.setName("My-collection");
+  c.setVersion("2.0");
+
+  c.attachEntity("sub-entity", &e);
+
+  soft::JSONModel dm;
+  c.save(&dm);
+
+  soft::Collection e2;
+  soft::Collection c2;
+  c2.attachEntity("sub-entity", &e2);
+
+  c2.load(&dm);
+
+  ASSERT_EQ("My-collection", c2.name());
+  ASSERT_EQ("2.0", c2.version());
+  ASSERT_EQ("My-sub-entity", e2.name());
+  ASSERT_EQ("1.0", e2.version());
+  ASSERT_EQ(e.id(), e2.id());
+}
+
+TEST_F(CollectionTest, findEntity)
+{
+  soft::Collection c2;
+  c2.addEntity("lbl1", "foo", "1.0", "space", "647ab24d-2904-4f5d-9d37-581cd3f72367");
+  c2.addEntity("lbl2", "bar", "2.0", "face", "245f8dca-4d42-4d3c-8c5d-8099b6b914d8");
+  c2.addEntity("lbl3", "baz", "1.0", "home", "d1f68e22-919d-44bc-a915-ad3436342b0a");
+  c2.addEntity("lbl4", "qnx", "1.0", "net", "c2b39d37-9f5b-4bba-9040-842465aa5af8");
+
+  std::string name, version, ns, uuid;
+  c2.findEntity("lbl1", name, version, ns, uuid);
+  ASSERT_STREQ(name.c_str(), "foo");
+  ASSERT_STREQ(version.c_str(), "1.0");
+  ASSERT_STREQ(ns.c_str(), "space");
+  ASSERT_STREQ(uuid.c_str(), "647ab24d-2904-4f5d-9d37-581cd3f72367");
+
+  c2.findEntity("lbl3", name, version, ns, uuid);
+  ASSERT_STREQ(name.c_str(), "baz");
+  ASSERT_STREQ(version.c_str(), "1.0");
+  ASSERT_STREQ(ns.c_str(), "home");
+  ASSERT_STREQ(uuid.c_str(), "d1f68e22-919d-44bc-a915-ad3436342b0a");
 }

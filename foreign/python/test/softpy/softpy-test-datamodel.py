@@ -32,6 +32,7 @@ m.string_list = ['this', 'is', 'a', 'test', 'string-list']
 
 # Store
 storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
+#storage = softpy.storage_create('mongo2', 'mongodb://localhost/', 'db=something;coll=foo')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 
@@ -61,6 +62,7 @@ softpy.storage_free(storage)
 
 # Load
 storage = softpy.storage_create('hdf5', 'softpy-test-datamodel.h5')
+#storage = softpy.storage_create('mongo2', 'mongodb://localhost/', 'db=something;coll=foo')
 strategy = softpy.storage_get_storage_strategy(storage)
 model = softpy.storage_strategy_get_datamodel(strategy)
 

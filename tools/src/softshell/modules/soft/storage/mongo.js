@@ -6,13 +6,12 @@
     mongo["^doc"] = 'This module contains method for the MongoDb storage';
 
     Driver = function(options) {
-	this.uri        = options.uri || "mongodb://q3d.matek.sintef.no";
-	this.database   = options.database || "soft";
-	this.collection = options.collection || "default";
-
+	this.uri        = options.uri || "mongodb://localhost";
+	this.database   = options.database || "demo";
+	this.collection = options.collection || "guess";
 	this.mongoclient = new MongoClient(this.uri);
 	this.mongocollection = this.mongoclient.collection (this.database,this.collection);
-    }
+    };
 
     Driver.prototype.find = function(query) {
 	var cursor = this.mongocollection.find(query);
@@ -24,7 +23,7 @@
 	    bson = cursor.next();
 	}
 	return ret;
-    }
+    };
 
     Driver.prototype.selfTest = function () {
 	var tests = [];
@@ -52,8 +51,8 @@
 	    return false;
 	});
 
-	report();
-    }
+//	report();
+    };
 
     Driver.prototype.write = function (entity, callback) {
 /*	var num = this.mongocollection.count({name: entity.__name__, version: entity.__version__});
@@ -70,7 +69,7 @@
 	    return callback(result);
 	}
 	return result;
-    }
+    };
 
     Driver.prototype.read = function (uuid, callback) {
 	var cursor = this.mongocollection.find({id: uuid}); 
@@ -79,11 +78,11 @@
 	    return callback(bson);
 	}
 	return bson;
-    }
+    };
 
     mongo.driver = function() {
 	return Driver.prototype.constructor;
-    }
+    };
 
     return mongo;
 })(exports);

@@ -5,7 +5,7 @@ if (GTEST_FOUND)
   set (CMAKE_INCLUDE_CURRENT_DIR ON)
   aux_source_directory (. SRC_LIST)
   add_executable (${PROJECT_NAME} ${SRC_LIST})
-  include_directories(${soft-numerics-sim_SOURCE_DIR}/../ ${soft-numerics-sim_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+  include_directories(${soft-kernel_INCLUDE_DIRS} ${soft-numerics-sim_SOURCE_DIR}/../ ${soft-numerics-sim_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${soft-numerics-sim_LIBS} ${GTEST_LIBRARIES})
   
   add_test(${PROJECT_NAME}
