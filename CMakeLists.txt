@@ -37,7 +37,8 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package (BSON REQUIRED)
+# TODO: Resolve this
+# find_package (BSON REQUIRED)
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
@@ -112,12 +113,13 @@ set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
-#####################
-# add_forge
-#####################
+############################
+# Additional CMake scripts
+############################
 
+include(GenerateExportHeader)
 include(cmake/add_forge.cmake)
-
+include(cmake/install_runtime_library.cmake)
 
 ######################
 # Add subdirectories
