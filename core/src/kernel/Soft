@@ -1,7 +1,6 @@
 #ifndef SOFT_DEF_H
 #define SOFT_DEF_H
 
-#include <entity.h>
 #include <collection.h>
 #include <soft.h>
 #include <istoragestrategy.h>

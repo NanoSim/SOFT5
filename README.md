@@ -1,4 +1,5 @@
-# SOFT5
+SOFT5 {#mainpage}
+=================
 
 ## Source code structure
 

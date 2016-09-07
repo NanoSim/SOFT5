@@ -6,6 +6,13 @@
 #include "soft.h"
 #include "softns.h"
 
+/*!
+  \file softshell.cpp
+  \ingroup soft-tools
+
+  This file defines commands for softshell
+ */
+
 ANONYMOUS_BEGIN_NAMESPACE
 
 QString read(const QString &filename)

@@ -21,7 +21,7 @@ class SOFT_KERNEL_EXPORT IEntity
 {
 public:
   IEntity();
-  explicit IEntity (std::string const &id);
+  explicit IEntity (std::string const &uuid);
   explicit IEntity (IEntity const *other);
   virtual  ~IEntity() = 0;
 

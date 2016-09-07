@@ -10,10 +10,6 @@
 
 SOFT_BEGIN_NAMESPACE
 
-// TODO: Needed? Should be a part of tripletstore?
-struct RelationTriplet {
-};
-
 class SOFT_KERNEL_EXPORT  Collection : public IEntity
 {
 public:
@@ -58,7 +54,7 @@ public:
                    std::string const &object);
 
   std::list<std::string> findRelations(std::string const &subject,
-				       std::string const &object);
+				       std::string const &predicate);
   
   void addDimMap(std::string const &label,
                  std::string const &entityDim,
@@ -68,13 +64,12 @@ public:
   int numRelations() const;
 
   IEntity const *findInstance(std::string const &label) const;
-  std::list<RelationTriplet> findRelations(std::string const &subject) const;
-
   virtual void save (IDataModel *) const override;
   virtual void load (IDataModel const *) override;
 
   virtual std::vector<std::string> dimensions() const override;
   virtual int getDimensionSize(std::string const &dim) const override;
+
 private:
   class Private;
   Private *d;
