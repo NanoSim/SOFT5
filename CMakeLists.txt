@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.2)
 include(CPack)
 project(soft5)
 
-option (WITH_STORAGE_MONGO "MongoDB storage support"      ON)
-option (WITH_STORAGE_JSON "JSON storage support"          ON)
-option (WITH_STORAGE_EXTERNAL "External storage support"  ON)
-option (WITH_PLUGIN_SOFT_KERNEL "Compile kernel plugin"   ON)
-option (WITH_FOREIGN_C "Compile with C API"               ON)
-option (WITH_TESTS "Compile tests"                        ON)
+option (WITH_TESTS "Compile tests"                        OFF)
+option (WITH_STORAGE_JSON "JSON storage support"          OFF)
+option (WITH_PLUGIN_SOFT_KERNEL "Compile kernel plugin"   OFF)
+option (WITH_STORAGE_EXTERNAL "External storage support"  OFF)
+option (WITH_FOREIGN_C "Compile with C API"               OFF)
+option (WITH_STORAGE_MONGO "MongoDB storage support"      OFF)
 option (WITH_WEB "Compile with Web support"               OFF)
 option (WITH_HSM "Compile with HSM plugin"                OFF)
 option (WITH_STORAGE_HD5 "HDF5 storage support"           OFF)
@@ -37,7 +37,8 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package (BSON REQUIRED)
+# TODO: Resolve this
+# find_package (BSON REQUIRED)
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
@@ -112,12 +113,13 @@ set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
-#####################
-# add_forge
-#####################
+############################
+# Additional CMake scripts
+############################
 
+include(GenerateExportHeader)
 include(cmake/add_forge.cmake)
-
+include(cmake/install_runtime_library.cmake)
 
 ######################
 # Add subdirectories
@@ -145,11 +147,11 @@ endif (WITH_STORAGE_HD5)
 
 if (WITH_STORAGE_MONGO)
   add_subdirectory(storage/src/mongo)
-  add_subdirectory(storage/src/plugins/mongo)
+#  add_subdirectory(storage/src/plugins/mongo)
   add_subdirectory(storage/src/plugins/mongo2)
   if (WITH_TESTS)
     add_subdirectory(storage/test/mongo)
-    add_subdirectory(storage/test/plugins/mongo)
+#    add_subdirectory(storage/test/plugins/mongo)
     add_subdirectory(storage/test/plugins/mongo2)
   endif(WITH_TESTS)
 endif (WITH_STORAGE_MONGO)
