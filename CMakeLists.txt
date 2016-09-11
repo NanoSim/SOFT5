@@ -38,7 +38,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # TODO: Resolve this
-# find_package (BSON REQUIRED)
+find_package (BSON REQUIRED)
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
