@@ -218,7 +218,7 @@ the same information).
     } else if (PyUnicode_Check(o)) {
       PyObject *bytes = PyUnicode_AsUTF8String(o);
       if (bytes) {
-	if (!(str = PyBytes_AS_STRING(bytes))) {
+	if (!(str = PyBytes_AsString(bytes))) {
 	  Py_DECREF(bytes);
 	  return NULL;
 	}
