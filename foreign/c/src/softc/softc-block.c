@@ -62,7 +62,7 @@ static size_t dec(void **mem)
   if (*cnt > 0)
     return --(*cnt);
 	    
-  free(((char*)(*mem)-sizeof(size_t));
+  free((char*)(*mem)-sizeof(size_t));
   *mem = NULL;
   return 0;
 }
