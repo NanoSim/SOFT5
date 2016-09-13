@@ -202,8 +202,8 @@ the same information).
   }
 
 
-  /* Returns the content of the python string object `o` as a newly
-     malloc'ed string. NULL is returned on error. */
+  /* Returns the content of the python string, bytes or unicode object
+     `o` as a newly malloc'ed C string. NULL is returned on error. */
   char *pystring(PyObject *o)
   {
     char *s, *str=NULL;
@@ -228,7 +228,7 @@ the same information).
 	PyErr_SetString(PyExc_MemoryError, "");
       }
     } else {
-      PyErr_SetString(PyExc_TypeError,"must be string or unicode");
+      PyErr_SetString(PyExc_TypeError,"must be string, bytes or unicode");
     }
     return NULL;
   }
