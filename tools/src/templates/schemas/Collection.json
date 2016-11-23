@@ -1,5 +1,5 @@
 {
-    "schema_name": "collection-form",
+    "schema_name": "Collection",
     "schema_version": "0.3",
     "schema_namespace": "http://meta.emmc.eu",
     "schema_dimensions": [
