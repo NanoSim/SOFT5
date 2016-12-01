@@ -10,9 +10,6 @@ include_directories (
   ${soft-storage-mongo_INCLUDE_DIRS}
   "../common")
 
-# Export/import declaration for Windows
-generate_export_header(${PROJECT_NAME})
-
 set (LINK_LIBS ${LINK_LIBS} ${soft-storage-mongo_LIBS})
 aux_source_directory (. SRC_LIST)
 
@@ -21,4 +18,8 @@ add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
-install_runtime_library(${PROJECT_NAME} ${SCRIPT_PLUGINS_INSTALL_DIR)
+
+# Export/import declaration for Windows
+generate_export_header(${PROJECT_NAME})
+
+install_runtime_library(${PROJECT_NAME} ${SCRIPT_PLUGINS_INSTALL_DIR})
