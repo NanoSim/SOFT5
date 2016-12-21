@@ -38,7 +38,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # TODO: Resolve this
-# find_package (BSON REQUIRED)
+
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
@@ -54,6 +54,7 @@ if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
 endif ()
 
 if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
+  find_package (BSON REQUIRED)
   find_package(MONGOC REQUIRED)
 endif()
 
@@ -77,14 +78,14 @@ set (library_path
   ${soft-storage-mongo_BINARY_DIR}
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
-  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-storage-plugins-mongo2_BINARY_DIR}
   ${soft-numerics-sim_BINARY_DIR}
   ${softc_BINARY_DIR}
 )
 set (storage_path
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
-  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-storage-plugins-mongo2_BINARY_DIR}
 )
 if (UNIX)
   string(REPLACE ";" ":" LD_LIBRARY_PATH "${library_path}")

@@ -7,7 +7,7 @@
 struct _softc_string_s
 {
   _softc_string_s(){}
-  explicit _softc_string_s(const char *str)
+  explicit _softc_string_s(const char *str = nullptr)
     :str(str)
   {}
   explicit _softc_string_s(_softc_string_s &&other) noexcept
@@ -18,6 +18,12 @@ struct _softc_string_s
     str = std::move(other.str);
     return *this;
   }
+
+  int compare(const char *buffer)
+  {
+    return str.compare(buffer);
+  }
+
   std::string str;
 };
 

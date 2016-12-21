@@ -157,5 +157,12 @@ std::string TripletStore :: toRdf() const
   return byteArray.toStdString();
 }
 
+/*!
+  return number of triples
+ */
+int TripletStore :: size() const
+{
+  return d->triplets.size();
+}
 
 SOFT_END_NAMESPACE
