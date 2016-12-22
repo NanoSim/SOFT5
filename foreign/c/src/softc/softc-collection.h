@@ -2,7 +2,7 @@
 #define SOFTC_COLLECTION_H_DEF
 
 #include <stddef.h>
-#include "softc-string.h"
+#include "softc-entity.h"
 #include "softc-string-list.h"
 #include "softc-macros.h"
 

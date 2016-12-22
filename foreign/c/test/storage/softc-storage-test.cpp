@@ -9,6 +9,7 @@
 #include <softc/softc-utils.h>
 #include <softc/softc-datamodel.h>
 #include <softc/softc-storage.h>
+#include <softc/softc-collection.h>
 
 template <typename T>
 void arrayToPtr(T **dest, std::vector<T> const &source)
@@ -328,4 +329,19 @@ TEST_F(SoftC_StorageTest, strList)
     ASSERT_STREQ( from_softc_string(slist[i]), strlist[i].c_str());
   }
   softc_string_destroylist(slist, n_elements);
+}
+
+TEST_F(SoftC_StorageTest, collectionStorage)
+{
+  auto storage  = softc_storage_create("hdf5", "coll.h5", "");
+  ASSERT_TRUE(storage != nullptr);
+  auto collection = softc_collection_create_new();
+  ASSERT_TRUE(collection != nullptr);
+  softc_collection_set_name(collection, "Mine");
+  softc_collection_set_version(collection, "V1");
+  softc_storage_save(storage, (const softc_entity_t*) collection);
+  
+  
+  softc_collection_free(collection);
+  softc_storage_free(storage);
 }

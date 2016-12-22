@@ -19,6 +19,9 @@ void softc_collection_private_add_relation(void *ref, const char *subject, const
 void softc_collection_private_connect(void *ref, const char *subject, const char *predicate, const char *object);
 int softc_collection_private_num_relations(void *ref);
 int softc_collection_private_num_entities(void *ref);
+void softc_collection_private_save(const void *ref, softc_datamodel_t *dataModel);
+void softc_collection_private_load(void *ref, const softc_datamodel_t *dataModel);
+
 softc_string_list_s *softc_collection_private_find_relations(void *ref, const char *subject, const char *predicate);
 
 

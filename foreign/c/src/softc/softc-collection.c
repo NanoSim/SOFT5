@@ -46,10 +46,15 @@ struct _softc_collection_s {
 static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
 {
   const softc_collection_s *self = (const softc_collection_s*)ptr;
+  softc_collection_private_save(self->privat.ptr, data_model);  
+  /*
+  const softc_collection_s *self = (const softc_collection_s*)ptr;
+  
   size_t E = self->dims.E;
   size_t R = self->dims.R;
   softc_datamodel_append_string (data_model, "__name__", self->props.__name__);
   softc_datamodel_append_string (data_model, "__version__", self->props.__version__);
+  */
 }
 
 void softc_collection_register_entity(softc_collection_s *self, const char *label, softc_entity_t *entity)
@@ -69,9 +74,14 @@ size_t softc_collection_num_entities(softc_collection_s *self)
 static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
 {
   softc_collection_s *self = (softc_collection_s*)ptr;
+  softc_collection_private_load(self->privat.ptr, data_model);  
+
+  /*
+  softc_collection_s *self = (softc_collection_s*)ptr;
   
   softc_datamodel_get_string (data_model, "__name__", &self->props.__name__);
   softc_datamodel_get_string (data_model, "__version__", &self->props.__version__);    
+  */
 }
 
 static const char ** get_dimensions(const softc_entity_t *ptr, size_t *size)

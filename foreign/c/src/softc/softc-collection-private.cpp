@@ -1,9 +1,11 @@
 #include "softc-collection-private.h"
 #include <cassert>
-#include "softc-entity.h"
 #include <collection.h>
 #include <memory>
 #include <map>
+
+#include "softc-entity.h"
+#include "softc-datamodel-private.hpp"
 
 struct softc_private_s {
   std::unique_ptr<soft::Collection> collection;
@@ -90,6 +92,22 @@ int softc_collection_private_num_entities(void *ref)
   softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
   return d->collection->numEntities();
+}
+
+void softc_collection_private_save(const void *ref, softc_datamodel_t *dataModel)
+{
+  const softc_private_s *d = static_cast<const softc_private_s*>(ref);
+  assert(d != nullptr);
+
+  d->collection->save(dataModel->ref);
+}
+
+void softc_collection_private_load(void *ref, const softc_datamodel_t *dataModel)
+{
+  softc_private_s *d = static_cast<softc_private_s*>(ref);
+  assert(d != nullptr);
+
+  d->collection->load(dataModel->ref);
 }
 
 softc_string_list_s *softc_collection_private_find_relations(void *ref, const char *subject, const char *predicate)
