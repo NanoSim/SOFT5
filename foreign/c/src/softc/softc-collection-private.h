@@ -5,6 +5,7 @@
 #include "softc-macros.h"
 #include "softc-entity.h"
 #include "softc-string.h"
+#include "softc-string-list.h"
 
 SOFTC_BEGIN_DECLS
 
@@ -18,7 +19,7 @@ void softc_collection_private_add_relation(void *ref, const char *subject, const
 void softc_collection_private_connect(void *ref, const char *subject, const char *predicate, const char *object);
 int softc_collection_private_num_relations(void *ref);
 int softc_collection_private_num_entities(void *ref);
-softc_string_s *softc_collection_private_find_relations(void *ref, const char *subject, const char *predicate);
+softc_string_list_s *softc_collection_private_find_relations(void *ref, const char *subject, const char *predicate);
 
 
 SOFTC_END_DECLS

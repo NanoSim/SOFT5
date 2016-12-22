@@ -92,17 +92,17 @@ int softc_collection_private_num_entities(void *ref)
   return d->collection->numEntities();
 }
 
-softc_string_s *softc_collection_private_find_relations(void *ref, const char *subject, const char *predicate)
+softc_string_list_s *softc_collection_private_find_relations(void *ref, const char *subject, const char *predicate)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
   auto rs = d->collection->findRelations(subject, predicate);
   auto n = rs.size();
-  softc_string_s *stringList = softc_string_createlist0(n);
-  for(int i = 0; i < n; ++i) {
-    auto v = rs.front();
-    softc_string_assign(stringList[i], v.c_str());
-    rs.pop_front();
+
+  auto lst = softc_string_list_create();
+  for (auto relation : rs) {
+    auto str = softc_string_create(relation.c_str());
+    softc_string_list_append(lst, str);
   }
-  return stringList;
+  return lst;
 }

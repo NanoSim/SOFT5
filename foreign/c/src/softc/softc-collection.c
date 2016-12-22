@@ -207,9 +207,9 @@ size_t softc_collection_num_relations(softc_collection_s *self)
   return (size_t) softc_collection_private_num_relations(self->privat.ptr);
 }
 
-softc_string_s *softc_collection_find_relations(softc_collection_s *self, const char *subject, const char *predicate)
+softc_string_list_s *softc_collection_find_relations(softc_collection_s *self, const char *subject, const char *predicate)
 {
-  return softc_collection_private_find_relations(self, subject, predicate);
+  return softc_collection_private_find_relations(self->privat.ptr, subject, predicate);
 }
 
 

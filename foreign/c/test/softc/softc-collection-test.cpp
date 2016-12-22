@@ -75,5 +75,5 @@ TEST_F(CollectionTest, findRelation)
   auto numRel = softc_collection_num_relations(coll);
   auto lst = softc_collection_find_relations(coll, "dad", "loves");
 
-  ASSERT_STREQ(from_softc_string(lst[0]), "mommy");
+  ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "mommy");
 }
