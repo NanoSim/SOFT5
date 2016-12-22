@@ -8,11 +8,6 @@ protected:
   static void TearDownTestCase() {}      
 };
 
-TEST(BFoo, bfoo)
-{
-  ASSERT_TRUE(false);
-}
-
 TEST_F(StringListTest, create) 
 {
   auto lst = softc_string_list_create();
