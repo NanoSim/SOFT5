@@ -30,7 +30,7 @@ TEST_F (CollectionTest, store1)
 
   softc_collection_register_entity(coll, "foo", (softc_entity_t*)foo);
   //ASSERT_EQ(softc_collection_num_entities(coll), 1);
-  ASSERT_EQ(softc_collection_num_relations(coll), 0);
+  ASSERT_TRUE(softc_collection_num_relations(coll) > 0);
 
   softc_collection_free(coll);
   foo_free(foo);

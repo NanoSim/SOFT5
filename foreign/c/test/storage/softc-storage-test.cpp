@@ -116,8 +116,11 @@ typedef double* soft_double_array;
 TEST_F(SoftC_StorageTest, writeData)
 {
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
   double **v2d;
   double ***v3d;
   bool isOk;
@@ -159,8 +162,11 @@ TEST_F(SoftC_StorageTest, readString)
   softc_string_s message;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", NULL);
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -180,8 +186,11 @@ TEST_F(SoftC_StorageTest, readInt32)
   int32_t x;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", NULL);
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -199,9 +208,12 @@ TEST_F(SoftC_StorageTest, readDouble)
   double x;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", NULL);
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
-
+  ASSERT_TRUE(model != nullptr);
+  
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
   softc_datamodel_set_meta_version(model, "meta");
@@ -221,8 +233,11 @@ TEST_F(SoftC_StorageTest, readIntVec)
   std::vector<int32_t> intvec_cmp;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", NULL);
-  auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(storage != nullptr);
+  auto strategy = softc_storage_get_storage_strategy(storage); 
+  ASSERT_TRUE(strategy != nullptr);    
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -244,8 +259,11 @@ TEST_F(SoftC_StorageTest, doubleVec)
   std::vector<double> doublevec_cmp;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -268,8 +286,11 @@ TEST_F(SoftC_StorageTest, doubleVec2D)
   std::vector<std::vector<double> > doublevec2d_cmp;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -292,8 +313,11 @@ TEST_F(SoftC_StorageTest, doubleVec3D)
   std::vector<std::vector<std::vector<double> > > doublevec3d_cmp;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -313,8 +337,11 @@ TEST_F(SoftC_StorageTest, strList)
   size_t n_elements = 0;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
+  ASSERT_TRUE(storage != nullptr);
   auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
+  ASSERT_TRUE(model != nullptr);
 
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
@@ -340,8 +367,26 @@ TEST_F(SoftC_StorageTest, collectionStorage)
   softc_collection_set_name(collection, "Mine");
   softc_collection_set_version(collection, "V1");
   softc_storage_save(storage, (const softc_entity_t*) collection);
-  
-  
+   
   softc_collection_free(collection);
   softc_storage_free(storage);
 }
+
+TEST_F(SoftC_StorageTest, collectionRetrieval)
+{
+  auto storage  = softc_storage_create("hdf5", "retrieve-test.h5", "");
+  ASSERT_TRUE(storage != nullptr);
+  auto collection = softc_collection_create_new();
+  ASSERT_TRUE(collection != nullptr);
+  softc_collection_add_relation(collection, "a", "is", "b");
+  softc_collection_add_relation(collection, "v", "is", "b");
+  softc_storage_save(storage, (const softc_entity_t*)collection);
+
+  auto id = softc_entity_get_id((const softc_entity_t*)collection);
+  auto collection_copy = softc_collection_create (id);
+  softc_storage_load(storage, (softc_entity_t*)collection_copy);
+  softc_collection_free(collection);
+  softc_collection_free(collection_copy);
+  softc_storage_free(storage);
+}
+
