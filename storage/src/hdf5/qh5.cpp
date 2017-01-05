@@ -571,6 +571,7 @@ QVariant QH5 :: read (QString const &key)
 
   auto dataspace = H5Dget_space (dataset);
   auto rank      = H5Sget_simple_extent_ndims (dataspace);
+  if (rank < 0) return QVariant();
 
   QVector<hsize_t> dims(rank);
   auto status    = H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr); 

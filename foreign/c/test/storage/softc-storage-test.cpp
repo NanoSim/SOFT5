@@ -388,6 +388,7 @@ TEST_F(SoftC_StorageTest, collectionRetrieval)
   softc_storage_load(storage, (softc_entity_t*)collection_copy);
 
   auto lst = softc_collection_find_relations(collection_copy, "b", "^is");
+  ASSERT_TRUE(softc_string_list_count(lst) > 0);
   ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "a");
 
   softc_string_list_free(lst);
