@@ -82,6 +82,7 @@ bool Bson :: appendString (char const * key, char const * value)
 bool Bson :: append (const char *key, soft::StdString const &value)
 {
   appendString(key, value.c_str());
+  return true;
 }
 
 bool Bson :: append (const char *key, Bson const &value) 
@@ -155,11 +156,13 @@ bool Bson :: getBool (const char *key, bool &value) const
 bool Bson :: appendDouble(char const * key, double const &value)
 {
   auto isOk = BSON_APPEND_DOUBLE(bson.get(), key, value);
+  return isOk;
 }
 
 bool Bson :: appendFloat(char const * key, float const &value)
 {
   auto isOk = BSON_APPEND_DOUBLE(bson.get(), key, value);
+  return isOk;
 }
 
 bool Bson :: appendBinary (char const *key, QByteArray const &value)
@@ -548,6 +551,7 @@ bson_t* Bson :: data() const
 Bson& Bson :: operator=(Bson const &other)
 {
   bson = other.bson;
+  return *this;
 }
 
 std::shared_ptr<struct _bson_t> Bson :: bsonPtr()
