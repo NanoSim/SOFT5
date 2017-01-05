@@ -21,5 +21,4 @@ target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 
 # Export/import declaration for Windows
 generate_export_header(${PROJECT_NAME})
-
 install_runtime_library(${PROJECT_NAME} ${SCRIPT_PLUGINS_INSTALL_DIR})

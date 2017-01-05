@@ -8,6 +8,7 @@ set (CMAKE_AUTOMOC ON)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
+find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
 include_directories(
   ${PYTHON_INCLUDE_PATH}
@@ -44,14 +45,14 @@ else()
   set(pyext_ext ".pyd")
 endif()
 
-execute_process(COMMAND 
+execute_process(COMMAND
   ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print(sysconfig.get_python_lib(plat_specific=True, prefix='${CMAKE_INSTALL_PREFIX}'))"
   OUTPUT_VARIABLE _ABS_PYTHON_MODULE_PATH
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-get_filename_component(_ABS_PYTHON_MODULE_PATH 
+get_filename_component(_ABS_PYTHON_MODULE_PATH
   ${_ABS_PYTHON_MODULE_PATH} ABSOLUTE)
-file(RELATIVE_PATH _REL_PYTHON_MODULE_PATH 
+file(RELATIVE_PATH _REL_PYTHON_MODULE_PATH
   ${CMAKE_INSTALL_PREFIX} ${_ABS_PYTHON_MODULE_PATH})
 
 set(PYTHON_MODULE_PATH
