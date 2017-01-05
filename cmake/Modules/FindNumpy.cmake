@@ -1,38 +1,49 @@
-# - Find numpy
-# Find the native numpy includes
-# This module defines
-#  NUMPY_INCLUDE_DIR, where to find numpy/arrayobject.h, etc.
-#  NUMPY_FOUND, If false, do not try to use numpy headers.
+# - Finds the Python module NumPy
 #
-# Verbose output can be suppressed by setting NUMPY_FIND_QUIETLY to TRUE.
+# This module defines:
+#   NUMPY_INCLUDE_DIR    include path for arrayobject.h
+#   NUMPY_VERSION        numpy version string
+#   NUMPY_FOUND          whether NumPy headers are found
+#
+# We assume that you include
+#
+#     find_package(PythonInterp REQUIRED)
+#     find_package(PythonLibs REQUIRED)
+#
+# before finding this package.  Verbose output can be suppressed by setting
+# FIND_NUMPY_QUIETLY to TRUE.
 #
 
-EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c 
-    "from __future__ import print_function; import numpy; print(numpy.get_include())"
-    OUTPUT_VARIABLE numpy_incdir
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-if (numpy_incdir)
-  if(EXISTS ${NUMPY_INCLUDE_DIR}/numpy/arrayobject.h)
-    # successful
-    set (NUMPY_FOUND TRUE)
-    set (NUMPY_INCLUDE_DIR "${numpy_incdir}" CACHE STRING "Numpy include path")
-  else()
-    set(NUMPY_FOUND FALSE)
-  endif()
-else()
-  # Did not successfully include numpy
-  set(NUMPY_FOUND FALSE)
+if(NOT FIND_NUMPY_QUIETLY)
+  message("-- Checking for NumPy")
 endif()
 
-if (NUMPY_FOUND)
-  if (NOT NUMPY_FIND_QUIETLY)
-    message (STATUS "Numpy headers found")
-  endif (NOT NUMPY_FIND_QUIETLY)
-else (NUMPY_FOUND)
-  if (NUMPY_FIND_REQUIRED)
-    message (FATAL_ERROR "Numpy headers missing")
-  endif (NUMPY_FIND_REQUIRED)
-endif (NUMPY_FOUND)
+execute_process(
+  COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy; print(numpy.get_include()); print(numpy.version.version)"
+  OUTPUT_VARIABLE numpy_output
+  ERROR_VARIABLE numpy_error)
 
-MARK_AS_ADVANCED (NUMPY_INCLUDE_DIR)
+if(numpy_error)
+  set(NUMPY_FOUND FALSE)
+else()
+  set(NUMPY_FOUND TRUE)
+  string(REPLACE "\n" ";" numpy_output ${numpy_output})
+  list(GET numpy_output 0 NUMPY_INCLUDE_DIR)
+  list(GET numpy_output 1 NUMPY_VERSION)
+endif()
+
+if(NOT FIND_NUMPY_QUIETLY)
+  if(NUMPY_FOUND)
+    message("-- Checking for NumPy - found version ${NUMPY_VERSION}")
+  else()
+    message("-- Checking for NumPy - not found")
+  endif()
+endif()
+
+
+include(FindPackageHandleStandardArgs)
+
+find_package_handle_standard_args(
+  NumPy DEFAULT_MSG NUMPY_VERSION NUMPY_INCLUDE_DIR)
+mark_as_advanced(INCLUDE_FOUND NUMPY_VERSION NUMPY_INCLUDE_DIR)
