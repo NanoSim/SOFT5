@@ -19,11 +19,16 @@ void softc_string_destroylist(softc_string_s* strlist, size_t n);
 */
 
 %typemap(in,numinputs=1) softc_string_s const {
-   if (!PyString_Check( $input )) {
+   if (PyUnicode_Check( $input )) {
+     $1 = softc_string_create( PyUnicode_AS_DATA( $input ) );
+   } else if (PyBytes_Check( $input )) {
+     $1 = softc_string_create( PyBytes_AsString( $input ) );
+   } else if (PyString_Check( $input )) {
+     $1 = softc_string_create( PyString_AsString( $input ) );
+   } else {
      PyErr_SetString(PyExc_ValueError, "Expecting a string");
      return NULL;
    }
-   $1 = softc_string_create( PyString_AsString( $input ) );
 }
 
 /* Set the input argument to point to a temporary variable */
@@ -88,12 +93,17 @@ bool softc_datamodel_get_string(const softc_datamodel_t *model, const char *key,
   lst = (char **) malloc(n * sizeof(char *));
   for (i = 0; i < n; ++i) {
     PyObject *s = PyList_GetItem($input, i);
-    if (!PyString_Check(s)) {
-        free(lst);
-        PyErr_SetString(PyExc_ValueError, "List items must be strings");
-        return NULL;
+    if (PyUnicode_Check(s)) {
+      lst[i] = (char *)PyUnicode_AS_DATA(s);
+    } else if (PyBytes_Check(s)) {
+      lst[i] = PyBytes_AsString(s);
+    } else if (PyString_Check(s)) {
+      lst[i] = PyString_AsString(s);
+    } else {
+      free(lst);
+      PyErr_SetString(PyExc_ValueError, "List items must be strings");
+      return NULL;
     }
-    lst[i] = PyString_AsString(s);
   }
   $1 = softc_string_createlist( (const char**)lst, n );
   free(lst);

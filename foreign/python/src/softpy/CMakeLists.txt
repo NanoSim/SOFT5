@@ -28,7 +28,9 @@ set(SWIG_MODULE_softpy_EXTRA_DEPS
   softpy-typemaps.i
   softpy-entity.i
   softpy-datamodel.i
+  softpy-string.i
   softpy-python.i
+  softpy.i
 )
 
 if(USE_PYTHON3)
