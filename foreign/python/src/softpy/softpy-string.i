@@ -5,6 +5,12 @@
 %}
 
 
+/*
+ * FIXME - there are still some bugs for unicode strings both under
+ *         Python2 and Python3
+ */
+
+
 /* String input typemaps */
 %typemap("doc") (softc_string_s value) "String."
 %typemap(in,numinputs=1) softc_string_s value {
@@ -34,8 +40,8 @@
   softc_string_s* v = $1;
 #if PY_MAJOR_VERSION <= 2
   $result = PyString_FromString( from_softc_string( *v ));
-#else
-  $result = PyString_AsUTF8( from_softc_string( *v ));
+#else  /* FIXME - not called from Python3 - Why? */
+  $result = PyUnicode_FromString( from_softc_string( *v ));
 #endif
 }
 
@@ -118,7 +124,11 @@
   lst = PyList_New( len );
   for (i = 0; i < len; ++i) {
     p = from_softc_string( a[i] );
+#if PY_MAJOR_VERSION <= 2
     s = PyString_FromString( p );
+#else
+    s = PyUnicode_FromString( p );
+#endif
     PyList_SetItem( lst, i, s );
   }
   softc_string_destroylist( a, len );
