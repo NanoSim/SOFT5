@@ -4,14 +4,16 @@ set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 
-
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
+find_package(Numpy REQUIRED)
+
 include_directories(
-  ${PYTHON_INCLUDE_PATH}
+  ${PYTHON_INCLUDE_DIRS}
+  ${NUMPY_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${soft-kernel_SOURCE_DIR}
   ${softc_SOURCE_DIR}
