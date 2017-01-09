@@ -8,7 +8,11 @@ set (CMAKE_AUTOMOC ON)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
-find_package(PythonInterp REQUIRED)
+if(USE_PYTHON3)
+  find_package(PythonInterp 3 REQUIRED)
+else()
+  find_package(PythonInterp REQUIRED)
+endif()
 find_package(PythonLibs REQUIRED)
 include_directories(
   ${PYTHON_INCLUDE_PATH}
