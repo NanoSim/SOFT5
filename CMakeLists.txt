@@ -37,8 +37,6 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-# TODO: Resolve this
-
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
@@ -54,7 +52,7 @@ if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
 endif ()
 
 if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
-  find_package (BSON REQUIRED)
+  find_package(BSON REQUIRED)
   find_package(MONGOC REQUIRED)
 endif()
 

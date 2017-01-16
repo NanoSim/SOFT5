@@ -59,7 +59,7 @@ IEntity* create (const std::string &uuid)
  */
 std::string IEntity :: id() const
 {
-  return d->uuid.toString().toStdString();
+  return d->uuid.toString().mid(1,36).toStdString();
 }
 
 /*!

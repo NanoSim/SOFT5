@@ -103,10 +103,10 @@ void softc_collection_private_save(const void *ref, softc_datamodel_t *dataModel
 }
 
 void softc_collection_private_load(void *ref, const softc_datamodel_t *dataModel)
-{const
-  softc_private_s *d = static_cast<softc_private_s*>(ref);
+{
+  const softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
-
+  
   d->collection->load(dataModel->ref);
 }
 

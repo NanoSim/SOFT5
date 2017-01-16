@@ -4,13 +4,16 @@ set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 
-
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
+find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
+find_package(Numpy REQUIRED)
+
 include_directories(
-  ${PYTHON_INCLUDE_PATH}
+  ${PYTHON_INCLUDE_DIRS}
+  ${NUMPY_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${soft-kernel_SOURCE_DIR}
   ${softc_SOURCE_DIR}
@@ -44,14 +47,14 @@ else()
   set(pyext_ext ".pyd")
 endif()
 
-execute_process(COMMAND 
+execute_process(COMMAND
   ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print(sysconfig.get_python_lib(plat_specific=True, prefix='${CMAKE_INSTALL_PREFIX}'))"
   OUTPUT_VARIABLE _ABS_PYTHON_MODULE_PATH
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-get_filename_component(_ABS_PYTHON_MODULE_PATH 
+get_filename_component(_ABS_PYTHON_MODULE_PATH
   ${_ABS_PYTHON_MODULE_PATH} ABSOLUTE)
-file(RELATIVE_PATH _REL_PYTHON_MODULE_PATH 
+file(RELATIVE_PATH _REL_PYTHON_MODULE_PATH
   ${CMAKE_INSTALL_PREFIX} ${_ABS_PYTHON_MODULE_PATH})
 
 set(PYTHON_MODULE_PATH

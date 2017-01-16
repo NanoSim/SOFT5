@@ -2,6 +2,7 @@
 #include <softc/softc-utils.h>
 #include <softc/softc-entity.h>
 #include <softc/softc-collection.h>
+#include <softc/softc-storage.h>
 
 #include "foo.h"
 
@@ -76,4 +77,25 @@ TEST_F(CollectionTest, findRelation)
   auto lst = softc_collection_find_relations(coll, "dad", "loves");
 
   ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "mommy");
+}
+
+TEST_F (CollectionTest, store_and_load)
+{
+  auto storage = softc_storage_create("mongo2", "mongodb://localhost", "db=foreign;coll=coll");
+  ASSERT_TRUE(storage != nullptr);
+  softc_collection_s *coll = softc_collection_create_new();
+  ASSERT_TRUE(coll != nullptr);
+
+  softc_collection_add_relation(coll, "dad","loves","mommy");
+  softc_collection_add_relation(coll, "history","repeats","itself");
+
+  auto id = softc_entity_get_id((const softc_entity_t*)coll);
+
+  softc_storage_save(storage, (const softc_entity_t*)coll);
+  auto collection_copy = softc_collection_create (id);
+  softc_storage_load(storage, (softc_entity_t*)collection_copy);
+
+  auto numRel = softc_collection_num_relations(collection_copy);
+  auto lst = softc_collection_find_relations(collection_copy, "dad", "loves");
+  ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "mommy"); 
 }
