@@ -267,7 +267,7 @@ bool BsonModel :: getArray (const char *, IDataModel *) const
 
 IDataModel* BsonModel :: getModel (const char *) const
 {
-  return false;
+  return nullptr;
 }
 
 const _bson_t *BsonModel :: bson() const
