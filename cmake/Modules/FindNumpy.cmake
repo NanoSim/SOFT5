@@ -15,9 +15,9 @@
 #
 
 
-#if(NOT FIND_NUMPY_QUIETLY)
-#  message("-- Checking for NumPy")
-#endif()
+if(NOT FIND_NUMPY_QUIETLY)
+  message("-- Checking for NumPy")
+endif()
 
 execute_process(
   COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy; print(numpy.get_include()); print(numpy.version.version)"
@@ -33,14 +33,13 @@ else()
   list(GET numpy_output 1 NUMPY_VERSION)
 endif()
 
-#if(NOT FIND_NUMPY_QUIETLY)
-#  if(NUMPY_FOUND)
-#    message("-- Checking for NumPy - found version ${NUMPY_VERSION}")
-#  else()
-#    message("-- Checking for NumPy - not found")
-#  endif()
-#endif()
-
+if(NOT FIND_NUMPY_QUIETLY)
+  if(NUMPY_FOUND)
+    message("-- Checking for NumPy - found version ${NUMPY_VERSION}")
+  else()
+    message("-- Checking for NumPy - not found")
+  endif()
+endif()
 
 include(FindPackageHandleStandardArgs)
 
