@@ -23,8 +23,7 @@ void softc_string_list_free(softc_string_list_s *self)
 
 void softc_string_list_append(softc_string_list_s *self, softc_string_s str)
 {
-  auto it = self->string_list.begin();
-  self->string_list.insert(it, str);
+  self->string_list.push_back(str);
 }
 
 void softc_string_list_clear(softc_string_list_s *self)
@@ -50,3 +49,10 @@ softc_string_s softc_string_list_last(softc_string_list_s *self)
   return self->string_list.back();
 }
 
+//! Returns the item at index position i in the list.  i must be a
+//! valid index position in the list (i.e., 0 <= i < size()).
+softc_string_s softc_string_at(softc_string_list_s *self, int index)
+{
+  assert(index >= 0 && index < self->string_list.size());
+  return self->string_list.at(index);
+}

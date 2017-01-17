@@ -62,10 +62,6 @@ void softc_collection_register_entity(softc_collection_s *self, const char *labe
   softc_collection_private_register_entity(self->privat.ptr, label, entity);
 }
 
-void softc_collection_connection(softc_collection_s *self, const char *subject, const char *predicate, const char *object)
-{
-}
-
 size_t softc_collection_num_entities(softc_collection_s *self)
 {
   return (size_t) softc_collection_private_num_entities(self->privat.ptr);

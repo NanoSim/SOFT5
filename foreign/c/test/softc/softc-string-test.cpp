@@ -16,7 +16,6 @@ TEST(SoftC_StringTest, create)
   softc_string_destroy(text);
 }
 
-#if 0
 TEST(SoftC_StringListTest, create) 
 {
   auto lst = softc_string_list_create();
@@ -35,4 +34,3 @@ TEST(SoftC_StringListTest, append)
   softc_string_list_append(lst, str);
   ASSERT_EQ(softc_string_list_count(lst), 1);  
 }
-#endif

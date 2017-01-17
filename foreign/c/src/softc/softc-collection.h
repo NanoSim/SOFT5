@@ -29,7 +29,6 @@ softc_collection_dimensions_s * const softc_collection_dims(softc_collection_s *
 softc_collection_allocatable_s * softc_collection_allocatables(softc_collection_s *self);
 
 void softc_collection_register_entity(softc_collection_s *self, const char *label, softc_entity_t *entity);
-void  softc_collection_connection(softc_collection_s *self, const char *subject, const char *predicate, const char *object);
 size_t softc_collection_num_entities(softc_collection_s *self);
 size_t softc_collection_num_relations(softc_collection_s *self);
 softc_string_list_s *softc_collection_find_relations(softc_collection_s *self, const char *subject, const char *predicate);

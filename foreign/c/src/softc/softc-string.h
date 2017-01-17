@@ -13,6 +13,7 @@ int softc_string_compare(softc_string_s str, const char *text);
 softc_string_s* softc_string_createlist0(size_t n);
 softc_string_s* softc_string_createlist(const char *str[], size_t n);
 void softc_string_destroylist(softc_string_s* strlist, size_t n);
+bool softc_string_isequal(softc_string_s first, softc_string_s second);
 SOFTC_END_DECLS
 
 #endif

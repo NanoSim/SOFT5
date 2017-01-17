@@ -69,3 +69,8 @@ int softc_string_compare(softc_string_s s, const char *text)
     return -1;
   }
 }
+
+bool softc_string_isequal(softc_string_s first, softc_string_s second)
+{
+  return (first->str == second->str);
+}
