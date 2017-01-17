@@ -76,14 +76,14 @@ set (library_path
   ${soft-storage-mongo_BINARY_DIR}
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
-  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-storage-plugins-mongo2_BINARY_DIR}
   ${soft-numerics-sim_BINARY_DIR}
   ${softc_BINARY_DIR}
 )
 set (storage_path
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
-  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-storage-plugins-mongo2_BINARY_DIR}
 )
 if (UNIX)
   string(REPLACE ";" ":" LD_LIBRARY_PATH "${library_path}")
