@@ -17,8 +17,6 @@
   char *s;
   if (PyUnicode_Check( $input )) {
     s = PyString_AsString(PyUnicode_AsUTF8String($input));
-  } else if (PyBytes_Check( $input )) {
-    s = PyBytes_AsString($input);
   } else if (PyString_Check( $input )) {
     s = PyString_AsString($input);
   } else {
@@ -52,86 +50,50 @@
 
 /* String_list input typemaps */
 
-/*
- * The next two typemaps should specifically match this prototype, including the
- * names of the arguments:
- * bool softc_datamodel_append_string_list(softc_datamodel_t *model, const char *key,
- *                        const softc_string_s *strlist, size_t n_elements);
- */
-/* Converts a single Python string list argument into 2 arguments for the C routine */
-%typemap(in,numinputs=1) (const softc_string_s* strlist, size_t n_elements)
-                         (const softc_string_s* strlist, size_t n) {
+%typemap(in) (const softc_string_list_s *strlist) {
   int i;
-  char** lst;
-  if (!PyList_Check($input)) {
-    PyErr_SetString(PyExc_ValueError, "Expecting a list");
+  if (!PySequence_Check($input)) {
+    PyErr_SetString(PyExc_ValueError, "Expecting a sequence");
     return NULL;
   }
-  $2 = n = PyList_Size($input);
-  lst = (char **) malloc(n * sizeof(char *));
-  for (i = 0; i < n; ++i) {
-    PyObject *s = PyList_GetItem($input, i);
+  $1 = softc_string_list_create();
+  for (i = 0; i < PySequence_Size($input); i++) {
+    PyObject *s = PySequence_GetItem($input, i);
     if (PyUnicode_Check(s)) {
-      lst[i] = PyString_AsString(PyUnicode_AsUTF8String(s));
-    } else if (PyBytes_Check(s)) {
-      lst[i] = PyBytes_AsString(s);
+      softc_string_list_append_cstr($1, PyString_AsString(PyUnicode_AsUTF8String(s)));
     } else if (PyString_Check(s)) {
-      lst[i] = PyString_AsString(s);
+      softc_string_list_append_cstr($1, PyString_AsString(s));
     } else {
-      free(lst);
-      PyErr_SetString(PyExc_ValueError, "List items must be strings");
+      softc_string_list_free($1);
+      PyErr_SetString(PyExc_ValueError, "Sequence items must be strings");
       return NULL;
     }
   }
-  $1 = softc_string_createlist( (const char**)lst, n );
-  free(lst);
-}
-
-/* After having called softc_datamodel_append_string_list, this one cleans up temporary
- * resources; It complements the 'softc_string_createlist' above.
- */
-%typemap(freearg) (const softc_string_s* strlist, size_t n_elements)
-                  (softc_string_s* strlist, size_t n) {
-  softc_string_destroylist( $1, $2 );
 }
 
 
 /* String_list output typemaps */
 
-/*
- * The next two typemaps should specifically match this prototype:
- * bool softc_datamodel_get_string_list(const softc_datamodel_t *model, const char *key,
- *                        softc_string_s **strlist, size_t *n_elements);
- */
-/* Typemap to strip away the 2 return values from the Python argument list */
-%typemap(in,numinputs=0) (softc_string_s **strlist, size_t *n_elements)
-                         (softc_string_s* strlist, size_t n) {
-  $1 = &strlist;
-  $2 = &n;
+/* Set output argument to point to temporary variable */
+%typemap(in,numinputs=0) (softc_string_list_s **strlist)
+                         (softc_string_list_s* tmp) {
+  $1 = &tmp;
 }
 
-/* Typemap to converted the 2 return values from the argument list to the Python result & type */
-%typemap(argout,numinputs=0) (softc_string_s **strlist, size_t *n_elements)
-                             (softc_string_s* strlist, size_t n) {
+%typemap(argout,numinputs=0) (softc_string_list_s **strlist) {
   int i;
-  size_t len = 0;
-  PyObject *lst = 0;
-  softc_string_s* a = 0;
-  PyObject *s = 0;
-  const char* p = 0;
-  len = *$2;
-  a = *$1;
-  lst = PyList_New( len );
-  for (i = 0; i < len; ++i) {
-    p = from_softc_string( a[i] );
+  size_t n = softc_string_list_count(*$1);
+  PyObject *lst = PyList_New(n);
+  for (i = 0; i < n; ++i) {
+    softc_string_s s = softc_string_at(*$1, i);
+    const char *p = from_softc_string(s);
 #if PY_MAJOR_VERSION <= 2
-    s = PyString_FromString( p );
+    PyObject *str = PyString_FromString(p);
 #else
-    s = PyUnicode_FromString( p );
+    PyObject *str = PyUnicode_FromString(p);
 #endif
-    PyList_SetItem( lst, i, s );
+    PyList_SetItem(lst, i, str);
   }
-  softc_string_destroylist( a, len );
   $result = lst;
 }
 
