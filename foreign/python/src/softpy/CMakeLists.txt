@@ -27,12 +27,13 @@ set(CMAKE_SWIG_FLAGS "")
 
 set(SWIG_MODULE_softpy_EXTRA_DEPS
   numpy.i
+  softpy.i
   softpy-typemaps.i
-  softpy-entity.i
   softpy-datamodel.i
   softpy-string.i
+  softpy-entity.i
+  softpy-collection.i
   softpy-python.i
-  softpy.i
 )
 
 if(USE_PYTHON3)
