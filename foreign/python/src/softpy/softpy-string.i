@@ -52,23 +52,26 @@
 
 %typemap(in) (const softc_string_list_s *strlist) {
   int i;
+  PyObject *s;
   if (!PySequence_Check($input)) {
     PyErr_SetString(PyExc_ValueError, "Expecting a sequence");
     return NULL;
   }
   $1 = softc_string_list_create();
   for (i = 0; i < PySequence_Size($input); i++) {
-    PyObject *s = PySequence_GetItem($input, i);
+    s = PySequence_GetItem($input, i);
     if (PyUnicode_Check(s)) {
       softc_string_list_append_cstr($1, PyString_AsString(PyUnicode_AsUTF8String(s)));
     } else if (PyString_Check(s)) {
       softc_string_list_append_cstr($1, PyString_AsString(s));
     } else {
       softc_string_list_free($1);
+      Py_DECREF(s);
       PyErr_SetString(PyExc_ValueError, "Sequence items must be strings");
       return NULL;
     }
   }
+  Py_DECREF(s);
 }
 
 
