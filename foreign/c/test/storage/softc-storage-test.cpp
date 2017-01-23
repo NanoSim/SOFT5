@@ -124,8 +124,7 @@ TEST_F(SoftC_StorageTest, writeData)
   double **v2d;
   double ***v3d;
   bool isOk;
-  //softc_string_s *strList_stdc;
-  softc_string_list_s *strList_stdc = softc_string_list_create();
+  softc_string_list_s *strList = softc_string_list_create();
   
   arrayToPtr(&v3d, doublevec3d);
   arrayToPtr(&v2d, doublevec2d);
@@ -145,20 +144,19 @@ TEST_F(SoftC_StorageTest, writeData)
   isOk = softc_datamodel_append_array_double_2d(model, "double-array-2d", (const double**)v2d, doublevec2d[0].size(), doublevec2d.size()); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_double_3d(model, "double-array-3d", (const double***)v3d, doublevec3d[0][0].size(), doublevec3d[0].size(), doublevec3d.size()); ASSERT_TRUE(isOk);
 
-  strList_stdc = softc_string_list_create();
+  strList = softc_string_list_create();
   std::vector<const char*> ptrlist( strlist.size(), nullptr );
   size_t n=0;
   for (const auto& it: strlist) {
      ptrlist[n] = it.c_str();
      softc_string_s s = softc_string_create(ptrlist[n]);
-     softc_string_list_append(strList_stdc, s);
+     softc_string_list_append(strList, s);
      n++;
   }
   ASSERT_EQ(n, strlist.size());
-  ASSERT_EQ(n, softc_string_list_count(strList_stdc));
-  //strList_stdc = softc_string_createlist( ptrlist.data(), n );
+  ASSERT_EQ(n, softc_string_list_count(strList));
   
-  isOk = softc_datamodel_append_string_list(model, "string-list", strList_stdc); ASSERT_TRUE(isOk);
+  isOk = softc_datamodel_append_string_list(model, "string-list", strList); ASSERT_TRUE(isOk);
 
   softc_storage_strategy_store(strategy, model);  
 }
