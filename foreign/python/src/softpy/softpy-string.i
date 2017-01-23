@@ -1,73 +1,56 @@
 /* -*- C -*-  (not really, but good for syntax highlighting) */
 
-/*
-%typemap(in,numinputs=0) char **value (const char *str)   { $1 = &temp; };
-%typemap(argout)         char **value                     { $result = PyString_FromString(*$1); };
-*/
+%{
+#include "softc-string.h"
+%}
 
-softc_string_s softc_string_create(const char *str);
-const char *from_softc_string(const softc_string_s s);
-void softc_string_destroy(softc_string_s str);
-
-softc_string_s* softc_string_createlist(const char *str[], size_t n);
-void softc_string_destroylist(softc_string_s* strlist, size_t n);
 
 /*
-%typemap(in,numinputs=1) softc_string_s {
-   $1 = softc_string_create( PyString_AsString( $1 ) );
+ * FIXME - there are still some bugs for unicode strings both under
+ *         Python2 and Python3
+ */
+
+
+/* String input typemaps */
+%typemap("doc") (softc_string_s value) "String."
+%typemap(in,numinputs=1) softc_string_s value {
+  char *s;
+  if (PyUnicode_Check( $input )) {
+    s = PyString_AsString(PyUnicode_AsUTF8String($input));
+  } else if (PyBytes_Check( $input )) {
+    s = PyBytes_AsString($input);
+  } else if (PyString_Check( $input )) {
+    s = PyString_AsString($input);
+  } else {
+    PyErr_SetString(PyExc_ValueError, "Expecting a string");
+    return NULL;
+  }
+  $1 = softc_string_create(s);
 }
-*/
 
-%typemap(in,numinputs=1) softc_string_s const {
-   if (!PyString_Check( $input )) {
-     PyErr_SetString(PyExc_ValueError, "Expecting a string");
-     return NULL;
-   }
-   $1 = softc_string_create( PyString_AsString( $input ) );
-}
 
-/* Set the input argument to point to a temporary variable */
-/*
-%typemap(argout,numinputs=0) softc_string_s {
-  $result = PyString_FromString( from_softc_string( $1 ));
-}
-*/
+/* String output typemaps */
+%typemap("doc") (softc_string_s *value) "String."
 
-/*
-bool softc_datamodel_get_string(const softc_datamodel_t *model, const char *key, softc_string_s *value);
-%typemap(argout,numinputs=1) (softc_string_s *value)
-*/
-/*
-%typemap(in,numinputs=1) (const char *key, softc_string_s *value)
-                         (const char *key, softc_string_s value) {
-  $1 = PyString_AsString( $input );
-  $2 = &value;
-}
-*/
 %typemap(in,numinputs=0) softc_string_s *value (softc_string_s value) {
   $1 = &value;
 }
 
-%typemap(argout,numinputs=2) (const softc_datamodel_t *model, const char *key, softc_string_s *value) {
-  softc_string_s* v = $3;
+%typemap(argout,numinputs=0) (softc_string_s *value) {
+  softc_string_s* v = $1;
+#if PY_MAJOR_VERSION <= 2
   $result = PyString_FromString( from_softc_string( *v ));
-  softc_string_destroy(*v);
+#else  /* FIXME - not called from Python3 - Why? */
+  $result = PyUnicode_FromString( from_softc_string( *v ));
+#endif
 }
-
-/*
-%typemap(argout,numinputs=0) softc_string_s *value {
-  softc_string_s s = *$1;
-  $result = PyString_FromString( from_softc_string( s ));
-}
-
-%typemap(argout) softc_string_s const {
-  $result = PyString_FromString( from_softc_string( $1 ));
-}
-*/
 
 %typemap(freearg) softc_string_s {
    softc_string_destroy( $1 );
 }
+
+
+/* String_list input typemaps */
 
 /*
  * The next two typemaps should specifically match this prototype, including the
@@ -88,12 +71,17 @@ bool softc_datamodel_get_string(const softc_datamodel_t *model, const char *key,
   lst = (char **) malloc(n * sizeof(char *));
   for (i = 0; i < n; ++i) {
     PyObject *s = PyList_GetItem($input, i);
-    if (!PyString_Check(s)) {
-        free(lst);
-        PyErr_SetString(PyExc_ValueError, "List items must be strings");
-        return NULL;
+    if (PyUnicode_Check(s)) {
+      lst[i] = PyString_AsString(PyUnicode_AsUTF8String(s));
+    } else if (PyBytes_Check(s)) {
+      lst[i] = PyBytes_AsString(s);
+    } else if (PyString_Check(s)) {
+      lst[i] = PyString_AsString(s);
+    } else {
+      free(lst);
+      PyErr_SetString(PyExc_ValueError, "List items must be strings");
+      return NULL;
     }
-    lst[i] = PyString_AsString(s);
   }
   $1 = softc_string_createlist( (const char**)lst, n );
   free(lst);
@@ -106,6 +94,9 @@ bool softc_datamodel_get_string(const softc_datamodel_t *model, const char *key,
                   (softc_string_s* strlist, size_t n) {
   softc_string_destroylist( $1, $2 );
 }
+
+
+/* String_list output typemaps */
 
 /*
  * The next two typemaps should specifically match this prototype:
@@ -133,7 +124,11 @@ bool softc_datamodel_get_string(const softc_datamodel_t *model, const char *key,
   lst = PyList_New( len );
   for (i = 0; i < len; ++i) {
     p = from_softc_string( a[i] );
+#if PY_MAJOR_VERSION <= 2
     s = PyString_FromString( p );
+#else
+    s = PyUnicode_FromString( p );
+#endif
     PyList_SetItem( lst, i, s );
   }
   softc_string_destroylist( a, len );
