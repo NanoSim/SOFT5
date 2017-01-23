@@ -76,14 +76,14 @@ set (library_path
   ${soft-storage-mongo_BINARY_DIR}
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
-  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-storage-plugins-mongo2_BINARY_DIR}
   ${soft-numerics-sim_BINARY_DIR}
   ${softc_BINARY_DIR}
 )
 set (storage_path
   ${soft-storage-plugins-hdf5_BINARY_DIR}
   ${soft-storage-plugins-json_BINARY_DIR}
-  ${soft-storage-plugins-mongo_BINARY_DIR}
+  ${soft-storage-plugins-mongo2_BINARY_DIR}
 )
 if (UNIX)
   string(REPLACE ";" ":" LD_LIBRARY_PATH "${library_path}")
@@ -162,7 +162,9 @@ endif (WITH_STORAGE_JSON)
 if (WITH_STORAGE_EXTERNAL)
   add_subdirectory(storage/src/plugins/external)
   if (WITH_TESTS)
-    add_subdirectory(storage/test/plugins/external)
+    if (WITH_PORTO)
+      add_subdirectory(storage/test/plugins/external)
+    endif (WITH_PORTO)
   endif (WITH_TESTS)
 endif (WITH_STORAGE_EXTERNAL)
 

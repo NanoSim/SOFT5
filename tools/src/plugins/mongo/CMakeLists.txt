@@ -10,6 +10,11 @@ include_directories (
   ${soft-storage-mongo_INCLUDE_DIRS}
   "../common")
 
+# Export/import declaration for Windows
+if (WIN32)
+generate_export_header(${PROJECT_NAME})
+endif()
+
 set (LINK_LIBS ${LINK_LIBS} ${soft-storage-mongo_LIBS})
 aux_source_directory (. SRC_LIST)
 

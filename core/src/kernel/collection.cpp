@@ -242,7 +242,7 @@ void Collection :: connect (std::string const &subject,
 
 int Collection :: numRelations() const
 {
-  NOT_IMPLEMENTED
+  return d->tripletStore.size();
 }
 
 /*!
