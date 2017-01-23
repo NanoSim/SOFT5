@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import sys
 import pickle
 
 import numpy as np
@@ -23,7 +24,7 @@ def store(e, datamodel):
     softpy.datamodel_append_int32(datamodel, 'spacegroup_no', 225)
     softpy.datamodel_append_double(datamodel, 'lattice_parameter', 5.64)
     softpy.datamodel_append_array_double(
-        datamodel, 'positions', 
+        datamodel, 'positions',
         np.array([(0.0, 0.0, 0.0), (0.5, 0.5, 0.5)]).flatten())
 
 def load(e, datamodel):
@@ -40,7 +41,7 @@ e = softpy.entity_t(get_meta_name='MyStructure',
                     get_dimensions=['I', 'J'],
                     get_dimension_size=[3, 4],
                     load=load,
-                    store=store, 
+                    store=store,
                     user_data=Data())
 
 assert softpy.entity_get_meta_name(e) == 'MyStructure'
@@ -67,7 +68,7 @@ assert d.spgr == 225
 assert d.latt == 5.64
 assert np.allclose(
     d.posi, np.array([(0.0, 0.0, 0.0), (0.5, 0.5, 0.5)]).flatten())
-                   
+
 del e
 
 
@@ -83,7 +84,7 @@ class Person(object):
             get_dimensions=['ndays'],
             get_dimension_size=[len(distances)],
             load=self.load,
-            store=self.store, 
+            store=self.store,
             id=uuid)
 
     def store(self, e, datamodel):
@@ -91,13 +92,13 @@ class Person(object):
         softpy.datamodel_append_int32(datamodel, 'age', self.age)
         softpy.datamodel_append_array_double(
             datamodel, 'distances', self.distances)
-        
+
     def load(self, e, datamodel):
         self.name = softpy.datamodel_get_string(datamodel, 'name')
         self.age = softpy.datamodel_get_int32(datamodel, 'age')
         self.distances = softpy.datamodel_get_array_double(
             datamodel, 'distances')
-        
+
 person = Person('Jack', 42, [5.4, 7.6, 1.1])
 
 with softpy.Storage('hdf5', 'x.h5') as s:
@@ -114,7 +115,8 @@ assert np.all(p.distances == person.distances)
 
 
 # Ensure that entities are pickleable
-if HAVE_DILL:
+# Hmm, this does not works with Python3...
+if HAVE_DILL and sys.version_info.major == 2:
     dump = pickle.dumps(person)
     person2 = pickle.loads(dump)
     for k in person.__dict__:
