@@ -26,6 +26,12 @@ void softc_string_list_append(softc_string_list_s *self, softc_string_s str)
   self->string_list.push_back(str);
 }
 
+void softc_string_list_append_cstr(softc_string_list_s *self, const char *str)
+{
+  softc_string_s s = softc_string_create(str);
+  self->string_list.push_back(s);
+}
+
 void softc_string_list_clear(softc_string_list_s *self)
 {
   while(!self->string_list.empty()) {
@@ -34,7 +40,7 @@ void softc_string_list_clear(softc_string_list_s *self)
   }
 }
 
-int softc_string_list_count(softc_string_list_s *self)
+size_t softc_string_list_count(const softc_string_list_s *self)
 {
   return self->string_list.size();
 }
@@ -51,7 +57,7 @@ softc_string_s softc_string_list_last(softc_string_list_s *self)
 
 //! Returns the item at index position i in the list.  i must be a
 //! valid index position in the list (i.e., 0 <= i < size()).
-softc_string_s softc_string_at(softc_string_list_s *self, int index)
+softc_string_s softc_string_at(const softc_string_list_s *self, int index)
 {
   assert(index >= 0 && index < self->string_list.size());
   return self->string_list.at(index);

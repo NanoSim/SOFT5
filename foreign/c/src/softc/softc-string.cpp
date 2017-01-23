@@ -25,35 +25,6 @@ void softc_string_destroy(softc_string_s str)
   delete (str);
 }
 
-typedef _softc_string_s* string_p;
-softc_string_s* softc_string_createlist0(size_t n)
-{
-  string_p* a = new string_p[n];
-  for (size_t i = 0; i < n; ++i) {
-    a[i] = softc_string_create0();
-  }
-  return a;
-}
-
-softc_string_s* softc_string_createlist(const char *str[], size_t n)
-{
-  string_p* a = new string_p[n];
-  for (size_t i = 0; i < n; ++i) {
-    a[i] = softc_string_create( str[i] );
-  }
-  return a;
-}
-
-void softc_string_destroylist(softc_string_s* strlist, size_t n)
-{
-  if (strlist) {
-    for (size_t i = 0; i < n; ++i) {
-      softc_string_destroy( strlist[i] );
-    }
-    delete[] strlist;
-  }
-}
-
 void softc_string_assign(softc_string_s s, const char *text)
 {
   if (text) {
