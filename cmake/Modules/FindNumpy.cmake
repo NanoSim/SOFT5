@@ -41,7 +41,6 @@ if(NOT FIND_NUMPY_QUIETLY)
   endif()
 endif()
 
-
 include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(
