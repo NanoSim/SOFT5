@@ -5,12 +5,6 @@
 %}
 
 
-/*
- * FIXME - there are still some bugs for unicode strings both under
- *         Python2 and Python3
- */
-
-
 /* String input typemaps */
 %typemap("doc") (softc_string_s value) "String."
 %typemap(in,numinputs=1) softc_string_s value {
