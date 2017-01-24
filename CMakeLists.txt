@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.2)
 include(CPack)
 project(soft5)
 
+set (SOFT_MAJOR_VERSION 5)
+set (SOFT_MINOR_VERSION 1)
+set (SOFT_PATCH_VERSION 5)
+
+# FIXME - clean up dependencies between options
+#   * TESTS depends on: FOREIGN_C, STORAGE_JSON
+#   * PYTHON depends on: FOREIGN_C
+#   * +++
 option (WITH_TESTS "Compile tests"                        OFF)
 option (WITH_STORAGE_JSON "JSON storage support"          OFF)
 option (WITH_PLUGIN_SOFT_KERNEL "Compile kernel plugin"   OFF)
@@ -36,7 +44,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions("-DQT_NO_DEBUG_OUTPUT")
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules")
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
@@ -47,25 +55,37 @@ set (CMAKE_INCLUDE_CURRENT_DIR    ON)
 set (CMAKE_AUTOMOC                ON)
 set (SOFT_ROOTDIR ${CMAKE_SOURCE_DIR})
 
+# Where to place downloaded dependencies and downloaded prefix
+set (SOFT_DEPS_SOURCE_DIR "${soft5_BINARY_DIR}/Dependencies/src")
+set (SOFT_DEPS_INSTALL_PREFIX "${soft5_BINARY_DIR}/Dependencies")
+
+
 if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
   find_package(HDF5 REQUIRED)
 endif ()
 
 if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
-  find_package(BSON REQUIRED)
-  find_package(MONGOC REQUIRED)
+  find_package(BSON)
+  if(NOT BSON_FOUND)
+    include(cmake/Dependencies/CMakeLists-bson.txt)
+  endif()
+
+  find_package(MONGOC)
+  if(NOT MONGOC_FOUND)
+    include(cmake/Dependencies/CMakeLists-mongoc.txt)
+  endif()
 endif()
 
-set (SOFT_MAJOR_VERSION 5)
-set (SOFT_MINOR_VERSION 1)
-set (SOFT_PATCH_VERSION 5)
-
 # Tests
-# Run them with "ctest -V" or "make check" to get verbose output.
 if (WITH_TESTS)
   enable_testing()
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
+  find_package(GTest)
+  if(NOT GTEST_FOUND)
+    include(cmake/Dependencies/CMakeLists-gtest.txt)
+  endif()
 
+  # Add "make check" and synonym for "ctest -V" for verbose output
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
 endif (WITH_TESTS)
 
 # Define content of PATH (Windows), LD_LIBRARY_PATH (Unix) and SOFTSTORAGE
@@ -111,6 +131,30 @@ set (SCRIPT_MODULES_INSTALL_DIR ${SOFTBASE}/modules)
 set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
+
+
+
+# Platform-dependent file extensions
+if(WIN32)
+  set(EXEEXT ".exe")
+else()
+  set(EXEEXT "")
+endif()
+
+# Set up wine for cross-compilation for Windows on Linux
+if(WIN32)
+  if(CROSS_TARGET)
+    # Do not interfere with ~/.wine
+    set(ENV{WINEPREFIX} "${soft5_BINARY_DIR}/wineroot")
+
+    # Set search path for dlls
+    set(ENV{WINEPATH} "${MINGW_BINDIR}\\;${soft5_BINARY_DIR}/core/src/kernel\\;${soft5_BINARY_DIR}/storage/src/plugins/json")
+
+    # Get rid of wine:fixmes
+    set(ENV{WINEDEBUG} "fixme-all")
+  endif()
+endif()
+
 
 ############################
 # Additional CMake scripts
