@@ -124,7 +124,7 @@ TEST_F(SoftC_StorageTest, writeData)
   double **v2d;
   double ***v3d;
   bool isOk;
-  softc_string_list_s *strList = softc_string_list_create();
+  softc_string_list_s *strList;
   
   arrayToPtr(&v3d, doublevec3d);
   arrayToPtr(&v2d, doublevec2d);
