@@ -82,7 +82,7 @@ if (MONGOC_VERSION)
       "Could NOT find MONGOC version"
   )
 else ()
-   find_package_handle_standard_args(MONGOC "Could NOT find MONGOC uuuurh"
+   find_package_handle_standard_args(MONGOC DEFAULT_MSG
       MONGOC_LIBRARIES
       MONGOC_INCLUDE_DIR
   )

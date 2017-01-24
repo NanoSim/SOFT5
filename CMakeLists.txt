@@ -112,17 +112,22 @@ else ()
 endif()
 string(REPLACE ";" ":" SOFTSTORAGE "${storage_path}")
 
-# Make sure that we install 64-bit libraries in lib64 on systems that
-# use this convention
-get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-if ("${LIB64}" STREQUAL "TRUE")
-  set(LIBSUFFIX 64)
+if(UNIX)
+  # Make sure that we install 64-bit libraries in lib64 on systems that
+  # use this convention
+  get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+  if ("${LIB64}" STREQUAL "TRUE")
+    set(LIBSUFFIX 64)
+  else()
+    set(LIBSUFFIX "")
+  endif()
+  set(libdir lib${LIBSUFFIX})
 else()
-  set(LIBSUFFIX "")
+  set(libdir lib)
 endif()
-set(LIB_INSTALL_DIR lib${LIBSUFFIX} CACHE PATH
-  "Installation directory for libraries")
+set(LIB_INSTALL_DIR ${libdir} CACHE PATH "Installation directory for libraries")
 mark_as_advanced(LIB_INSTALL_DIR)
+
 
 # Install targets
 set (SOFTBASE ${LIB_INSTALL_DIR}/${PROJECT_NAME})
