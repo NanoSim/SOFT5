@@ -159,8 +159,8 @@ if(WIN32)
     # Set search path for dlls
     set(ENV{WINEPATH} "${MINGW_BINDIR}\\;${soft5_BINARY_DIR}/core/src/kernel\\;${soft5_BINARY_DIR}/storage/src/plugins/json")
 
-    # Get rid of wine:fixmes
-    set(ENV{WINEDEBUG} "fixme-all")
+    # Get rid of wine debug output (it may interfere with build output)
+    set(ENV{WINEDEBUG} "-all")
   endif()
 endif()
 
