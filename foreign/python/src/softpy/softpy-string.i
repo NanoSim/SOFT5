@@ -22,8 +22,6 @@
 
 
 /* String output typemaps */
-%typemap("doc") (softc_string_s *value) "String."
-
 %typemap(in,numinputs=0) softc_string_s *value (softc_string_s value) {
   $1 = &value;
 }
@@ -32,7 +30,7 @@
   softc_string_s* v = $1;
 #if PY_MAJOR_VERSION <= 2
   $result = PyString_FromString( from_softc_string( *v ));
-#else  /* FIXME - not called from Python3 - Why? */
+#else
   $result = PyUnicode_FromString( from_softc_string( *v ));
 #endif
 }
@@ -43,6 +41,7 @@
 
 
 /* String_list input typemaps */
+%typemap("doc") (softc_string_list_s *value) "String list."
 
 %typemap(in) (const softc_string_list_s *strlist) {
   int i;
@@ -64,8 +63,8 @@
       PyErr_SetString(PyExc_ValueError, "Sequence items must be strings");
       return NULL;
     }
+    Py_DECREF(s);
   }
-  Py_DECREF(s);
 }
 
 
