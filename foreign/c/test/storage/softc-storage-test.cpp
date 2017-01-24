@@ -145,11 +145,9 @@ TEST_F(SoftC_StorageTest, writeData)
   isOk = softc_datamodel_append_array_double_3d(model, "double-array-3d", (const double***)v3d, doublevec3d[0][0].size(), doublevec3d[0].size(), doublevec3d.size()); ASSERT_TRUE(isOk);
 
   strList = softc_string_list_create();
-  std::vector<const char*> ptrlist( strlist.size(), nullptr );
   size_t n=0;
   for (const auto& it: strlist) {
-     ptrlist[n] = it.c_str();
-     softc_string_s s = softc_string_create(ptrlist[n]);
+     softc_string_s s = softc_string_create(it.c_str());
      softc_string_list_append(strList, s);
      n++;
   }
