@@ -1,0 +1,68 @@
+# -*- Mode: cmake -*-
+project(dependencies-hdf5)
+
+include(ExternalProject)
+
+
+# Create targets for downloading, configuring, building and installing hdf5
+get_filename_component(toolchain_file ${CMAKE_TOOLCHAIN_FILE} ABSOLUTE)
+ExternalProject_Add(
+  hdf5
+  PREFIX         "${SOFT_DEPS_SOURCE_DIR}/hdf5"
+  DOWNLOAD_DIR   "${SOFT_DEPS_SOURCE_DIR}/tarbals"
+  URL            "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.0-patch1/src/hdf5-1.10.0-patch1.tar.gz"
+  URL_MD5        "9180ff0ef8dc2ef3f61bd37a7404f295"
+
+  SOURCE_DIR     "${SOFT_DEPS_SOURCE_DIR}/hdf5"
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${toolchain_file}
+    -DHDF5_BUILD_FORTRAN=ON
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_PREFIX=${SOFT_DEPS_INSTALL_PREFIX}
+  BINARY_DIR     "${SOFT_DEPS_BINARY_DIR}/hdf5"
+  )
+#  UPDATE_COMMAND ""
+#  PATCH_COMMAND  ""
+
+
+# Make sure that hdf5 is installed before compiling tests
+# Hmm, seems not really work when compiling with -j
+ExternalProject_Add_StepTargets(hdf5 hdf5-install
+  DEPENDEES install)
+
+add_custom_target(hdf5-dummy
+  DEPENDS hdf5-install)
+
+
+# Calling find_package(Hdf5) here would fail, since hdf5 is first
+# build at compile time.
+#
+# We therefore manually set the variables that find_package(Hdf5)
+# would have set.
+#
+# We assume that we are cross-compiling with mingw64 for win64 on linux,
+# which produces static libraries.
+set(HDF5_FOUND TRUE)
+set(HDF5_INCLUDE_DIRS "${SOFT_DEPS_INSTALL_PREFIX}/include"
+  CACHE PATH "" FORCE)
+set(HDF5_INCLUDE_DIR "${SOFT_DEPS_INSTALL_PREFIX}/include"
+  CACHE PATH "" FORCE)
+
+set(HDF5_C_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libhdf5.a"
+  CACHE FILEPATH "" FORCE)
+set(HDF5_CXX_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libhdf5_cpp.a"
+  CACHE FILEPATH "" FORCE)
+set(HDF5_Fortran_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libhdf5_fortran.a"
+  CACHE FILEPATH "" FORCE)
+
+set(HDF5_C_HL_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libhdf5_hl.a"
+  CACHE FILEPATH "" FORCE)
+set(HDF5_CXX_HL_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libhdf5_hl_cpp.a"
+  CACHE FILEPATH "" FORCE)
+set(HDF5_Fortran_HL_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libhdf5_hl_fortran.a"
+  CACHE FILEPATH "" FORCE)
+
+set(HDF5_LIBRARIES "${HDF5_C_LIBRARIES}" CACHE FILEPATH "" FORCE)
+set(HDF5_HL_LIBRARIES "${HDF5_C_HL_LIBRARIES}" CACHE FILEPATH "" FORCE)
+
+message(STATUS "Prepare downloading hdf5 to ${SOFT_DEPS_SOURCE_DIR}/hdf5")

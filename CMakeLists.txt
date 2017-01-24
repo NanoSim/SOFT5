@@ -57,11 +57,15 @@ set (SOFT_ROOTDIR ${CMAKE_SOURCE_DIR})
 
 # Where to place downloaded dependencies and downloaded prefix
 set (SOFT_DEPS_SOURCE_DIR "${soft5_BINARY_DIR}/Dependencies/src")
+set (SOFT_DEPS_BINARY_DIR "${soft5_BINARY_DIR}/Dependencies/build")
 set (SOFT_DEPS_INSTALL_PREFIX "${soft5_BINARY_DIR}/Dependencies")
 
 
 if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
-  find_package(HDF5 REQUIRED)
+  find_package(HDF5)
+  if(NOT HDF5_FOUND)
+    include(cmake/Dependencies/CMakeLists-hdf5.txt)
+  endif()
 endif ()
 
 if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
