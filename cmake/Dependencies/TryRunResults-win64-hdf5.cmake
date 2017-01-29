@@ -119,12 +119,10 @@ set( H5_NO_ALIGNMENT_RESTRICTIONS_RUN__TRYRUN_OUTPUT
 # RUN_RESULT_VAR
 #    indicates whether the executable would have been able to run on its
 #    target platform. If so, set RUN_RESULT_VAR to
-#    the exit code (in many cases 0 for success), otherwise enter FAILED_TO_RU\
-N.
+#    the exit code (in many cases 0 for success), otherwise enter FAILED_TO_RUN.
 # RUN_RESULT_VAR__TRYRUN_OUTPUT
 #    contains the text the executable would have printed on stdout and stderr.
-#    If the executable would not have been able to run, set RUN_RESULT_VAR__TRY\
-RUN_OUTPUT empty.
+#    If the executable would not have been able to run, set RUN_RESULT_VAR__TRY_RUN_OUTPUT empty.
 
 #set( RUN_RESULT_VAR
 #     53
