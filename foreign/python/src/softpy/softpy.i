@@ -333,27 +333,7 @@ void                softc_storage_strategy_end_retrieve(softc_storage_strategy_t
 /*
  * collection
  */
-/* Questions:
- *   - What is the difference between softc_collection_create()
- *     and softc_collection_create_ext().  What about namespace?
- *
- *   - The char *id argument of softc_collection_create() is not used
- *
- *   - Is the ***dimensions arg. a pointer to a newly allocated
- *     NULL-terminated array of string pointers?
- */
-//%include softpy-collection.i
-softc_collection_s * softc_collection_create(const char *id=NULL);
-//softc_collection_s * softc_collection_create_ext(const char *name, const char *version);
-void                 softc_collection_free(softc_collection_s *self);
-void                 softc_collection_register_entity(softc_collection_s *self, const char *label, const softc_entity_t *entity);
-void                 softc_collection_add_dim(softc_collection_s *self, const char *label, const char *description);
-void                 softc_collection_connection(softc_collection_s *self, const char *subject, const char *predicate, const char *object);
-size_t               softc_collection_num_entities(softc_collection_s *self);
-size_t               softc_collection_num_dims(softc_collection_s *self);
-size_t               softc_collection_num_relations(softc_collection_s *self);
-size_t               softc_collection_num_dim_maps(softc_collection_s *self);
-void                 softc_collection_get_dimensions(softc_collection_s *self, char ***ARGOUT_NULLTERM_STRING_LIST);
+%include softpy-collection.i
 
 
 /**********************************************

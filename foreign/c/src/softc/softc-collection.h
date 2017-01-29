@@ -11,12 +11,12 @@ SOFTC_BEGIN_DECLS
 typedef struct _softc_collection_s softc_collection_s;
 typedef struct _softc_collection_allocatable_s softc_collection_allocatable_s;
 
-typedef struct 
+typedef struct
 {
   size_t E;
   size_t R;
 } softc_collection_dimensions_s;
-  
+
 typedef struct _softc_collection_properties_s softc_collection_properties_s;
 
 softc_collection_s *softc_collection_create_new();
@@ -44,5 +44,3 @@ void softc_collection_connect(softc_collection_s *self, const char *subject, con
 SOFTC_END_DECLS
 
 #endif /* SOFTC_COLLECTION_H_DEF */
-
-

@@ -7,7 +7,11 @@ set (CMAKE_AUTOMOC ON)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
-find_package(PythonInterp REQUIRED)
+if(USE_PYTHON3)
+  find_package(PythonInterp 3 REQUIRED)
+else()
+  find_package(PythonInterp 2 REQUIRED)
+endif()
 find_package(PythonLibs REQUIRED)
 find_package(Numpy REQUIRED)
 
@@ -23,9 +27,12 @@ set(CMAKE_SWIG_FLAGS "")
 
 set(SWIG_MODULE_softpy_EXTRA_DEPS
   numpy.i
+  softpy.i
   softpy-typemaps.i
-  softpy-entity.i
   softpy-datamodel.i
+  softpy-string.i
+  softpy-entity.i
+  softpy-collection.i
   softpy-python.i
 )
 

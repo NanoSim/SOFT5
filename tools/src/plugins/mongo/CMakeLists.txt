@@ -24,6 +24,11 @@ add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 
+# Export/import declaration for Windows
+if (WIN32)
+generate_export_header(${PROJECT_NAME})
+endif()
+
 if (WIN32)
 install_runtime_library(${PROJECT_NAME} ${SCRIPT_PLUGINS_INSTALL_DIR})
 else ()

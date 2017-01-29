@@ -124,7 +124,7 @@ TEST_F(SoftC_StorageTest, writeData)
   double **v2d;
   double ***v3d;
   bool isOk;
-  softc_string_s *strList_stdc;
+  softc_string_list_s *strList;
   
   arrayToPtr(&v3d, doublevec3d);
   arrayToPtr(&v2d, doublevec2d);
@@ -144,15 +144,17 @@ TEST_F(SoftC_StorageTest, writeData)
   isOk = softc_datamodel_append_array_double_2d(model, "double-array-2d", (const double**)v2d, doublevec2d[0].size(), doublevec2d.size()); ASSERT_TRUE(isOk);
   isOk = softc_datamodel_append_array_double_3d(model, "double-array-3d", (const double***)v3d, doublevec3d[0][0].size(), doublevec3d[0].size(), doublevec3d.size()); ASSERT_TRUE(isOk);
 
-  std::vector<const char*> ptrlist( strlist.size(), nullptr );
+  strList = softc_string_list_create();
   size_t n=0;
   for (const auto& it: strlist) {
-     ptrlist[n++] = it.c_str();
+     softc_string_s s = softc_string_create(it.c_str());
+     softc_string_list_append(strList, s);
+     n++;
   }
   ASSERT_EQ(n, strlist.size());
-  strList_stdc = softc_string_createlist( ptrlist.data(), n );
+  ASSERT_EQ(n, softc_string_list_count(strList));
   
-  isOk = softc_datamodel_append_string_list(model, "string-list", strList_stdc, strlist.size()); ASSERT_TRUE(isOk);
+  isOk = softc_datamodel_append_string_list(model, "string-list", strList); ASSERT_TRUE(isOk);
 
   softc_storage_strategy_store(strategy, model);  
 }
@@ -333,8 +335,7 @@ TEST_F(SoftC_StorageTest, doubleVec3D)
 
 TEST_F(SoftC_StorageTest, strList)
 {
-  softc_string_s *slist = nullptr;
-  size_t n_elements = 0;
+  softc_string_list_s *slist = nullptr;
 
   auto storage  = softc_storage_create("hdf5", "test.h5", "");
   ASSERT_TRUE(storage != nullptr);
@@ -348,14 +349,16 @@ TEST_F(SoftC_StorageTest, strList)
   softc_datamodel_set_meta_version(model, "meta");
 
   softc_storage_strategy_start_retrieve(strategy, model);
-  auto isOk = softc_datamodel_get_string_list(model, "string-list", &slist, &n_elements);
+  auto isOk = softc_datamodel_get_string_list(model, "string-list", &slist);
   ASSERT_TRUE(isOk);
-  softc_storage_strategy_end_retrieve(strategy, model);
+  size_t n_elements = softc_string_list_count(slist);
   ASSERT_EQ(n_elements, strlist.size());
+  softc_storage_strategy_end_retrieve(strategy, model);
   for (size_t i = 0; i < strlist.size(); ++i) {
-    ASSERT_STREQ( from_softc_string(slist[i]), strlist[i].c_str());
+    softc_string_s s = softc_string_at(slist, i);
+    ASSERT_STREQ( from_softc_string(s), strlist[i].c_str());
   }
-  softc_string_destroylist(slist, n_elements);
+  softc_string_list_free(slist);
 }
 
 TEST_F(SoftC_StorageTest, collectionStorage)
