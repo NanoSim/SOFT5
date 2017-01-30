@@ -20,8 +20,8 @@ endif()
 
 ExternalProject_Add(
   hdf5
-  PREFIX         "${SOFT_DEPS_SOURCE_DIR}/hdf5"
-  STAMP_DIR      "${SOFT_DEPS_BINARY_DIR}/stamps"
+  PREFIX         "${SOFT_DEPS_ROOT_DIR}"
+  STAMP_DIR      "${SOFT_DEPS_SOURCE_DIR}/hdf5-stamp"
 
   DOWNLOAD_DIR   "${SOFT_DEPS_SOURCE_DIR}/tarbals"
   URL            "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.0-patch1/src/hdf5-1.10.0-patch1.tar.gz"
@@ -30,14 +30,14 @@ ExternalProject_Add(
   UPDATE_COMMAND ""
   PATCH_COMMAND  ""
 
-  SOURCE_DIR     "${SOFT_DEPS_SOURCE_DIR}/hdf5"
+  SOURCE_DIR     "${SOFT_DEPS_SOURCE_DIR}/hdf5-src"
   CMAKE_ARGS
     ${initial_cache_opt}
     -DCMAKE_TOOLCHAIN_FILE=${toolchain_file}
     -DHDF5_BUILD_FORTRAN=OFF
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_INSTALL_PREFIX=${SOFT_DEPS_INSTALL_PREFIX}
-  BINARY_DIR     "${SOFT_DEPS_BINARY_DIR}/hdf5"
+  BINARY_DIR     "${SOFT_DEPS_SOURCE_DIR}/hdf5-build"
   )
 #    --debug-trycompile
 
@@ -50,6 +50,7 @@ ExternalProject_Add_StepTargets(hdf5 hdf5-install
 add_custom_target(hdf5-dummy
   DEPENDS hdf5-install)
 
+add_dependencies(${SOFT_DEPS_INSTALL_PREFIX}/lib/liblibhdf5.a hdf5-dummy)
 
 # Calling find_package(Hdf5) here would fail, since hdf5 is first
 # build at compile time.
@@ -59,7 +60,8 @@ add_custom_target(hdf5-dummy
 #
 # We assume that we are cross-compiling with mingw64 for win64 on linux,
 # which produces static libraries.
-set(HDF5_FOUND TRUE)
+set(HDF5_FOUND TRUE
+  CACHE PATH "" FORCE)
 set(HDF5_INCLUDE_DIRS "${SOFT_DEPS_INSTALL_PREFIX}/include"
   CACHE PATH "" FORCE)
 set(HDF5_INCLUDE_DIR "${SOFT_DEPS_INSTALL_PREFIX}/include"
@@ -82,4 +84,26 @@ set(HDF5_Fortran_HL_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/liblibhdf5_hl_for
 set(HDF5_LIBRARIES "${HDF5_C_LIBRARIES}" CACHE FILEPATH "" FORCE)
 set(HDF5_HL_LIBRARIES "${HDF5_C_HL_LIBRARIES}" CACHE FILEPATH "" FORCE)
 
-message(STATUS "Prepare downloading hdf5 to ${SOFT_DEPS_SOURCE_DIR}/hdf5")
+mark_as_advanced(
+  HDF5_FOUND
+  HDF5_INCLUDE_DIRS
+  HDF5_INCLUDE_DIR
+
+  HDF5_C_LIBRARIES
+  HDF5_CXX_LIBRARIES
+  HDF5_Fortran_LIBRARIES
+
+  HDF5_C_HL_LIBRARIES
+  HDF5_CXX_HL_LIBRARIES
+  HDF5_Fortran_HL_LIBRARIES
+
+  HDF5_LIBRARIES
+  HDF5_HL_LIBRARIES
+  )
+
+
+ExternalProject_Get_Property(hdf5 install_dir)
+include_directories(${install_dir}/include)
+
+add_dependencies(project_b_exe project_a)
+target_link_libraries(project_b_exe ${install_dir}/lib/alib.lib)

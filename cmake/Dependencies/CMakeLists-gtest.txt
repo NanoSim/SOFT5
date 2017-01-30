@@ -8,17 +8,20 @@ include(ExternalProject)
 get_filename_component(toolchain_file ${CMAKE_TOOLCHAIN_FILE} ABSOLUTE)
 ExternalProject_Add(
   gtest
-  PREFIX "${SOFT_DEPS_SOURCE_DIR}/gtest"
+  PREFIX "${SOFT_DEPS_ROOT_DIR}"
 
   GIT_REPOSITORY "https://github.com/google/googletest.git"
   GIT_TAG "release-1.8.0"
 
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
-  SOURCE_DIR "${SOFT_DEPS_SOURCE_DIR}/gtest"
+  SOURCE_DIR "${SOFT_DEPS_SOURCE_DIR}/gtest-src"
   CMAKE_ARGS
     -DCMAKE_TOOLCHAIN_FILE=${toolchain_file}
     -DCMAKE_INSTALL_PREFIX=${SOFT_DEPS_INSTALL_PREFIX}
+    -DBUILD_GTEST=ON
+    -DBUILD_GMOCK=OFF
+    -Dgtest_disable_pthreads=ON
   )
 
 
@@ -39,7 +42,8 @@ add_custom_target(gtest-dummy
 #
 # We assume that we are cross-compiling with mingw64 for win64 on linux,
 # which produces static libraries.
-set(GTEST_FOUND TRUE)
+set(GTEST_FOUND TRUE
+  CACHE PATH "" FORCE)
 set(GTEST_INCLUDE_DIRS "${SOFT_DEPS_INSTALL_PREFIX}/include"
   CACHE PATH "" FORCE)
 set(GTEST_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libgtest.a"
@@ -47,4 +51,17 @@ set(GTEST_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libgtest.a"
 set(GTEST_MAIN_LIBRARIES "${SOFT_DEPS_INSTALL_PREFIX}/lib/libgtest_main.a"
   CACHE FILEPATH "" FORCE)
 
-message(STATUS "Prepare downloading gtest to ${SOFT_DEPS_SOURCE_DIR}/gtest")
+set(GTEST_INCLUDE_DIR "${GTEST_INCLUDE_DIRS}" CACHE PATH "" FORCE)
+set(GTEST_LIBRARY "${GTEST_LIBRARIES}" CACHE FILEPATH "" FORCE)
+set(GTEST_MAIN_LIBRARY "${GTEST_MAIN_LIBRARIES}" CACHE FILEPATH "" FORCE)
+
+mark_as_advanced(
+  GTEST_FOUND
+  GTEST_INCLUDE_DIRS
+  GTEST_LIBRARIES
+  GTEST_MAIN_LIBRARIES
+
+  GTEST_INCLUDE_DIR
+  GTEST_LIBRARY
+  GTEST_MAIN_LIBRARY
+  )

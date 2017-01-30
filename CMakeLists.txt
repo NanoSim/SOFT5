@@ -56,9 +56,9 @@ set (CMAKE_AUTOMOC                ON)
 set (SOFT_ROOTDIR ${CMAKE_SOURCE_DIR})
 
 # Where to place downloaded dependencies and downloaded prefix
-set (SOFT_DEPS_SOURCE_DIR "${soft5_BINARY_DIR}/Dependencies/src")
-set (SOFT_DEPS_BINARY_DIR "${soft5_BINARY_DIR}/Dependencies/build")
-set (SOFT_DEPS_INSTALL_PREFIX "${soft5_BINARY_DIR}/Dependencies")
+set (SOFT_DEPS_ROOT_DIR "${soft5_BINARY_DIR}/Dependencies")
+set (SOFT_DEPS_SOURCE_DIR "${SOFT_DEPS_ROOT_DIR}/src")
+set (SOFT_DEPS_INSTALL_PREFIX "${SOFT_DEPS_ROOT_DIR}")
 
 
 if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
