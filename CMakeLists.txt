@@ -28,6 +28,9 @@ option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
 option (WITH_NUMERICS "Compile with SOFT Numerics"        OFF)
 option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
 option (WITH_PORTO "Compile porto plugins"                OFF)
+option (BUILD_HD5 "Download and build HDF5"               OFF)
+option (BUILD_MONGOC "Download and build mongo C driver"  OFF)
+option (BUILD_GTEST "Download and build Google Test"      OFF)
 
 set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -55,42 +58,63 @@ set (CMAKE_INCLUDE_CURRENT_DIR    ON)
 set (CMAKE_AUTOMOC                ON)
 set (SOFT_ROOTDIR ${CMAKE_SOURCE_DIR})
 
-# Where to place downloaded dependencies and downloaded prefix
-set (SOFT_DEPS_ROOT_DIR "${soft5_BINARY_DIR}/Dependencies")
-set (SOFT_DEPS_SOURCE_DIR "${SOFT_DEPS_ROOT_DIR}/src")
-set (SOFT_DEPS_INSTALL_PREFIX "${SOFT_DEPS_ROOT_DIR}")
-
+# Prefix for installed external dependencies
+set (SOFT_DEPS_PREFIX "${soft5_BINARY_DIR}/Dependencies")
+include (BuildExternalProject)
 
 if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
-  find_package(HDF5)
-  if(NOT HDF5_FOUND)
-    include(cmake/Dependencies/CMakeLists-hdf5.txt)
+  if(BUILD_HD5)
+    build_external_project(hdf5
+      ${soft5_SOURCE_DIR}/cmake/Dependencies
+      ${SOFT_DEPS_PREFIX})
+    set(HDF5_ROOT ${SOFT_DEPS_PREFIX})
+    find_package(HDF5 REQUIRED
+      HINTS ${SOFT_DEPS_PREFIX}
+      PATHS ${SOFT_DEPS_PREFIX}/share/cmake
+      NO_CMAKE_SYSTEM_PATH
+      )
+    # FIXME, find_package() does not set HDF5_LIBRARIES in this case...
+    # Is this a bug in FindHDF5.cmake?
+    if(NOT HDF5_LIBRARIES)
+      if(UNIX)
+	set(HDF5_LIBRARIES "${SOFT_DEPS_PREFIX}/lib/libhdf5.a")
+      elseif(WIN32)
+	set(HDF5_LIBRARIES "${SOFT_DEPS_PREFIX}/lib/hdf5.dll")
+      endif()
+    endif()
+  else()
+    find_package(HDF5 REQUIRED)
   endif()
 endif ()
 
 if (WITH_STORAGE_MONGO OR WITH_PLUGIN_MONGO)
-  find_package(BSON)
-  if(NOT BSON_FOUND)
-    include(cmake/Dependencies/CMakeLists-bson.txt)
+  if(BUILD_MONGOC)
+    build_external_project(mongoc
+      ${soft5_SOURCE_DIR}/cmake/Dependencies
+      ${SOFT_DEPS_PREFIX})
+    set(BSON_ROOT_DIR "${SOFT_DEPS_PREFIX}")
+    set(MONGOC_ROOT_DIR "${SOFT_DEPS_PREFIX}")
   endif()
-
-  find_package(MONGOC)
-  if(NOT MONGOC_FOUND)
-    include(cmake/Dependencies/CMakeLists-mongoc.txt)
-  endif()
+  find_package(BSON REQUIRED)
+  find_package(MONGOC REQUIRED)
 endif()
 
 # Tests
 if (WITH_TESTS)
-  enable_testing()
-  find_package(GTest)
-  if(NOT GTEST_FOUND)
-    include(cmake/Dependencies/CMakeLists-gtest.txt)
+  if(BUILD_GTEST)
+    build_external_project(gtest
+      ${soft5_SOURCE_DIR}/cmake/Dependencies
+      ${SOFT_DEPS_PREFIX})
+    set(GTEST_ROOT ${SOFT_DEPS_PREFIX})
   endif()
+  find_package(GTest REQUIRED)
+
+  enable_testing()
 
   # Add "make check" and synonym for "ctest -V" for verbose output
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
-endif (WITH_TESTS)
+endif ()
+
 
 # Define content of PATH (Windows), LD_LIBRARY_PATH (Unix) and SOFTSTORAGE
 # environment variables needed for running the tests without installation.
