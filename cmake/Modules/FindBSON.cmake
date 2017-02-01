@@ -21,34 +21,30 @@ find_path(BSON_INCLUDE_DIR
 
 set(BSON_INCLUDE_DIR "${BSON_INCLUDE_DIR}/libbson-1.0")
 
-if(WIN32 AND NOT CYGWIN)
-  if(MSVC)
-    find_library(BSON
-      NAMES
-        "bson-1.0"
-      HINTS
-        ${BSON_ROOT_DIR}
-      PATH_SUFFIXES
-        bin
-        lib
-    )
+if(WIN32 AND MSVC)
+  find_library(BSON
+    NAMES
+      "bson-1.0"
+    HINTS
+      ${BSON_ROOT_DIR}
+    PATH_SUFFIXES
+      bin
+      lib
+  )
+  mark_as_advanced(BSON)
+  set(BSON_LIBRARIES ${BSON} ws2_32)
 
-    mark_as_advanced(BSON)
-    set(BSON_LIBRARIES ${BSON} ws2_32)
-  else()
-      # bother supporting this?
-  endif()
 else()
 
   find_library(BSON_LIBRARY
     NAMES
       bson-1.0
     HINTS
+      ${BSON_ROOT_DIR}
       ${_BSON_LIBDIR}
     PATH_SUFFIXES
       lib
   )
-
   mark_as_advanced(BSON_LIBRARY)
 
   find_package (Threads REQUIRED)

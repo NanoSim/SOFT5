@@ -39,7 +39,7 @@ find_program(WINE NAMES wine64)
 set(RUNNER ${WINE})
 
 # here is the target environment located
-set(CMAKE_FIND_ROOT_PATH /usr/${COMPILER_PREFIX} ${CMAKE_INSTALL_PREFIX})
+set(CMAKE_FIND_ROOT_PATH ${MINGW_PREFIX}/${MINGW_NAME} ${CMAKE_INSTALL_PREFIX})
 
 
 # adjust the default behaviour of the FIND_XXX() commands:

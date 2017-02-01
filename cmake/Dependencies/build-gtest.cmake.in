@@ -3,15 +3,17 @@
 cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
 
-if(WIN32)
+if("@WIN32@")
   set(disable_pthreads ON)
 else()
   set(disable_pthreads OFF)
 endif()
 
+message(FATAL_ERROR "WIN32=${WIN32} (@WIN32@), disable_pthreads=${disable_pthreads}")
+
 ExternalProject_Add(
   gtest
-  PREFIX "${SOFT_DEPS_PREFIX}"
+  PREFIX "@SOFT_DEPS_PREFIX@"
 
   GIT_REPOSITORY "https://github.com/google/googletest.git"
   GIT_TAG "release-1.8.0"
@@ -20,10 +22,9 @@ ExternalProject_Add(
   PATCH_COMMAND ""
 
   CMAKE_ARGS
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-    -DCMAKE_INSTALL_PREFIX=${SOFT_DEPS_PREFIX}
+    -DCMAKE_TOOLCHAIN_FILE=@CMAKE_TOOLCHAIN_FILE@
+    -DCMAKE_INSTALL_PREFIX=@SOFT_DEPS_PREFIX@
     -DBUILD_GTEST=ON
     -DBUILD_GMOCK=OFF
-    -Dgtest_disable_pthreads=ON
-    #-Dgtest_disable_pthreads=${disable_pthreads}
+    -Dgtest_disable_pthreads=${disable_pthreads}
   )

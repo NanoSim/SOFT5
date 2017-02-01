@@ -59,7 +59,8 @@ set (CMAKE_AUTOMOC                ON)
 set (SOFT_ROOTDIR ${CMAKE_SOURCE_DIR})
 
 # Prefix for installed external dependencies
-set (SOFT_DEPS_PREFIX "${soft5_BINARY_DIR}/Dependencies")
+set (SOFT_DEPS_PREFIX "${soft5_BINARY_DIR}/usr")
+set (CMAKE_FIND_ROOT_PATH ${soft5_BINARY_DIR} ${CMAKE_FIND_ROOT_PATH})
 include (BuildExternalProject)
 
 if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)

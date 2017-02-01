@@ -3,21 +3,33 @@
 cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
 
+set(srcdir "@SOFT_DEPS_PREFIX@/src/mongoc-src")
 
-if(CROSS_TARGET)
-  if(MINGW_NAME)
-    set(hostopt "--host=${MINGW_NAME}")
+set(ssl_libs "")
+set(enable_ssl yes)
+
+if(NOT "@CROSS_TARGET@" STREQUAL "")
+  if(NOT "@MINGW_NAME@" STREQUAL "")
+    set(configure_host "--host=@MINGW_NAME@")
+
+    # FIXME - figure how to enable ssl
+    set(enable_ssl no)
+    #set(ssl_libs "SSL_LIBS=-lcrypt32")
+
+    # When cross-compiling for windows mongoc installs bson-stdint-win32.h
+    # but mingw needs bson-stdint.h
+    set(postinstall "&& ${CMAKE_COMMAND} -E copy ${srcdir}/src/libbson/src/bson/bson-stdint.h @SOFT_DEPS_PREFIX@/include/libbson-1.0")
   else()
-    set(hostopt "--host=${CROSS_TARGET}")
+    set(configure_host "--host=@CROSS_TARGET@")
   endif()
 endif()
 
 
-# We use autoconf here, since the cmake configuration of hdf5 does
+# We use autoconf here, since the cmake configuration of mongoc and bson do
 # not work with cross-compiling
 ExternalProject_Add(
   mongoc
-  PREFIX "${SOFT_DEPS_PREFIX}"
+  PREFIX "@SOFT_DEPS_PREFIX@"
 
   GIT_REPOSITORY    "https://github.com/mongodb/mongo-c-driver.git"
   GIT_TAG           "1.5.3"
@@ -25,10 +37,11 @@ ExternalProject_Add(
   UPDATE_COMMAND    ""
   PATCH_COMMAND     ""
 
-  SOURCE_DIR        "${SOFT_DEPS_PREFIX}/src/mongoc-src"
-  CONFIGURE_COMMAND cd ${SOFT_DEPS_PREFIX}/src/mongoc-src && ./autogen.sh ${hostopt} --prefix=${SOFT_DEPS_PREFIX} --with-libbson=bundled
+  SOURCE_DIR        ${srcdir}
+  CONFIGURE_COMMAND cd ${srcdir} && ${ssl_libs} ./autogen.sh ${configure_host} --prefix=@SOFT_DEPS_PREFIX@ --with-libbson=bundled  --enable-tests=no --enable-ssl=${enable_ssl}
 
-  BUILD_COMMAND     cd ${SOFT_DEPS_PREFIX}/src/mongoc-src && make
+  BUILD_COMMAND     cd ${srcdir} && make
 
-  INSTALL_COMMAND   cd ${SOFT_DEPS_PREFIX}/src/mongoc-src && make install
+  INSTALL_COMMAND   cd ${srcdir} && make install ${postinstall}
+
   )

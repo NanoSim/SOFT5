@@ -9,7 +9,7 @@
 # to ${target} and PREFIX set to ${prefix} (but keep other directories
 # to their default value).
 #
-# A typical value for ${prefix} would be "${CMAKE_BINARY_DIR}/Dependencies",
+# A typical value for ${prefix} would be "${CMAKE_BINARY_DIR}/usr",
 # i.e. a sub-directory under the build root.
 #
 # Inspired by the stackoverflow answer:
@@ -25,10 +25,16 @@ function(build_external_project target input_dir prefix)
     "${prefix}/src/${target}-trigger/build"
     )
 
+  # Convert CMAKE_TOOLCHAIN_FILE to absolute path
+  if(CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+  endif()
+
   # Configure user-provided setup for ExternalProject_Add()
   configure_file(
     "${input_dir}/build-${target}.cmake.in"
     "${prefix}/src/${target}-trigger/CMakeLists.txt"
+    @ONLY
     )
 
   # Append a custom target to the configured output

@@ -1,5 +1,5 @@
---- ./HDF5UseFortran.cmake	2017-01-25 16:11:53.204383862 +0100
-+++ ./Dependencies/src/hdf5/config/cmake/HDF5UseFortran.cmake	2017-01-25 17:57:08.228940280 +0100
+--- a/src/hdf5/config/cmake/HDF5UseFortran.cmake
++++ b/src/hdf5/config/cmake/HDF5UseFortran.cmake
 @@ -32,15 +32,16 @@
          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
          "${CODE}"
@@ -12,16 +12,16 @@
          CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
          RUN_OUTPUT_VARIABLE OUTPUT
      )
- 
+
 -
 -
 +    set(RUN_RESULT_VAR ${RUN_RESULT_VAR1})
 +    set(COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR})
      set(${RETURN} ${OUTPUT})
- 
+
      #message ( "Test result1 ${RETURN} ")
 @@ -199,8 +200,8 @@
- 
+
           END PROGRAM main
    "
 -  XX
@@ -86,11 +86,11 @@
 @@ -468,7 +470,9 @@
       "
    )
- 
+
 -C_RUN("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
 +C_RUN("maximum decimal precision for C" ${PROG_SRC}
 +  H5_C_MAXIMAL_DECIMAL_PRECISION_RUN
 +  PROG_OUTPUT)
- 
+
  # dnl The output from the above program will be:
  # dnl    -- LINE 1 --  long double decimal precision

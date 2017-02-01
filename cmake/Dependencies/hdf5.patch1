@@ -1,5 +1,5 @@
---- a/src/H5win32defs.h   2016-03-28 18:26:25.000000000 +0200
-+++ b/src/H5win32defs.h   2017-01-25 13:44:45.321444963 +0100
+--- a/src/H5win32defs.h
++++ b/src/H5win32defs.h
 @@ -67,10 +67,12 @@
 
  #endif /* H5_HAVE_VISUAL_STUDIO */
