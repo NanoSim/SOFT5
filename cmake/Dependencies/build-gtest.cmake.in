@@ -3,13 +3,12 @@
 cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
 
-if("@WIN32@")
+if(@WIN32@)
   set(disable_pthreads ON)
 else()
   set(disable_pthreads OFF)
 endif()
 
-message(FATAL_ERROR "WIN32=${WIN32} (@WIN32@), disable_pthreads=${disable_pthreads}")
 
 ExternalProject_Add(
   gtest
