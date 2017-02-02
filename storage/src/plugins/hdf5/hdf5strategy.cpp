@@ -13,8 +13,8 @@ const char *HDF5Strategy::metaType() const
 }
 
 struct StrategyFtor {
-  StrategyFtor(QString const &uri, const char *uuid)
-    : uuid(uuid)
+  StrategyFtor(QString const &uri, const std::string &uuid)
+    : uuid(uuid.c_str())
   {
     h5.open(uri);
   }
@@ -333,8 +333,8 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   JSONModel * jsonModel = dynamic_cast<JSONModel*>(model);
   auto jsonObj = jsonModel->propsJson();
   auto dimsObj = jsonModel->dimsJson();
-
-  StrategyFtor *ftor = new StrategyFtor(d->uri, model->id().c_str());
+  auto id = model->id();
+  StrategyFtor *ftor = new StrategyFtor(d->uri, id);
   jsonModel->data = (void*)ftor;
 
   std::function<bool(const char*, StdUInt&)>getDimension = std::bind(&StrategyFtor::getDimension, &(*ftor), _1, _2);
