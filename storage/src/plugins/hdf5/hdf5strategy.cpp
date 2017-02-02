@@ -31,7 +31,7 @@ struct StrategyFtor {
     return false;
 
   }
-  
+
   bool getString(const char *key, StdString &retValue) {
     auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
     if (ret.isValid() && ret.canConvert(QMetaType::QString)) {
@@ -94,7 +94,7 @@ struct StrategyFtor {
     }
     return false;
   }
-  
+
   bool getInt64(const char *key, int64_t &retValue) {
     auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
     if (ret.isValid() && ret.canConvert(QMetaType::Int)) {
@@ -146,7 +146,7 @@ struct StrategyFtor {
 
       auto variantList = ret.value<QVariantList>();
       retValue.resize(variantList.size());
-      
+
       auto it = variantList.constBegin();
       auto retIt = retValue.begin();
       while (it != variantList.constEnd()) {
@@ -164,7 +164,7 @@ struct StrategyFtor {
 
       auto variantList = ret.value<QVariantList>();
       retValue.resize(variantList.size());
-      
+
       auto it = variantList.constBegin();
       auto retIt = retValue.begin();
       while (it != variantList.constEnd()) {
@@ -178,7 +178,7 @@ struct StrategyFtor {
   bool getDoubleArray2D(const char *key, std::vector<std::vector<double> >&retValue) {
     auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
     if (ret.isValid() && ret.canConvert(QMetaType::QVariantList)) {
-      
+
       auto variantList = ret.value<QVariantList>();
       retValue.resize(variantList.size());
       for (int i = 0; i < variantList.size(); ++i) {
@@ -213,7 +213,7 @@ struct StrategyFtor {
 	}
       }
 
-      return true;      
+      return true;
     }
     return false;
   }
@@ -234,7 +234,7 @@ struct StrategyFtor {
   }
 
   QString uuid;
-  soft::hdf5::QH5 h5;  
+  soft::hdf5::QH5 h5;
 };
 
 class HDF5Strategy::Private
@@ -298,7 +298,7 @@ void HDF5Strategy :: store (IDataModel const *model)
   } else {
     h5.open(d->uri, false);
   }
-    
+
   auto id = QString::fromStdString(model->id());
   h5.createGroup(id);
   h5.createGroup(QString("%1/properties").arg(id));
@@ -310,15 +310,15 @@ void HDF5Strategy :: store (IDataModel const *model)
     for (auto key: jsonObject.keys()) {
       auto value = jsonObject.value(key);
       h5.write(QString("%1/dimensions/%2").arg(id).arg(key), value.toVariant());
-    }    
+    }
   }
-  
+
   if (doc.isObject()) {
     auto jsonObject = doc.object();
     for (auto key: jsonObject.keys()) {
       auto value = jsonObject.value(key);
       h5.write(QString("%1/properties/%2").arg(id).arg(key), value.toVariant());
-    }    
+    }
   }
   h5.write(QString("%1/meta/name").arg(id), QString::fromStdString(model->metaName()));
   h5.write(QString("%1/meta/version").arg(id), QString::fromStdString(model->metaVersion()));
@@ -333,8 +333,8 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   JSONModel * jsonModel = dynamic_cast<JSONModel*>(model);
   auto jsonObj = jsonModel->propsJson();
   auto dimsObj = jsonModel->dimsJson();
-  auto id = model->id().c_str();
-  StrategyFtor *ftor = new StrategyFtor(d->uri, id);
+
+  StrategyFtor *ftor = new StrategyFtor(d->uri, model->id().c_str());
   jsonModel->data = (void*)ftor;
 
   std::function<bool(const char*, StdUInt&)>getDimension = std::bind(&StrategyFtor::getDimension, &(*ftor), _1, _2);
@@ -347,7 +347,7 @@ void HDF5Strategy :: startRetrieve (IDataModel *model) const
   std::function<bool(const char*, uint32_t&)>getUInt32 = std::bind(&StrategyFtor::getUInt32, &(*ftor), _1, _2);
   std::function<bool(const char*, int64_t&)>getInt64 = std::bind(&StrategyFtor::getInt64, &(*ftor), _1, _2);
   std::function<bool(const char*, uint64_t&)>getUInt64 = std::bind(&StrategyFtor::getUInt64, &(*ftor), _1, _2);
-  std::function<bool(const char*, float&)>getFloat = std::bind(&StrategyFtor::getFloat, &(*ftor), _1, _2); 
+  std::function<bool(const char*, float&)>getFloat = std::bind(&StrategyFtor::getFloat, &(*ftor), _1, _2);
   std::function<bool(const char*, double&)>getDouble = std::bind(&StrategyFtor::getDouble, &(*ftor), _1, _2);
   std::function<bool(const char*, bool&)>getBool = std::bind(&StrategyFtor::getBool, &(*ftor), _1, _2);
   std::function<bool(const char*, std::vector<int32_t> &)>getInt32Array = std::bind(&StrategyFtor::getInt32Array, &(*ftor), _1, _2);
