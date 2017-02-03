@@ -9,7 +9,7 @@
 class CollectionTest : public ::testing::Test {
 protected:
   static void SetUpTestCase() {}
-  static void TearDownTestCase() {}      
+  static void TearDownTestCase() {}
 };
 
 TEST_F (CollectionTest, construct)
@@ -45,7 +45,7 @@ TEST_F (CollectionTest, setName)
 
   softc_string_s s = softc_string_create("");
   softc_collection_get_name(coll, s);
-  auto strComp = softc_string_compare(s, "testname");  
+  auto strComp = softc_string_compare(s, "testname");
   auto strCompFalse = softc_string_compare(s, "testname-false");
   ASSERT_EQ(strComp, 0);
   ASSERT_NE(strCompFalse, 0);
@@ -81,7 +81,7 @@ TEST_F(CollectionTest, findRelation)
 
 TEST_F (CollectionTest, store_and_load)
 {
-  auto storage = softc_storage_create("mongo2", "mongodb://localhost", "db=foreign;coll=coll");
+  auto storage = softc_storage_create("hdf5", "collection-test.h5", "");
   ASSERT_TRUE(storage != nullptr);
   softc_collection_s *coll = softc_collection_create_new();
   ASSERT_TRUE(coll != nullptr);
@@ -97,5 +97,5 @@ TEST_F (CollectionTest, store_and_load)
 
   auto numRel = softc_collection_num_relations(collection_copy);
   auto lst = softc_collection_find_relations(collection_copy, "dad", "loves");
-  ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "mommy"); 
+  ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "mommy");
 }
