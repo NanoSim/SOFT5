@@ -12,8 +12,8 @@
  * SWIG declarations
  */
 
-softc_collection_s *softc_collection_create_new();
-softc_collection_s *softc_collection_create(const char *id);
+//softc_collection_s *softc_collection_create_new();
+softc_collection_s *softc_collection_create(const char *id=NULL);
 softc_collection_s *softc_collection_create_ext(const char *name,
 						const char *version);
 void softc_collection_free(softc_collection_s *self);

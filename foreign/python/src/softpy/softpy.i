@@ -291,15 +291,20 @@ char  *softc_uuidgen();
 
 
 /*
+ * string
+ */
+%include "softpy-string.i"
+
+/*
+ * string_list
+ */
+%include "softpy-string-list.i"
+
+/*
  * entity
  */
 %include "softpy-entity.i"
 
-
-/*
- * softc_string_s
- */
-%include "softpy-string.i"
 
 /*
  * datamodel

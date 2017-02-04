@@ -181,7 +181,7 @@ class Collection(object):
     def add_dim(self, label, description=''):
         collection_add_dim(self.__soft_entity__, label, description)
 
-    def add_connection(self, subject, predicate, object_):
+    def add_relation(self, subject, predicate, object_):
         collection_connection(self.__soft_entity__, subject,
                               predicate, object_)
 
