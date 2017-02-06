@@ -101,10 +101,3 @@ assert(string_list == m.string_list)
 
 softpy.storage_strategy_end_retrieve(strategy, model)
 softpy.storage_free(storage)
-
-
-# Collection
-coll = softpy.collection_create()
-softpy.collection_set_name(coll, 'testname')
-softpy.collection_set_version(coll, '0.1')
-#softpy.collection_set_namespace(coll, 'sintef.no/metadata/test')

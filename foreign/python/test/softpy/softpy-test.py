@@ -18,12 +18,6 @@ def runfile(filename):
 # Wrap tests into a unittest TestCase
 # This way, we can run the individual tests interactively
 class TestSoftpy(unittest.TestCase):
-    def test_string(self):
-        self.assertEqual(runfile('softpy-test-string.py'), 0)
-
-    def test_string_list(self):
-        self.assertEqual(runfile('softpy-test-string-list.py'), 0)
-
     def test_datamodel(self):
         self.assertEqual(runfile('softpy-test-datamodel.py'), 0)
 

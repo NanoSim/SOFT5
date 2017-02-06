@@ -26,7 +26,7 @@ void softc_collection_private_register_entity(void *ref, const char *label, soft
   assert(d != nullptr);
 
   d->entityMap.insert({std::string(label), entity});
-  d->collection->addEntity(label, 
+  d->collection->addEntity(label,
 			   softc_entity_get_meta_name(entity),
 			   softc_entity_get_meta_version(entity),
 			   softc_entity_get_meta_namespace(entity),
@@ -56,7 +56,7 @@ void softc_collection_private_get_name(void *ref, softc_string_s name)
   assert(d != nullptr);
   auto n = d->collection->name();
   softc_string_assign(name, n.c_str());
-}				
+}
 
 void softc_collection_private_get_version(void *ref, softc_string_s version)
 {
@@ -65,7 +65,7 @@ void softc_collection_private_get_version(void *ref, softc_string_s version)
   auto n = d->collection->version();
   softc_string_assign(version, n.c_str());
 }
-	   
+
 void softc_collection_private_set_name(void *ref, const char *name)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
@@ -106,7 +106,7 @@ void softc_collection_private_load(void *ref, const softc_datamodel_t *dataModel
 {
   const softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
-  
+
   d->collection->load(dataModel->ref);
 }
 

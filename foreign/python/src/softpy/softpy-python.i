@@ -171,9 +171,9 @@ class Collection(object):
         collection_add_relation(self.__soft_entity__,
                                 subject, predicate, object_)
 
-    def add_relation(self, subject, predicate, object_):
-        collection_connection(self.__soft_entity__, subject,
-                              predicate, object_)
+    def connect(self, subject, predicate, object_):
+        collection_connect(self.__soft_entity__,
+                           subject, predicate, object_)
 
     def get_num_entities(self):
         return collection_num_entities(self.__soft_entity__)
