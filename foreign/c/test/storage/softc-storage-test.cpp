@@ -392,12 +392,13 @@ TEST_F(SoftC_StorageTest, collectionRetrieval)
 
   auto lst = softc_collection_find_relations(collection_copy, "b", "^is");
   ASSERT_EQ(2, softc_string_list_count(lst));
-  if (strcmp(from_softc_string(softc_string_list_first(lst)), "a") == 0) {
-    ASSERT_STREQ("a", from_softc_string(softc_string_at(lst, 0)));
-    ASSERT_STREQ("v", from_softc_string(softc_string_at(lst, 1)));
-  } else {
-    ASSERT_STREQ("v", from_softc_string(softc_string_at(lst, 0)));
-    ASSERT_STREQ("a", from_softc_string(softc_string_at(lst, 1)));
+  char **expected_names = {"a", "v"};
+  for (int i=0; i < 2; i++) {
+    int found = 0;
+    for (int j=0; j < softc_string_list_count(lst); j++)
+      if (strcmp(expected_names[i],
+		 from_softc_string(softc_string_at(lst, j))) == 0) found = 1;
+    ASSERT_TRUE(found);
   }
   softc_string_list_free(lst);
 
