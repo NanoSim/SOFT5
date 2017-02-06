@@ -233,6 +233,13 @@ the same information).
     return NULL;
   }
 
+  /* Returns the python major version number. */
+  int py_major_version()
+  {
+    return PY_MAJOR_VERSION;
+  }
+
+
 %}
 
 
@@ -275,6 +282,10 @@ the same information).
 /*
  * softc
  */
+%include "softpy-bytearray.i"
+%include "softpy-string.i"
+%include "softpy-string-list.i"
+
 void   init();  // called automatically in module initialisation...
 void   cleanup();
 
@@ -291,25 +302,15 @@ char  *softc_uuidgen();
 
 
 /*
- * string
+ * datamodel
  */
-%include "softpy-string.i"
+%include "softpy-datamodel.i"
 
-/*
- * string_list
- */
-%include "softpy-string-list.i"
 
 /*
  * entity
  */
 %include "softpy-entity.i"
-
-
-/*
- * datamodel
- */
-%include "softpy-datamodel.i"
 
 
 /*
@@ -323,7 +324,6 @@ softc_storage_strategy_t * softc_storage_get_storage_strategy(softc_storage_t *)
 void softc_storage_free_storage_strategy(softc_storage_strategy_t *strategy);
 
 
-
 /*
  * storage strategy
  */
@@ -332,7 +332,6 @@ void softc_storage_strategy_free_datamodel(softc_datamodel_t *datamodel);
 void                softc_storage_strategy_store(softc_storage_strategy_t *, const softc_datamodel_t *);
 void                softc_storage_strategy_start_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);
 void                softc_storage_strategy_end_retrieve(softc_storage_strategy_t *, softc_datamodel_t *);
-
 
 
 /*

@@ -1,14 +1,16 @@
 /* -*- C -*-  (not really, but good for syntax highlighting) */
 
+/* We only add some typemaps here without exposing the softc_string_list api. */
+
 %{
 #include "softc-string-list.h"
 %}
 
 
 /* String_list input typemaps */
-%typemap("doc") (softc_string_list_s *value) "String list."
+%typemap("doc") (softc_string_list_s *IN_SOFTSTRINGLIST) "$1_name: list of strings"
 
-%typemap(in) (const softc_string_list_s *strlist) {
+%typemap(in) (softc_string_list_s *IN_SOFTSTRINGLIST) {
   int i;
   PyObject *s;
   if (!PySequence_Check($input)) {
@@ -32,27 +34,27 @@
   }
 }
 
+%typemap(freearg) softc_string_list_s *IN_SOFTSTRINGLIST {
+  softc_string_list_free($1);
+}
+
 
 /* String_list output typemaps */
 
 /* Set output argument to point to temporary variable */
-%typemap(in,numinputs=0) (softc_string_list_s **strlist)
+%typemap(in,numinputs=0) (softc_string_list_s **ARGOUT_SOFTSTRINGLIST)
                          (softc_string_list_s* tmp) {
   $1 = &tmp;
 }
 
-%typemap(argout,numinputs=0) (softc_string_list_s **strlist) {
+%typemap(argout,numinputs=0) (softc_string_list_s **ARGOUT_SOFTSTRINGLIST) {
   int i;
   size_t n = softc_string_list_count(*$1);
   PyObject *lst = PyList_New(n);
   for (i = 0; i < n; ++i) {
     softc_string_s s = softc_string_at(*$1, i);
     const char *p = from_softc_string(s);
-#if PY_MAJOR_VERSION <= 2
-    PyObject *str = PyString_FromString(p);
-#else
-    PyObject *str = PyUnicode_FromString(p);
-#endif
+    PyObject *str = string_FromString(p);
     PyList_SetItem(lst, i, str);
   }
   $result = lst;

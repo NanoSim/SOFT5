@@ -146,63 +146,82 @@ class Storage(object):
 
 
 class Collection(object):
-    """A collection of entities."""
+    """A collection of entities with relations between them.
+
+    """
     def __init__(self, id=None):
-        self.__soft_entity__ = collection_create(id)
+        if id:
+            self.__soft_entity__ = collection_create(id)
+        else:
+            self.__soft_entity__ = collection_create_new()
 
     def __delete__(self):
         collection_free(self.__softpy_entity__)
         object.__del__(self)
 
-    def __len__(self):
-        return collection_num_entities(self.__soft_entity__)
-
-    def __setitem__(self, label, value):
-        if isinstance(value, entity_t):
-            e = value
-        elif hasattr(value, '__soft_entity__'):
-            e = value.__soft_entity__
-        else:
-            raise TypeError('Value must be an softpy entity')
+    def register_entity(self, label, entity):
+        """Register a new entity associated with the given label."""
+        e = get_c_entity(entity)
         collection_register_entity(self.__soft_entity__, label, e)
 
-    def __getitem__(self, label):
-        raise NotImplementedError
+    #def add_dim(self, label, description=''):
+    #    collection_add_dim(self.__soft_entity__, label, description)
 
-    #def __setattr__(self, label, value):
-    #    self.__setitem__(label, value)
-
-    #def __getattr__(self, label):
-    #    return self.__getitem__(label)
-
-    def register_entity(self, label, value):
-        self.__setitem__(label, value)
-
-    def add_dim(self, label, description=''):
-        collection_add_dim(self.__soft_entity__, label, description)
+    def add_relation(self, subject, predicate, object_):
+        collection_add_relation(self.__soft_entity__,
+                                subject, predicate, object_)
 
     def add_relation(self, subject, predicate, object_):
         collection_connection(self.__soft_entity__, subject,
                               predicate, object_)
 
     def get_num_entities(self):
-         return len(self)
-
-    def get_num_dims(self):
-         return collection_num_dims(self.__soft_entity__)
+        return collection_num_entities(self.__soft_entity__)
 
     def get_num_relations(self):
          return collection_num_relations(self.__soft_entity__)
 
-    def get_num_dim_maps(self):
-         return collection_num_dim_maps(self.__soft_entity__)
+    #def get_num_dim_maps(self):
+    #     return collection_num_dim_maps(self.__soft_entity__)
+    #
+    #def get_dimensions(self):
+    #     return collection_get_dimensions(self.__soft_entity__)
 
-    def get_dimensions(self):
-         return collection_get_dimensions(self.__soft_entity__)
+    name = property(
+        lambda self: collection_get_name2(self.__soft_entity__),
+        lambda self, name: collection_set_name(
+            self.__soft_entity__, name),
+        doc='Collection name.'
+    )
+
+    version = property(
+        lambda self: collection_get_version2(self.__soft_entity__),
+        lambda self, version: collection_set_version(
+            self.__soft_entity__, version),
+        doc='Collection version.'
+    )
+
+    def find_relations(self, subject, predicate):
+        """Returns a set with all relations matching the given `subject` and
+        `predicate`.
+
+        If `predicate` is preceded with "^", the match is inverted, i.e.
+        all relations whos object matches `subject` and predicate matches
+        the remaining of `predicate` are returned."""
+        soft_lst = collection_find_relations(self.__soft_entity__,
+                                        subject, predicate)
+        relations = set()
+        for i in range(string_list_count(soft_lst)):
+            soft_str = string_at(soft_lst, i)
+            s = from_softc_string(soft_str)
+            relations.add(s)
+            #string_destroy(soft_str)
+        string_list_free(soft_lst)
+        return relations
 
 
 def get_c_entity(entity):
-    """Returns a reference to the underlying C-level entity_t."""
+    """Returns a reference to the underlying C-level entity_t or collection_s."""
     if hasattr(entity, '__soft_entity__'):
         e = entity.__soft_entity__
     else:
