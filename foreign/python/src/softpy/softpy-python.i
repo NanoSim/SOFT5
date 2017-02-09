@@ -2,6 +2,7 @@
 
 %pythoncode %{
 
+import os
 import sys
 import json
 import ast
@@ -36,6 +37,10 @@ class SoftInvalidPropertyError(SoftError):
 
 class SoftMetadataError(SoftError):
     """Raised on malformed metadata description."""
+    pass
+
+class SoftMissingMetadataError(SoftError):
+    """Raised when metadata cannot be found in the database."""
     pass
 
 class SettingDerivedPropertyError(Exception):
@@ -149,6 +154,13 @@ class Collection(object):
     """A collection of entities with relations between them.
 
     """
+    # Fixme:
+    # * Add arguments
+    #
+    #      uuid=None, driver=None, uri=None, options=None
+    #
+    #   such that the constructor can load a collection from a storage
+    #   in the same way as the entity constructor.
     def __init__(self, id=None):
         if id:
             self.__soft_entity__ = collection_create(id)
@@ -171,14 +183,21 @@ class Collection(object):
         collection_add_relation(self.__soft_entity__,
                                 subject, predicate, object_)
 
-    def connect(self, subject, predicate, object_):
-        collection_connect(self.__soft_entity__,
-                           subject, predicate, object_)
+    #def connect(self, subject, predicate, object_):
+    #    collection_connect(self.__soft_entity__,
+    #                       subject, predicate, object_)
 
     def get_num_entities(self):
         return collection_num_entities(self.__soft_entity__)
 
     def get_num_relations(self):
+         """Returns the total number of relations associated with this
+         collection.
+
+         Note: A collection will typically contain many more relations
+         than the number of relations you have added with add_relation()
+         because relations are also used to associate entity labels with
+         the entity type, name, version , namespace and uuid."""
          return collection_num_relations(self.__soft_entity__)
 
     #def get_num_dim_maps(self):
@@ -186,6 +205,43 @@ class Collection(object):
     #
     #def get_dimensions(self):
     #     return collection_get_dimensions(self.__soft_entity__)
+
+    def get_labels(self):
+        """Returns a set with all registered entity labels."""
+        return self.find_relations('Entity', '^is-a')
+
+    def get_uuid(self, label):
+        """Returns the uuid of the entity instance with the given label."""
+        uuid, = self.find_relations(label, 'id')
+        return uuid
+
+    def get_name(self, label):
+        """Returns the name of the entity instance with the given label."""
+        uuid, = self.find_relations(label, 'name')
+        return uuid
+
+    def get_version(self, label):
+        """Returns the version of the entity instance with the given label."""
+        uuid, = self.find_relations(label, 'version')
+        return uuid
+
+    def get_namespace(self, label):
+        """Returns the namespace of the entity instance with the given
+        label."""
+        uuid, = self.find_relations(label, 'namespace')
+        return uuid
+
+    def get_entity(self, label, driver, uri, options=None):
+        """Returns the the entity instance associated with `label`
+        from the storage specified with `driver`, `uri` and `options`.
+
+        This method depends on that the metadata for `label` exists in
+        a metadata database registered with softpy.register_metadb().
+        """
+        e = entity(self.get_name(label), self.get_version(label),
+                   self.get_namespace(label))
+        return e(uuid=self.get_uuid(label), driver=driver, uri=uri,
+                 options=options)
 
     name = property(
         lambda self: collection_get_name2(self.__soft_entity__),
@@ -717,18 +773,285 @@ def _get_prop_info(cls, name, field, default=None):
 
 
 
-def entity(metadata):
-    """Factory fuction for creating an Entity class object for `metadata`.
+def entity(name, version=None, namespace=None):
+    """Factory fuction for creating an Entity class object.
 
-    Here `metadata` is a metadata description (in json format) of the
-    entity to create.  It should either be a string or a file-like
-    object."""
-    if hasattr(metadata, 'read'):
-        meta = json.load(metadata)
-    else:
-        meta = json.loads(metadata)
+    See the class docstring for Metadata for supported values for
+    `name`, `version` and `namespace`."""
+    meta = Metadata(name, version, namespace)
     attr = dict(soft_metadata=meta)
-    return type(str(meta['name']), (BaseEntity,), attr)
+    return type(meta.name, (BaseEntity,), attr)
+
+
+
+
+class Metadata(dict):
+    """A class representing SOFT metadata.
+
+    Parameters
+    ----------
+    name : str | Metadata | Entity | Entity instance | file-like | dict
+        If `version` and `namespace` are given, this is the
+        metadata name.
+
+        Otherwise, this is a full description of the metadata in one of
+        following forms:
+          - Metadata object or dict
+          - SOFT entity or entity instance
+          - file-like object with a read() method with the metadata in json-
+            format.
+          - string with the metadata in json-format
+    version : None | str
+        Metadata version or None if `name` provides full
+        description of the metadata.
+    namespace : None | str
+        Metadata namespace or None if `name` provides full
+        description of the metadata.  """
+    def __init__(self, name, version=None, namespace=None):
+        if version is None or namespace is None:
+            if hasattr(name, 'soft_metadata'):
+                d = name.soft_metadata
+            elif hasattr(name, 'read'):
+                d = json.load(name)
+            elif isinstance(name, str):
+                d = json.loads(name)
+            elif sys.version_info.major == 2 and isinstance(name, unicode):
+                d = json.loads(name.decode('utf8'))
+            elif isinstance(name, dict):
+                d = name
+            else:
+                raise TypeError(
+                    'Cannot convert %s to metadata' % (type(name),))
+        else:
+            d = find_metadata(name, version, namespace)
+        self.update(d)
+
+    def __str__(self):
+        return self.json()
+
+    name = property(lambda self: self['name'])
+    version = property(lambda self: self['version'])
+    namespace = property(lambda self: self['namespace'])
+    description = property(lambda self: self['description'])
+    dimensions = property(lambda self: [
+        str(d['name']) for d in self['dimensions']],
+                          doc='List of dimension labels.')
+    property_names = property(lambda self: [
+        str(p['name']) for p in self['properties']],
+                              doc='List of property names.')
+
+    def json(self):
+        """Returns a json string representing this metadata."""
+        return json.dumps(self, indent=2, sort_keys=True)
+
+
+
+#
+# Metadata database interface
+# ===========================
+
+# FIXME: functionality should be implemented in C++?
+# FIXME: add support for converters
+class MetaDB(object):
+    """A base class for metadata databases."""
+    def __init__(self, **kwargs):
+        """Connects to the database."""
+        raise NotImplementedError
+
+    def find(self, name, version, namespace):
+        """Returns a Metadata object for the given name, version and
+        namespace.
+
+        Should raise SoftMissingMetadataError if not metadata can be found.
+        """
+        raise NotImplementedError
+
+    def insert(self, metadata):
+        """Inserts `metadata` into the database.
+
+        May not be implemented by all subclasses."""
+        raise NotImplementedError
+
+    def types(self):
+        """Returns a list of (name, version, namespace)-tuples for all
+        registered metadata.
+
+        May not be implemented by all subclasses."""
+        raise NotImplementedError
+
+    def close(self):
+        """Closes the connection to the database."""
+        raise NotImplementedError
+
+    def has(self, name, version, namespace):
+        """Returns whether metadata with the given name, version and
+        namespace exists in the database."""
+        try:
+            self.find(name, version, namespace)
+        except SoftError:
+            return False
+        return True
+
+
+class JSONMetaDB(MetaDB):
+    """A simple metadata database using a json file.
+
+    The `fname` argument should either be a file name or an open
+    file-like object.
+
+    Note, if `fname` is a file-like object, it will not be closed
+    when the close() method is called on the returned database object.
+    """
+    def __init__(self, fname):
+        self.fname = fname
+        if hasattr(fname, 'read'):
+            self.data = json.load(fname)
+        elif not os.path.exists(fname):
+            self.data = []
+        else:
+            with open(fname) as f:
+                self.data = json.load(f)
+        self.changed = False
+        self.closed = False
+
+    def find(self, name, version, namespace):
+        """Returns a Metadata object for the given name, version and
+        namespace.
+
+        SoftMissingMetadataError is raised if not metadata can be found."""
+        for meta in self.data:
+            if (meta.name == name and
+                meta.version == version and
+                meta.namespace == namespace):
+                return meta
+        raise SoftMissingMetadataError('Cannot find metadata %s/%s-%s' % (
+            namespace, name, version))
+
+    def insert(self, metadata):
+        """Inserts `metadata` into the database."""
+        meta = Metadata(metadata)
+        try:
+            self.find(meta.name, meta.version, meta.namespace)
+        except SoftMissingMetadataError:
+            self.data.append(meta)
+            self.changed = True
+        else:
+            raise SoftError('Metadata %s/%s-%s already in the database' % (
+                meta.namespace, meta.name, meta.version))
+
+    def types(self):
+        """Returns a list of (name, version, namespace)-tuples for all
+        registered metadata."""
+        return [(meta.name, meta.version, meta.namespace) for meta in self.data]
+
+    def flush(self):
+        """Flushes the database to file."""
+        if self.changed:
+            if hasattr(self.fname, 'read'):
+                json.dump(self.data, fname, indent=2, sort_keys=True)
+            else:
+                with open(self.fname, 'w') as f:
+                    json.dump(self.data, f, indent=2, sort_keys=True)
+
+    def clear(self):
+        """Removes all metadata in the database.  This is probably only
+        useful for testing."""
+        if self.data:
+            self.changed = True
+        self.data.clear()
+
+    def close(self):
+        """Closes the connection to the database."""
+        self.flush()
+        self.closed = True
+
+
+class MongoMetaDB(MetaDB):
+    """A simple metadata database for mongodb.
+
+    Parameters
+    ----------
+    uri : string
+        URI of database to connect to.
+    dbname : string
+        Name of the mongodb database.
+    collection_name : string
+        Name of mongodb collection to connect to.
+
+    Note: this requires that you have pymongo installed.
+    """
+    def __init__(self, uri, dbname, collection_name):
+        import pymongo
+        self.client = pymongo.MongoClient(uri)
+        self.db = self.client[dbname]
+        self.coll = self.db[collection_name]
+
+    def find(self, name, version, namespace):
+        """Returns a Metadata object for the given name, version and
+        namespace.
+
+        SoftMissingMetadataError is raised if not metadata can be found."""
+        meta = self.coll.find_one(
+            {'name': name, 'version': version, 'namespace': namespace})
+        if meta:
+            return meta
+        raise SoftMissingMetadataError('Cannot find metadata %s/%s-%s' % (
+            namespace, name, version))
+
+    def insert(self, metadata):
+        """Inserts `metadata` into the database."""
+        meta = Metadata(metadata)
+        try:
+            self.find(meta.name, meta.version, meta.namespace)
+        except SoftMissingMetadataError:
+            self.coll.insert_one(meta)
+            self.changed = True
+        else:
+            raise SoftError('Metadata %s/%s-%s already in the database' % (
+                meta.namespace, meta.name, meta.version))
+
+    def types(self):
+        """Returns a list of (name, version, namespace)-tuples for all
+        registered metadata."""
+        return [(post['name'], post['version'], post['namespace'])
+                for post in self.coll.find()]
+
+    def clear(self):
+        """Removes all metadata in the database.  This is probably only
+        useful for testing."""
+        self.coll.delete_many({})
+
+    def close(self):
+        """Closes the connection to the database."""
+        self.client.close()
+
+
+
+_metadbs = []    # list with all registered metadata databases
+_metacache = {}  # cache with resently used metadata
+def register_metadb(metadb):
+    """Registers metadata database `metadb`."""
+    _metadbs.append(metadb)
+
+def find_metadata(name, version, namespace):
+    """Search through all registered metadata databases and return
+    a Metadata object corresponding to `name`, `version`, `namespace`.
+    """
+    t = name, version, namespace
+    if t in _metacache:
+        return _metacache[t]
+    for db in _metadbs:
+        try:
+            meta = db.find(*t)
+        except SoftMissingMetadataError:
+            pass
+        else:
+            _metacache[t] = meta
+            return meta
+    raise SoftMissingMetadataError(
+        'Cannot find metadata %s/%s-%s' % (namespace, name, version))
+
+
 
 
 # Convinience functions for returning entity info
