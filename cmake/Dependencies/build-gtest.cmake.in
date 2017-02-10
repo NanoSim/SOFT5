@@ -25,5 +25,5 @@ ExternalProject_Add(
     -DCMAKE_INSTALL_PREFIX=@SOFT_DEPS_PREFIX@
     -DBUILD_GTEST=ON
     -DBUILD_GMOCK=OFF
-    -Dgtest_disable_pthreads=${disable_pthreads}
+    -Dgtest_disable_pthreads=ON
   )
