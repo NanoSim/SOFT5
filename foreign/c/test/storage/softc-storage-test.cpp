@@ -87,7 +87,7 @@ protected:
 	 {2.1, 0.2, 0.3},
 	 {2.1, 0.2, 0.3}}})
     , strlist({"this is", "a test"})
-      
+
   {}
 
   ~SoftC_StorageTest()
@@ -125,7 +125,7 @@ TEST_F(SoftC_StorageTest, writeData)
   double ***v3d;
   bool isOk;
   softc_string_list_s *strList;
-  
+
   arrayToPtr(&v3d, doublevec3d);
   arrayToPtr(&v2d, doublevec2d);
 
@@ -153,10 +153,10 @@ TEST_F(SoftC_StorageTest, writeData)
   }
   ASSERT_EQ(n, strlist.size());
   ASSERT_EQ(n, softc_string_list_count(strList));
-  
+
   isOk = softc_datamodel_append_string_list(model, "string-list", strList); ASSERT_TRUE(isOk);
 
-  softc_storage_strategy_store(strategy, model);  
+  softc_storage_strategy_store(strategy, model);
 }
 
 TEST_F(SoftC_StorageTest, readString)
@@ -215,7 +215,7 @@ TEST_F(SoftC_StorageTest, readDouble)
   ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
   ASSERT_TRUE(model != nullptr);
-  
+
   softc_datamodel_set_id (model, uuid_string);
   softc_datamodel_set_meta_name(model, "meta");
   softc_datamodel_set_meta_version(model, "meta");
@@ -236,8 +236,8 @@ TEST_F(SoftC_StorageTest, readIntVec)
 
   auto storage  = softc_storage_create("hdf5", "test.h5", NULL);
   ASSERT_TRUE(storage != nullptr);
-  auto strategy = softc_storage_get_storage_strategy(storage); 
-  ASSERT_TRUE(strategy != nullptr);    
+  auto strategy = softc_storage_get_storage_strategy(storage);
+  ASSERT_TRUE(strategy != nullptr);
   auto model    = softc_storage_strategy_get_datamodel(strategy);
   ASSERT_TRUE(model != nullptr);
 
@@ -251,7 +251,7 @@ TEST_F(SoftC_StorageTest, readIntVec)
   softc_storage_strategy_end_retrieve(strategy, model);
   ASSERT_EQ(intarray_size, intvec.size());
   ptrToArray(intvec_cmp, intarray, intarray_size);
-  ASSERT_EQ(intvec, intvec_cmp);    
+  ASSERT_EQ(intvec, intvec_cmp);
 }
 
 TEST_F(SoftC_StorageTest, doubleVec)
@@ -371,7 +371,7 @@ TEST_F(SoftC_StorageTest, collectionStorage)
   softc_collection_set_name(collection, "Mine");
   softc_collection_set_version(collection, "V1");
   softc_storage_save(storage, (const softc_entity_t*) collection);
-   
+
   softc_collection_free(collection);
   softc_storage_free(storage);
 }
@@ -382,18 +382,24 @@ TEST_F(SoftC_StorageTest, collectionRetrieval)
   ASSERT_TRUE(storage != nullptr);
   auto collection = softc_collection_create_new();
   ASSERT_TRUE(collection != nullptr);
-  softc_collection_add_relation(collection, "a", "is", "b");
-  softc_collection_add_relation(collection, "v", "is", "b");
+  softc_collection_add_relation(collection, "apple", "is", "fruit");
+  softc_collection_add_relation(collection, "pear", "is", "fruit");
   softc_storage_save(storage, (const softc_entity_t*)collection);
 
   auto id = softc_entity_get_id((const softc_entity_t*)collection);
   auto collection_copy = softc_collection_create (id);
   softc_storage_load(storage, (softc_entity_t*)collection_copy);
 
-  auto lst = softc_collection_find_relations(collection_copy, "b", "^is");
-  ASSERT_TRUE(softc_string_list_count(lst) > 0);
-  ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "a");
-
+  auto lst = softc_collection_find_relations(collection_copy, "fruit", "^is");
+  ASSERT_EQ(2, softc_string_list_count(lst));
+  const char *expected_names[] = {"apple", "pear"};
+  for (int i=0; i < 2; i++) {
+    int found = 0;
+    for (int j=0; j < softc_string_list_count(lst); j++)
+      if (strcmp(expected_names[i],
+		 from_softc_string(softc_string_at(lst, j))) == 0) found = 1;
+    ASSERT_TRUE(found);
+  }
   softc_string_list_free(lst);
 
   softc_collection_free(collection);
@@ -401,4 +407,3 @@ TEST_F(SoftC_StorageTest, collectionRetrieval)
   softc_storage_free(storage);
 
 }
-

@@ -66,6 +66,22 @@ if (WITH_TESTS)
   enable_testing()
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose -F)
 
+  # Add a "memcheck" target that runs all checks with valgrind
+  find_program(VALGRIND valgrind)
+  if(VALGRIND)
+    set(MEMORYCHECK_COMMAND ${VALGRIND})
+    set(MEMORYCHECK_COMMAND_OPTIONS
+      "--tool=memcheck --leak-check=yes --track-origins=yes --trace-children=yes")
+    set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE
+      ${soft5_SOURCE_DIR}/cmake/valgrind-suppressions.txt)
+  endif()
+  if(MEMORYCHECK_COMMAND)
+    include(Dart)  # Seems to be required for memory checking to work...
+    add_custom_target(memcheck
+      COMMAND ctest --output-on-failure -T memcheck
+      COMMENT "Runs memory check with ${MEMORYCHECK_COMMAND}")
+  endif()
+
 endif (WITH_TESTS)
 
 # Define content of PATH (Windows), LD_LIBRARY_PATH (Unix) and SOFTSTORAGE
