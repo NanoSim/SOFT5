@@ -29,8 +29,7 @@ struct StrategyFtor {
       return true;
     }
     return false;
-
-  }
+  }  // FIXME - valgrind reports a memory leak here...
 
   bool getString(const char *key, StdString &retValue) {
     auto ret = h5.read(QString("%1/properties/%2").arg(uuid).arg(key));
