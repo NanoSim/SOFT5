@@ -29,8 +29,10 @@ set(SWIG_MODULE_softpy_EXTRA_DEPS
   numpy.i
   softpy.i
   softpy-typemaps.i
-  softpy-datamodel.i
+  softpy-bytearray.i
   softpy-string.i
+  softpy-string-list.i
+  softpy-datamodel.i
   softpy-entity.i
   softpy-collection.i
   softpy-python.i

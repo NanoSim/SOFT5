@@ -30,6 +30,6 @@ class TestSoftpy(unittest.TestCase):
     def test_collection(self):
         self.assertEqual(runfile('softpy-test-collection.py'), 0)
 
-        
+
 if __name__ == "__main__":
     unittest.main()
