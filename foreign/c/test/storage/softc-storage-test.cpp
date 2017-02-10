@@ -382,17 +382,17 @@ TEST_F(SoftC_StorageTest, collectionRetrieval)
   ASSERT_TRUE(storage != nullptr);
   auto collection = softc_collection_create_new();
   ASSERT_TRUE(collection != nullptr);
-  softc_collection_add_relation(collection, "a", "is", "b");
-  softc_collection_add_relation(collection, "v", "is", "b");
+  softc_collection_add_relation(collection, "apple", "is", "fruit");
+  softc_collection_add_relation(collection, "pear", "is", "fruit");
   softc_storage_save(storage, (const softc_entity_t*)collection);
 
   auto id = softc_entity_get_id((const softc_entity_t*)collection);
   auto collection_copy = softc_collection_create (id);
   softc_storage_load(storage, (softc_entity_t*)collection_copy);
 
-  auto lst = softc_collection_find_relations(collection_copy, "b", "^is");
+  auto lst = softc_collection_find_relations(collection_copy, "fruit", "^is");
   ASSERT_EQ(2, softc_string_list_count(lst));
-  char **expected_names = {"a", "v"};
+  const char *expected_names[] = {"apple", "pear"};
   for (int i=0; i < 2; i++) {
     int found = 0;
     for (int j=0; j < softc_string_list_count(lst); j++)
