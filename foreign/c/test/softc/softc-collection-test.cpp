@@ -99,3 +99,34 @@ TEST_F (CollectionTest, store_and_load)
   auto lst = softc_collection_find_relations(collection_copy, "dad", "loves");
   ASSERT_STREQ(from_softc_string(softc_string_list_first(lst)), "mommy"); 
 }
+
+TEST_F (CollectionTest, find_entity)
+{
+  softc_collection_s *coll = softc_collection_create(NULL);
+  foo_s *foo = foo_create(NULL, 10);
+  foo_property_set_n(foo, 42);
+  softc_string_s name    = softc_string_create("");
+  softc_string_s version = softc_string_create("");
+  softc_string_s ns      = softc_string_create(""); 
+  softc_string_s uuid    = softc_string_create("");
+  foo_property_set_str(foo, "Dette er en test");
+  auto en  = softc_entity_get_meta_name((const softc_entity_t*)foo);
+  auto evs = softc_entity_get_meta_version((const softc_entity_t*)foo);
+  auto ens = softc_entity_get_meta_namespace((const softc_entity_t*)foo);
+  auto eid = softc_entity_get_id((const softc_entity_t*)foo);
+  ASSERT_EQ(softc_collection_num_entities(coll), 0);
+  ASSERT_EQ(softc_collection_num_relations(coll), 0);
+
+  softc_collection_register_entity(coll, "foo", (softc_entity_t*)foo);
+  ASSERT_EQ(softc_collection_num_entities(coll), 1);
+  ASSERT_TRUE(softc_collection_num_relations(coll) > 0);
+
+  softc_collection_find_entity(coll, "foo", name, version, ns, uuid);
+  ASSERT_STREQ(from_softc_string(name), en);
+  ASSERT_STREQ(from_softc_string(version), evs);
+  ASSERT_STREQ(from_softc_string(ns), ens);
+  ASSERT_STREQ(from_softc_string(uuid), eid);
+  softc_collection_free(coll);
+  foo_free(foo);
+}
+
