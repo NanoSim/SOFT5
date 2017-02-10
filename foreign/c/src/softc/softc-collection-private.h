@@ -11,6 +11,7 @@ SOFTC_BEGIN_DECLS
 
 void *softc_collection_private_create(const char *id);
 void softc_collection_private_register_entity(void *ref, const char *label, softc_entity_t *entity);
+void softc_collection_private_find_entity(void *ref, const char *label, softc_string_s name, softc_string_s version, softc_string_s ns, softc_string_s uuid);
 void softc_collection_private_set_name(void *ref, const char *name);
 void softc_collection_private_get_name(void *ref, softc_string_s name);
 void softc_collection_private_set_version(void *ref, const char *version);
