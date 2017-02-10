@@ -33,12 +33,12 @@ void softc_collection_private_register_entity(void *ref, const char *label, soft
 			   softc_entity_get_id(entity));
 }
 
-void softc_collection_private_find_entity( void *ref
-                                         , const char *label
-                                         , softc_string_s name
-                                         , softc_string_s version
-                                         , softc_string_s ns
-                                         , softc_string_s uuid)
+void softc_collection_private_find_entity( void *ref, 
+                                           const char *label, 
+                                           softc_string_s name, 
+                                           softc_string_s version, 
+                                           softc_string_s ns, 
+                                           softc_string_s uuid)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
@@ -55,10 +55,10 @@ void softc_collection_private_find_entity( void *ref
   softc_string_assign(uuid   ,  iuuid.c_str()   );
 }
 
-void softc_collection_private_add_relation(void *ref
-					   , const char *subject
-					   , const char *predicate
-					   , const char *object)
+void softc_collection_private_add_relation( void *ref, 
+                                            const char *subject, 
+                                            const char *predicate, 
+                                            const char *object)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
