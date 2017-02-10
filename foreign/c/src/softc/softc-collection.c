@@ -29,7 +29,7 @@ struct _softc_collection_allocatable_s
   short dummy;
 };
 
-typedef struct _softc_collection_private_s 
+typedef struct _softc_collection_private_s
 {
   void *ptr;
 } softc_collection_private_s;
@@ -46,10 +46,10 @@ struct _softc_collection_s {
 static void store (const softc_entity_t *ptr, softc_datamodel_t *data_model)
 {
   const softc_collection_s *self = (const softc_collection_s*)ptr;
-  softc_collection_private_save(self->privat.ptr, data_model);  
+  softc_collection_private_save(self->privat.ptr, data_model);
   /*
   const softc_collection_s *self = (const softc_collection_s*)ptr;
-  
+
   size_t E = self->dims.E;
   size_t R = self->dims.R;
   softc_datamodel_append_string (data_model, "__name__", self->props.__name__);
@@ -80,13 +80,13 @@ size_t softc_collection_num_entities(softc_collection_s *self)
 static void load (softc_entity_t *ptr, const softc_datamodel_t *data_model)
 {
   softc_collection_s *self = (softc_collection_s*)ptr;
-  softc_collection_private_load(self->privat.ptr, data_model);  
+  softc_collection_private_load(self->privat.ptr, data_model);
 
   /*
   softc_collection_s *self = (softc_collection_s*)ptr;
-  
+
   softc_datamodel_get_string (data_model, "__name__", &self->props.__name__);
-  softc_datamodel_get_string (data_model, "__version__", &self->props.__version__);    
+  softc_datamodel_get_string (data_model, "__version__", &self->props.__version__);
   */
 }
 
@@ -109,7 +109,7 @@ static int get_dimension_size(const softc_entity_t *ptr, const char *label)
   softc_collection_s *self = (softc_collection_s*)ptr;
   if (strcmp(label, "E") == 0) return self->dims.E;
   if (strcmp(label, "R") == 0) return self->dims.R;
-  assert(false); /* Illegal label */   
+  assert(false); /* Illegal label */
   return 0;
 }
 
@@ -251,11 +251,10 @@ void softc_collection_set_version(softc_collection_s *self, const char *version)
 
 void softc_collection_add_relation(softc_collection_s *self, const char *subject, const char *predicate, const char *object)
 {
-  softc_collection_private_add_relation(self->privat.ptr, subject, predicate, object);  
+  softc_collection_private_add_relation(self->privat.ptr, subject, predicate, object);
 }
 
 void softc_collection_connect(softc_collection_s *self, const char *subject, const char *predicate, const char *object)
 {
-  softc_collection_private_connect(self->privat.ptr, subject, predicate, object);  
+  softc_collection_private_connect(self->privat.ptr, subject, predicate, object);
 }
-
