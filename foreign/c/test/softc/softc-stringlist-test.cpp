@@ -5,10 +5,10 @@
 class StringListTest : public ::testing::Test {
 protected:
   static void SetUpTestCase() {}
-  static void TearDownTestCase() {}      
+  static void TearDownTestCase() {}
 };
 
-TEST_F(StringListTest, create) 
+TEST_F(StringListTest, create)
 {
   auto lst = softc_string_list_create();
   ASSERT_TRUE(lst != nullptr);
@@ -16,7 +16,7 @@ TEST_F(StringListTest, create)
   softc_string_list_free(lst);
 }
 
-TEST_F(StringListTest, append) 
+TEST_F(StringListTest, append)
 {
   auto lst = softc_string_list_create();
   auto str1 = softc_string_create("Hello");
@@ -30,7 +30,7 @@ TEST_F(StringListTest, append)
   ASSERT_EQ(softc_string_list_count(lst), 2);
 }
 
-TEST_F(StringListTest, at) 
+TEST_F(StringListTest, at)
 {
   auto lst = softc_string_list_create();
   auto str1 = softc_string_create("a");
@@ -53,4 +53,3 @@ TEST_F(StringListTest, at)
   ASSERT_TRUE(softc_string_isequal(str3, s3));
   ASSERT_EQ(softc_string_list_count(lst), 3);
 }
-
