@@ -62,6 +62,16 @@ void softc_collection_register_entity(softc_collection_s *self, const char *labe
   softc_collection_private_register_entity(self->privat.ptr, label, entity);
 }
 
+void softc_collection_find_entity( softc_collection_s *self
+                                 , const char *label
+                                 , softc_string_s name
+                                 , softc_string_s version
+                                 , softc_string_s ns
+                                 , softc_string_s uuid)
+{
+  softc_collection_private_find_entity(self->privat.ptr, label, name, version, ns, uuid);
+}
+
 size_t softc_collection_num_entities(softc_collection_s *self)
 {
   return (size_t) softc_collection_private_num_entities(self->privat.ptr);
