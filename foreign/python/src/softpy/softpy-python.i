@@ -7,6 +7,7 @@ import sys
 import json
 import ast
 import operator
+import warnings
 
 import numpy as np
 
@@ -836,6 +837,9 @@ class Metadata(dict):
     property_names = property(lambda self: [
         str(p['name']) for p in self['properties']],
                               doc='List of property names.')
+    mtype = property(lambda self:
+                     (self['name'], self['version'], self['namespace']),
+                     doc='A (name, version, namespace) tuple.')
 
     def json(self):
         """Returns a json string representing this metadata."""
@@ -894,7 +898,7 @@ class JSONMetaDB(MetaDB):
     """A simple metadata database using a json file.
 
     The `fname` argument should either be a file name or an open
-    file-like object.
+    file-like object with an array of metadata definitions.
 
     Note, if `fname` is a file-like object, it will not be closed
     when the close() method is called on the returned database object.
@@ -902,12 +906,13 @@ class JSONMetaDB(MetaDB):
     def __init__(self, fname):
         self.fname = fname
         if hasattr(fname, 'read'):
-            self.data = json.load(fname)
+            data = json.load(fname)
         elif not os.path.exists(fname):
-            self.data = []
+            data = []
         else:
             with open(fname) as f:
-                self.data = json.load(f)
+                data = json.load(f)
+        self.data = [Metadata(d) for d in data]
         self.changed = False
         self.closed = False
 
@@ -936,10 +941,10 @@ class JSONMetaDB(MetaDB):
             raise SoftError('Metadata %s/%s-%s already in the database' % (
                 meta.namespace, meta.name, meta.version))
 
-    def types(self):
+    def mtypes(self):
         """Returns a list of (name, version, namespace)-tuples for all
         registered metadata."""
-        return [(meta.name, meta.version, meta.namespace) for meta in self.data]
+        return [meta.mtype for meta in self.data]
 
     def flush(self):
         """Flushes the database to file."""
@@ -961,6 +966,42 @@ class JSONMetaDB(MetaDB):
         """Closes the connection to the database."""
         self.flush()
         self.closed = True
+
+
+class JSONDirMetaDB(JSONMetaDB):
+    """A simple metadata database using separate json files in a directory.
+
+    The `path` argument is the path to the directory containing the json
+    files.  Only files with a .json extension will be read.
+    """
+    from glob import glob
+
+    def __init__(self, path):
+        self.path = path
+        self.data = []
+        self.fnames = {}
+        for fname in glob(os.path.join(path, '*.json')):
+            with open(fname) as f:
+                meta = Metadata(json.load(f))
+                self.data.append(meta)
+            fnames[meta.mtype] = fname
+        self.changed = False
+        self.closed = False
+
+    def flush(self):
+        """Flushes the database to file."""
+        if self.changed:
+            for meta in self.data:
+                # we do not change existing metadata
+                if not meta.mtype in self.fnames:
+                    fname = os.path.join(self.path, '%s-%s.json' % (
+                        meta.name, meta.version))
+                    if os.path.exists(fname):
+                        warnings.warn('metadata file already exits: %s' %
+                                      fname)
+                    else:
+                        with open(fname, 'w') as f:
+                            json.dump(meta, f, indent=2, sort_keys=True)
 
 
 class MongoMetaDB(MetaDB):
