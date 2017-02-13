@@ -10,7 +10,6 @@ PyObject *string_FromString(const char *s)
 #else
   return  PyUnicode_FromString(s);
 #endif
-
 }
 
 %}
@@ -37,7 +36,7 @@ PyObject *string_FromString(const char *s)
 }
 
 
-/* String output typemaps */
+/* String argout typemaps */
 %typemap(in,numinputs=0) softc_string_s *ARGOUT_SOFTSTRING (softc_string_s v) {
   $1 = &v;
 }
@@ -48,19 +47,34 @@ PyObject *string_FromString(const char *s)
 }
 
 
-/* Add descructor */
-//%extend softc_string_s {
-//  ~softc_string_s() {
-//    softc_string_destroy($self);
-//  }
-//}
+/* String out typemaps
+ * This exposes softc_string_s as ordinary immutable Python strings.
+ *
+ * Pros: simple and natural interface + we get rid of an annoying
+ * memory leak due to failing to freeing the underlying softc_string_s *
+ * pointer for objects returned by string_create().
+ *
+ * Cons: softc_string_append() cannot be exposed in Python, logically
+ * because Python strings are immutable, but also because that the
+ * underlying softc_string_s object is destroyed when softc_string_create()
+ * returns.
+ */
+%typemap(out) softc_string_s {
+  $result = string_FromString(from_softc_string($1));
+}
+
+%typemap(newfree) softc_string_s {
+  softc_string_destroy($1);
+}
 
 
+/* Tell swig that softc_string_create() returns a new object */
+%newobject softc_string_create;
 
 /* Declarations */
 softc_string_s softc_string_create(const char *str);
-const char *from_softc_string(const softc_string_s s);
-void softc_string_destroy(softc_string_s str);
-void softc_string_assign(softc_string_s str, const char *text);
-int softc_string_compare(softc_string_s str, const char *text);
-bool softc_string_isequal(softc_string_s first, softc_string_s second);
+//const char *from_softc_string(const softc_string_s s);
+//void softc_string_destroy(softc_string_s str);
+//void softc_string_assign(softc_string_s str, const char *text);
+//int softc_string_compare(softc_string_s str, const char *text);
+//bool softc_string_isequal(softc_string_s first, softc_string_s second);

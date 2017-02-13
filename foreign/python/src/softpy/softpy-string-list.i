@@ -61,8 +61,14 @@
 }
 
 
+/* Tell swig that softc_string_list_create() returns a new object and
+ * that it is cleaned up by softc_string_list_free() */
+%newobject softc_string_list_create;
+%delobject softc_string_list_free;
+
+
 /* Declarations */
-softc_string_list_s* softc_string_list_create();
+softc_string_list_s * softc_string_list_create();
 void softc_string_list_free(softc_string_list_s *self);
 void softc_string_list_append(softc_string_list_s *self, softc_string_s str);
 void softc_string_list_append_cstr(softc_string_list_s *self, const char *str);
