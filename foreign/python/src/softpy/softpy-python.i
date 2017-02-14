@@ -264,15 +264,12 @@ class Collection(object):
         If `predicate` is preceded with "^", the match is inverted, i.e.
         all relations whos object matches `subject` and predicate matches
         the remaining of `predicate` are returned."""
-        soft_lst = collection_find_relations(self.__soft_entity__,
+        strlst = collection_find_relations(self.__soft_entity__,
                                         subject, predicate)
         relations = set()
-        for i in range(string_list_count(soft_lst)):
-            soft_str = string_at(soft_lst, i)
-            s = from_softc_string(soft_str)
-            relations.add(s)
-            #string_destroy(soft_str)
-        string_list_free(soft_lst)
+        for i in range(string_list_count(strlst)):
+            relations.add(string_at(strlst, i))
+        string_list_free(strlst)
         return relations
 
 

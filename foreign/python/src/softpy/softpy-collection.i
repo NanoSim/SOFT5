@@ -28,7 +28,6 @@ void softc_collection_get_version2(softc_collection_s *self, char **version)
 /*
  * Typemaps
  */
-
 %typemap(in,numinputs=0) char **OUTSTR (char *temp) {
   $1 = &temp;
 }
@@ -40,6 +39,9 @@ void softc_collection_get_version2(softc_collection_s *self, char **version)
 /*
  * SWIG declarations
  */
+%newobject softc_collection_create_new;
+%newobject softc_collection_create;
+%delobject softc_collection_free;
 
 softc_collection_s *softc_collection_create_new();
 softc_collection_s *softc_collection_create(const char *id);
