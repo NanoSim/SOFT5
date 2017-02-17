@@ -41,7 +41,7 @@ PyObject *bytes_FromStringAndSize(const char *s, Py_ssize_t n)
 }
 
 
-/* Bytearray output typemaps */
+/* Bytearray argout typemaps */
 %typemap(in,numinputs=0) softc_bytearray_s *ARGOUT_SOFTBYTEARRAY
 (softc_bytearray_s v) {
   $1 = &v;
