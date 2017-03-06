@@ -1,7 +1,5 @@
 project(foreign-softc-test C CXX)
 
-find_package(GTest)
-
 if(GTEST_FOUND)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
