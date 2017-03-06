@@ -8,6 +8,7 @@ import json
 import ast
 import operator
 from glob import glob
+import warnings
 
 import numpy as np
 
@@ -604,13 +605,16 @@ class BaseEntity(object):
             datamodel_append_dimension(datamodel, label, value)
 
         for name in self.soft_get_property_names():
+            typename = self.soft_get_property_typename(name)
+            ptype = self.soft_get_property_type(name)
+            dims = self.soft_get_property_dims(name)
             value = self.soft_get_property(name)
             if value is Uninitialized:
                 raise SoftUninitializedError(
                     'Uninitialized data for "%s.%s"' % (
                         self.__class__.__name__, name))
-            typename = self.soft_get_property_typename(name)
-            dims = self.soft_get_property_dims(name)
+            elif not dims and not isinstance(value, ptype):
+                value = ptype(value)
             if not dims:
                 setter = getattr(_softpy, 'datamodel_append_' + typename)
             elif typename == 'string' or typename == 'string_list':
@@ -859,7 +863,7 @@ class Metadata(dict):
                     doc='Metadata namespace.')
     description = property(lambda self: asStr(self['description']),
                     doc='Description of this metadata.')
-    type = property(lambda self: (self.name, self.version, self.namespace),
+    mtype = property(lambda self: (self.name, self.version, self.namespace),
                     doc='A (name, version, namespace)-tuple uniquely '
                         'identifying the metadata.')
     dimensions = property(lambda self: [
@@ -901,7 +905,7 @@ class MetaDB(object):
         May not be implemented by all subclasses."""
         raise NotImplementedError
 
-    def types(self):
+    def mtypes(self):
         """Returns a list of (name, version, namespace)-tuples for all
         registered metadata.
 
@@ -926,7 +930,7 @@ class JSONMetaDB(MetaDB):
     """A simple metadata database using a json file.
 
     The `fname` argument should either be a file name or an open
-    file-like object.
+    file-like object with an array of metadata definitions.
 
     Note, if `fname` is a file-like object, it will not be closed
     when the close() method is called on the returned database object.
@@ -934,12 +938,13 @@ class JSONMetaDB(MetaDB):
     def __init__(self, fname):
         self.fname = fname
         if hasattr(fname, 'read'):
-            self.data = json.load(fname)
+            data = json.load(fname)
         elif not os.path.exists(fname):
-            self.data = []
+            data = []
         else:
             with open(fname) as f:
-                self.data = Metadata(f)
+                data = json.load(f)
+        self.data = [Metadata(d) for d in data]
         self.changed = False
         self.closed = False
 
@@ -968,10 +973,10 @@ class JSONMetaDB(MetaDB):
             raise SoftError('Metadata %s/%s-%s already in the database' % (
                 meta.namespace, meta.name, meta.version))
 
-    def types(self):
+    def mtypes(self):
         """Returns a list of (name, version, namespace)-tuples for all
         registered metadata."""
-        return [(meta.name, meta.version, meta.namespace) for meta in self.data]
+        return [meta.mtype for meta in self.data]
 
     def flush(self):
         """Flushes the database to file."""
@@ -998,7 +1003,8 @@ class JSONMetaDB(MetaDB):
 class JSONDirMetaDB(JSONMetaDB):
     """A metadata database using a directory with json files.
 
-    The `path` argument should be the full path to the directory.
+    The `path` argument is the path to the directory containing the json
+    files.  Only files with a .json extension will be read.
     """
     def __init__(self, path):
         self.path = path
@@ -1007,21 +1013,24 @@ class JSONDirMetaDB(JSONMetaDB):
         for filename in glob(os.path.join(path, '*.json')):
             with open(filename) as f:
                 meta = Metadata(f)
-            self.filenames[meta.type] = filename
+            self.filenames[meta.mtype] = filename
             self.data.append(meta)
         self.changed = False
         self.closed = False
 
     def flush(self):
         """Flushes the database to file."""
-        for meta in data:
-            if not meta.type in self.filenames:
-                filename = os.path.join(self.path, '%s-%s.json' % (
-                    meta.name, meta.version))
-            if os.path.exists(filename):
-                SoftError('Metadata file already exists: ' + filename)
-            with open(filename, 'w') as f:
-                f.write(meta.json())
+        if self.changed:
+            for meta in data:
+                if not meta.mtype in self.filenames:
+                    filename = os.path.join(self.path, '%s-%s.json' % (
+                        meta.name, meta.version))
+                if os.path.exists(filename):
+                    warnings.warn(
+                        'existing metadata is not overwritten: %s' + filename)
+                else:
+                    with open(filename, 'w') as f:
+                        f.write(meta.json())
 
 
 class MongoMetaDB(MetaDB):
