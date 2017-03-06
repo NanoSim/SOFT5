@@ -5,7 +5,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR    ON)
 set (CMAKE_AUTOMOC                TRUE)
 
 include_directories (${MONGOC_INCLUDE_DIR} ${soft-kernel_INCLUDE_DIRS})
-set (LINK_LIBS ${LINK_LIBS} ${MONGOC_LIBRARIES} ${soft-kernel_LIBS})
+set (LINK_LIBS ${LINK_LIBS} ${BSON_LIBRARY} ${MONGOC_LIBRARY} ${soft-kernel_LIBS})
 
 aux_source_directory (. SRC_LIST)
 add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
