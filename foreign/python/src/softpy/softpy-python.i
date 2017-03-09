@@ -703,15 +703,15 @@ class BaseEntity(object):
 
     def soft_get_meta_name(self):
         """Returns entity name."""
-        return entity_get_name(self.__soft_entity__)
+        return entity_get_meta_name(self.__soft_entity__)
 
     def soft_get_meta_version(self):
         """Returns entity version."""
-        return entity_get_name(self.__soft_entity__)
+        return entity_get_meta_version(self.__soft_entity__)
 
     def soft_get_meta_namespace(self):
         """Returns entity name space."""
-        return entity_get_namespace(self.__soft_entity__)
+        return entity_get_meta_namespace(self.__soft_entity__)
 
     @classmethod
     def soft_get_meta_description(cls):
@@ -805,6 +805,21 @@ def entity(name, version=None, namespace=None):
     See the class docstring for Metadata for supported values for
     `name`, `version` and `namespace`."""
     meta = Metadata(name, version, namespace)
+
+    # Create an instance for this entity
+    #e = entity_t(
+    #        get_meta_name=meta['name'],
+    #        get_meta_version=meta['version'],
+    #        get_meta_namespace=meta['namespace'],
+    #        get_dimensions=dims,
+    #        get_dimension_size=self.soft_internal_dimension_size,
+    #        load=self.soft_internal_load,
+    #        store=self.soft_internal_store,
+    #        id=uuid,
+    #        user_data=self)
+
+
+
     attr = dict(soft_metadata=meta)
     return type(meta.name, (BaseEntity,), attr)
 
