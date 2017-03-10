@@ -203,17 +203,20 @@ void softc_collection_free(softc_collection_s *self)
   free (self);
 }
 
-softc_collection_properties_s *const softc_collection_props (softc_collection_s *self)
+softc_collection_properties_s
+*const softc_collection_props (softc_collection_s *self)
 {
   return &self->props;
 }
 
-softc_collection_dimensions_s *const softc_collection_dims (softc_collection_s *self)
+softc_collection_dimensions_s
+*const softc_collection_dims (softc_collection_s *self)
 {
   return &self->dims;
 }
 
-softc_collection_allocatable_s *softc_collection_allocatables(softc_collection_s *self)
+softc_collection_allocatable_s
+*softc_collection_allocatables(softc_collection_s *self)
 {
   return self->allocs;
 }
@@ -223,20 +226,24 @@ size_t softc_collection_num_relations(softc_collection_s *self)
   return (size_t) softc_collection_private_num_relations(self->privat.ptr);
 }
 
-softc_string_list_s *softc_collection_find_relations(softc_collection_s *self, const char *subject, const char *predicate)
+softc_string_list_s *softc_collection_find_relations(softc_collection_s *self,
+                                                     const char *subject,
+                                                     const char *predicate)
 {
-  return softc_collection_private_find_relations(self->privat.ptr, subject, predicate);
+  return softc_collection_private_find_relations(self->privat.ptr,
+                                                 subject,
+                                                 predicate);
 }
 
-
-void softc_collection_set_name(softc_collection_s *self, const char *name)
-{
-  softc_collection_private_set_name(self->privat.ptr, name);
-}
 
 void softc_collection_get_name(softc_collection_s *self, softc_string_s name)
 {
   softc_collection_private_get_name(self->privat.ptr, name);
+}
+
+void softc_collection_set_name(softc_collection_s *self, const char *name)
+{
+  softc_collection_private_set_name(self->privat.ptr, name);
 }
 
 void softc_collection_get_version(softc_collection_s *self, softc_string_s version)
@@ -247,6 +254,16 @@ void softc_collection_get_version(softc_collection_s *self, softc_string_s versi
 void softc_collection_set_version(softc_collection_s *self, const char *version)
 {
   softc_collection_private_set_version(self->privat.ptr, version);
+}
+
+void softc_collection_get_namespace(softc_collection_s *self, softc_string_s ns)
+{
+  softc_collection_private_get_namespace(self->privat.ptr, ns);
+}
+
+void softc_collection_set_namespace(softc_collection_s *self, const char *ns)
+{
+  softc_collection_private_set_namespace(self->privat.ptr, ns);
 }
 
 void softc_collection_add_relation(softc_collection_s *self, const char *subject, const char *predicate, const char *object)
