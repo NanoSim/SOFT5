@@ -44,6 +44,14 @@ class SoftMissingMetadataError(SoftError):
     """Raised when metadata cannot be found in the database."""
     pass
 
+class SoftConverterError(SoftError):
+    """Raised for conversion error."""
+    pass
+
+class SoftMissingConverterError(SoftConverterError):
+    """Raised when a converter cannot be found."""
+    pass
+
 class SettingDerivedPropertyError(Exception):
     """Users of softpy can raise this exception in setters for derived
     properties.  This exception will signal to the storage loader, of all
@@ -64,6 +72,7 @@ class ArithmeticError(Exception):
 class Uninitialized(object):
     """Class representing uninitialized values. Not intended to be
     instanciated..."""
+    pass
 
 
 class Storage(object):
@@ -156,7 +165,7 @@ class Storage(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-       self.close()
+        self.close()
 
     def __repr__(self):
         if self.options:
@@ -235,14 +244,14 @@ class Collection(object):
         return collection_num_entities(self.__soft_entity__)
 
     def get_num_relations(self):
-         """Returns the total number of relations associated with this
-         collection.
+        """Returns the total number of relations associated with this
+        collection.
 
-         Note: A collection will typically contain many more relations
-         than the number of relations you have added with add_relation()
-         because relations are also used to associate entity labels with
-         the entity type, name, version , namespace and uuid."""
-         return collection_num_relations(self.__soft_entity__)
+        Note: A collection will typically contain many more relations
+        than the number of relations you have added with add_relation()
+        because relations are also used to associate entity labels with
+        the entity type, name, version , namespace and uuid."""
+        return collection_num_relations(self.__soft_entity__)
 
     #def get_num_dim_maps(self):
     #     return collection_num_dim_maps(self.__soft_entity__)
@@ -302,7 +311,7 @@ class Collection(object):
         if (name, namespace) == ('Collection', 'org.sintef.soft'):
             return Collection(uuid=uuid, driver=driver, uri=uri,
                               options=options)
-        elif (name, namespace) == ('MetadataSchema', 'org.sintef.soft'):
+        elif (name, namespace) == ('entity_schema', 'org.sintef.soft'):
             meta = find_metadata_uuid(uuid)
             return entity(meta)
         else:
@@ -357,7 +366,7 @@ class Collection(object):
         all relations whos object matches `subject` and predicate matches
         the remaining of `predicate` are returned."""
         strlst = collection_find_relations(self.__soft_entity__,
-                                        subject, predicate)
+                                           subject, predicate)
         relations = set()
         for i in range(string_list_count(strlst)):
             relations.add(string_at(strlst, i))
@@ -712,18 +721,18 @@ class BaseEntity(with_metaclass(MetaEntity)):
         the metadata definitions.  Raises SoftInvalidDimensionsError for
         inconsistencies."""
         for d in self.soft_metadata['properties']:
-             name = asStr(d['name'])
-             value = getattr(self, name)
-             if value is not Uninitialized and 'dims' in d:
-                 for label in d['dims']:
-                     dimsize = self.soft_get_dimension_size(asStr(label))
-                     if len(value) != dimsize:
-                         raise SoftInvalidDimensionsError(
-                             'length of dimension %r of property %r is %d, '
-                             'expected %d' % (label, name, len(value), dimsize))
-                     if len(value) == 0:  # can't continue for zero-sized dims
-                         break
-                     value = value[0]
+            name = asStr(d['name'])
+            value = getattr(self, name)
+            if value is not Uninitialized and 'dims' in d:
+                for label in d['dims']:
+                    dimsize = self.soft_get_dimension_size(asStr(label))
+                    if len(value) != dimsize:
+                        raise SoftInvalidDimensionsError(
+                            'length of dimension %r of property %r is %d, '
+                            'expected %d' % (label, name, len(value), dimsize))
+                    if len(value) == 0:  # can't continue for zero-sized dims
+                        break
+                    value = value[0]
 
     def soft_internal_store(self, e, datamodel):
         """Stores property values to `datamodel`, raising SoftUnitializedError
@@ -800,33 +809,33 @@ class BaseEntity(with_metaclass(MetaEntity)):
                    for name in self.soft_get_property_names())
 
     def soft_get_property(self, name):
-         """Returns the value of property `name`.  The default implementation
-         checks if there exists a method get_`name`().  If so, the the
-         result of calling get_`name`() with no argument is returned.
-         Otherwise the value of attribute `name` is returned."""
-         getter = 'get_' + name
-         if hasattr(self, getter):
-             return getattr(self, getter)()
-         elif hasattr(self, name):
-             return getattr(self, name)
-         else:
-             raise SoftInvalidPropertyError(name)
+        """Returns the value of property `name`.  The default implementation
+        checks if there exists a method get_`name`().  If so, the the
+        result of calling get_`name`() with no argument is returned.
+        Otherwise the value of attribute `name` is returned."""
+        getter = 'get_' + name
+        if hasattr(self, getter):
+            return getattr(self, getter)()
+        elif hasattr(self, name):
+            return getattr(self, name)
+        else:
+            raise SoftInvalidPropertyError(name)
 
     def soft_set_property(self, name, value):
-         """Sets property `name` to value.  The default implementation checks
-         if there exists a method set_`name`().  If so, set_`name`() is called
-         with `value` as argument.  Otherwise the attribute `name` is set to
-         `value`."""
-         setter = 'set_' + name
-         if hasattr(self, setter):
-             getattr(self, setter)(value)
-         else:
-             ptype = self.soft_get_property_type(name)
-             if   (not isinstance(value, ptype) and
-                   not value is Uninitialized and
-                   not ptype == str):
-                 value = ptype(value)
-             setattr(self, name, value)
+        """Sets property `name` to value.  The default implementation checks
+        if there exists a method set_`name`().  If so, set_`name`() is called
+        with `value` as argument.  Otherwise the attribute `name` is set to
+        `value`."""
+        setter = 'set_' + name
+        if hasattr(self, setter):
+            getattr(self, setter)(value)
+        else:
+            ptype = self.soft_get_property_type(name)
+            if   (not isinstance(value, ptype) and
+                  not value is Uninitialized and
+                  not ptype == str):
+                value = ptype(value)
+            setattr(self, name, value)
 
     def soft_get_id(self):
         """Returns entity id."""
@@ -942,16 +951,16 @@ def entity(name, version=None, namespace=None):
     # The assigned UUID is generated from a MD5 hash of the metadata
     # name, version and namespace.
     e = entity_t(
-            'MetadataSchema',                   # get_meta_name
-            '0.1'          ,                    # get_meta_version
-            'org.sintef.soft',                  # get_meta_namespace
-            [],                                 # get_dimensions
-            [],                                 # get_dimension_size
-            lambda e, d: None,                  # store
-            lambda e, d: None,                  # load
-            meta.get_uuid(),                    # id
-            None,                               # user_data
-        )
+        'entity_schema',                    # get_meta_name
+        '0.1'          ,                    # get_meta_version
+        'org.sintef.soft',                  # get_meta_namespace
+        [],                                 # get_dimensions
+        [],                                 # get_dimension_size
+        lambda e, d: None,                  # store
+        lambda e, d: None,                  # load
+        meta.get_uuid(),                    # id
+        None,                               # user_data
+    )
     attr = dict(soft_metadata=meta, __soft_entity__=e)
     return type(meta.name, (BaseEntity,), attr)
 
@@ -1004,14 +1013,14 @@ class Metadata(dict):
     name = property(lambda self: asStr(self['name']),
                     doc='Metadata name.')
     version = property(lambda self: asStr(self['version']),
-                    doc='Metadata version.')
+                       doc='Metadata version.')
     namespace = property(lambda self: asStr(self['namespace']),
-                    doc='Metadata namespace.')
+                         doc='Metadata namespace.')
     description = property(lambda self: asStr(self['description']),
-                    doc='Description of this metadata.')
+                           doc='Description of this metadata.')
     mtype = property(lambda self: (self.name, self.version, self.namespace),
-                    doc='A (name, version, namespace)-tuple uniquely '
-                        'identifying the metadata.')
+                     doc='A (name, version, namespace)-tuple uniquely '
+                         'identifying the metadata.')
     dimensions = property(lambda self: [
         str(d['name']) for d in self['dimensions']],
                           doc='List of dimension labels.')
@@ -1035,7 +1044,6 @@ class Metadata(dict):
 # ===========================
 
 # FIXME: functionality should be implemented in C++?
-# FIXME: add support for converters
 class MetaDB(object):
     """A base class for metadata databases."""
     def __init__(self, **kwargs):
@@ -1291,9 +1299,93 @@ def find_metadata_uuid(uuid):
 
 
 
+#
+# Converter reference implementation
+# ==================================
+# FIXME: should be implemented in C++?
+_converters = []
 
+def register_converter(converter, inputs, outputs):
+    """Registers a converter.
+
+    Parameters
+    ----------
+    converter : callable
+        A converter. It should take a sequence of input instances as
+        argument and should return a sequence of output instances.
+    inputs : sequence
+        A sequence (name, version, namespace) tuples describing the
+        entities the converter takes as input.
+    outputs : sequence
+        A sequence (name, version, namespace) tuples describing the
+        entities the converter returns as output.
+    """
+    _converters.append((converter, inputs, outputs))
+
+
+def _conversion_tree(output, inputs):
+    """Returns a nested list structure describing how the entities in
+    `inputs` can be converted to `output`.
+
+    `output` is a (name, version, namespace)-tuple and `inputs` is a
+    sequence of (name, version, namespace)-tuples.
+
+    The returned value is either an element in `inputs` (if it matches
+    `output`) or a nested tuple of the form
+
+        (output, converter, [input, ...])
+
+    where `input` is either an element in `inputs` or a tuple like above.
+
+    Raises SoftMissingConverterError if none of the installed
+    converters can convert `inputs` to `output`.
+    """
+    if output in inputs:
+        return output
+    for conv, ins, outs in _converters:
+        if output in outs:
+            try:
+                return (output, conv, [_conversion_tree(inp, inputs)
+                                       for inp in ins])
+            except SoftMissingConverterError:
+                pass
+    raise SoftMissingConverterError('Cannot convert to %s' % (output, ))
+
+
+def convert(output, input_instances):
+    """Returns a new instance of (name, version, namespace) from the
+    sequence of entity instances `input_instances`.
+
+    Raises SoftMissingConverterError if none of the installed
+    converters can convert `input_instances` to an instance of the
+    desired type.
+    """
+    if isinstance(input_instances, BaseEntity):
+        instances = [input_instances]
+    inputdict = get_metadict(input_instances)
+    if len(inputdict) != len(input_instances):
+        raise SoftConverterError(
+            'Converting from several instances of the same entity is ambiguous')
+
+    def _convert(tree):
+        if isinstance(tree[2], list):
+            output, conv, inputs = tree
+            assert output not in inputdict
+            insts = conv([_convert(t) for t in inputs])
+            d = get_metadict(insts)
+            inputdict[output] = d[output]
+            return d[output]
+        else:
+            return inputdict[tree]
+
+    tree = _conversion_tree(output, inputdict.keys())
+    return _convert(tree)
+
+
+
+#
 # Convinience functions for returning entity info
-# -----------------------------------------------
+# ===============================================
 def _get_entity_info(e, field, *args):
     """Help function for returning info about entities."""
     if hasattr(e, '__soft_entity__'):
@@ -1321,6 +1413,12 @@ def get_meta_namespace(e):
     """Returns the namespace of entity `e`."""
     return _get_entity_info(e, 'meta_namespace')
 
+def get_meta_mtype(e):
+    """Returns a (name, version, namespace) tuple for entity `e`."""
+    return (_get_entity_info(e, 'meta_name'),
+            _get_entity_info(e, 'meta_version'),
+            _get_entity_info(e, 'meta_namespace'))
+
 def get_dimensions(e):
     """Returns list of dimension lables for entity `e`."""
     return _get_entity_info(e, 'dimensions')
@@ -1330,9 +1428,19 @@ def get_dimension_size(e, label):
     not a valid dimension label -1 is returned."""
     return _get_entity_info(e, 'dimension_size', label)
 
+def get_metadict(instances):
+    """Returns a dict mapping (name, version, namespace) of the metadata
+    of each element in `instances` to the instances themselves.
+    `instances` may also be a single instance."""
+    if isinstance(instances, BaseEntity):
+        instances = [instances]
+    return {get_meta_mtype(inst): inst for inst in instances}
+
 def derived_property_exception(msg=''):
     """Convinient function for raising SettingDerivedPropertyError
-    within lambdas."""
+    within lambdas.
+
+    See also: SettingDerivedPropertyError."""
     raise SettingDerivedPropertyError(msg)
 
 %}
