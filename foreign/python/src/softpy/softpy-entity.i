@@ -704,7 +704,7 @@ typedef struct {
 
 //softc_entity_t *softc_entity_new(const char *uri);
 const char  *softc_entity_get_id(const softc_entity_t *self);
-const char  *softc_entity_get_meta_type(const softc_entity_t *self);
+//const char  *softc_entity_get_meta_type(const softc_entity_t *self);
 const char  *softc_entity_get_meta_name(const softc_entity_t *self);
 const char  *softc_entity_get_meta_namespace(const softc_entity_t *self);
 const char  *softc_entity_get_meta_version(const softc_entity_t *self);

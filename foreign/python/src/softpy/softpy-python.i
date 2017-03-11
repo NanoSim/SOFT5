@@ -9,7 +9,6 @@ import ast
 import operator
 from glob import glob
 import warnings
-import uuid
 
 import numpy as np
 
@@ -946,15 +945,6 @@ def entity(name, version=None, namespace=None):
 
 
 
-
-def get_metadata_uuid(name, version, namespace):
-    """Returns an UUID generated from a MD5 hash of metadata name,
-    version and namespace."""
-    # FIXME - this should be implemented in core SOFT
-    return str(uuid.uuid3(uuid.NAMESPACE_URL, '%s/%s-%s' % (
-        namespace, name, version)))
-
-
 class Metadata(dict):
     """A class representing SOFT metadata.
 
@@ -1020,7 +1010,7 @@ class Metadata(dict):
     def get_uuid(self):
         """Returns an UUID generated from a MD5 hash of the metadata name,
         version and namespace."""
-        return get_metadata_uuid(self.name, self.version, self.namespace)
+        return uuid_from_entity(self.name, self.version, self.namespace)
 
     def get_json(self):
         """Returns a json string representing this metadata."""
@@ -1051,7 +1041,7 @@ class MetaDB(object):
     def find_uuid(self, uuid):
         """Returns a Metadata object with given uuid."""
         for mtype in self.mtypes():
-            if get_metadata_uuid(*mtype) == uuid:
+            if uuid_from_entity(*mtype) == uuid:
                 return Metadata(*mtype)
 
     def insert(self, metadata):
