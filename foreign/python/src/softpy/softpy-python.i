@@ -1,7 +1,6 @@
 # -*- python -*-
 
 %pythoncode %{
-
 import os
 import sys
 import json
@@ -526,6 +525,9 @@ class MetaEntity(type):
     def __len__(self):
         return len(self.soft_metadata['properties'])
 
+    def __eq__(self, other):
+        return self.soft_metadata == other.soft_metadata
+
     name = property(lambda self: str(self.soft_metadata['name']),
                     doc='Entity name.')
     version = property(lambda self: str(self.soft_metadata['version']),
@@ -542,7 +544,19 @@ class MetaEntity(type):
                               doc='List of property names.')
 
 
-class BaseEntity(object):
+# Python 2/3-compatibility trick copied from six
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(meta):
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+    return type.__new__(metaclass, 'temporary_class', (), {})
+
+
+class BaseEntity(with_metaclass(MetaEntity)):
     """Base class for entities created with the entity() factory function.
 
     To avoid name conflict with properties and making it easy to subclass
@@ -558,8 +572,6 @@ class BaseEntity(object):
     often more convenient to override soft_internal_dimension_size() in
     your subclass.
     """
-    __metaclass__ = MetaEntity
-
     def __init__(self, uuid=None, driver=None, uri=None, options=None,
                  dimension_sizes=None, uninitialize=True, **kwargs):
         """Initialize a new entity.

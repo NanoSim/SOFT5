@@ -82,5 +82,5 @@ subcoll2 = coll2.get_entity('relatives')
 assert subcoll2.get_labels() == {'Anna'}
 
 Person2 = coll2.get_entity('Person')
-assert type(Person2) == type(Person)
 assert Person2.property_names == Person.property_names
+assert Person2 == Person
