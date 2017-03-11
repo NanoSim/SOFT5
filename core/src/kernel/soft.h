@@ -15,6 +15,7 @@ class IStorageStrategy;
 void SOFT_KERNEL_EXPORT init(int &argc, char *argv[]);
 std::string SOFT_KERNEL_EXPORT applicationDirPath();
 std::string SOFT_KERNEL_EXPORT uuidGen(); /* TODO: Move this to a utils header */
+std::string SOFT_KERNEL_EXPORT uuidFromEntity(const char *name, const char *version, const char *ns);
 std::list<std::string> SOFT_KERNEL_EXPORT arguments();
 int SOFT_KERNEL_EXPORT storageDriverCount();
 std::list<std::string> SOFT_KERNEL_EXPORT registeredStorageDrivers();
