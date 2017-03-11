@@ -9,6 +9,7 @@ import ast
 import operator
 from glob import glob
 import warnings
+import uuid
 
 import numpy as np
 
@@ -80,6 +81,12 @@ class Storage(object):
         be a url for database connections.
     options : None | string
         Additional options passed to the driver.
+
+    Notes
+    -----
+    Options for the default drivers:
+
+    hdf5 : "append=yes"  - append to the hdf5 file, otherwise truncate.
     """
     def __init__(self, driver, uri, options=None):
         self.driver = driver
@@ -96,14 +103,19 @@ class Storage(object):
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         e = get_c_entity(entity)
-        datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asStr(uuid if uuid else e.id))
-        datamodel_set_meta_name(datamodel, asStr(e.name))
-        datamodel_set_meta_version(datamodel, asStr(e.version))
-        datamodel_set_meta_namespace(datamodel, asStr(e.namespace))
-        entity_store(e, datamodel)   # Ask the entity to fill out the datamodel
-        storage_strategy_store(self.strategy, datamodel)
-        storage_strategy_free_datamodel(datamodel)
+        if isinstance(e, collection_s):
+            storage_save(self.storage, e)
+        else:
+            datamodel = storage_strategy_get_datamodel(self.strategy)
+            datamodel_set_id(datamodel, asStr(uuid if uuid else e.id))
+            datamodel_set_meta_name(datamodel, asStr(get_meta_name(e)))
+            datamodel_set_meta_version(datamodel, asStr(get_meta_version(e)))
+            datamodel_set_meta_namespace(datamodel,
+                                         asStr(get_meta_namespace(e)))
+            entity_store(e, datamodel)   # Ask the entity to fill out the
+                                         # datamodel
+            storage_strategy_store(self.strategy, datamodel)
+            storage_strategy_free_datamodel(datamodel)
 
     def load(self, entity, uuid=None):
         """Fills `entity` with data loaded from this storage.  By default
@@ -112,15 +124,19 @@ class Storage(object):
         if self.closed:
             raise SoftClosedStorageError('Storage %r is closed.' % self.uri)
         e = get_c_entity(entity)
-        datamodel = storage_strategy_get_datamodel(self.strategy)
-        datamodel_set_id(datamodel, asStr(uuid if uuid else e.id))
-        datamodel_set_meta_name(datamodel, asStr(e.name))
-        datamodel_set_meta_version(datamodel, asStr(e.version))
-        datamodel_set_meta_namespace(datamodel, asStr(e.namespace))
-        storage_strategy_start_retrieve(self.strategy, datamodel)
-        entity_load(e, datamodel)  # Ask the entity to fill out itself
-        storage_strategy_end_retrieve(self.strategy, datamodel)
-        storage_strategy_free_datamodel(datamodel)
+        if isinstance(e, collection_s):
+            collection_load(self.storage, e)
+        else:
+            datamodel = storage_strategy_get_datamodel(self.strategy)
+            datamodel_set_id(datamodel, asStr(uuid if uuid else e.id))
+            datamodel_set_meta_name(datamodel, asStr(get_meta_name(e)))
+            datamodel_set_meta_version(datamodel, asStr(get_meta_version(e)))
+            datamodel_set_meta_namespace(datamodel,
+                                         asStr(get_meta_namespace(e)))
+            storage_strategy_start_retrieve(self.strategy, datamodel)
+            entity_load(e, datamodel)  # Ask the entity to fill out itself
+            storage_strategy_end_retrieve(self.strategy, datamodel)
+            storage_strategy_free_datamodel(datamodel)
 
     def close(self):
         """Closes current storage."""
@@ -155,28 +171,56 @@ class Storage(object):
 class Collection(object):
     """A collection of entities with relations between them.
 
+    With default arguments, it returns a new empty collection.
+
+    If `uuid` is given, this will be the uuid of the new collection.
+    This is normally used in combination with `driver`, `uri` and `options`
+    to load the collection from a storage.
+
+    See also: Storage
     """
-    # Fixme:
-    # * Add arguments
-    #
-    #      uuid=None, driver=None, uri=None, options=None
-    #
-    #   such that the constructor can load a collection from a storage
-    #   in the same way as the entity constructor.
-    def __init__(self, id=None):
-        if id:
-            self.__soft_entity__ = collection_create(id)
+    def __init__(self, uuid=None, driver=None, uri=None, options="append=yes"):
+        if uuid:
+            self.__soft_entity__ = collection_create(uuid)
         else:
             self.__soft_entity__ = collection_create_new()
+
+        if driver:
+            with Storage(driver=driver, uri=uri, options=options) as s:
+                collection_load(s.storage, self.__soft_entity__)
+
+        self._driver = driver
+        self._uri = uri
+        self._options = options
+
+        # We store a Python-level references to all entities/collections
+        # added to this collection.  This makes it possible to:
+        #   - store the content of the collection together with the collection
+        #   - retrieve elements added in this session without having their
+        #     metadata in a in a metadata database
+        self._cache = {}
 
     def __delete__(self):
         collection_free(self.__softpy_entity__)
         object.__del__(self)
 
-    def register_entity(self, label, entity):
+    def add(self, label, entity):
         """Register a new entity associated with the given label."""
         e = get_c_entity(entity)
-        collection_register_entity(self.__soft_entity__, label, e)
+        if isinstance(e, entity_t):
+            collection_register_entity(self.__soft_entity__, label, e)
+        elif isinstance(e, collection_s):
+            collection_register_collection(self.__soft_entity__, label, e)
+        else:
+            raise SoftError('Only instances, collections and metadata '
+                            'can be added to collections.')
+        self._cache[label] = entity
+
+    #def pop(self, label):
+    #    return collection_pop(self.__soft_entity__, label)
+
+    #def remove(self, label):
+    #    collection_remove(self.__soft_entity__, label)
 
     #def add_dim(self, label, description=''):
     #    collection_add_dim(self.__soft_entity__, label, description)
@@ -219,45 +263,93 @@ class Collection(object):
 
     def get_name(self, label):
         """Returns the name of the entity instance with the given label."""
-        uuid, = self.find_relations(label, 'name')
-        return uuid
+        name, = self.find_relations(label, 'name')
+        return name
 
     def get_version(self, label):
         """Returns the version of the entity instance with the given label."""
-        uuid, = self.find_relations(label, 'version')
-        return uuid
+        version, = self.find_relations(label, 'version')
+        return version
 
     def get_namespace(self, label):
         """Returns the namespace of the entity instance with the given
         label."""
-        uuid, = self.find_relations(label, 'namespace')
-        return uuid
+        namespace, = self.find_relations(label, 'namespace')
+        return namespace
 
-    def get_entity(self, label, driver, uri, options=None):
+    def get_entity(self, label, driver=None, uri=None, options=None):
         """Returns the the entity instance associated with `label`
         from the storage specified with `driver`, `uri` and `options`.
+
+        Default values for `driver`, `uri` and `options` can be set
+        with the corresponding properties.  If this collection was
+        loaded from a storage, these properties be initialised to the
+        same storage.
 
         This method depends on that the metadata for `label` exists in
         a metadata database registered with softpy.register_metadb().
         """
-        e = entity(self.get_name(label), self.get_version(label),
-                   self.get_namespace(label))
-        return e(uuid=self.get_uuid(label), driver=driver, uri=uri,
-                 options=options)
+        if label in self._cache:
+            return self._cache[label]
+        driver = driver if driver else self._driver
+        uri = uri if uri else self._uri
+        options = options if options else self._options
+        if not driver or not uri:
+            raise ValueError('`driver` and `uri` must be given when no '
+                             'defaults are set')
+        name = self.get_name(label)
+        version = self.get_version(label)
+        namespace = self.get_namespace(label)
+        uuid = self.get_uuid(label)
+        if (name, namespace) == ('Collection', 'org.sintef.soft'):
+            return Collection(uuid=uuid, driver=driver, uri=uri,
+                              options=options)
+        elif (name, namespace) == ('MetadataSchema', 'org.sintef.soft'):
+            meta = find_metadata_uuid(uuid)
+            return entity(meta)
+        else:
+            cls = entity(name, version, namespace)
+            return cls(uuid=uuid, driver=driver, uri=uri, options=options)
 
     name = property(
-        lambda self: collection_get_name2(self.__soft_entity__),
+        lambda self: collection_get_name(self.__soft_entity__),
         lambda self, name: collection_set_name(
             self.__soft_entity__, name),
         doc='Collection name.'
     )
 
     version = property(
-        lambda self: collection_get_version2(self.__soft_entity__),
+        lambda self: collection_get_version(self.__soft_entity__),
         lambda self, version: collection_set_version(
             self.__soft_entity__, version),
         doc='Collection version.'
     )
+
+    namespace = property(
+        lambda self: collection_get_namespace(self.__soft_entity__),
+        lambda self, namespace: collection_set_namespace(
+            self.__soft_entity__, namespace),
+        doc='Collection name space.'
+    )
+
+    uuid = property(
+        lambda self: self.__soft_entity__.id,
+        doc='The uuid of this collection.')
+
+    driver = property(
+        lambda self: self._driver,
+        lambda self, value: setattr(self, '_driver', value),
+        doc='Default driver used by get_entities().')
+
+    uri = property(
+        lambda self: self._uri,
+        lambda self, value: setattr(self, '_uri', value),
+        doc='Default uri used by get_entities().')
+
+    options = property(
+        lambda self: self._options,
+        lambda self, value: setattr(self, '_options', value),
+        doc='Default options used by get_entities().')
 
     def find_relations(self, subject, predicate):
         """Returns a set with all relations matching the given `subject` and
@@ -274,15 +366,43 @@ class Collection(object):
         string_list_free(strlst)
         return relations
 
+    def save(self, storage=None, store_content=True):
+        """A convenient method for storing a collection.
+
+        If `storage` is not given, the default storage will be used.
+
+        If `store_content` is true, the content of the collection will
+        also be stored.
+
+        Note: if `storage` is given and `store_content` is true, the
+        storage should have been created with option "append=yes".
+        """
+        if storage:
+            pass  # ok, proceed...
+        elif self.driver and self.uri:
+            with Storage(self.driver, self.uri, self.options) as s:
+                return self.save(s, store_content)
+        else:
+            raise ValueError('`storage` must be given when no default storage')
+
+        if store_content:
+            for label, e in self._cache.items():
+                if isinstance(e, Collection):
+                    e.save(storage, store_content=store_content)
+                else:
+                    storage.save(e)
+        storage.save(self)
+
 
 def get_c_entity(entity):
-    """Returns a reference to the underlying C-level entity_t or collection_s."""
+    """Returns a reference to the underlying C-level entity_t or
+    collection_s."""
     if hasattr(entity, '__soft_entity__'):
         e = entity.__soft_entity__
     else:
         e = entity
-    if not isinstance(e, entity_t):
-        raise TypeError('Not a proper entity')
+    if not isinstance(e, (entity_t, collection_s)):
+        raise TypeError('Not a proper entity or collection')
     return e
 
 
@@ -806,24 +926,33 @@ def entity(name, version=None, namespace=None):
     `name`, `version` and `namespace`."""
     meta = Metadata(name, version, namespace)
 
-    # Create an instance for this entity
-    #e = entity_t(
-    #        get_meta_name=meta['name'],
-    #        get_meta_version=meta['version'],
-    #        get_meta_namespace=meta['namespace'],
-    #        get_dimensions=dims,
-    #        get_dimension_size=self.soft_internal_dimension_size,
-    #        load=self.soft_internal_load,
-    #        store=self.soft_internal_store,
-    #        id=uuid,
-    #        user_data=self)
-
-
-
-    attr = dict(soft_metadata=meta)
+    # Create a dummy C-level entity for the returned metadata.
+    # This allows us to add this metadata to a collection.
+    # The assigned UUID is generated from a MD5 hash of the metadata
+    # name, version and namespace.
+    e = entity_t(
+            'MetadataSchema',                   # get_meta_name
+            '0.1'          ,                    # get_meta_version
+            'org.sintef.soft',                  # get_meta_namespace
+            [],                                 # get_dimensions
+            [],                                 # get_dimension_size
+            lambda e, d: None,                  # store
+            lambda e, d: None,                  # load
+            meta.get_uuid(),                    # id
+            None,                               # user_data
+        )
+    attr = dict(soft_metadata=meta, __soft_entity__=e)
     return type(meta.name, (BaseEntity,), attr)
 
 
+
+
+def get_metadata_uuid(name, version, namespace):
+    """Returns an UUID generated from a MD5 hash of metadata name,
+    version and namespace."""
+    # FIXME - this should be implemented in core SOFT
+    return str(uuid.uuid3(uuid.NAMESPACE_URL, '%s/%s-%s' % (
+        namespace, name, version)))
 
 
 class Metadata(dict):
@@ -868,7 +997,7 @@ class Metadata(dict):
         self.update(d)
 
     def __str__(self):
-        return self.json()
+        return self.get_json()
 
     name = property(lambda self: asStr(self['name']),
                     doc='Metadata name.')
@@ -888,7 +1017,12 @@ class Metadata(dict):
         str(p['name']) for p in self['properties']],
                               doc='List of property names.')
 
-    def json(self):
+    def get_uuid(self):
+        """Returns an UUID generated from a MD5 hash of the metadata name,
+        version and namespace."""
+        return get_metadata_uuid(self.name, self.version, self.namespace)
+
+    def get_json(self):
         """Returns a json string representing this metadata."""
         return json.dumps(self, indent=2, sort_keys=True)
 
@@ -913,6 +1047,12 @@ class MetaDB(object):
         Should raise SoftMissingMetadataError if not metadata can be found.
         """
         raise NotImplementedError
+
+    def find_uuid(self, uuid):
+        """Returns a Metadata object with given uuid."""
+        for mtype in self.mtypes():
+            if get_metadata_uuid(*mtype) == uuid:
+                return Metadata(*mtype)
 
     def insert(self, metadata):
         """Inserts `metadata` into the database.
@@ -1042,7 +1182,7 @@ class JSONDirMetaDB(JSONMetaDB):
                         meta.name, meta.version))
                 if os.path.exists(filename):
                     warnings.warn(
-                        'existing metadata is not overwritten: %s' + filename)
+                        'will not overwrite existing metadata: %s' + filename)
                 else:
                     with open(filename, 'w') as f:
                         f.write(meta.json())
@@ -1092,7 +1232,7 @@ class MongoMetaDB(MetaDB):
             raise SoftError('Metadata %s/%s-%s already in the database' % (
                 meta.namespace, meta.name, meta.version))
 
-    def types(self):
+    def mtypes(self):
         """Returns a list of (name, version, namespace)-tuples for all
         registered metadata."""
         return [(post['name'], post['version'], post['namespace'])
@@ -1133,6 +1273,20 @@ def find_metadata(name, version, namespace):
     raise SoftMissingMetadataError(
         'Cannot find metadata %s/%s-%s' % (namespace, name, version))
 
+def find_metadata_uuid(uuid):
+    """Search through all registered metadata databases and return
+    a Metadata object corresponding to `name`, `version`, `namespace`.
+    """
+    for db in _metadbs:
+        try:
+            meta = db.find_uuid(uuid)
+        except SoftMissingMetadataError:
+            pass
+        else:
+            return meta
+    raise SoftMissingMetadataError(
+        'Cannot find metadata with uuid: ' + uuid)
+
 
 
 
@@ -1140,12 +1294,14 @@ def find_metadata(name, version, namespace):
 # -----------------------------------------------
 def _get_entity_info(e, field, *args):
     """Help function for returning info about entities."""
-    if isinstance(e, entity_t):
+    if hasattr(e, '__soft_entity__'):
+        e = e.__soft_entity__
+    if isinstance(e, collection_s):
+        return globals()['collection_get_' + field](e, *args)
+    elif isinstance(e, entity_t):
         return globals()['entity_get_' + field](e, *args)
-    elif hasattr(e, '__soft_entity__'):
-        return globals()['entity_get_' + field](e.__soft_entity__, *args)
     else:
-        raise TypeError('not an entity: %r' % e)
+        raise TypeError('not an entity or collection: %r' % e)
 
 def get_id(e):
     """Returns the id of entity `e`."""
