@@ -16,6 +16,8 @@ void softc_collection_private_set_name(void *ref, const char *name);
 void softc_collection_private_get_name(void *ref, softc_string_s name);
 void softc_collection_private_set_version(void *ref, const char *version);
 void softc_collection_private_get_version(void *ref, softc_string_s version);
+void softc_collection_private_set_namespace(void *ref, const char *ns);
+void softc_collection_private_get_namespace(void *ref, softc_string_s ns);
 void softc_collection_private_add_relation(void *ref, const char *subject, const char *predicate, const char *object);
 void softc_collection_private_connect(void *ref, const char *subject, const char *predicate, const char *object);
 int softc_collection_private_num_relations(void *ref);

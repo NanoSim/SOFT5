@@ -23,10 +23,12 @@ public:
 
   std::string name() const;
   std::string version() const;
+  std::string ns() const;
 
   static IEntity* create (std::string const &uuid = std::string());
   void setName(std::string const &name);
   void setVersion(std::string const &version);
+  void setNamespace(std::string const &ns);
   void registerEntity(std::string const &label, IEntity const *entity);
   void addEntity(std::string const &label,
                  std::string const &name,
@@ -40,7 +42,7 @@ public:
 		  std::string &ns,
 		  std::string &uuid) const;
   void attachEntity(std::string const &label, IEntity *entity);
-  
+
 
   void addDim(std::string const &label,
               std::string const &description = std::string());
@@ -55,7 +57,7 @@ public:
 
   std::list<std::string> findRelations(std::string const &subject,
 				       std::string const &predicate);
-  
+
   void addDimMap(std::string const &label,
                  std::string const &entityDim,
                  std::string const &collectionDim);

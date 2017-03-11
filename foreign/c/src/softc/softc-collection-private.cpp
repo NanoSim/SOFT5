@@ -33,11 +33,11 @@ void softc_collection_private_register_entity(void *ref, const char *label, soft
 			   softc_entity_get_id(entity));
 }
 
-void softc_collection_private_find_entity( void *ref, 
-                                           const char *label, 
-                                           softc_string_s name, 
-                                           softc_string_s version, 
-                                           softc_string_s ns, 
+void softc_collection_private_find_entity( void *ref,
+                                           const char *label,
+                                           softc_string_s name,
+                                           softc_string_s version,
+                                           softc_string_s ns,
                                            softc_string_s uuid)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
@@ -55,9 +55,9 @@ void softc_collection_private_find_entity( void *ref,
   softc_string_assign(uuid   ,  iuuid.c_str()   );
 }
 
-void softc_collection_private_add_relation( void *ref, 
-                                            const char *subject, 
-                                            const char *predicate, 
+void softc_collection_private_add_relation( void *ref,
+                                            const char *subject,
+                                            const char *predicate,
                                             const char *object)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
@@ -88,6 +88,14 @@ void softc_collection_private_get_version(void *ref, softc_string_s version)
   softc_string_assign(version, n.c_str());
 }
 
+void softc_collection_private_get_namespace(void *ref, softc_string_s ns)
+{
+  softc_private_s *d = static_cast<softc_private_s*>(ref);
+  assert(d != nullptr);
+  auto n = d->collection->ns();
+  softc_string_assign(ns, n.c_str());
+}
+
 void softc_collection_private_set_name(void *ref, const char *name)
 {
   softc_private_s *d = static_cast<softc_private_s*>(ref);
@@ -100,6 +108,13 @@ void softc_collection_private_set_version(void *ref, const char *version)
   softc_private_s *d = static_cast<softc_private_s*>(ref);
   assert(d != nullptr);
   d->collection->setVersion(version);
+}
+
+void softc_collection_private_set_namespace(void *ref, const char *ns)
+{
+  softc_private_s *d = static_cast<softc_private_s*>(ref);
+  assert(d != nullptr);
+  d->collection->setNamespace(ns);
 }
 
 int softc_collection_private_num_relations(void *ref)
