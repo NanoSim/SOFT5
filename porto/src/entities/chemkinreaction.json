@@ -44,7 +44,7 @@
         },
         {
             "name": "third_body",
-            "type": "bool",
+            "type": "int",
             "description": "Whether the reaction occurs in precense of catalytical third-body (e.g. a surface)."
         },
         {

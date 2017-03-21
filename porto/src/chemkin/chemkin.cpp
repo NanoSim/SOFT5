@@ -77,7 +77,7 @@ int softc_plugin_load(softc_datamodel_t *datamodel, char const *uri, char const 
       chemkinReaction->products.push_back(product.first);
     }
 
-    chemkinReaction->third_body = reaction.hasThirdBody();
+    chemkinReaction->third_body = reaction.hasThirdBody() ? 1 : 0;
     chemkinReaction->A = arrhenius.A;
     chemkinReaction->b = arrhenius.n;
     chemkinReaction->Ea = arrhenius.E;
