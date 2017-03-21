@@ -6,6 +6,13 @@ set (SOFT_MAJOR_VERSION 5)
 set (SOFT_MINOR_VERSION 1)
 set (SOFT_PATCH_VERSION 5)
 
+# Additional helper files for aiding debugging with VS Code.
+# NOTE: The OPTIONAL flag makes it so that it is not an error if CMake can't 
+#       find the script.
+# NOTE: This must be defined before any add_library and add_executable, hence
+#       why this is at the start.
+include(CMakeToolsHelpers OPTIONAL)
+
 # FIXME - clean up dependencies between options
 #   * TESTS depends on: FOREIGN_C, STORAGE_JSON
 #   * PYTHON depends on: FOREIGN_C
