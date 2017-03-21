@@ -3,6 +3,7 @@
 #include "idatamodel.h"
 #include "collection.h"
 #include "tripletstore.h"
+#include <assert.h>
 
 SOFT_BEGIN_NAMESPACE
 
@@ -300,6 +301,10 @@ void Collection :: save (IDataModel *dataModel) const
     // TODO: Who owns this data model now? Needs to be freed at some point?
     auto dm = dataModel->createModel();
     IEntity *e = ie.second;
+    // TODO: Note that this part may crash if the datamodel is free'd
+    // (for example by using a smart pointer) before passing it on
+    // here. This indicates that there is an ownership issue here that
+    // we MUST resolve.
     dm->setId(e->id());
     dm->setMetaName(e->metaName());
     dm->setMetaVersion(e->metaVersion());

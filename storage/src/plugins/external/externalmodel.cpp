@@ -30,7 +30,7 @@ ExternalModel :: ~ExternalModel()
 
 IDataModel *ExternalModel :: createModel()
 {
-  return new ExternalModel;
+  return new ExternalModel();
 }
 
 bool ExternalModel :: appendDimension (const char *key, StdUInt value)

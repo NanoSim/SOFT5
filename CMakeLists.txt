@@ -34,6 +34,16 @@ option (BUILD_GTEST "Download and build Google Test"      OFF)
 
 set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
+# If we have Porto selected, this has some implications to which other plugins we also need
+if (WITH_PORTO)
+  set(WITH_TESTS ON)
+  set(WITH_FOREIGN_C ON)
+  set(WITH_PLUGIN_SOFT_KERNEL ON)
+  set(WITH_STORAGE_EXTERNAL ON)
+  set(WITH_STORAGE_JSON ON)
+  set(WITH_STORAGE_MONGO ON)
+endif()
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
