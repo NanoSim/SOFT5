@@ -73,14 +73,14 @@ assert coll2.get_num_entities() == coll.get_num_entities()
 assert coll2.get_num_relations() == coll.get_num_relations()
 assert coll2.find_relations('Jack', 'loves') == coll.find_relations(
     'Jack', 'loves')
-fred2 = coll2.get_entity('Fred')
+fred2 = coll2.get_instance('Fred')
 assert fred2.name == 'Fred'
 assert fred2.age == 12
 assert fred2.skills == ['bar']
 
-subcoll2 = coll2.get_entity('relatives')
+subcoll2 = coll2.get_instance('relatives')
 assert subcoll2.get_labels() == {'Anna'}
 
-Person2 = coll2.get_entity('Person')
+Person2 = coll2.get_instance('Person')
 assert Person2.property_names == Person.property_names
 assert Person2 == Person

@@ -284,7 +284,7 @@ class Collection(object):
         namespace, = self.find_relations(label, 'namespace')
         return namespace
 
-    def get_entity(self, label, driver=None, uri=None, options=None):
+    def get_instance(self, label, driver=None, uri=None, options=None):
         """Returns the the entity instance associated with `label`
         from the storage specified with `driver`, `uri` and `options`.
 
