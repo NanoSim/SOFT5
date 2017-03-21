@@ -1,4 +1,5 @@
 #!/usr/bin/env softshell
+
 var entity = require('porto.entity');
 porto.ChemkinReaction = entity.using('chemkinReaction', 'eu.nanosim.vasp', '0.1');
 
@@ -19,13 +20,17 @@ var find = function(x, xs) {
 
 __main__ = function (args) {
     try {
-        var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
-
+        // Check that the user provides sufficient arguments to the program
         if (args.length < 2) {
             print("Usage " + args[0] + " <uuid>");
             return;
         }
 
+        // Attempt to talk to the local mongodb
+        var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
+
+        // Load the collection given by the uuid on the command line, then retrieve all
+        // reaction entities in this collection
         var uuid = args[1];
         collection = new porto.Collection(uuid);
         storage.load(collection);
@@ -43,23 +48,29 @@ __main__ = function (args) {
 
             var reactants = reaction.reactants;
             var products = reaction.products;
-
+            
+            // Collect a list of all reactants and product species
             for (var r in reactants) {
                 species.push(reactants[r]);
             }
-
             for (var p in products) {
                 species.push(products[p]);
             }
 
+            // Construct the reactions
             if (products.length > 0 && reactants.length > 0) {
                 all_reactions.push(reactants.join(" + ") + " => " + products.join(" + ") + " " + reaction.A + " " + reaction.b + " " + reaction.Ea);
             }
 
         });
 
+        // All elements we want to check for, ideally this could be the entire periodic table
         var all_elements = ["Fe", "H", "C", "O"];
         var elements = [];
+
+        // TODO: Before this point we should capture the stochimetric factors before each species, to balance
+        //       the reactions properly.
+        
         unique(species).forEach(function(s) {
             all_elements.forEach(function(e) {
                 // For each unique species, loop over each element, then ...
@@ -74,8 +85,10 @@ __main__ = function (args) {
             });
         });
 
-        // @TODO Identify stochimetry
-
+        // Pass the aggregated information from the entity to the code generator (soft.mvc). The
+        // variables here (elements, species, reactions) can be found in the template specified
+        // below. This will substitute the template entrires such as @{elements} with the contents
+        // specified below.
         var controller = require('soft.mvc').create({
             model: {
                 elements: unique(elements).join(" "),
@@ -84,12 +97,14 @@ __main__ = function (args) {
             },
             view: "./template/chemkin.cjs"
         });
+
+        // Output the generated code directly to the console.
+        // TODO: Add capability to write it to a named file instead.
         console.raw(controller());
 
     } catch (err) {
-        console.raw("failed with" + err);
+        // Any error caught during execution is logged to the console.
+        console.raw("ERROR: Failed generating the code.\nReason: " + err);
     }
-
-    console.raw("--------------------\n");
 
 };
