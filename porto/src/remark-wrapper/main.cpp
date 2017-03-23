@@ -17,8 +17,6 @@ int main(int argc, char **argv)
 
   std::string remarcPath(argv[1]);
   std::string uuid(argv[2]);
-  //std::string remarcPath("/home/sintef/nanosim-demo/remarc/");
-  //std::string uuid("7a679f09-9f91-47f2-bd62-17153231b38e");
 
   soft::Collection collection(uuid.c_str());
   collection.setName("DFTPrep");
