@@ -1,16 +1,12 @@
 #include "udf.h"
 
 /* 
-	@TODO This is a preliminary template.
+	TODO This is a preliminary template.
 
 	The input provided to this are at the moment:
 
 		@{soft.model.effectivenessFactor.functionalForm}
 		@{soft.model.effectivenessFactor.parameters}
-
-	I assume that we can aggregate these into a generated call to a function with the parameters as arguments, for example:
-
-		real x = effectiveness_factor_functional_form_@{soft.model.effectivenessFactor.functionalForm}(@{soft.model.effectivenessFactor.parameters.join(', ')})
 
 	Producing the code:
 
@@ -33,37 +29,37 @@
 */
 
 real effectiveness_factor_functional_form_constant(real p1) {
-	return 0.0; // @TODO Something here
+	return 0.0; // TODO Something here
 }
 
 real effectiveness_factor_functional_form_somethingelse(real p1, real p2, real p3) {
-	return 0.0; // @TODO Something here
+	return 0.0; // TODO Something here
 }
 
 real effective_reaction_parameters_functional_form_constant(real p1) {
-	return 0.0; // @TODO Something here
+	return 0.0; // TODO Something here
 }
 
 real effective_reaction_parameters_functional_form_somethingelse(real p1, real p2, real p3) {
-	return 0.0; // @TODO Something here
+	return 0.0; // TODO Something here
 }
 
 
-// @TODO The name defined here should probably be something else
+// TODO The name defined here should probably be something else
 DEFINE_HET_RXN_RATE(NiO_CH4,c,t,r,mw,yi,rr,rr_t)
 {
 
 	// NOTE: There are some issue with storing and communicating bools across language barriers, so we use an integer for now: 
 	if (@{soft.model.effectiveReactionparameters.multiplyByParticleVolumeFraction} == 1) {
-		// @TODO Something here
+		// TODO Something here
 	}
 
-	real x = effectiveness_factor_functional_form_@{soft.model.effectivenessFactor.functionalForm}(@{soft.model.effectivenessFactor.parameters.join(', ')})
+	real x = effectiveness_factor_functional_form_@{soft.model.effectivenessFactor.functionalForm}(@{soft.model.effectivenessFactor.parameters})
 
 
 
 	// ------------------------------------------------------
-	// @TODO The below code is from the previous generator. I've kept this in place just to give an example.
+	// TODO The below code is from the previous generator. I've kept this in place just to give an example.
 
 	real Rrate, k, S0, X_CH4, MW_CH4, vol_frac_solid;
 	Thread *gas_thread = THREAD_SUB_THREAD(t,0);
