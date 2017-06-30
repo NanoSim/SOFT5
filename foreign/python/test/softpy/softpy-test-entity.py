@@ -114,10 +114,9 @@ assert p.age == 42
 assert np.all(p.distances == person.distances)
 
 
-# Ensure that entities are pickleable
-# Hmm, this does not works with Python3...
-if HAVE_DILL and sys.version_info.major == 2:
+# Ensure that entity instances are pickleable
+if HAVE_DILL:
     dump = pickle.dumps(person)
     person2 = pickle.loads(dump)
     for k in person.__dict__:
-        assert getattr(person2, k) == getattr(person, k)
+        assert getattr(person2, k) == getattr(person, k), k

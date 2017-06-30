@@ -689,7 +689,7 @@ typedef struct {
                     if v1.im_func.func_code != v2.im_func.func_code:
                        return False
                 elif hasattr(v1, '__func__') and hasattr(v2, '__func__'):
-                    if v1.__func__ != v2.__func__:
+                    if v1.__func__.__code__ != v2.__func__.__code__:
                        return False
                 elif v1 != v2:
                     return False

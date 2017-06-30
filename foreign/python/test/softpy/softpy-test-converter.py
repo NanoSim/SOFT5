@@ -9,11 +9,11 @@ import softpy
 
 thisdir = os.path.dirname(__file__)
 
-A = softpy.entity(open(os.path.join(thisdir, 'A.json')))
-B = softpy.entity(open(os.path.join(thisdir, 'B.json')))
-C = softpy.entity(open(os.path.join(thisdir, 'C.json')))
-D = softpy.entity(open(os.path.join(thisdir, 'D.json')))
-E = softpy.entity(open(os.path.join(thisdir, 'E.json')))
+A = softpy.load_entity(os.path.join(thisdir, 'A.json'))
+B = softpy.load_entity(os.path.join(thisdir, 'B.json'))
+C = softpy.load_entity(os.path.join(thisdir, 'C.json'))
+D = softpy.load_entity(os.path.join(thisdir, 'D.json'))
+E = softpy.load_entity(os.path.join(thisdir, 'E.json'))
 ma = A.soft_metadata.mtype
 mb = B.soft_metadata.mtype
 mc = C.soft_metadata.mtype
@@ -21,7 +21,7 @@ md = D.soft_metadata.mtype
 me = E.soft_metadata.mtype
 
 #
-# Define conversions according to the following graph:
+# define conversions according to the following graph:
 #
 #   A<--(B,C)
 #   ^      ^

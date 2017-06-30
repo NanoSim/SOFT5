@@ -8,6 +8,8 @@ import ast
 import operator
 from glob import glob
 import warnings
+import re
+import fnmatch
 
 import numpy as np
 
@@ -537,6 +539,9 @@ class MetaEntity(type):
     def __eq__(self, other):
         return self.soft_metadata == other.soft_metadata
 
+    def __hash__(self):
+        return hash(('MetaEntity', ) + self.soft_metadata.mtype)
+
     name = property(lambda self: str(self.soft_metadata['name']),
                     doc='Entity name.')
     version = property(lambda self: str(self.soft_metadata['version']),
@@ -961,8 +966,31 @@ def entity(name, version=None, namespace=None):
         meta.get_uuid(),                    # id
         None,                               # user_data
     )
-    attr = dict(soft_metadata=meta, __soft_entity__=e)
-    return type(meta.name, (BaseEntity,), attr)
+
+    attr = dict(
+        soft_metadata=meta,
+        __soft_entity__=e,
+        __reduce__=lambda self: (_instantiate, (meta.get_json(indent=None), )),
+    )
+    return type(meta.name, (BaseEntity, ), attr)
+
+# Mark the entity() factory as safe for unpickling
+entity.__safe_for_unpickling__ = True
+
+def _instantiate(s):
+    """A help function that helps pickle instantiating an instance of the
+    entity described by `s`."""
+    meta = Metadata(s)
+    cls = entity(meta)
+    return cls()
+
+
+def load_entity(filename):
+    """A convenience function to read an entity from a json file."""
+    with open(filename) as f:
+        e = entity(f)
+    return e
+
 
 
 
@@ -971,9 +999,8 @@ class Metadata(dict):
 
     Parameters
     ----------
-    name : str | Metadata | Entity | Entity instance | file-like | dict
-        If `version` and `namespace` are given, this is the
-        metadata name.
+    name : str | Metadata | Entity | Entity instance | file-like | dict | tuple
+        If `version` and `namespace` are given, this is the metadata name.
 
         Otherwise, this is a full description of the metadata in one of
         following forms:
@@ -982,12 +1009,14 @@ class Metadata(dict):
           - file-like object with a read() method with the metadata in json-
             format.
           - string with the metadata in json-format
+          - tuple with (name, version, namespace). The full description is
+            looked up in the metadata database.
     version : None | str
-        Metadata version or None if `name` provides full
-        description of the metadata.
+        Metadata version or None if `name` provides full description
+        of the metadata.
     namespace : None | str
-        Metadata namespace or None if `name` provides full
-        description of the metadata.  """
+        Metadata namespace or None if `name` provides full description
+        of the metadata."""
     def __init__(self, name, version=None, namespace=None):
         if version is None or namespace is None:
             if hasattr(name, 'soft_metadata'):
@@ -1000,15 +1029,28 @@ class Metadata(dict):
                 d = json.loads(name.decode('utf8'))
             elif isinstance(name, dict):
                 d = name
+            elif isinstance(name, tuple):
+                name, version, namespace = name
+                d = find_metadata(name, version, namespace)
             else:
                 raise TypeError(
                     'Cannot convert %s to metadata' % (type(name),))
         else:
             d = find_metadata(name, version, namespace)
         self.update(d)
+        # A kind of hack, that automatically adds all metadata to the
+        # metadata database
+        if not self in metaDB:
+            dict.__setitem__(metaDB, self.get_uuid(), self)
 
     def __str__(self):
         return self.get_json()
+
+    def __hash__(self):
+        return hash(self.mtype)
+
+    def __eq__(self, other):
+        return self.mtype == other.mtype
 
     name = property(lambda self: asStr(self['name']),
                     doc='Metadata name.')
@@ -1033,9 +1075,9 @@ class Metadata(dict):
         version and namespace."""
         return uuid_from_entity(self.name, self.version, self.namespace)
 
-    def get_json(self):
+    def get_json(self, indent=2, sort_keys=True):
         """Returns a json string representing this metadata."""
-        return json.dumps(self, indent=2, sort_keys=True)
+        return json.dumps(self, indent=indent, sort_keys=sort_keys)
 
 
 
@@ -1044,7 +1086,82 @@ class Metadata(dict):
 # ===========================
 
 # FIXME: functionality should be implemented in C++?
-class MetaDB(object):
+#
+# FIXME2: improve the design
+#         A better design would be to create a build-in entity for metadata
+#         (i.e. an entity that encode the entity schema).  Then we could
+#         save the metadata using any of the already supported storage
+#         backends.
+
+
+class MetaDB(dict):
+    """Generic metadata database interface.
+
+    It is implemented as a dict mapping metadata uuid's to Metadata objects.
+
+    Keys may be provided either as (name, version, namespace)-tuples or
+    as metadata uuid's.
+    """
+    def __setitem__(self, key, meta):
+         dict.__setitem__(self, self.touuid(key), Metadata(meta))
+
+    def __getitem__(self, key):
+         return dict.__getitem__(self, self.touuid(key))
+
+    def __contains__(self, key):
+         return dict.__contains__(self, self.touuid(key))
+
+    @staticmethod
+    def touuid(key):
+        """Returns `key` converted to a metadata uuid. `key` may be either a
+        (name, version, namespace)-tuple or an uuid."""
+        if isinstance(key, tuple):
+            name, version, namespace = key
+            return uuid_from_entity(name, version, namespace)
+        elif isinstance(key, str) and re.match(
+                '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+                '[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$', key):
+            return key
+        elif isinstance(key, Metadata):
+            return key.get_uuid()
+        raise TypeError(
+            'key must be an uuid or (name, version, namespace)-tuple: %r' % (
+                key, ))
+
+    def find(self, name='*', version='*', namespace='*'):
+        """Returns a list of Metadata objects matching the given `name`,
+        `version` and `namespace` shell patterns."""
+        values = self.values()
+        if name is not '*':
+            rname = re.compile(fnmatch.translate(name))
+            values = [v for v in values if rname.match(v)]
+        if version is not '*':
+            rversion = re.compile(fnmatch.translate(version))
+            values = [v for v in values if rversion.match(v)]
+        if namespace is not '*':
+            rnamespace = re.compile(fnmatch.translate(namespace))
+            values = [v for v in values if rnamespace.match(v)]
+        return list(values)
+
+    def add(self, meta):
+        """Add Metadata object `meta` to database."""
+        meta = Metadata(meta)
+        dict.__setitem__(self, meta.get_uuid(), meta)
+
+    def mtypes(self):
+        """Returns a list of (name, version, namespace)-tuples for all
+        registered metadata."""
+        return [meta.mtype for meta in self.values()]
+
+    def get_json(self, indent=2, soft_keys=True):
+        """Returns a JSON representation of the database."""
+        return json.dumps(self, indent=indent, sort_keys=soft_keys)
+
+#
+# Old deprecated metadatabases
+# ----------------------------
+# FIXME: remove
+class BaseMetaDB(object):
     """A base class for metadata databases."""
     def __init__(self, **kwargs):
         """Connects to the database."""
@@ -1091,7 +1208,7 @@ class MetaDB(object):
         return True
 
 
-class JSONMetaDB(MetaDB):
+class JSONMetaDB(BaseMetaDB):
     """A simple metadata database using a json file.
 
     The `fname` argument should either be a file name or an open
@@ -1118,13 +1235,14 @@ class JSONMetaDB(MetaDB):
         namespace.
 
         SoftMissingMetadataError is raised if not metadata can be found."""
+        return self.find_uuid(uuid_from_entity(name, version, namespace))
+
+    def find_uuid(self, uuid):
+        """Returns a Metadata object with given uuid."""
         for meta in self.data:
-            if (meta.name == name and
-                meta.version == version and
-                meta.namespace == namespace):
+            if meta.get_uuid() == uuid:
                 return meta
-        raise SoftMissingMetadataError('Cannot find metadata %s/%s-%s' % (
-            namespace, name, version))
+        raise SoftMissingMetadataError('Cannot find metadata: %s' % uuid)
 
     def insert(self, metadata):
         """Inserts `metadata` into the database."""
@@ -1198,7 +1316,7 @@ class JSONDirMetaDB(JSONMetaDB):
                         f.write(meta.json())
 
 
-class MongoMetaDB(MetaDB):
+class MongoMetaDB(BaseMetaDB):
     """A simple metadata database for mongodb.
 
     Parameters
@@ -1258,9 +1376,12 @@ class MongoMetaDB(MetaDB):
         self.client.close()
 
 
+# Exposed instance of MetaDB currently caching all metadata
+metaDB = MetaDB()
 
-_metadbs = []    # list with all registered metadata databases
-_metacache = {}  # cache with resently used metadata
+# List of instances of deprecated metadata databases
+_metadbs = []
+
 def register_metadb(metadb):
     """Registers metadata database `metadb`."""
     _metadbs.append(metadb)
@@ -1269,30 +1390,21 @@ def find_metadata(name, version, namespace):
     """Search through all registered metadata databases and return
     a Metadata object corresponding to `name`, `version`, `namespace`.
     """
-    t = name, version, namespace
-    if t in _metacache:
-        return _metacache[t]
-    for db in _metadbs:
-        try:
-            meta = db.find(*t)
-        except SoftMissingMetadataError:
-            pass
-        else:
-            _metacache[t] = meta
-            return meta
-    raise SoftMissingMetadataError(
-        'Cannot find metadata %s/%s-%s' % (namespace, name, version))
+    return find_metadata_uuid(uuid_from_entity(name, version, namespace))
 
 def find_metadata_uuid(uuid):
     """Search through all registered metadata databases and return
     a Metadata object corresponding to `name`, `version`, `namespace`.
     """
+    if uuid in metaDB:
+        return metaDB[uuid]
     for db in _metadbs:
         try:
             meta = db.find_uuid(uuid)
         except SoftMissingMetadataError:
             pass
         else:
+            metaDB[uuid] = meta
             return meta
     raise SoftMissingMetadataError(
         'Cannot find metadata with uuid: ' + uuid)

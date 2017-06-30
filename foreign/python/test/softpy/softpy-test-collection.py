@@ -20,7 +20,9 @@ assert coll.name == 'foo'
 coll.version = '1.0'
 assert coll.version == '1.0'
 
-Person = softpy.entity(open(os.path.join(thisdir, 'person.json')))
+with open(os.path.join(thisdir, 'person.json')) as f:
+    Person = softpy.entity(f)
+
 jack = Person(name='Jack', age=42, skills=[])
 alda = Person(name='Alda', age=39, skills=['foo'])
 fred = Person(name='Fred', age=12, skills=['bar'])
@@ -55,8 +57,14 @@ coll.add('relatives', subcoll)
 coll.add('Person', Person)
 
 # Save the collection to hdf5
+# Note that we must set append=yes to also store the instances. This will
+# cause trouble with existing names the second time we run the test, so
+# we remove the h5 file first.
+if os.path.exists('softpy-test-collection.h5'):
+    os.remove('softpy-test-collection.h5')
 with softpy.Storage('hdf5', 'softpy-test-collection.h5', 'append=yes') as s:
     coll.save(s)
+
 
 # Create a metadata database with all metadata defined in json files
 # in the current directory - needed in order to instanciate entities
