@@ -47,7 +47,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions("-DQT_NO_DEBUG_OUTPUT")
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules)
 find_package (Qt5Core REQUIRED)
 find_package (Qt5Network REQUIRED)
 find_package (Qt5Script REQUIRED)
@@ -70,6 +70,7 @@ if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
       ${SOFT_DEPS_PREFIX})
     set(HDF5_ROOT ${SOFT_DEPS_PREFIX})
     find_package(HDF5 REQUIRED
+      COMPONENTS C
       HINTS ${SOFT_DEPS_PREFIX}
       PATHS ${SOFT_DEPS_PREFIX}/share/cmake
       NO_CMAKE_SYSTEM_PATH
@@ -84,7 +85,7 @@ if (WITH_PLUGIN_HD5 OR WITH_STORAGE_HD5)
       endif()
     endif()
   else()
-    find_package(HDF5 REQUIRED)
+    find_package(HDF5 REQUIRED COMPONENTS C)
   endif()
 endif ()
 
