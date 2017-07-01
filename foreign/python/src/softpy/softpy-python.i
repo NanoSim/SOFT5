@@ -494,15 +494,16 @@ class BaseEntity(object):
         self.soft_internal_dimension_info = dimension_sizes
 
         self.__soft_entity__ = entity_t(
-            get_meta_name=meta['name'],
-            get_meta_version=meta['version'],
-            get_meta_namespace=meta['namespace'],
-            get_dimensions=dims,
-            get_dimension_size=self.soft_internal_dimension_size,
-            load=self.soft_internal_load,
-            store=self.soft_internal_store,
-            id=uuid,
-            user_data=self)
+            meta['name'],                       # get_meta_name
+            meta['version'],                    # get_meta_version
+            meta['namespace'],                  # get_meta_namespace
+            dims,                               # get_dimensions
+            self.soft_internal_dimension_size,  # get_dimension_size
+            self.soft_internal_store,           # store
+            self.soft_internal_load,            # load
+            uuid,                               # id
+            self,                               # user_data
+        )
 
         if driver:
             if uuid is None:
@@ -615,6 +616,7 @@ class BaseEntity(object):
                         self.__class__.__name__, name))
             elif not dims and not isinstance(value, ptype):
                 value = ptype(value)
+
             if not dims:
                 setter = getattr(_softpy, 'datamodel_append_' + typename)
             elif typename == 'string' or typename == 'string_list':
@@ -805,21 +807,6 @@ def entity(name, version=None, namespace=None):
     See the class docstring for Metadata for supported values for
     `name`, `version` and `namespace`."""
     meta = Metadata(name, version, namespace)
-
-    # Create an instance for this entity
-    #e = entity_t(
-    #        get_meta_name=meta['name'],
-    #        get_meta_version=meta['version'],
-    #        get_meta_namespace=meta['namespace'],
-    #        get_dimensions=dims,
-    #        get_dimension_size=self.soft_internal_dimension_size,
-    #        load=self.soft_internal_load,
-    #        store=self.soft_internal_store,
-    #        id=uuid,
-    #        user_data=self)
-
-
-
     attr = dict(soft_metadata=meta)
     return type(meta.name, (BaseEntity,), attr)
 
@@ -882,10 +869,10 @@ class Metadata(dict):
                     doc='A (name, version, namespace)-tuple uniquely '
                         'identifying the metadata.')
     dimensions = property(lambda self: [
-        str(d['name']) for d in self['dimensions']],
+        str(asStr(d['name'])) for d in self['dimensions']],
                           doc='List of dimension labels.')
     property_names = property(lambda self: [
-        str(p['name']) for p in self['properties']],
+            asStr(p['name']) for p in self['properties']],
                               doc='List of property names.')
 
     def json(self):
