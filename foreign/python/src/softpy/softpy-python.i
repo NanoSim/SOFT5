@@ -7,6 +7,8 @@ import sys
 import json
 import ast
 import operator
+from glob import glob
+import warnings
 
 import numpy as np
 
@@ -604,24 +606,28 @@ class BaseEntity(object):
             datamodel_append_dimension(datamodel, label, value)
 
         for name in self.soft_get_property_names():
+            typename = self.soft_get_property_typename(name)
+            ptype = self.soft_get_property_type(name)
+            dims = self.soft_get_property_dims(name)
             value = self.soft_get_property(name)
             if value is Uninitialized:
                 raise SoftUninitializedError(
                     'Uninitialized data for "%s.%s"' % (
                         self.__class__.__name__, name))
-            vtype = self.soft_get_property_type(name)
-            dims = self.soft_get_property_dims(name)
+            elif not dims and not isinstance(value, ptype):
+                value = ptype(value)
+
             if not dims:
-                setter = getattr(_softpy, 'datamodel_append_' + vtype)
-            elif vtype == 'string' or vtype == 'string_list':
+                setter = getattr(_softpy, 'datamodel_append_' + typename)
+            elif typename == 'string' or typename == 'string_list':
                 assert len(dims) == 1
                 setter = getattr(_softpy, 'datamodel_append_string_list')
             elif len(dims) == 1:
-                setter = getattr(_softpy, 'datamodel_append_array_' + vtype)
+                setter = getattr(_softpy, 'datamodel_append_array_' + typename)
             else:
                 setter = getattr(_softpy, 'datamodel_append_array_%s_%dd' % (
-                    vtype, len(dims)))
-            #print('*** name=%r -> %r' % (name, setter))
+                    typename, len(dims)))
+            #print('*** name=%r: %r -> %r' % (name, type(value), setter))
             try:
                 setter(datamodel, asStr(name), value)
             except Exception as ex:
@@ -634,18 +640,18 @@ class BaseEntity(object):
         would not call this function directly, but instead through
         Storage.load()."""
         for name in self.soft_get_property_names():
-            vtype = self.soft_get_property_type(name)
+            typename = self.soft_get_property_typename(name)
             dims = self.soft_get_property_dims(name)
             if not dims:
-                getter = getattr(_softpy, 'datamodel_get_' + vtype)
-            elif vtype == 'string_list' or vtype == 'string':
+                getter = getattr(_softpy, 'datamodel_get_' + typename)
+            elif typename == 'string_list' or typename == 'string':
                 assert len(dims) == 1
                 getter = getattr(_softpy, 'datamodel_get_string_list')
             elif len(dims) == 1:
-                getter = getattr(_softpy, 'datamodel_get_array_' + vtype)
+                getter = getattr(_softpy, 'datamodel_get_array_' + typename)
             else:
                 getter = getattr(_softpy, 'datamodel_get_array_%s_%dd' % (
-                    vtype, len(dims)))
+                    typename, len(dims)))
             #print('*** name=%r <- %r' % (name, getter))
             value = getter(datamodel, str(name))
             #print('    self=%r, value=%r' % (self, value))
@@ -686,6 +692,11 @@ class BaseEntity(object):
          if hasattr(self, setter):
              getattr(self, setter)(value)
          else:
+             ptype = self.soft_get_property_type(name)
+             if   (not isinstance(value, ptype) and
+                   not value is Uninitialized and
+                   not ptype == str):
+                 value = ptype(value)
              setattr(self, name, value)
 
     def soft_get_id(self):
@@ -694,15 +705,15 @@ class BaseEntity(object):
 
     def soft_get_meta_name(self):
         """Returns entity name."""
-        return entity_get_name(self.__soft_entity__)
+        return entity_get_meta_name(self.__soft_entity__)
 
     def soft_get_meta_version(self):
         """Returns entity version."""
-        return entity_get_name(self.__soft_entity__)
+        return entity_get_meta_version(self.__soft_entity__)
 
     def soft_get_meta_namespace(self):
         """Returns entity name space."""
-        return entity_get_namespace(self.__soft_entity__)
+        return entity_get_meta_namespace(self.__soft_entity__)
 
     @classmethod
     def soft_get_meta_description(cls):
@@ -730,13 +741,32 @@ class BaseEntity(object):
         return _get_prop_info(cls, asStr(name), 'unit', '')
 
     @classmethod
-    def soft_get_property_type(cls, name):
-        """Returns the type of property `name`."""
-        ptype = _get_prop_info(cls, asStr(name), 'type')
-        if not ptype:
+    def soft_get_property_typename(cls, name):
+        """Returns the type name of property `name`."""
+        typename = _get_prop_info(cls, asStr(name), 'type')
+        if not typename:
             raise SoftMetadataError(
                 'property "%s" has no type information' % name)
-        return ptype
+        return asStr(typename)
+
+    @classmethod
+    def soft_get_property_type(cls, name):
+        """Returns the type of property `name`."""
+        typemaps = dict(string=str, string_list=str)
+        if not cls.soft_get_property_dims(name):
+            # Should uint8 map to bytes?
+            # Issue: datamodel_append_uint8() does only accept ints not bytes
+            typemaps.update(dict(int8=int, uint8=int, int16=int, uint16=int,
+                                 int32=int, uint32=int, blob=bytes))
+            if sys.version_info.major == 2:
+                typemaps.update(dict(int64=long, uint64=long))
+            else:
+                typemaps.update(dict(int64=int, uint64=int))
+        typename = cls.soft_get_property_typename(name)
+        if typename in typemaps:
+            return typemaps[typename]
+        else:
+            return getattr(np, typename)
 
     @classmethod
     def soft_get_property_description(cls, name):
@@ -827,10 +857,17 @@ class Metadata(dict):
     def __str__(self):
         return self.json()
 
-    name = property(lambda self: asStr(self['name']))
-    version = property(lambda self: asStr(self['version']))
-    namespace = property(lambda self: asStr(self['namespace']))
-    description = property(lambda self: asStr(self['description']))
+    name = property(lambda self: asStr(self['name']),
+                    doc='Metadata name.')
+    version = property(lambda self: asStr(self['version']),
+                    doc='Metadata version.')
+    namespace = property(lambda self: asStr(self['namespace']),
+                    doc='Metadata namespace.')
+    description = property(lambda self: asStr(self['description']),
+                    doc='Description of this metadata.')
+    mtype = property(lambda self: (self.name, self.version, self.namespace),
+                    doc='A (name, version, namespace)-tuple uniquely '
+                        'identifying the metadata.')
     dimensions = property(lambda self: [
         str(asStr(d['name'])) for d in self['dimensions']],
                           doc='List of dimension labels.')
@@ -870,7 +907,7 @@ class MetaDB(object):
         May not be implemented by all subclasses."""
         raise NotImplementedError
 
-    def types(self):
+    def mtypes(self):
         """Returns a list of (name, version, namespace)-tuples for all
         registered metadata.
 
@@ -895,7 +932,7 @@ class JSONMetaDB(MetaDB):
     """A simple metadata database using a json file.
 
     The `fname` argument should either be a file name or an open
-    file-like object.
+    file-like object with an array of metadata definitions.
 
     Note, if `fname` is a file-like object, it will not be closed
     when the close() method is called on the returned database object.
@@ -903,12 +940,13 @@ class JSONMetaDB(MetaDB):
     def __init__(self, fname):
         self.fname = fname
         if hasattr(fname, 'read'):
-            self.data = json.load(fname)
+            data = json.load(fname)
         elif not os.path.exists(fname):
-            self.data = []
+            data = []
         else:
             with open(fname) as f:
-                self.data = json.load(f)
+                data = json.load(f)
+        self.data = [Metadata(d) for d in data]
         self.changed = False
         self.closed = False
 
@@ -937,10 +975,10 @@ class JSONMetaDB(MetaDB):
             raise SoftError('Metadata %s/%s-%s already in the database' % (
                 meta.namespace, meta.name, meta.version))
 
-    def types(self):
+    def mtypes(self):
         """Returns a list of (name, version, namespace)-tuples for all
         registered metadata."""
-        return [(meta.name, meta.version, meta.namespace) for meta in self.data]
+        return [meta.mtype for meta in self.data]
 
     def flush(self):
         """Flushes the database to file."""
@@ -956,12 +994,45 @@ class JSONMetaDB(MetaDB):
         useful for testing."""
         if self.data:
             self.changed = True
-        self.data[:] = []   # clear
+        del self.data[:]
 
     def close(self):
         """Closes the connection to the database."""
         self.flush()
         self.closed = True
+
+
+class JSONDirMetaDB(JSONMetaDB):
+    """A metadata database using a directory with json files.
+
+    The `path` argument is the path to the directory containing the json
+    files.  Only files with a .json extension will be read.
+    """
+    def __init__(self, path):
+        self.path = path
+        self.data = []
+        self.filenames = {}
+        for filename in glob(os.path.join(path, '*.json')):
+            with open(filename) as f:
+                meta = Metadata(f)
+            self.filenames[meta.mtype] = filename
+            self.data.append(meta)
+        self.changed = False
+        self.closed = False
+
+    def flush(self):
+        """Flushes the database to file."""
+        if self.changed:
+            for meta in data:
+                if not meta.mtype in self.filenames:
+                    filename = os.path.join(self.path, '%s-%s.json' % (
+                        meta.name, meta.version))
+                if os.path.exists(filename):
+                    warnings.warn(
+                        'existing metadata is not overwritten: %s' + filename)
+                else:
+                    with open(filename, 'w') as f:
+                        f.write(meta.json())
 
 
 class MongoMetaDB(MetaDB):
