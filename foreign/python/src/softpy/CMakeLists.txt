@@ -1,8 +1,34 @@
 project (softpy C CXX)
 
-set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_AUTOMOC ON)
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+set(PY_SOURCES
+  __init__.py
+  errors.py
+  entity.py
+  collection.py
+  storage.py
+  metadata.py
+  arithmetic_eval.py
+  converters.py
+)
+
+set(SWIG_MODULE_softpy_EXTRA_DEPS
+  numpy.i
+  softpy.i
+  softpy-typemaps.i
+  softpy-bytearray.i
+  softpy-string.i
+  softpy-string-list.i
+  softpy-datamodel.i
+  softpy-entity.i
+  softpy-collection.i
+  softpy-python.i
+)
+
+set(CMAKE_SWIG_FLAGS "")
 
 if(USE_PYTHON3)
   find_package(PythonInterp 3 REQUIRED)
@@ -36,21 +62,6 @@ include_directories(
   ${softc_SOURCE_DIR}
   )
 
-set(CMAKE_SWIG_FLAGS "")
-
-set(SWIG_MODULE_softpy_EXTRA_DEPS
-  numpy.i
-  softpy.i
-  softpy-typemaps.i
-  softpy-bytearray.i
-  softpy-string.i
-  softpy-string-list.i
-  softpy-datamodel.i
-  softpy-entity.i
-  softpy-collection.i
-  softpy-python.i
-)
-
 if(USE_PYTHON3)
   set_source_files_properties(softpy.i PROPERTIES SWIG_FLAGS "-py3;-Wall")
 else()
@@ -59,6 +70,14 @@ endif()
 
 swig_add_module(softpy python softpy.i)
 swig_link_libraries(softpy softc ${PYTHON_LIBRARIES})
+
+
+# Copy the python sources to the binary dir such that we can run the tests
+# without installation
+foreach(src ${PY_SOURCES})
+  configure_file(${src} ${src} COPYONLY)
+endforeach()
+
 
 
 # Install, Python module, follow the solution at
@@ -81,9 +100,14 @@ file(RELATIVE_PATH _REL_PYTHON_MODULE_PATH
 
 set(PYTHON_MODULE_PATH
   ${_REL_PYTHON_MODULE_PATH}
-  )
+)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_softpy${pyext_ext}
-  DESTINATION ${PYTHON_MODULE_PATH})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/softpy.py
-  DESTINATION ${PYTHON_MODULE_PATH})
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/_softpy${pyext_ext}
+        ${CMAKE_CURRENT_BINARY_DIR}/softpy.py
+  DESTINATION ${PYTHON_MODULE_PATH}/softpy
+)
+install(
+  FILES ${PY_SOURCES}
+  DESTINATION ${PYTHON_MODULE_PATH}/softpy
+)

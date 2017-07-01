@@ -69,7 +69,8 @@ with softpy.Storage('hdf5', 'softpy-test-collection.h5', 'append=yes') as s:
 # Create a metadata database with all metadata defined in json files
 # in the current directory - needed in order to instanciate entities
 # and metadata read from the stored hdf5 file
-softpy.register_metadb(softpy.JSONDirMetaDB(thisdir))
+#softpy.register_metadb(softpy.JSONDirMetaDB(thisdir))
+softpy.register_jsondir(thisdir)
 
 
 # Create a new collection, loaded from hdf5
