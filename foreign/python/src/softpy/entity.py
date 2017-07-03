@@ -502,7 +502,7 @@ class BaseEntity(with_metaclass(MetaEntity)):
     def soft_from_dict(self, d):
         """Populate self from a dict."""
         meta = d['meta']
-        # FIXME - check if converter exists... if so apply it
+        # FIXME - check if translator exists... if so apply it
         if     (meta['name'] != self.soft_get_meta_name() or
                 meta['version'] != self.soft_get_meta_version() or
                 meta['namespace'] != self.soft_get_meta_namespace()):

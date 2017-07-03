@@ -12,7 +12,7 @@ set(PY_SOURCES
   storage.py
   metadata.py
   arithmetic_eval.py
-  converters.py
+  translators.py
 )
 
 set(SWIG_MODULE_softpy_EXTRA_DEPS

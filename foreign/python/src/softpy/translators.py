@@ -5,42 +5,42 @@ from . import softpy
 from .errors import SoftError
 from .entity import BaseEntity
 
-class SoftConverterError(SoftError):
-    """Raised for conversion error."""
+class SoftTranslatorError(SoftError):
+    """Raised for translation error."""
     pass
 
-class SoftMissingConverterError(SoftConverterError):
-    """Raised when a converter cannot be found."""
+class SoftMissingTranslatorError(SoftTranslatorError):
+    """Raised when a translator cannot be found."""
     pass
 
 
 #
-# Converter reference implementation
+# Translator reference implementation
 # ==================================
 # FIXME: should be implemented in C++?
-_converters = []
+_translators = []
 
-def register_converter(converter, inputs, outputs):
-    """Registers a converter.
+def register_translator(translator, inputs, outputs):
+    """Registers a translator.
 
     Parameters
     ----------
-    converter : callable
-        A converter. It should take a sequence of input instances as
+    translator : callable
+        A translator. It should take a sequence of input instances as
         argument and should return a sequence of output instances.
     inputs : sequence
         A sequence (name, version, namespace) tuples describing the
-        entities the converter takes as input.
+        entities the translator takes as input.
     outputs : sequence
         A sequence (name, version, namespace) tuples describing the
-        entities the converter returns as output.
+        entities the translator returns as output.
     """
-    _converters.append((converter, inputs, outputs))
+    _translators.append((translator, inputs, outputs))
 
 
-def _conversion_tree(output, inputs):
+def _translation_tree(output, inputs):
     """Returns a nested list structure describing how the entities in
-    `inputs` can be converted to `output`.
+    `inputs` can be translated to `output`.
 
     `output` is a (name, version, namespace)-tuple and `inputs` is a
     sequence of (name, version, namespace)-tuples.
@@ -48,53 +48,53 @@ def _conversion_tree(output, inputs):
     The returned value is either an element in `inputs` (if it matches
     `output`) or a nested tuple of the form
 
-        (output, converter, [input, ...])
+        (output, translator, [input, ...])
 
     where `input` is either an element in `inputs` or a tuple like above.
 
-    Raises SoftMissingConverterError if none of the installed
-    converters can convert `inputs` to `output`.
+    Raises SoftMissingTranslatorError if none of the installed
+    translators can translate `inputs` to `output`.
     """
     if output in inputs:
         return output
-    for conv, ins, outs in _converters:
+    for trans, ins, outs in _translators:
         if output in outs:
             try:
-                return (output, conv, [_conversion_tree(inp, inputs)
+                return (output, trans, [_translation_tree(inp, inputs)
                                        for inp in ins])
-            except SoftMissingConverterError:
+            except SoftMissingTranslatorError:
                 pass
-    raise SoftMissingConverterError('Cannot convert to %s' % (output, ))
+    raise SoftMissingTranslatorError('Cannot translate to %s' % (output, ))
 
 
-def convert(output, input_instances):
+def translate(output, input_instances):
     """Returns a new instance of (name, version, namespace) from the
     sequence of entity instances `input_instances`.
 
-    Raises SoftMissingConverterError if none of the installed
-    converters can convert `input_instances` to an instance of the
+    Raises SoftMissingTranslatorError if none of the installed
+    translators can translate `input_instances` to an instance of the
     desired type.
     """
     if isinstance(input_instances, BaseEntity):
         instances = [input_instances]
     inputdict = get_metadict(input_instances)
     if len(inputdict) != len(input_instances):
-        raise SoftConverterError(
-            'Converting from several instances of the same entity is ambiguous')
+        raise SoftTranslatorError(
+            'Translating from several instances of the same entity is ambiguous')
 
-    def _convert(tree):
+    def _translate(tree):
         if isinstance(tree[2], list):
-            output, conv, inputs = tree
+            output, trans, inputs = tree
             assert output not in inputdict
-            insts = conv([_convert(t) for t in inputs])
+            insts = trans([_translate(t) for t in inputs])
             d = get_metadict(insts)
             inputdict[output] = d[output]
             return d[output]
         else:
             return inputdict[tree]
 
-    tree = _conversion_tree(output, inputdict.keys())
-    return _convert(tree)
+    tree = _translation_tree(output, inputdict.keys())
+    return _translate(tree)
 
 
 def get_metadict(instances):
