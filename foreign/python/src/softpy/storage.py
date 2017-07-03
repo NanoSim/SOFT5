@@ -174,7 +174,7 @@ def json_hack_save(storage, instance, uuid=None):
         raise TypeError('`instance` must be an Entity, Collection or Metadata')
 
     with open(storage.uri, 'w') as f:
-        json.dump(d, f, indent=int(optdict.get('indent', 2)),
+        json.dump(d, f, indent=int(optdict.get('indent', 4)),
                   sort_keys=istrue(optdict.get('sort', 'no')))
 
 

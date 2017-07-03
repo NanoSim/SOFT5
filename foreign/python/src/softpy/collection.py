@@ -183,7 +183,6 @@ class Collection(object):
         version = self.get_version(label)
         namespace = self.get_namespace(label)
         uuid = self.get_uuid(label)
-        print('*** get_instance():', label, uuid, name)
         if (name, namespace) == ('Collection', 'org.sintef.soft'):
             instance = Collection(uuid=uuid, driver=driver, uri=uri,
                                   options=options)
