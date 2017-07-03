@@ -71,6 +71,9 @@ class Metadata(dict):
     def __str__(self):
         return self.get_json()
 
+    def __repr__(self):
+        return 'Metadata(%s)' % self.get_json()
+
     def __hash__(self):
         return hash(self.mtype)
 
@@ -423,7 +426,8 @@ def find_metadata(name, version, namespace):
     """Search through all registered metadata databases and return
     a Metadata object corresponding to `name`, `version`, `namespace`.
     """
-    return find_metadata_uuid(softpy.uuid_from_entity(name, version, namespace))
+    return find_metadata_uuid(softpy.uuid_from_entity(
+        asStr(name), asStr(version), asStr(namespace)))
 
 def find_metadata_uuid(uuid):
     """Search through all registered metadata databases and return
