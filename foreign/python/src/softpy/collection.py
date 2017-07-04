@@ -55,7 +55,6 @@ class Collection(object):
 
         if driver:
             with Storage(driver=driver, uri=uri, options=options) as s:
-
                 if driver == 'json':
                     # FIXME: hack
                     with open(uri, 'r') as f:

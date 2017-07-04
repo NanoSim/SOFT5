@@ -44,8 +44,14 @@ class Storage(object):
         self.driver = driver
         self.uri = uri
         self.options = options
-        self.storage = softpy.storage_create(driver, uri, options)
-        self.strategy = softpy.storage_get_storage_strategy(self.storage)
+
+        # FIXME - hack for json, remove when it is implemented in core
+        if driver == 'json':
+            pass
+        else:
+            self.storage = softpy.storage_create(driver, uri, options)
+            self.strategy = softpy.storage_get_storage_strategy(self.storage)
+
         self._closed = False
 
     def save(self, instance, uuid=None):
@@ -55,7 +61,7 @@ class Storage(object):
         if self.closed:
             raise SoftStorageClosedError('Storage %r is closed.' % self.uri)
 
-        # FIXME - hack for json storage, remove then it is implemented in core
+        # FIXME - hack for json, remove when it is implemented in core
         if self.driver == 'json':
             return json_hack_save(self, instance, uuid)
 
@@ -98,11 +104,9 @@ class Storage(object):
         # (name, version, namespace) of an instance with a given UUID
         # in order to know when to translate.  For now we will
         # demonstrate the concept using the json-hack below...
-        #
 
+        # FIXME - hack for json, remove when it is implemented in core
         if self.driver == 'json':
-            # FIXME - hack for json storage, remove then it is implemented
-            # in core soft
 
             # Get source type, i.e. the type of the instance with this
             # uuid in the storage
@@ -128,7 +132,7 @@ class Storage(object):
                 src_instance = cls()
                 json_hack_load(self, src_instance, uuid)
                 target_instance = translate(target_mtype, [src_instance])
-                instance.update(target_instance)
+                instance.soft_update(target_instance)
 
         else:
             if isinstance(e, softpy.collection_s):
@@ -152,8 +156,14 @@ class Storage(object):
         """Closes current storage."""
         if self.closed:
             raise SoftStorageClosedError('Storage %r is closed.' % self.uri)
-        softpy.storage_free_storage_strategy(self.strategy)
-        softpy.storage_free(self.storage)
+
+        # FIXME - hack for json, remove when it is implemented in core
+        if self.driver == 'json':
+            pass
+        else:
+            softpy.storage_free_storage_strategy(self.strategy)
+            softpy.storage_free(self.storage)
+
         self._closed = True
 
     closed = property(lambda self: self._closed,
@@ -202,23 +212,27 @@ def json_hack_save(storage, instance, uuid=None):
     else:
         d = {}
 
-    if isinstance(instance, Collection):
-        uuid = uuid if uuid else instance.uuid
-        d[uuid] = instance.soft_as_dict()
-        for label in instance.get_labels():
-            ent = instance.get_instance(label)
-            d[instance.get_uuid(label)] = ent.soft_as_dict()
-    elif isinstance(instance, BaseEntity):
-        uuid = uuid if uuid else instance.soft_get_id()
-        d[uuid] = instance.soft_as_dict()
-    elif isinstance(instance, Metadata):
+    if hasattr(instance, 'mtype') and hasattr(instance, 'get_uuid'):
         uuid = uuid if uuid else instance.get_uuid()
         dd = dict(instance)
-        dd['meta'] = {'name': 'entity_schema', 'version': '0.3',
+        dd['meta'] = {'name': 'entity_schema',
+                      'version': '0.3',
                       'namespace': 'org.sintef.soft'}
         d[uuid] = dd
     else:
-        raise TypeError('`instance` must be an Entity, Collection or Metadata')
+        e = softpy.get_c_entity(instance)
+        if isinstance(e, softpy.collection_s):
+            uuid = uuid if uuid else instance.uuid
+            d[uuid] = instance.soft_as_dict()
+            for label in instance.get_labels():
+                ent = instance.get_instance(label)
+                d[instance.get_uuid(label)] = ent.soft_as_dict()
+        elif isinstance(e, softpy.entity_t):
+            uuid = uuid if uuid else instance.soft_get_id()
+            d[uuid] = instance.soft_as_dict()
+        else:
+            raise TypeError(
+                '`instance` must be an Entity, Collection or Metadata')
 
     with open(storage.uri, 'w') as f:
         json_dump(d, f, indent=int(optdict.get('indent', 4)),
@@ -251,12 +265,14 @@ def json_hack_load(storage, instance, uuid=None):
             name, version, namespace))
 
     if isinstance(e, softpy.collection_s):
-        instance.soft_from_dict(d[uuid], storage.driver, storage.uri, storage.options)
+        instance.soft_from_dict(
+            d[uuid], storage.driver, storage.uri, storage.options)
     elif isinstance(e, softpy.entity_t):
         instance.soft_from_dict(d[uuid])
     else:
         raise TypeError(
-            '`instance` must be an Entity or Collection, got %r' % type(instance))
+            '`instance` must be an Entity or Collection, got %r' %
+            type(instance))
 
 
 def json_hack_has_uuid(storage, uuid):
@@ -292,8 +308,6 @@ def json_hack_get_uuids(storage):
 
 
 # FIXME - get rid to these cyclic imports
-from .collection import Collection
-#from .entity import BaseEntity
 from .entity import entity
 
 
