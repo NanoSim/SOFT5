@@ -34,7 +34,7 @@ def transD2C(d):
     return C(s=dt[md].s)
 
 def transE2A(e):
-    """Translates entities of type D to A."""
+    """Translates entities of type E to A."""
     dt = softpy.get_metadict(e)
     return A(s=dt[me].s, length=100.0 * dt[me].length)
 

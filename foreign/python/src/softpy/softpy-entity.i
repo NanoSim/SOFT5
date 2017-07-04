@@ -51,8 +51,9 @@
   static int softpy_entity_error = 0;
 
 
-  /* Help function setting self->ndims and self->dims.  Returns
-   * non-zero on error. */
+  /* Help function setting self->ndims and self->dims.
+   * `seq` should be a sequence of dimension labels.
+   * Returns non-zero on error. */
   static int softpy_set_dimensions(softpy_entity_t *self, PyObject *seq)
   {
     int i, n;
@@ -79,8 +80,9 @@
     return 1;
   }
 
-  /* Help function setting self->ndims and self->dim_sizes.  Returns
-   * non-zero on error. */
+  /* Help function setting self->ndims and self->dim_sizes.
+   * `seq` should be a sequence of dimension lengths (ints).
+   * Returns non-zero on error. */
   static int softpy_set_dimension_size(softpy_entity_t *self, PyObject *seq)
   {
     int i, n;
@@ -105,8 +107,13 @@
     return 1;
   }
 
-  /* Help function. Calls `callable` and return the string returned by it */
-  const char *get_string(const softpy_entity_t *self, PyObject *callable, char *s)
+  /* Help function. Calls `callable` and returns the string returned by it.
+   *
+   * If `s` is not NULL, it must point to some memory allocated with malloc().
+   * On return this memory may have been reallocated.  The return value
+   * will point to the new memory. */
+  const char *get_string(const softpy_entity_t *self, PyObject *callable,
+			 char *s)
   {
     int n;
     const char *string;
@@ -503,6 +510,7 @@
     if (list) free(list);
     return NULL;
   }
+
 
   /* For supporting pickle */
   static PyObject *softpy_getstate(softpy_entity_t *self)

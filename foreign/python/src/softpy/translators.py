@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 from . import softpy
 from .errors import SoftError
-from .entity import BaseEntity
 
 class SoftTranslatorError(SoftError):
     """Raised for translation error."""
@@ -68,19 +67,28 @@ def _translation_tree(output, inputs):
 
 
 def translate(output, input_instances):
-    """Returns a new instance of (name, version, namespace) from the
-    sequence of entity instances `input_instances`.
+    """Returns a new instance of type `output` from `input_instances`.
 
-    Raises SoftMissingTranslatorError if none of the installed
-    translators can translate `input_instances` to an instance of the
-    desired type.
+    Args:
+        output: A (name, version, namespace)-tuple specifying the desired
+            type.
+        input_instances: Sequence of input entity instances.
+
+    Returns:
+        New instance of the desired type populated from `input_instances`.
+
+    Raises:
+        SoftMissingTranslatorError: If none of the installed
+            translators can translate `input_instances` to an instance
+            of the desired type.
     """
-    if isinstance(input_instances, BaseEntity):
+    if hasattr(input_instances, 'soft_get_id'):
         instances = [input_instances]
     inputdict = get_metadict(input_instances)
     if len(inputdict) != len(input_instances):
         raise SoftTranslatorError(
-            'Translating from several instances of the same entity is ambiguous')
+            'Translating from several instances of the same type is '
+            'ambiguous')
 
     def _translate(tree):
         if isinstance(tree[2], list):
@@ -101,6 +109,6 @@ def get_metadict(instances):
     """Returns a dict mapping (name, version, namespace) of the metadata
     of each element in `instances` to the instances themselves.
     `instances` may also be a single instance."""
-    if isinstance(instances, BaseEntity):
+    if hasattr(instances, 'soft_get_id'):
         instances = [instances]
     return {softpy.get_meta_mtype(inst): inst for inst in instances}

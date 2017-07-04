@@ -3,14 +3,19 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import os
-import json
 
 from . import softpy
 from .softpy import asStr, asBytes
 from .errors import SoftError
+from .translators import translate
+from .utils import json_loads, json_dumps, json_load, json_dump
 
 
-class SoftStorageClosedError(SoftError):
+class SoftStorageError(SoftError):
+    """Error when storing/loading to/from a storage."""
+    pass
+
+class SoftStorageClosedError(SoftStorageError):
     """Raised when working on a closed storage."""
     pass
 
@@ -79,27 +84,69 @@ class Storage(object):
         if self.closed:
             raise SoftStorageClosedError('Storage %r is closed.' % self.uri)
 
-        # FIXME - hack for json storage, remove then it is implemented in core
-        if self.driver == 'json':
-            return json_hack_load(self, instance, uuid)
-
         e = softpy.get_c_entity(instance)
-        if isinstance(e, softpy.collection_s):
-            softpy.collection_load(self.storage, e)
+        if uuid is None:
+            uuid = e.id
+
+        #
+        # Implicit translation
+        #
+        # FIXME - this is yet another experimental feature that should go
+        #         intosoft core if it turns out to work
+        #
+        # Hmm, we need an API for queuing the storage for the type
+        # (name, version, namespace) of an instance with a given UUID
+        # in order to know when to translate.  For now we will
+        # demonstrate the concept using the json-hack below...
+        #
+
+        if self.driver == 'json':
+            # FIXME - hack for json storage, remove then it is implemented
+            # in core soft
+
+            # Get source type, i.e. the type of the instance with this
+            # uuid in the storage
+            src_mtype = json_hack_get_mtype(self, uuid)
+            if not src_mtype:
+                raise SoftStorageError(
+                    'UUID %r is not found in storage %r' % (uuid, storage.uri))
+
+            # Get target type, i.e.
+            target_mtype = (softpy.get_meta_name(e),
+                            softpy.get_meta_version(e),
+                            softpy.get_meta_namespace(e))
+
+            # Populate the instance.
+            # If the source type differ from the target type, we will
+            # first create an uninitialised instance of the source type
+            # populate it and then use an translator to populate the
+            # target instance.
+            if src_mtype == target_mtype:
+                json_hack_load(self, instance, uuid)
+            else:
+                cls = entity(src_mtype)
+                src_instance = cls()
+                json_hack_load(self, src_instance, uuid)
+                target_instance = translate(target_mtype, [src_instance])
+                instance.update(target_instance)
+
         else:
-            datamodel = softpy.storage_strategy_get_datamodel(self.strategy)
-            softpy.datamodel_set_id(
-                datamodel, asStr(uuid if uuid else e.id))
-            softpy.datamodel_set_meta_name(
-                datamodel, asStr(softpy.get_meta_name(e)))
-            softpy.datamodel_set_meta_version(
-                datamodel, asStr(softpy.get_meta_version(e)))
-            softpy.datamodel_set_meta_namespace(
-                datamodel, asStr(softpy.get_meta_namespace(e)))
-            softpy.storage_strategy_start_retrieve(self.strategy, datamodel)
-            softpy.entity_load(e, datamodel)  # Ask instance to fill out itself
-            softpy.storage_strategy_end_retrieve(self.strategy, datamodel)
-            softpy.storage_strategy_free_datamodel(datamodel)
+            if isinstance(e, softpy.collection_s):
+                softpy.collection_load(self.storage, e)
+            else:
+                datamodel = softpy.storage_strategy_get_datamodel(self.strategy)
+                softpy.datamodel_set_id(
+                    datamodel, asStr(uuid))
+                softpy.datamodel_set_meta_name(
+                    datamodel, asStr(softpy.get_meta_name(e)))
+                softpy.datamodel_set_meta_version(
+                    datamodel, asStr(softpy.get_meta_version(e)))
+                softpy.datamodel_set_meta_namespace(
+                    datamodel, asStr(softpy.get_meta_namespace(e)))
+                softpy.storage_strategy_start_retrieve(self.strategy, datamodel)
+                softpy.entity_load(e, datamodel)  # Ask instance to fill out itself
+                softpy.storage_strategy_end_retrieve(self.strategy, datamodel)
+                softpy.storage_strategy_free_datamodel(datamodel)
 
     def close(self):
         """Closes current storage."""
@@ -151,7 +198,7 @@ def json_hack_save(storage, instance, uuid=None):
     optdict = _parse_options(storage.options)
     if istrue(optdict.get('append', 'yes')) and os.path.exists(storage.uri):
         with open(storage.uri, 'r') as f:
-            d = json.load(f)
+            d = json_load(f)
     else:
         d = {}
 
@@ -174,7 +221,7 @@ def json_hack_save(storage, instance, uuid=None):
         raise TypeError('`instance` must be an Entity, Collection or Metadata')
 
     with open(storage.uri, 'w') as f:
-        json.dump(d, f, indent=int(optdict.get('indent', 4)),
+        json_dump(d, f, indent=int(optdict.get('indent', 4)),
                   sort_keys=istrue(optdict.get('sort', 'no')))
 
 
@@ -186,7 +233,7 @@ def json_hack_load(storage, instance, uuid=None):
     """
     assert storage.driver == 'json'
     with open(storage.uri) as f:
-        d = json.load(f)
+        d = json_load(f)
 
     e = softpy.get_c_entity(instance)
     if not uuid:
@@ -210,6 +257,39 @@ def json_hack_load(storage, instance, uuid=None):
     else:
         raise TypeError(
             '`instance` must be an Entity or Collection, got %r' % type(instance))
+
+
+def json_hack_has_uuid(storage, uuid):
+    """Returns true if an instance with the given `uuid` exists in
+    `storage`."""
+    return json_hack_get_mtype() is not None
+
+
+def json_hack_get_mtype(storage, uuid):
+    """Returns the (name, version, namespace) of the instance with the
+    given `uuid` in `storage`.
+
+    None is returned if `uuid` is not in `storage`."""
+    assert storage.driver == 'json'
+    with open(storage.uri) as f:
+        d = json_load(f)
+    if uuid in d:
+        meta = d[uuid]['meta']
+        return (asStr(meta['name']),
+                asStr(meta['version']),
+                asStr(meta['namespace']))
+    return None
+
+
+def json_hack_get_uuids(storage):
+    """Returns a generator over all the UUID's in `storage`."""
+    assert storage.driver == 'json'
+    with open(storage.uri) as f:
+        d = json_load(f)
+    for uuid in d.keys():
+        yield uuid
+
+
 
 # FIXME - get rid to these cyclic imports
 from .collection import Collection
@@ -236,3 +316,8 @@ def istrue(value):
         return False
     else:
         return True
+
+
+# FIXME: circular import - get rid of this when json is properly
+# implemented in soft core
+from .entity import entity

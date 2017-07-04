@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import sys
-import json
 
 import numpy as np
 
@@ -13,6 +12,7 @@ from .arithmetic_eval import arithmetic_eval
 from .errors import SoftError, SoftMetadataError
 from .storage import Storage
 from .metadata import Metadata
+from .utils import json_loads, json_dumps, json_load, json_dump
 
 
 __all__ = ['entity', 'load_entity', 'derived_property_exception']
@@ -58,7 +58,7 @@ class MetaEntity(type):
     """Metaclass for BaseEntity providing some functionality to entity
     classes that is not inherited by their instances."""
     def __str__(self):
-        return json.dumps(self.soft_metadata, indent=2, sort_keys=True)
+        return json_dumps(self.soft_metadata, indent=2, sort_keys=True)
 
     def __repr__(self):
         return '<class %s version=%r, namespace=%r)>' % (
@@ -175,7 +175,7 @@ class BaseEntity(with_metaclass(MetaEntity)):
         meta = self.soft_metadata
         if uuid:
             uuid = asStr(uuid)
-        dims = [str(d['name']) for d in meta['dimensions']]
+        dims = [asStr(d['name']) for d in meta['dimensions']]
         if isinstance(dimension_sizes, dict):
             dimension_sizes = [dimension_sizes[label] for label in dims]
         self.soft_internal_dimension_info = dimension_sizes
@@ -480,6 +480,19 @@ class BaseEntity(with_metaclass(MetaEntity)):
              dim_sizes.append(arithmetic_eval(sizeexpr))
         return dim_sizes
 
+    def soft_update(self, other):
+        """Populate this instance from `other`, where `other` must be an
+        instance of the same type as this one."""
+        if self.soft_metadata.mtype != other.soft_metadata.mtype:
+            raise SoftError(
+                'cannot update instance of type %r from an instance of '
+                'type %r' % (self.soft_metadata.mtype,
+                             other.soft_metadata.mtype))
+        for pname in self.soft_get_property_names():
+            self.soft_set_property(pname, other.soft_get_property(pname))
+
+
+
     #-----------------------------------------------------------------------
     # FIXME - use the json storage when that is implemented
     #
@@ -517,11 +530,11 @@ class BaseEntity(with_metaclass(MetaEntity)):
 
     def soft_to_json(self, indent=2, sort_keys=True):
         """Returns a json representation of this string."""
-        return json.dumps(self.soft_as_dict(), indent=indent, sort_keys=sort_keys)
+        return json_dumps(self.soft_as_dict(), indent=indent, sort_keys=sort_keys)
 
     def soft_from_json(self, s):
         """Initialise self from a json string."""
-        d = json.loads(s)
+        d = json_loads(s)
         self.soft_from_dict(d)
 
     #-----------------------------------------------------------------------

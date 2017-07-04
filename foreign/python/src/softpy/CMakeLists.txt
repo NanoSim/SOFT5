@@ -7,6 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(PY_SOURCES
   __init__.py
   errors.py
+  utils.py
   entity.py
   collection.py
   storage.py

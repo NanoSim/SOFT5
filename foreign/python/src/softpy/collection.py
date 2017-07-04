@@ -2,14 +2,13 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import json
-
 from . import softpy
 from .softpy import asStr, asBytes
 from .errors import SoftError
 from .entity import entity
 from .storage import Storage, json_hack_load, json_hack_save
 from .metadata import find_metadata_uuid
+from .utils import json_loads, json_dumps, json_load, json_dump
 
 
 class SoftLabelError(SoftError):
@@ -60,7 +59,7 @@ class Collection(object):
                 if driver == 'json':
                     # FIXME: hack
                     with open(uri, 'r') as f:
-                        d = json.load(f)
+                        d = json_load(f)
                     if not self.uuid in d:
                         raise SoftError(
                             'storage %r has no uuid %r' % (uri, self.uuid))
@@ -341,11 +340,11 @@ class Collection(object):
 
     def soft_to_json(self, indent=2, sort_keys=True):
         """Returns a json representation of this string."""
-        return json.dumps(self.soft_as_dict(), indent=indent, sort_keys=sort_keys)
+        return json_dumps(self.soft_as_dict(), indent=indent, sort_keys=sort_keys)
 
     def soft_from_json(self, s):
         """Initialise self from a json string."""
-        d = json.loads(s)
+        d = json_loads(s)
         self.soft_from_dict(d)
     #-----------------------------------------------------------------------
 
@@ -357,4 +356,4 @@ class Collection(object):
                 tripletdict[label] = {}
             tripletdict[label][attr] = value
         return '%s(%s)' % (self.__class__.__name__,
-                           json.dumps(tripletdict, indent=2, sort_keys=True))
+                           json_dumps(tripletdict, indent=2, sort_keys=True))
