@@ -197,7 +197,7 @@ that is associated to the instance.
 
 Queuing entity instances
 ------------------------
-TODO
+To be implemented...
 
 
 Relations
@@ -229,13 +229,24 @@ Note the preceeding '^' when searching for the inverted relation.
 
 Dimension mapping
 -----------------
-TODO
+To be implemented...
 
 
 
 Metadata database
 =================
 TODO
+
+
+Translators
+===========
+TODO
+
+
+Plugins
+=======
+To be implemented...
+
 
 
 Some technical details about entities

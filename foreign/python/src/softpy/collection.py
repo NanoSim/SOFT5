@@ -154,7 +154,8 @@ class Collection(object):
         label."""
         return self._find_attr(label, 'namespace')
 
-    def get_instance(self, label, driver=None, uri=None, options=None):
+    def get_instance(self, label, driver=None, uri=None, options=None,
+                     expected_entity=None):
         """Returns the the entity instance associated with `label`
         from the storage specified with `driver`, `uri` and `options`.
 
@@ -162,6 +163,11 @@ class Collection(object):
         with the corresponding properties.  If this collection was
         loaded from a storage, these properties be initialised to the
         same storage.
+
+        If `expected_entity` is given, the returned instance will be
+        of this type.  If the stored instance is of another type, it
+        will be translated.  If no matching translator is found, a
+        SoftMissingTranslatorError will be raised.
 
         This method depends on that the metadata for `label` exists in
         a metadata database registered with softpy.register_metadb().
@@ -188,7 +194,9 @@ class Collection(object):
             meta = find_metadata_uuid(uuid)
             instance = entity(meta)
         else:
-            cls = entity(name, version, namespace)
+            if not expected_entity:
+                expected_entity = (name, version, namespace)
+            cls = entity(expected_entity)
             instance = cls(uuid=uuid, driver=driver, uri=uri, options=options)
         self._cache[label] = instance
         return instance

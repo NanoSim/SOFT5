@@ -1,4 +1,5 @@
 *.pyc
+*.pytc
 
 softpy-test-datamodel.h5
 softpy-test-factory.h5
