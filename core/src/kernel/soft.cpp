@@ -30,7 +30,7 @@ namespace {
    {
       return (T*)v.value<void*>();
    }
-   
+
    template <class T>
    static QVariant asQVariant(T *ptr)
    {
@@ -43,13 +43,13 @@ std::list<std::string> registeredStorageDrivers()
   if (QCoreApplication::instance() == nullptr) {
     return std::list<std::string>();
   }
-  
+
   auto *factory = asPtr<StorageFactory>(qApp->property(storagefactoryid));
   std::list<std::string> retval;
   for (auto i = 0; i < factory->driverCount(); ++i) {
     retval.push_back(factory->driverName(i));
   }
-  
+
   return retval;
 }
 
@@ -97,7 +97,7 @@ static QList<QDir> pluginsDirList()
       list << customDir;
     }
   }
-  
+
   if (qApp->arguments().count() > 1 ) {
     auto const argPaths = qApp->arguments().at(1).split(":");
     for (auto path : argPaths) {
@@ -144,7 +144,7 @@ void init(int &argc, char *argv[])
 
 bool registerStorage(const char *name, IStorageStrategy*(*createFunc)(const char*, const char*))
 {
-  if (QCoreApplication::instance() == nullptr) 
+  if (QCoreApplication::instance() == nullptr)
     return false;
 
   auto *factory = asPtr<StorageFactory>(qApp->property(storagefactoryid));
@@ -153,9 +153,9 @@ bool registerStorage(const char *name, IStorageStrategy*(*createFunc)(const char
 
 std::shared_ptr<IStorageStrategy> create(const char *name, const char *uri, const char *options)
 {
-  if (QCoreApplication::instance() == nullptr) 
+  if (QCoreApplication::instance() == nullptr)
     return std::shared_ptr<IStorageStrategy>();
-  
+
   auto *factory = asPtr<StorageFactory>(qApp->property(storagefactoryid));
   std::shared_ptr<IStorageStrategy> retval (factory->create(name, uri, options));
   return retval;
@@ -163,9 +163,9 @@ std::shared_ptr<IStorageStrategy> create(const char *name, const char *uri, cons
 
 IStorageStrategy* createStrategy(const char *name, const char *uri, const char *options)
 {
-  if (QCoreApplication::instance() == nullptr) 
+  if (QCoreApplication::instance() == nullptr)
     return nullptr;
-  
+
   auto *factory = asPtr<StorageFactory>(qApp->property(storagefactoryid));
   return factory->create(name, uri, options);
 }
@@ -175,9 +175,40 @@ std::string applicationDirPath()
    return QCoreApplication::applicationDirPath().toStdString();
 }
 
+/*!
+  Returns an url constructed from \a name, \a version and \a ns.
+ */
+QString urlFromEntity(const char *name, const char *version, const char *ns)
+{
+  return QString("%1/%2-%3").arg(ns).arg(name).arg(version);
+}
+
+/*!
+  Returns a new unique random UUID.
+ */
 std::string uuidGen()
 {
   return QUuid::createUuid().toString().mid(1,36).toStdString();
+}
+
+/*!
+  Returns an UUID generated from a MD5 hash of \a url.
+ */
+std::string uuidFromUrl(QString url)
+{
+  // NameSpace_URL from RFC4122
+  QUuid nsUrl(0x6ba7b811, 0x9dad, 0x11d1, 0x80, 0xb4,
+              0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8);
+  return QUuid::createUuidV3(nsUrl, url).toString().mid(1,36).toStdString();
+}
+
+/*!
+  Returns an UUID generated from \a name, \a version and \a ns.
+  Can be used as an alternative identifier of entities.
+ */
+std::string uuidFromEntity(const char *name, const char *version, const char *ns)
+{
+  return uuidFromUrl(urlFromEntity(name, version, ns));
 }
 
 std::list<std::string> arguments()

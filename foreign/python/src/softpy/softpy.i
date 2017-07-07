@@ -408,6 +408,11 @@ char **softc_get_storage_drivers();
 %feature("docstring", "Returns a new unique uuid.") softc_uuidgen;
 char  *softc_uuidgen();
 
+%feature("docstring", "Returns a uuid from entity name, version and namespace.") softc_uuid_from_entity;
+char  *softc_uuid_from_entity(const char *name,
+                              const char *version,
+                              const char *namespace);
+
 
 /*
  * datamodel
@@ -425,9 +430,9 @@ char  *softc_uuidgen();
  * storage
  */
 softc_storage_t * softc_storage_create (const char *driver, const char *uri, const char *options=NULL);
-void              softc_storage_free (softc_storage_t *);
-void              softc_storage_load (softc_storage_t *, void *entity);
-void              softc_storage_save (softc_storage_t *, void *entity);
+void              softc_storage_free (softc_storage_t *storage);
+void              softc_storage_load (softc_storage_t *storage, void *entity);
+void              softc_storage_save (softc_storage_t *storage, void *entity);
 softc_storage_strategy_t * softc_storage_get_storage_strategy(softc_storage_t *);
 void softc_storage_free_storage_strategy(softc_storage_strategy_t *strategy);
 

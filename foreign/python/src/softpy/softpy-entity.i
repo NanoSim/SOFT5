@@ -689,7 +689,7 @@ typedef struct {
                     if v1.im_func.func_code != v2.im_func.func_code:
                        return False
                 elif hasattr(v1, '__func__') and hasattr(v2, '__func__'):
-                    if v1.__func__ != v2.__func__:
+                    if v1.__func__.__code__ != v2.__func__.__code__:
                        return False
                 elif v1 != v2:
                     return False
@@ -704,7 +704,7 @@ typedef struct {
 
 //softc_entity_t *softc_entity_new(const char *uri);
 const char  *softc_entity_get_id(const softc_entity_t *self);
-const char  *softc_entity_get_meta_type(const softc_entity_t *self);
+//const char  *softc_entity_get_meta_type(const softc_entity_t *self);
 const char  *softc_entity_get_meta_name(const softc_entity_t *self);
 const char  *softc_entity_get_meta_namespace(const softc_entity_t *self);
 const char  *softc_entity_get_meta_version(const softc_entity_t *self);

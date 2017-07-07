@@ -38,6 +38,8 @@ void softc_collection_get_name(softc_collection_s *self, softc_string_s name);
 void softc_collection_set_name(softc_collection_s *self, const char *name);
 void softc_collection_set_version(softc_collection_s *self, const char *version);
 void softc_collection_get_version(softc_collection_s *self, softc_string_s version);
+void softc_collection_get_namespace(softc_collection_s *self, softc_string_s ns);
+void softc_collection_set_namespace(softc_collection_s *self, const char *ns);
 void softc_collection_add_relation(softc_collection_s *self, const char *subject, const char *predicate, const char *object);
 void softc_collection_connect(softc_collection_s *self, const char *subject, const char *predicate, const char *object);
 
