@@ -30,21 +30,21 @@ me = E.soft_metadata.mtype
 #
 def transD2C(d):
     """Translates entities of type D to C."""
-    dt = softpy.get_metadict(d)
+    dt = softpy.get_instancedict(d)
     return C(s=dt[md].s)
 
-def transE2A(e):
-    """Translates entities of type E to A."""
-    dt = softpy.get_metadict(e)
-    return A(s=dt[me].s, length=100.0 * dt[me].length)
-
+#def transE2A(e):
+#    """Translates entities of type E to A."""
+#    dt = softpy.get_instancedict(e)
+#    return A(s=dt[me].s, length=100.0 * dt[me].length)
+#
 def transBC2A(bc):
     """Translates entities of type B, C to A."""
-    dt = softpy.get_metadict(bc)
+    dt = softpy.get_instancedict(bc)
     return A(s=dt[mc].s, length=100.0 * dt[mb].length)
 
 softpy.register_translator(transD2C, [md], [mc])
-softpy.register_translator(transE2A, [me], [ma])
+#softpy.register_translator(transE2A, [me], [ma])
 softpy.register_translator(transBC2A, [mb, mc], [ma])
 
 b = B(length=1.2)

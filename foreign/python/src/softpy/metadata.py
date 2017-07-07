@@ -186,224 +186,6 @@ class MetaDB(dict):
         """Returns a JSON representation of the database."""
         return json.dumps(self, indent=indent, sort_keys=soft_keys)
 
-#
-# Old deprecated metadatabases
-# ----------------------------
-# FIXME: remove
-#class BaseMetaDB(object):
-#    """A base class for metadata databases."""
-#    def __init__(self, **kwargs):
-#        """Connects to the database."""
-#        raise NotImplementedError
-#
-#    def find(self, name, version, namespace):
-#        """Returns a Metadata object for the given name, version and
-#        namespace.
-#
-#        Should raise SoftMissingMetadataError if not metadata can be found.
-#        """
-#        raise NotImplementedError
-#
-#    def find_uuid(self, uuid):
-#        """Returns a Metadata object with given uuid."""
-#        for mtype in self.mtypes():
-#            if softpy.uuid_from_entity(*mtype) == uuid:
-#                return Metadata(*mtype)
-#
-#    def insert(self, metadata):
-#        """Inserts `metadata` into the database.
-#
-#        May not be implemented by all subclasses."""
-#        raise NotImplementedError
-#
-#    def mtypes(self):
-#        """Returns a list of (name, version, namespace)-tuples for all
-#        registered metadata.
-#
-#        May not be implemented by all subclasses."""
-#        raise NotImplementedError
-#
-#    def close(self):
-#        """Closes the connection to the database."""
-#        raise NotImplementedError
-#
-#    def has(self, name, version, namespace):
-#        """Returns whether metadata with the given name, version and
-#        namespace exists in the database."""
-#        try:
-#            self.find(name, version, namespace)
-#        except SoftError:
-#            return False
-#        return True
-#
-#
-#class JSONMetaDB(BaseMetaDB):
-#    """A simple metadata database using a json file.
-#
-#    The `fname` argument should either be a file name or an open
-#    file-like object with an array of metadata definitions.
-#
-#    Note, if `fname` is a file-like object, it will not be closed
-#    when the close() method is called on the returned database object.
-#    """
-#    def __init__(self, fname):
-#        self.fname = fname
-#        if hasattr(fname, 'read'):
-#            data = json.load(fname)
-#        elif not os.path.exists(fname):
-#            data = []
-#        else:
-#            with open(fname) as f:
-#                data = json.load(f)
-#        self.data = [Metadata(d) for d in data]
-#        self.changed = False
-#        self.closed = False
-#
-#    def find(self, name, version, namespace):
-#        """Returns a Metadata object for the given name, version and
-#        namespace.
-#
-#        SoftMissingMetadataError is raised if not metadata can be found."""
-#        return self.find_uuid(softpy.uuid_from_entity(name, version, namespace))
-#
-#    def find_uuid(self, uuid):
-#        """Returns a Metadata object with given uuid."""
-#        for meta in self.data:
-#            if meta.get_uuid() == uuid:
-#                return meta
-#        raise SoftMissingMetadataError('Cannot find metadata: %s' % uuid)
-#
-#    def insert(self, metadata):
-#        """Inserts `metadata` into the database."""
-#        meta = Metadata(metadata)
-#        try:
-#            self.find(meta.name, meta.version, meta.namespace)
-#        except SoftMissingMetadataError:
-#            self.data.append(meta)
-#            self.changed = True
-#        else:
-#            raise SoftError('Metadata %s/%s-%s already in the database' % (
-#                meta.namespace, meta.name, meta.version))
-#
-#    def mtypes(self):
-#        """Returns a list of (name, version, namespace)-tuples for all
-#        registered metadata."""
-#        return [meta.mtype for meta in self.data]
-#
-#    def flush(self):
-#        """Flushes the database to file."""
-#        if self.changed:
-#            if hasattr(self.fname, 'read'):
-#                json.dump(self.data, fname, indent=2, sort_keys=True)
-#            else:
-#                with open(self.fname, 'w') as f:
-#                    json.dump(self.data, f, indent=2, sort_keys=True)
-#
-#    def clear(self):
-#        """Removes all metadata in the database.  This is probably only
-#        useful for testing."""
-#        if self.data:
-#            self.changed = True
-#        del self.data[:]
-#
-#    def close(self):
-#        """Closes the connection to the database."""
-#        self.flush()
-#        self.closed = True
-#
-#
-#class JSONDirMetaDB(JSONMetaDB):
-#    """A metadata database using a directory with json files.
-#
-#    The `path` argument is the path to the directory containing the json
-#    files.  Only files with a .json extension will be read.
-#    """
-#    def __init__(self, path):
-#        self.path = path
-#        self.data = []
-#        self.filenames = {}
-#        for filename in glob(os.path.join(path, '*.json')):
-#            with open(filename) as f:
-#                meta = Metadata(f)
-#            self.filenames[meta.mtype] = filename
-#            self.data.append(meta)
-#        self.changed = False
-#        self.closed = False
-#
-#    def flush(self):
-#        """Flushes the database to file."""
-#        if self.changed:
-#            for meta in data:
-#                if not meta.mtype in self.filenames:
-#                    filename = os.path.join(self.path, '%s-%s.json' % (
-#                        meta.name, meta.version))
-#                if os.path.exists(filename):
-#                    warnings.warn(
-#                        'will not overwrite existing metadata: %s' + filename)
-#                else:
-#                    with open(filename, 'w') as f:
-#                        f.write(meta.json())
-#
-#
-#class MongoMetaDB(BaseMetaDB):
-#    """A simple metadata database for mongodb.
-#
-#    Parameters
-#    ----------
-#    uri : string
-#        URI of database to connect to.
-#    dbname : string
-#        Name of the mongodb database.
-#    collection_name : string
-#        Name of mongodb collection to connect to.
-#
-#    Note: this requires that you have pymongo installed.
-#    """
-#    def __init__(self, uri, dbname, collection_name):
-#        import pymongo
-#        self.client = pymongo.MongoClient(uri)
-#        self.db = self.client[dbname]
-#        self.coll = self.db[collection_name]
-#
-#    def find(self, name, version, namespace):
-#        """Returns a Metadata object for the given name, version and
-#        namespace.
-#
-#        SoftMissingMetadataError is raised if not metadata can be found."""
-#        meta = self.coll.find_one(
-#            {'name': name, 'version': version, 'namespace': namespace})
-#        if meta:
-#            return meta
-#        raise SoftMissingMetadataError('Cannot find metadata %s/%s-%s' % (
-#            namespace, name, version))
-#
-#    def insert(self, metadata):
-#        """Inserts `metadata` into the database."""
-#        meta = Metadata(metadata)
-#        try:
-#            self.find(meta.name, meta.version, meta.namespace)
-#        except SoftMissingMetadataError:
-#            self.coll.insert_one(meta)
-#            self.changed = True
-#        else:
-#            raise SoftError('Metadata %s/%s-%s already in the database' % (
-#                meta.namespace, meta.name, meta.version))
-#
-#    def mtypes(self):
-#        """Returns a list of (name, version, namespace)-tuples for all
-#        registered metadata."""
-#        return [(post['name'], post['version'], post['namespace'])
-#                for post in self.coll.find()]
-#
-#    def clear(self):
-#        """Removes all metadata in the database.  This is probably only
-#        useful for testing."""
-#        self.coll.delete_many({})
-#
-#    def close(self):
-#        """Closes the connection to the database."""
-#        self.client.close()
-
 
 # Exposed instance of MetaDB currently caching all metadata
 metaDB = MetaDB()
@@ -421,7 +203,14 @@ def register_jsondir(path):
     filenames = glob(os.path.join(path, '*.json'))
     for filename in filenames:
         with open(filename) as f:
-            Metadata(f)  # this automatically registers the metadata...
+            d = json.load(f)
+            # Check if d looks like an entity
+            required = set(['name', 'version', 'namespace', 'properties'])
+            optional = set(['description', 'dimensions'])
+            allowed = required.union(optional)
+            s = set(d.keys())
+            if required.issubset(s) and not s.difference(allowed):
+                Metadata(d)  # this automatically registers the metadata...
 
 def find_metadata(name, version, namespace):
     """Search through all registered metadata databases and return
@@ -446,3 +235,16 @@ def find_metadata_uuid(uuid):
             return meta
     raise SoftMissingMetadataError(
         'Cannot find metadata with uuid: ' + uuid)
+
+
+# When the module is loaded, search the directories in environment
+# variable SOFT_ENTITIES for JSON-files and initialise metaDB from
+# them.
+#
+# Since we may want to load the entities from online metadata databases,
+# we should allow SOFT_ENTITIES to contain urls. That means that we cannot
+# use colon as separator.  Semicolon seems better.
+for d in os.environ.get('SOFT_ENTITIES', '').split(';'):
+    if d:
+        register_jsondir(d)
+del d  # clean up the module namespace
