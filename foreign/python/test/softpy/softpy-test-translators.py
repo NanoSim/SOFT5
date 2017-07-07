@@ -21,49 +21,49 @@ md = D.soft_metadata.mtype
 me = E.soft_metadata.mtype
 
 #
-# define conversions according to the following graph:
+# define translations according to the following graph:
 #
 #   A<--(B,C)
 #   ^      ^
 #    \     |
 #     E    D
 #
-def convD2C(d):
-    """Converts entities of type D to C."""
+def transD2C(d):
+    """Translates entities of type D to C."""
     dt = softpy.get_metadict(d)
     return C(s=dt[md].s)
 
-def convE2A(e):
-    """Converts entities of type D to A."""
+def transE2A(e):
+    """Translates entities of type E to A."""
     dt = softpy.get_metadict(e)
     return A(s=dt[me].s, length=100.0 * dt[me].length)
 
-def convBC2A(bc):
-    """Converts entities of type B, C to A."""
+def transBC2A(bc):
+    """Translates entities of type B, C to A."""
     dt = softpy.get_metadict(bc)
     return A(s=dt[mc].s, length=100.0 * dt[mb].length)
 
-softpy.register_converter(convD2C, [md], [mc])
-softpy.register_converter(convE2A, [me], [ma])
-softpy.register_converter(convBC2A, [mb, mc], [ma])
+softpy.register_translator(transD2C, [md], [mc])
+softpy.register_translator(transE2A, [me], [ma])
+softpy.register_translator(transBC2A, [mb, mc], [ma])
 
 b = B(length=1.2)
 c = C(s='c')
 d = D(s='d', length=1.4)
 e = E(s='e', length=1.6)
 
-a = softpy.convert(ma, [b, c])
+a = softpy.translate(ma, [b, c])
 assert a.s == 'c'
 assert a.length == 120.0
 
-a = softpy.convert(ma, [b, d])
+a = softpy.translate(ma, [b, d])
 assert a.s == 'd'
 assert a.length == 120.0
 
-a = softpy.convert(ma, [e])
+a = softpy.translate(ma, [e])
 assert a.s == 'e'
 assert a.length == 160.0
 
-a2 = softpy.convert(ma, [a])
+a2 = softpy.translate(ma, [a])
 assert a2.s == a.s
 assert a2.length == a.length

@@ -7,12 +7,13 @@ set(CMAKE_AUTOMOC ON)
 set(PY_SOURCES
   __init__.py
   errors.py
+  utils.py
   entity.py
   collection.py
   storage.py
   metadata.py
   arithmetic_eval.py
-  converters.py
+  translators.py
 )
 
 set(SWIG_MODULE_softpy_EXTRA_DEPS

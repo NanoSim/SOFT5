@@ -119,7 +119,10 @@ assert np.all(p.distances == person.distances)
 
 
 # Ensure that entity instances are pickleable
-if HAVE_DILL:
+# Seems not to work for py3<3.5
+if HAVE_DILL and (
+        sys.version_info.major < 3 or
+        (sys.version_info.major == 3 and sys.version_info.minor >= 5)):
     dump = pickle.dumps(person)
     person2 = pickle.loads(dump)
     for k in person.__dict__:

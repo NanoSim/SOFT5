@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from __future__ import print_function
 
 import sys
-import json
 
 import numpy as np
 
@@ -12,6 +12,7 @@ from .arithmetic_eval import arithmetic_eval
 from .errors import SoftError, SoftMetadataError
 from .storage import Storage
 from .metadata import Metadata
+from .utils import json_loads, json_dumps, json_load, json_dump
 
 
 __all__ = ['entity', 'load_entity', 'derived_property_exception']
@@ -57,7 +58,7 @@ class MetaEntity(type):
     """Metaclass for BaseEntity providing some functionality to entity
     classes that is not inherited by their instances."""
     def __str__(self):
-        return json.dumps(self.soft_metadata, indent=2, sort_keys=True)
+        return json_dumps(self.soft_metadata, indent=2, sort_keys=True)
 
     def __repr__(self):
         return '<class %s version=%r, namespace=%r)>' % (
@@ -71,7 +72,15 @@ class MetaEntity(type):
         return self.soft_metadata == other.soft_metadata
 
     def __hash__(self):
-        return hash(('MetaEntity', ) + self.soft_metadata.mtype)
+        # The IPython pretty-printer calls this hash method (for
+        # caching) from a object with no soft_metadata attribute while
+        # it looks for formatters. This annoying exceptions in
+        # interactive sessions.
+        # To work around, we ask for forgiveness...
+        try:
+            return hash(self.soft_metadata.mtype)
+        except AttributeError:  # only reached by IPython pretty-printer, I hope..
+            return id(self)
 
     name = property(lambda self: str(self.soft_metadata['name']),
                     doc='Entity name.')
@@ -164,15 +173,17 @@ class BaseEntity(with_metaclass(MetaEntity)):
             initial values read from `uri`.
         """
         meta = self.soft_metadata
-        dims = [str(d['name']) for d in meta['dimensions']]
+        if uuid:
+            uuid = asStr(uuid)
+        dims = [asStr(d['name']) for d in meta['dimensions']]
         if isinstance(dimension_sizes, dict):
             dimension_sizes = [dimension_sizes[label] for label in dims]
         self.soft_internal_dimension_info = dimension_sizes
 
         self.__soft_entity__ = softpy.entity_t(
-            meta['name'],                       # get_meta_name
-            meta['version'],                    # get_meta_version
-            meta['namespace'],                  # get_meta_namespace
+            meta.name,                          # get_meta_name
+            meta.version,                       # get_meta_version
+            meta.namespace,                     # get_meta_namespace
             dims,                               # get_dimensions
             self.soft_internal_dimension_size,  # get_dimension_size
             self.soft_internal_store,           # store
@@ -204,6 +215,9 @@ class BaseEntity(with_metaclass(MetaEntity)):
                         self.soft_set_property(name, Uninitialized)
                     except SettingDerivedPropertyError:
                         pass
+
+    def __repr__(self):
+        return '%s(%s)' % (self.soft_get_meta_name(), self.soft_to_json())
 
     def soft_internal_dimension_size(self, e, label):
         """Returns the size of dimension `label`.
@@ -465,6 +479,65 @@ class BaseEntity(with_metaclass(MetaEntity)):
                  sizeexpr = sizeexpr.replace(label, str(size))
              dim_sizes.append(arithmetic_eval(sizeexpr))
         return dim_sizes
+
+    def soft_update(self, other):
+        """Populate this instance from `other`, where `other` must be an
+        instance of the same type as this one."""
+        if self.soft_metadata.mtype != other.soft_metadata.mtype:
+            raise SoftError(
+                'cannot update instance of type %r from an instance of '
+                'type %r' % (self.soft_metadata.mtype,
+                             other.soft_metadata.mtype))
+        for pname in self.soft_get_property_names():
+            self.soft_set_property(pname, other.soft_get_property(pname))
+
+
+
+    #-----------------------------------------------------------------------
+    # FIXME - use the json storage when that is implemented
+    #
+    # These methods are implemented because of urgent need and lack of
+    # a working json storage...
+    def soft_as_dict(self):
+        """Returns a dict representation of this instance."""
+        return {
+            'meta': {
+                'name': self.soft_get_meta_name(),
+                'version': self.soft_get_meta_version(),
+                'namespace': self.soft_get_meta_namespace(),
+            },
+            'dimensions': {dname: self.soft_get_dimension_size(dname)
+                           for dname in self.soft_get_dimensions()},
+            'properties': {pname: self.soft_get_property(pname)
+                           for pname in self.soft_get_property_names()},
+        }
+
+    def soft_from_dict(self, d):
+        """Populate self from a dict."""
+        meta = d['meta']
+        # FIXME - check if translator exists... if so apply it
+        if     (meta['name'] != self.soft_get_meta_name() or
+                meta['version'] != self.soft_get_meta_version() or
+                meta['namespace'] != self.soft_get_meta_namespace()):
+            raise SoftError('expect instance of type %s/%s-%s got %s/%s-%s' % (
+                self.soft_get_meta_namespace(),
+                self.soft_get_meta_name(),
+                self.soft_get_meta_verson(),
+                meta['namespace'], meta['name'], meta['version']))
+        for pname, value in d['properties'].items():
+            self.soft_set_property(pname, value)
+        self.soft_internal_check_dimension_sizes()
+
+    def soft_to_json(self, indent=2, sort_keys=True):
+        """Returns a json representation of this string."""
+        return json_dumps(self.soft_as_dict(), indent=indent, sort_keys=sort_keys)
+
+    def soft_from_json(self, s):
+        """Initialise self from a json string."""
+        d = json_loads(s)
+        self.soft_from_dict(d)
+
+    #-----------------------------------------------------------------------
 
 
 def _get_prop_info(cls, name, field, default=None):

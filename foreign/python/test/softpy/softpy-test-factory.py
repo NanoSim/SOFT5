@@ -117,5 +117,5 @@ jack = Person(name='Jack Daniels', age=42, skills=['tasting', 'Python', 'C'])
 
 import pickle
 import dill
-s = pickle.dumps(jack)
-jack2 = pickle.loads(s)
+ss = pickle.dumps(jack)
+jack2 = pickle.loads(ss)
