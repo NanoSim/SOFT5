@@ -8,6 +8,7 @@ from .collection import Collection
 from .entity import entity, load_entity
 from .metadata import (Metadata, register_metadb, register_jsondir,
                        find_metadata, find_metadata_uuid)
-from .translators import register_translator, translate, get_metadict
+from .translators import (Translator, register_translator, translate,
+                          get_instancedict)
 
 __doc__ = softpy.__doc__
