@@ -8,13 +8,17 @@
 
 int main(int argc, char **argv)
 {
+
   ::soft::init(argc, argv); 
-  if (argc <= 1) {
-    QTextStream(stderr) << "usage: " << argv[0] << "<uuid>" << endl;
+  if (argc <= 2) {
+    QTextStream(stderr) << "usage: " << argv[0] << " <path-to-remarc> <uuid>" << endl;
     return 1;
   }
 
-  soft::Collection collection(argv[1]);
+  std::string remarcPath(argv[1]);
+  std::string uuid(argv[2]);
+
+  soft::Collection collection(uuid.c_str());
   collection.setName("DFTPrep");
   collection.setVersion("0.1");
   
@@ -22,7 +26,7 @@ int main(int argc, char **argv)
   storage.load(&collection);
 
   PortoInput *input = new PortoInput(&collection);
-  Remark *remarc = new Remark(&collection);
+  Remark *remarc = new Remark(&collection, QString(remarcPath.c_str()));
   PortoOutput *output = new PortoOutput(&collection);
 
   QObject::connect(input, SIGNAL(finished()), remarc, SLOT(run()));
