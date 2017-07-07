@@ -6,6 +6,13 @@ set (SOFT_MAJOR_VERSION 5)
 set (SOFT_MINOR_VERSION 1)
 set (SOFT_PATCH_VERSION 5)
 
+# Additional helper files for aiding debugging with VS Code.
+# NOTE: The OPTIONAL flag makes it so that it is not an error if CMake can't 
+#       find the script.
+# NOTE: This must be defined before any add_library and add_executable, hence
+#       why this is at the start.
+include(CMakeToolsHelpers OPTIONAL)
+
 # FIXME - clean up dependencies between options
 #   * TESTS depends on: FOREIGN_C, STORAGE_JSON
 #   * PYTHON depends on: FOREIGN_C
@@ -33,6 +40,16 @@ option (BUILD_MONGOC "Download and build mongo C driver"  OFF)
 option (BUILD_GTEST "Download and build Google Test"      OFF)
 
 set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+# If we have Porto selected, this has some implications to which other plugins we also need
+if (WITH_PORTO)
+  set(WITH_TESTS ON)
+  set(WITH_FOREIGN_C ON)
+  set(WITH_PLUGIN_SOFT_KERNEL ON)
+  set(WITH_STORAGE_EXTERNAL ON)
+  set(WITH_STORAGE_JSON ON)
+  set(WITH_STORAGE_MONGO ON)
+endif()
 
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -345,6 +362,7 @@ if (WITH_PORTO)
   add_subdirectory(porto/src/xyplot)
   add_subdirectory(porto/src/dft-prepare)
   add_subdirectory(porto/src/remark-wrapper)
+  add_subdirectory(porto/src/parscale-effectiveness-factor)
 
  if (WITH_TESTS)
    add_subdirectory(porto/test/json)

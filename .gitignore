@@ -28,6 +28,7 @@ ui_*.h
 *.qmlproject.user
 *.qmlproject.user.*
 
+.vscode
 .directory
 [Dd]ebug/
 [Rr]elease/

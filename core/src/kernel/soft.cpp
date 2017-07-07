@@ -20,7 +20,7 @@
 
 static const char *storagefactoryid = "ea1ae6168c404a31bcfdd59da91c1e85";
 static const char *pluginDirectory = "/plugins";
-static int verboseLevel = 0;
+static int verboseLevel = 1;
 
 SOFT_BEGIN_NAMESPACE
 
