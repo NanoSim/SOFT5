@@ -39,8 +39,8 @@ backend database.
   6. Return the identity (UUID) of the collection for further use.
 
 
-`	[user@computer]$ dft-prepare dft/Fe2O3/ dft/thermo.dat 
-	cc3bc435-159c-4e96-b53f-1b97a526d5ce`
+		[user@computer]$ dft-prepare dft/Fe2O3/ dft/thermo.dat 
+		cc3bc435-159c-4e96-b53f-1b97a526d5ce
 
 dft-prepare is a utility that can be found in the folder
 "porto/src/dft-prepare". It is a small C++ program that imports the
@@ -69,8 +69,6 @@ A new soft::Collection is then instanciated and attached with reference and file
 	collection.attachEntity("dftPath", &reference);
 	collection.attachEntity("dftBoundayFile", &file);
 	...
-
-
 
 ## Run the REMARC simulation
 REMARC consist of a set of Pyhon-scripts. REMARC requires an
@@ -101,20 +99,20 @@ be stored in the internal storage (mongodb). This data can be further
 used to reproduce the original CHEMKIN-II data files if needed.
 
 Screenshot:
-~~~~
-[user@computer]$ ./remarc-wrapper {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
-bin size: == 1
-started
-Extracting VASP data from: /home/user/nanosim-demo/dft/Fe2O3
-...
-bin size: == 6845
-Checking the format of the chem.inp file.
-chem.inp file format check PASSED.
-Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
-End of Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
-Global Units are NO GLOBAL UNITS
-Data output to speciesParsed and reactionsParsed.
- 
+
+	[user@computer]$ ./remarc-wrapper {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+	bin size: == 1
+	started
+	Extracting VASP data from: /home/user/nanosim-demo/dft/Fe2O3
+	...
+	bin size: == 6845
+	Checking the format of the chem.inp file.
+	chem.inp file format check PASSED.
+	Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
+	End of Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
+	Global Units are NO GLOBAL UNITS
+	Data output to speciesParsed and reactionsParsed.
+
 Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
 End of Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
 ~~~~
@@ -125,7 +123,62 @@ create a text based on a template-file and a data source. In our case
 the template is based on an existing UDF. We will show that we can
 generate (a set of) UDFs from reaction data stored in a database.
 
-Screenshot:
+The utility genudf.js is found in (porto/examples/udfgen) and uses the
+code generation facility of SOFT5. The entity
+eu.nanosim.vasp/ChemkinReaction/0.1 is used to create ChemkinReaction
+objects. In this example, we search the collection for a relationship:
+
+	var reactionDataIds = collection.findRelations("reactiondata", "has-id");
+
+This will return a list of ids for a set of ChemkinReaction
+datapoints. We can then instanciate each one and populate it with
+content from the database:
+
+
+	reactionDataIds.forEach(function(reactionId){
+            var reaction = new porto.ChemkinReaction(reactionId);
+            reaction.read(storage);
+	...
+	
+In the SOFT5 MVC (Model-View-Controller) framework, the model
+constitues an object with properties that is passed to a view-template.
+
+	var controller = require('soft.mvc').create({
+                model: {
+                    min_cutoff: 1e-6,
+                    dp : 0.00001,
+                    k0 : 2.5,
+                    Temp: 1173.,
+                    EA: reaction.Ea, /* Read value from coming for the Porto database */
+                    Gas_Const: 8.314,
+                    S0Eq: "6.0 * 0.2066 * vol_frac_solid / dp", 
+                    kEq: "k0 * exp(-EA/(Gas_Const*Temp))",
+                    RrateEq: "k * S0 * pow((C_R(c,gas_thread) * X_CH4 / MW_CH4 * 1000.0 ),0.6)"
+                },
+                view: "./template/udf.cjs"
+            });
+
+The template is a text file (udf.cjs) which contains markups where
+expressions will be replaced by the evaluated value by a javascript
+engine. In this way we can start with a final document as we want it
+to be generated, and the replace all parameters with input data from
+the model. (The same technique is also used for generating source
+code).
+
+	#include "udf.h"
+
+	real min_cutoff = @{soft.model.min_cutoff};                     /* Adjust to ensure stability */
+	real dp = @{soft.model.dp};                                     /* Grain diameter */
+	real Temp = @{soft.model.Temp};                                 /* Adjust to experimental run */
+	real Gas_Const = @{soft.model.Gas_Const}; 
+	real k0 = @{soft.model.k0};                                             /* Pre-exponential factor */
+	real EA = @{soft.model.EA};                                     /* Activation energy */
+
+Here we se that the activation energy (soft.model.EA) comes from the
+model.EA property defined earlier. This value comes from the previous
+calculations. 
+
+Running the genudf utility gives the following:
 
 	[user@computer]$ ./genudf.js {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
 
@@ -193,5 +246,14 @@ Screenshot:
 		*rr = Rrate / 1000.0;
 	}
 
+Note that in our example there are multiple UDFs that are generated.
 
+## Summary
 
+In this use case we saw how a Collection was instanciated from a C++
+code and how instances of other entities was attached to it. The
+remark wrapper used the generated collection as input ran the remark
+(Python) code as an embedded process. The generated ChemkinII files
+was then read and its contents written into the database and attached
+to the collection. In the final step we saw how JavaScript could be
+employed to search within a collection and use the code generator.
