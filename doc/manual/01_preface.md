@@ -1,5 +1,11 @@
 # Preface
 
+This User Manual is a part of the NanoSim delivery and is intended to
+be read by students and researchers developing software with/or based
+on Porto. As Porto is build on the SOFT5 framework it is essential to
+also become familiar with SOFT5. This manual will also cover some
+introduction to the ideas and concepts in SOFT5.
+
 SOFT5 is a toolkit for building scientific software. SOFT5 allows for
 data to be formally described at a very low level. These descriptions
 are used to instruct computers how data should be interpreted or
@@ -14,6 +20,12 @@ flexibility of the Resource Description Framework (RDF) with a
 pragmatic and minimalistic approach that is suitable for representing
 data and "state" in scientific software, and related this to
 persistant storage.
+
+Porto extends SOFT5 to target different use cases in scope of the
+NanoSim project. The different software packages developed as part of
+the NanoSim project needs the ability to both publish (make available)
+its own data, as well as using results from other
+simulations.
 
 ## Acknowledgement
 

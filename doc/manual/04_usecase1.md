@@ -12,8 +12,9 @@ Porto:
   5. Seamless mixing of compiled and scriped languages (C++/JavaScript).
 
 ## Prerequistite
-  
-DFT data from VASP simulations
+
+In order to run this workflow, it is assumed that there already exists
+DFT data coming from VASP simulations. This includes
 
   Gas Phase Species (large static folder of data)
   Thermo Data (needed as input for REMARC later)
@@ -37,8 +38,39 @@ backend database.
   5. Store the collection using an internal storage (MongoDb)
   6. Return the identity (UUID) of the collection for further use.
 
-~~~~[user@computer]$ dft-prepare dft/Fe2O3/ dft/thermo.dat 
-cc3bc435-159c-4e96-b53f-1b97a526d5ce~~~~
+
+`	[user@computer]$ dft-prepare dft/Fe2O3/ dft/thermo.dat 
+	cc3bc435-159c-4e96-b53f-1b97a526d5ce`
+
+dft-prepare is a utility that can be found in the folder
+"porto/src/dft-prepare". It is a small C++ program that imports the
+auto generated C++ files "reference" and "file" created from entities
+with the same name. (The Porto entities resides in
+porto/src/entities).  The classes "soft::Reference" and "soft::File"
+instansiated and initialized. 
+
+	soft::Reference reference;
+	reference.uri          = dftPathInfo.absoluteFilePath().toStdString();
+	reference.created      = dftPathInfo.created().toString("dd-mm-yyyy").toStdString();
+	reference.owner        = dftPathInfo.owner().toStdString();
+	reference.lastModified = dftPathInfo.lastModified().toString("dd-mm-yyyy").toStdString();  
+	...
+	
+	soft::File file;
+	file.filename          = dftBoundInfo.fileName().toStdString();
+	file.suffix            = dftBoundInfo.suffix().toStdString();
+	file.size              = dftBoundInfo.size();
+	file.data              = dataFromFile(dftBoundInfo.absoluteFilePath());	
+	...
+	
+A new soft::Collection is then instanciated and attached with reference and file.
+
+	soft::Collection collection;
+	collection.attachEntity("dftPath", &reference);
+	collection.attachEntity("dftBoundayFile", &file);
+	...
+
+
 
 ## Run the REMARC simulation
 REMARC consist of a set of Pyhon-scripts. REMARC requires an
@@ -70,196 +102,21 @@ used to reproduce the original CHEMKIN-II data files if needed.
 
 Screenshot:
 ~~~~
-[thomash@sintefutv006]$ ./remarc-wrapper {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+[user@computer]$ ./remarc-wrapper {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
 bin size: == 1
 started
-Extracting VASP data from: /home/thomash/nanosim-demo/dft/Fe2O3
-
-************ GAS PHASE SPECIES ****************
-
-Directories containing gasphase species: 
-['CH3', 'CH4', 'H']
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/gasphase/CH3
-   'vib' directory found
-    ['gasphase', 'C1H3', 'CH3', 'gasphase', 'None', -18.16762837]
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/gasphase/CH4
-   'vib' directory found
-    ['gasphase', 'C1H4', 'CH4', 'gasphase', 'None', -24.04210642]
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/gasphase/H
-    ['gasphase', 'H1', 'H', 'gasphase', 'None', -1.11720612]
-
-************ GAS PHASE SPECIES ****************
-
-Directories containing gasphase species: 
-['CH3', 'CH4', 'H']
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/gasphase/CH3
-   'vib' directory found
-    ['gasphase', 'C1H3', 'CH3', 'gasphase', 'None', -18.16762837]
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/gasphase/CH4
-   'vib' directory found
-    ['gasphase', 'C1H4', 'CH4', 'gasphase', 'None', -24.04210642]
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/gasphase/H
-    ['gasphase', 'H1', 'H', 'gasphase', 'None', -1.11720612]
-
-************ SYSTEM - surface *******************
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/surface/clean
-   'vib' directory found
-    WARNING --- 3 imaginary frequencies found
-    ['Fe2O3', 'Fe48O72', 'Fe48O72', 'surface', 'None', -806.91622291]
-
-************ ADSORBATE STRUCTURES ****************
-
-Directories containing adsorbed/bulk structures found: 
-['CH3+H', 'CH4']
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/surface/CH3+H/1+1/site1+site2
-   'vib' directory found
-    WARNING --- 3 imaginary frequencies found
-    ['Fe2O3', 'C1H4Fe48O72', 'CH4', 'CH3+H', 'site1+site2', -830.98730485]
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/surface/CH4/1/site1
-   'vib' directory found
-    WARNING --- 3 imaginary frequencies found
-    ['Fe2O3', 'C1H4Fe48O72', 'CH4', 'CH4', 'site1', -831.19146894]
-
-************ TRANSITION STATES ****************
-
-Directories containing transition states found: 
-['CH4-CH3+H']
-
-Checking dependencies for transition: CH4-CH3+H
-   found sites directory for state CH4: /home/thomash/nanosim-demo/dft/Fe2O3/surface/CH4/1/site1
-   found sites directory for state CH3+H: /home/thomash/nanosim-demo/dft/Fe2O3/surface/CH3+H/1+1/site1+site2
-    --- OK
-
-Checking --- /home/thomash/nanosim-demo/dft/Fe2O3/surface/ts/CH4-CH3+H/site1-site1+site2/dim
-    Dimer method - used
-   'vib' directory found
-    WARNING --- 4 imaginary frequencies found - is this a true transition state?
-    ['Fe2O3', 'C1H4Fe48O72', 'CH4', 'CH4-CH3+H', 'site1-site1+site2', -830.06777737]
-
-====================================================
-SEARCHING FOR ADSORBED SPECIES AND SURFACE REACTIONS
-====================================================
-
-
-Adsorbed species: CH4 at site site1 at Fe2O3
-
-How many sites of type site1 are there in the simulation cell?
-Area of simulation cell =  90.6564 Angstrom2
-Site density =  7.327e-10 moles/cm2
-
-How many adsorption sites for CH4 are there in total
-in the simulation cell for surface Fe2O3 (all sites)?
-Average area per adsorption site =  22.6641 Angstrom2
-Quantum vibrational partition functions used for desorption and adsorption rate calculation!
-Moments of inertia:
-  3.2277 amu*Angstrom2
-  3.2280 amu*Angstrom2
-  3.2287 amu*Angstrom2
-Rotational temperatures:
-    7.51 K
-    7.51 K
-    7.51 K
-This is a non-linear molecule
-What is its symmetry number? Ex. H2O = 2, NH3 = 3, CH4 = 12
-
-Gas-phase molecular species: get energy and frequency/ies
-ZPE =   1.1878 eV
-
-Adsorbed species: get energy and frequencies
-All 125 atoms in slab are included in frequency calculation.
-Removing 3 lowest frequencies:
-5.42790194129j
-3.75179511341j
-2.56798677785j
-ZPE =   8.8092 eV
-
-Clean surface: get energy and frequencies
-All 120 atoms in slab are included in frequency calculation.
-Removing 3 lowest frequencies:
-4.48272138092j
-2.84927320213j
-2.3196805537j
-ZPE =   7.5964 eV
-
-DeltaE desorption =   0.2331 eV (   22.49 kJ/mol)
-DeltaE desorption incl. ZPE =   0.2081 eV (   20.08 kJ/mol)
-
-
-========================================================
-
-
-Transition state: CH4-CH3+H at site site1-site1+site2 at Fe2O3
-Reactant: CH4 at site site1 at Fe2O3
-Product: CH3+H at site site1+site2 at Fe2O3
-
-How many sites of type site2 are there in the simulation cell?
-Area of simulation cell =  90.6564 Angstrom2
-Site density =  7.327e-10 moles/cm2
-
-
-Quantum vibrational partition functions used for rate calculation!
-
-Reactant: get energy and frequencies
-All 125 atoms in slab are included in frequency calculation.
-Removing 3 lowest frequencies:
-5.42790194129j
-3.75179511341j
-2.56798677785j
-ZPE =   8.8092 eV
-
-Product: get energy and frequencies
-All 125 atoms in slab are included in frequency calculation.
-Removing 3 lowest frequencies:
-5.09570902268j
-4.39542754503j
-2.91763156438j
-ZPE =   8.8845 eV
-
-Transition state: get energy and frequencies
-All 125 atoms in slab are included in frequency calculation.
-Removing 3 lowest frequencies:
-27.8989145597j
-14.7084304837j
-11.8700907205j
-Imaginary frequency =   1289.59i cm-1
-Crossover temperature for tunneling (Tc) = 295.30 K
-ZPE =   8.8351 eV
-
-Barrier height forward =   1.1237 eV (  108.42 kJ/mol)
-Barrier height forward incl. ZPE =   1.1496 eV (  110.92 kJ/mol)
-
-Barrier height reverse =   0.9195 eV (   88.72 kJ/mol)
-Barrier height reverse incl. ZPE =   0.8702 eV (   83.96 kJ/mol)
-
-Reaction energy forward =   0.2042 eV (   19.70 kJ/mol)
-Reaction energy forward incl. ZPE =   0.2794 eV (   26.96 kJ/mol)
-
-==============================================================
-
-
-=========================================
-DESORPTION AND SURFACE REACTIONS FINISHED
-=========================================
-
+Extracting VASP data from: /home/user/nanosim-demo/dft/Fe2O3
+...
 bin size: == 6845
 Checking the format of the chem.inp file.
 chem.inp file format check PASSED.
-Parsing NASA thermo file: /HOME/THOMASH/NANOSIM-DEMO/REMARC/THERMO.DAT
-End of Parsing NASA thermo file: /HOME/THOMASH/NANOSIM-DEMO/REMARC/THERMO.DAT
+Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
+End of Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
 Global Units are NO GLOBAL UNITS
 Data output to speciesParsed and reactionsParsed.
  
-Parsing NASA thermo file: /HOME/THOMASH/NANOSIM-DEMO/REMARC/THERMO.DAT
-End of Parsing NASA thermo file: /HOME/THOMASH/NANOSIM-DEMO/REMARC/THERMO.DAT
+Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
+End of Parsing NASA thermo file: /HOME/USER/NANOSIM-DEMO/REMARC/THERMO.DAT
 ~~~~
 
 ## Run the ANSYS Fluent UDF Code Generator
@@ -270,7 +127,7 @@ generate (a set of) UDFs from reaction data stored in a database.
 
 Screenshot:
 
-[thomash@sintefutv006]$ ./genudf.js {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+	[user@computer]$ ./genudf.js {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
 
 	/* Fluent UDF using id{fcf0db6f-3961-4f67-920a-8c5f4733994f}*/ 
 
