@@ -1,12 +1,13 @@
-Connecting REMARC to parScale
------------------------------
+Use Case 2. Coupling of REMARC to parScale
+==========================================
 
 In this example we demonstrate how to use data from an atomic scale simulation in **REMARC** as input to the particle scale model **parScale**, using **Porto**.
 
 **TODO: Explain here why we need to connect these scales, use writing from Stefan Radl**
 
 
-## Walkthrough
+Walkthrough
+-----------
 
 We assume that a simulation in REMARC has already been run and the simulation results have been stored in a *Porto Collection* with a unique identifier (*uuid*). This is described in the section _Run the REMARC simulation_. The uuid allows us to access the contents of the collection across different software and simulation tools.
 
@@ -37,11 +38,42 @@ After we have inspected this collection and are satisfied with its contents, we 
 
 We here see that the CHEMKIN II file has been populated with the reactions and their parameters, as inspected in the collection. This is now a file that contains the input needed to run parScale.
 
-**TODO** How to run parScale with this file?
-
-## Details
+Details
+-------
 
 The source for these scripts can be found in the Porto repository under `porto/examples`. These scripts are meant to serve as examples of a range of techniques for connecting different software and can easilly be tailored towards other software, file types, data sets, entities and collections.
+
+### `inspectChemkinReactionEntity.js`
+
+The following code snippet describes how to use Porto to access and use data stored in collections. For this particular case, the reactions are printed to console.
+
+    ...
+    
+    // Access the mongoDB database
+    var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
+
+    // Load the collection given by the uuid on the command line, then retrieve all
+    // reaction entities in this collection
+    var uuid = args[1];
+    collection = new porto.Collection(uuid);
+    storage.load(collection);
+
+    print("Collection (uuid = " + uuid + ")"); 
+ 
+    // Find all the reactions attached to this collection
+    var reactionDataIds = collection.findRelations("reactiondata", "has-id");
+    print("|    Reactants => Products, A, b, Ea");
+
+    reactionDataIds.forEach(function (reactionId) {
+       // Read each ChemkinReaction entity in the collection
+       var reaction = new porto.ChemkinReaction(reactionId);
+       reaction.read(storage);
+       // Print out the details
+       print("+--- " + reaction["reactants"] + " => " + reaction["products"] + ", " + reaction["A"] + ", " + reaction["b"] + ", " + reaction["Ea"]);
+    });
+
+    ...
+
 
 ### `chemkinReactionEntity-to-chemkinFile.js`
 
@@ -51,25 +83,97 @@ The source for these scripts can be found in the Porto repository under `porto/e
 2. Retrieve all reactions stored in the collection. Each reaction has the following information:
    * A list of reactants
    * A list of products
-   * Pre-exponential factor $A$
-   * $b$ (**TODO: Name?**)
-   * Activation energy, $E_a$
+   * Pre-exponential factor _A_
+   * Temperature exponent _b_
+   * Activation energy, _Ea_
 3. From the list of reactants and products, generate the list of _elements_ and _species_ involved in the reactions.
 4. Use the reaction along with the generated list of elements and species to populate a *CHEMKIN II* template. 
 5. Store the filled template to a file.
 
+The way this is implemented in `chemkinReactionEntity-to-chemkinFile.js` is by first accessing the collection and retrieve its information:
+
+    // Attempt to talk to the local mongodb
+    var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
+
+    // Load the collection given by the uuid on the command line, then retrieve all
+    // reaction entities in this collection
+    var uuid = args[1];
+    collection = new porto.Collection(uuid);
+    storage.load(collection);
+
+    var reactionDataIds = collection.findRelations("reactiondata", "has-id");
+
+The list of reactants and products, species and elements are then generated:
+
+    // Collects all species, for example H2O, FeO3, CH4, etc.
+    var species = [];
+    // Collects all reaction lines, on the form <reactants> => <product> <pre.exp.factor> <b> <activation energy>
+    var all_reactions = []
+    reactionDataIds.forEach(function (reactionId) {
+       var reaction = new porto.ChemkinReaction(reactionId);
+       reaction.read(storage);
+
+       var reactants = reaction.reactants;
+       var products = reaction.products;
+            
+       // Collect a list of all reactants and product species
+       for (var r in reactants) {
+          species.push(reactants[r]);
+       }
+       for (var p in products) {
+          species.push(products[p]);
+       }
+
+       // Construct the reactions
+       if (products.length > 0 && reactants.length > 0) {
+          all_reactions.push(reactants.join(" + ") + " => " + products.join(" + ") + " " + reaction.A + " " + reaction.b + " " + reaction.Ea);
+       }
+    });
+
+    // All elements we want to check for, ideally this could be the entire periodic table
+    var all_elements = ["Fe", "H", "C", "O"];
+    var elements = [];
+
+    unique(species).forEach(function(s) {
+       all_elements.forEach(function(e) {
+          // For each unique species, loop over each element, then ...
+          var ss = s;
+          // ... check if the element is in the species.
+          if (find(e, ss)) {
+             // We found an element, push it to the total list of elements and
+             // strip it away from the string we are searching in.
+             elements.push(e);
+             ss = ss.replace(e, "");
+          }
+       });
+    });
+
+Using this information, the CHEMKIN II file template can be populated:
+
+    var controller = require('soft.mvc').create({
+        model: {
+           elements: unique(elements).join(" "),
+           species: unique(species).join(" "),
+           reactions: all_reactions.join("\n")
+        },
+        view: "./template/chemkin.cjs"
+    });
+
+This template used here, `chemkin.cjs`, contains tags that corresponds to the names used in the above script which will substitute them for the actual values. For example, `@{soft.model.elements}` will here be replaced by a list of elements created above:
+
+    ELEMENTS @{soft.model.elements}
+    END
+    SPECIES
+    @{soft.model.species}
+    END
+
+    REACTIONS KJOULES/MOLE MOLES
+    @{soft.model.reactions}
+    END
+
 ### CHEMKIN II file format
 
-CHEMKIN II files have the form (**TODO**)
-
-**TODO: Does the file format exist somewhere else?**
-
-### Chemkin reaction entity
-
-**TODO: Described elsewhere?**
-
-
-This has the following structure:
+For this scenario, we use a CHEMKIN II file with following simple structure:
 
     ELEMENTS C H FE O 
     END
@@ -86,128 +190,4 @@ The input file consists of three sections, each starting with a name and ending 
 
 * `ELEMENTS` contains a list of elements noted by their periodic table names
 * `SPECIES` contains a list of all species used in the reaction equations
-* `REACTIONS` lists the possible reactions, followed by the pre exponential factor, b and activation energy. **Check**
-
-This file is generated by
-1. Accessing the base case entity by its UID.
-2. Retrieving all reactions by its relation `reactiondata` (**TODO** Need some note on relations earlier?)
-3. For each reaction, the reaction species and product species are noted in the entity property `reactants` and `products` respectively.
-4. Produce a list of species from the list of reactants and products.
-5. Produce a list of elements from the list of species.
-6. Populate the CHEMKIN II template file, where the tags `@{soft.model.elements}`, `@{soft.model.species}` and `@{soft.model.reactions}` corresponds to the elements, species and reactions respectively.
-
-A CHEMKIN II template file:
-
-    ELEMENTS @{soft.model.elements}
-    END
-    SPECIES
-    @{soft.model.species}
-    END
-
-    REACTIONS KJOULES/MOLE MOLES
-    @{soft.model.reactions}
-    END
-
-parScale can take the produced CHEMKIN II file as an input.
-
-
-ParScale -> Ansys FLUENT
-------------------------
-
-Demonstrate that data from the particle scale model parScale can be used in the generation of an Ansys FLUENT UDF using Porto. 
-
-
-* Simulate reaction and record (i) average particle temperature, (ii) current total consumption rate of gas-phase species A, and (iii) conversion of the solid
-* Postprocessing step 1: calculate and plot (i) consumption rate of A versus conversion X for different C_A. Repeat exercise for different temperature to determine k, m, and n.
-* Calculate the fitting values for k, n and m in the rate expression
-* The effectiveness factor (parameters k_fit and m, as well as the functional form) is written to a .json file from an Octave script that processes the ParScale output
-* then read into Porto using an External Plugin
-
-(Alternative approach, if feasible: Ef is written directly from ParScale using Porto. We will investigate whether this is a feasible approach within the time available.)
-
-* Porto stores Ef in an entity
-* An UDF for Fluent is generated using the UDF generation in Porto
-
-Stefan Radl will create an UDF template for the effectiveness factor.
-
-
-
-
-----------
-NOTES: To be removed
-====================
-
-
-Connecting scales with Porto
-============================
-
-One scenario (uid)
-Allows re-tracing steps, re-running simulations
-Porto stores data in database, programs can interact directly through the Porto API from applications or through scripting
-Porto -> input -> simulation -> output -> Porto
-Semantics of data defined in entities
-
-The connection from WP3 to WP4 will be the following:
-* Retrieve the activation energy from Remarc, using Porto
-* Write Chemkin file for use in ParScale
-* The Chemkin file will be generated using Porto and can be fully generated from the reaction entity from Remarc. This is analogue to the WP3 -> WP5 connection demonstrated.
-* The individual workflows for WP3 -> WP4 and WP4 -> WP5 can be combined to form a full workflow for WP3 -> WP4 -> WP5.
-* Stefan Radl will define a simplified reaction that allows us to demonstrate this connection.
-
-Example file:
-
-    ELEMENTS H O N END
-    SPECIES H2 H .....
-    Reaction (H2 + O = H2), Pre-exponential factor, temperature exponent and activation energy
-
-
-
-From Stefan Radl
------
-
-
-## 3 Effective Reaction Model
-The reaction rate law is written such that the key gas phase reactant (denoted as reactant A) is consumed and has the stoichiometric factor of -1. All other reactants may have a different stoichiometric factor.
-  
-The reaction may be of order n with respect to species A, and of order m with respect to a solid-phase reactant that is consumed during the reaction. The concentration of the solid-phase reactant is assumed to be proportional to (1-X) where X is the conversion. Consequently, the rate law (which equals the rate of consumption of species A) is written as
- 
-where k is the reaction rate constant (currently this value is assumed to be constant and equal to "effectiveArrhenius").
-
-In order to close the model, the local conversion X of the particles has to be tracked. Starting initially with 0, the time evolution of X follows directly from the consumption of the solid species (with the initial concentration Cs,0) and hence is
- 
-Here dt denotes the material derivative of X.
-
-### 3.1 Future Extension
-The reaction rate constant k may depend on the local temperature via Arrhenius law. This can be achieved by supplying more data to "effectiveArrhenius"
-
-Based on the local reaction rate a Thiele modulus could be calculated:
- 
-Here Deff is the effective diffusivity of gas phase species A in the pores, which may depend on the local temperature.  is the particle diameter. This Thiele modulus can be used to close a more advanced effectiveness factor model.
-
-
-## 4	Closing the Single Reaction Model
-Note that k, m, and n can be specified by the user (if it is clear which reaction is dominating), or are the result of a fitting exercise using a simulation of a more complex reaction or reaction network (using, e.g., ParScale). For the latter the rate expression may be linearized following
- 
-Thus, multivariate linear regression (e.g., using Octave’s ‘ols’ function) can be used to determine k, m, and n. http://stats.stackexchange.com/questions/32504/simple-multivariate-regression-with-octave. In the present work, m is set to zero to avoid the additional complication of running multiple ParScale simulations. However, the parameter n will be fitted by ParScale’s postprocessing tool.
-
-## 5	Overall Model for Reaction in Control Volume (for Application in WP5)
-
-The overall volumetric consumption rate of the gas phase species A (in [kmol/m³/s]) is 
-
-_Equation_
-
-where p is the particle volume fraction. This rate expression must be implemented in the Fluent UDF.
-Thus, the user input to the UDF is:
-
-* the parameters to model k as a function of temperature (e.g., (i) a constant value, or (ii) using the Arrhenius law that considers a pre-exponential factor and an activation energy which can be supplied by a Porto “reaction” entity)
-* the parameters m and n to model the effective reaction rate, 
-* the functional form of (can be a constant, or a more elaborate mathematical expression, e.g., that shown in the first chapter)
-* the parameters to model the effective diffusivity (in the simplest case this is not needed; the effective diffusivity is only needed if a complex functional form for the effectiveness factor is chosen) 
-* the initial concentration and stoichiometric factor of the solid to be able to calculate X (in the simplest case this is not needed; only needed if a complex functional form for the effectiveness factor is chosen)
-
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:|------:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
-
+* `REACTIONS` lists the possible reactions, followed by the pre exponential factor _A_, temperature exponent _b_ and activation energy _Ea_.
