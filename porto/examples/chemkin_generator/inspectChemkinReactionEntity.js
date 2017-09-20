@@ -15,7 +15,7 @@ __main__ = function (args) {
             return;
         }
 
-        // Attempt to talk to the local mongodb
+        // Access the mongoDB database
         var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
 
         // Load the collection given by the uuid on the command line, then retrieve all
@@ -26,13 +26,15 @@ __main__ = function (args) {
 
         print("Collection (uuid = " + uuid + ")");
 
+        // Find all the reactions attached to this collection
         var reactionDataIds = collection.findRelations("reactiondata", "has-id");
         print("|    Reactants => Products, A, b, Ea");
         
-        // Print each reaction
         reactionDataIds.forEach(function (reactionId) {
+            // Read each ChemkinReaction entity in the collection
             var reaction = new porto.ChemkinReaction(reactionId);
             reaction.read(storage);
+            // Print out the details
             print("+--- " + reaction["reactants"] + " => " + reaction["products"] + ", " + reaction["A"] + ", " + reaction["b"] + ", " + reaction["Ea"]);
         });
     } catch (err) {
