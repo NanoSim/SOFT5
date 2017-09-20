@@ -50,8 +50,7 @@ etc.). Future extensions of Porto might include a graphical user
 interface in addition to the scripting shell.
 
 
-Demonstrated Use Cases using Porto
-==================================
+# Demonstrated Use Cases using Porto
 
 In order to demonstrate how Porto is used, three use cases are in this document demonstrated. Connections between different scales are in practice making simulation software able to pass information to each other.
 
