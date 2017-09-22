@@ -68,3 +68,4 @@ By introducing Porto as the framework for coupling, this problem is transformed.
 ![Use cases connected through Porto](./use_cases_overview_porto_connection.png "Use cases connected through Porto")
 
 These use cases demonstrate different techniques supported by Porto and should be regarded as tutorials on how to build coupling between any software. 
+

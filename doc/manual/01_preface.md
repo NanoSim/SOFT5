@@ -6,6 +6,8 @@ on Porto. As Porto is build on the SOFT5 framework it is essential to
 also become familiar with SOFT5. This manual will also cover some
 introduction to the ideas and concepts in SOFT5.
 
+![Porto Architecture](./porto-architecture.png "Porto architecture")
+
 SOFT5 is a toolkit for building scientific software. SOFT5 allows for
 data to be formally described at a very low level. These descriptions
 are used to instruct computers how data should be interpreted or
@@ -27,13 +29,11 @@ the NanoSim project needs the ability to both publish (make available)
 its own data, as well as using results from other
 simulations.
 
-## Acknowledgement
-
-LedaFlow (JIP), SimCoFlow (NFR), NanoSim (EU)
-
 ## Scope of this manual
 
-This manual gives a brief introduction to the fundaments of SOFT5. In
-Chapter [?] Porto and NanoSim is presented. The last 3 chapters
-are dedicated to UseCases in NanoSim where SOFT/Porto is used to handle
-interoperability between different simulation tools.
+This manual is intended for getting started with using Porto for
+connecting software platforms. As a fundament for developing with
+Porto, chapter two gives a brief introduction to the fundaments of
+SOFT5. In Chapter 3 Porto and NanoSim is presented. The last 2
+chapters are dedicated to use cases in NanoSim where SOFT/Porto is
+used to handle interoperability between different simulation tools.

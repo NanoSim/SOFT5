@@ -201,3 +201,4 @@ The input file consists of three sections, each starting with a name and ending 
 * `ELEMENTS` contains a list of elements noted by their periodic table names
 * `SPECIES` contains a list of all species used in the reaction equations
 * `REACTIONS` lists the possible reactions, followed by the pre exponential factor _A_, temperature exponent _b_ and activation energy _Ea_.
+

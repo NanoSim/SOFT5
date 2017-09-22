@@ -1,4 +1,4 @@
-# Usecase 1. Coupling of REMARC and Ansys FLUENT
+# Use Case 1. Coupling of REMARC and Ansys FLUENT
 
 In this usecase we demonstrate that data from atomic scale can be used
 in the generation of a FLUENT UDF utilizing offline coupling with
@@ -39,6 +39,7 @@ backend database.
   6. Return the identity (UUID) of the collection for further use.
 
 ```bash
+$ cd porto/examples
 $ dft-prepare dft/Fe2O3/ dft/thermo.dat 
 cc3bc435-159c-4e96-b53f-1b97a526d5ce
 ```
@@ -106,7 +107,7 @@ used to reproduce the original CHEMKIN-II data files if needed.
 Screenshot:
 
 ```bash
-$ ./remarc-wrapper {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+$ ./remarc-wrapper remark/ {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
 bin size: == 1
 started
 Extracting VASP data from: /home/user/nanosim-demo/dft/Fe2O3
@@ -272,3 +273,4 @@ remark wrapper used the generated collection as input ran the remark
 was then read and its contents written into the database and attached
 to the collection. In the final step we saw how JavaScript could be
 employed to search within a collection and use the code generator.
+

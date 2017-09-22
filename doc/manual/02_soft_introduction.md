@@ -1,4 +1,4 @@
-# SOFT5
+# Porto/SOFT5
 
 SOFT5 is an acronym for SINTEF Open Framework and Tools no.5. SOFT5 is
 a set of libraries and tools to support scientific software
@@ -16,8 +16,6 @@ formats and the introduction of new features and data states. With
 SOFT5 it is possible to use reusable software components that handle
 all this, or develop new reusable software components that can be used
 by others in the same framework.
-
-![SOFT/Porto](./SOFT-Architecture.png "Porto built on top of the SOFT framework")
 
 SOFT5 contains a core library with plugin support. The library also
 comes with set of interaces (API) to create extensions and custom
@@ -111,7 +109,7 @@ The next step is to configure and install SOFT5.
 
 	$ mkdir build-soft5
 	$ cd build-soft5
-	$ cmake -DCMAKE_INSTALL_PREFIX=/usr/local/soft5 ../soft5
+	$ cmake -DCMAKE_INSTALL_PREFIX=/usr/local/soft5 -DWITH_PORTO=yes ../soft5
 	
 Note that your local installation may need help to find different
 software components. It is therefore recommended to use ccmake (CMake
@@ -322,5 +320,4 @@ implemented.
 	San Marino, 33203,	83.24
 	Iceland, 334252,	82.97
 	Hong Kong, 7347000000,	82.86
-	
 	
