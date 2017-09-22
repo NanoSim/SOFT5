@@ -21,7 +21,7 @@ by others in the same framework.
 ![SOFT5 Architecture](./SOFT-Architecture.png "SOFT5 Architecture")
 
 SOFT5 contains a core library with plugin support. The library also
-comes with set of interaces (API) to create extensions and custom
+comes with set of interfaces (API) to create extensions and custom
 plugins. The core library is used to connect a software application
 with the framework.
 
@@ -30,7 +30,7 @@ SOFT5, namely HDF5 and MongoDB. Local data stored in HDF5 files is suitable
 for managing local data
 
 The main approach to developing software with SOFT5 is to
-incrementally describe the domain of the software using entites (see
+incrementally describe the domain of the software using entities (see
 below). The entities can represent different elements of the software,
 and be used in handling I/O as well as in code generation and
 documentation. Entities can also be used for annotating data and data
@@ -132,7 +132,7 @@ with curses interface) when configuring the build process.
 ## Entities
 An entity contains information about data. It does not contain the
 actual data, but describes what the different data fields are, in
-terms of name, datatypes, units, dimensionality etc. Information about
+terms of name, data types, units, dimensionality etc. Information about
 data is often called meta data. Formal meta data enables for the
 correct interpretation of a set of data, which otherwise would be
 unreadable if not serialized in the correct and often undocumented
@@ -147,7 +147,7 @@ an object in a simulation code, while the latter is more suitable for
 a data catalog distribution description (see dcat:Distribution).
 SOFT5 entities allows for describing many aspects of the domain. While
 each entity describes a single unit of information, a collection of
-entites can describe the complete domain. See collections below.
+entities can describe the complete domain. See collections below.
 
 ### Uniqueness
 Each published entity needs to be uniquely identified in order to
@@ -160,13 +160,13 @@ fields the term 'Particle' can be a general term to describe something
 small. For this reason the SOFT5 entities have namespaces, similar to
 how vocabularies are defined in OWL. The version number is a pragmatic
 solution to handle how properties of an Entity might evolve during the
-developmen process. In order to handle different versions of a
+development process. In order to handle different versions of a
 software, the entity version number can be used to identify the
 necessary transformation between two data sets.
 
 ## Collections
 A collection is defined as a set of entities and relationships between
-them. Collections are themself defined as entities, and can this
+them. Collections are themselves defined as entities, and can this
 contain other collections as well. This is useful to represent the
 knowledge of the domain where data exists, in order to find data that
 relates to other data, but also to uniquely identify a complete data
@@ -214,7 +214,7 @@ presented.
 ## Working with metadata
 
 This section will give an example of how we might design a software
-tool from modelling the domain, to implementing the logic, without the
+tool from modeling the domain, to implementing the logic, without the
 regard for the syntax or file formats of the data that is the input or
 output. In our example, we want to calculate the average life
 expectancy per person living anywhere. We know statistical data exists

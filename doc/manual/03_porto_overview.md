@@ -3,7 +3,7 @@ Porto is build on top of SOFT5 and is the "glue" between the different
 simulators that needs to publish and/or exchange data. Porto uses all
 the major elements from SOFT5 such as the MongoDB storage module, the
 scripting tools, code generation framework and APIs to extend with
-custom datareaders/writers.
+custom data readers/writers.
 
 ## Modularity and reusability
 

@@ -9,9 +9,9 @@ Porto:
   2. Make use of the Porto internal storage for storing both meta-data and data.
   3. Work with Collections for building Domain Specific Relationships.
   4. Utilize custom external plugins for retrieving data from proprietary formats.
-  5. Seamless mixing of compiled and scriped languages (C++/JavaScript).
+  5. Seamless mixing of compiled and scripted languages (C++/JavaScript).
 
-## Prerequistite
+## Prerequisite
 
 In order to run this workflow, it is assumed that there already exists
 DFT data coming from VASP simulations. This includes
@@ -27,15 +27,15 @@ later use.
 ## Create an initial collection with DFT-data
 The dft-prepare is a tool written in C++ that takes the Gas Phase
 Species directory and a thermo-file as argument. It will first
-instanciate a 'Collection' and then populate this with the 'Reference'
-and 'File' entities. Then the collection is stored in the MongoDb
+instantiate a 'Collection' and then populate this with the 'Reference'
+and 'File' entities. Then the collection is stored in the MongoDB
 backend database.
 
   1. Create a collection
   2. Create a File-entity and populate it with the contents of thermo-data
   3. Create a Reference-entity and populate it with the gas phase folder info 
   4. Attach the File and Reference entity in the collection
-  5. Store the collection using an internal storage (MongoDb)
+  5. Store the collection using an internal storage (MongoDB)
   6. Return the identity (UUID) of the collection for further use.
 
 ```bash
@@ -49,7 +49,7 @@ dft-prepare is a utility that can be found in the folder
 auto generated C++ files "reference" and "file" created from entities
 with the same name. (The Porto entities resides in
 porto/src/entities).  The classes "soft::Reference" and "soft::File"
-instansiated and initialized. 
+instantiated and initialized. 
 
 ```c++
 soft::Reference reference;
@@ -67,7 +67,7 @@ file.data              = dataFromFile(dftBoundInfo.absoluteFilePath());
 ...
 ```
 
-A new soft::Collection is then instanciated and attached with reference and file.
+A new soft::Collection is then instantiated and attached with reference and file.
 
 ```c++
 soft::Collection collection;
@@ -77,9 +77,9 @@ collection.attachEntity("dftBoundayFile", &file);
 ```
 
 ## Run the REMARC simulation
-REMARC consist of a set of Pyhon-scripts. REMARC requires an
+REMARC consist of a set of Python-scripts. REMARC requires an
 interactive session that has been automated for this demo. We can show
-that this interaction can be replaced with using Porto scriping and an
+that this interaction can be replaced with using Porto scripting and an
 entity for REMARC Setup.
 
 The REMARC-wrapper consist of three distinct parts.
@@ -140,7 +140,7 @@ var reactionDataIds = collection.findRelations("reactiondata", "has-id");
 ```
 
 This will return a list of ids for a set of ChemkinReaction
-datapoints. We can then instanciate each one and populate it with
+datapoints. We can then instantiate each one and populate it with
 content from the database:
 
 ```js
@@ -151,7 +151,7 @@ reactionDataIds.forEach(function(reactionId){
 ```
 	
 In the SOFT5 MVC (Model-View-Controller) framework, the model
-constitues an object with properties that is passed to a view-template.
+constitutes an object with properties that is passed to a view-template.
 
 ```js
 var controller = require('soft.mvc').create({
@@ -188,7 +188,7 @@ real k0 = @{soft.model.k0};                 /* Pre-exponential factor */
 real EA = @{soft.model.EA};                 /* Activation energy */
 ```
 
-Here we se that the activation energy (soft.model.EA) comes from the
+Here we see that the activation energy (soft.model.EA) comes from the
 model.EA property defined earlier. This value comes from the previous
 calculations. 
 
