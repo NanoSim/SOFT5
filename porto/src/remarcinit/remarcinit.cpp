@@ -6,12 +6,12 @@
 #include <remarcReader.h>
 #include "remarcsetup.hxx"
 
-#include "remarkinit.h"
+#include "remarcinit.h"
 
 static char const defaultRemarcInFile[] = "remarc.in";
 
 int softc_plugin_identify (char* name, int maxlen) {
-  const char plugin_name[] = "remark-init";
+  const char plugin_name[] = "remarc-init";
   const size_t len = std::min<size_t>(sizeof(plugin_name), maxlen);
   strncpy(name, plugin_name, len);
   name[len - 1] = '\0';

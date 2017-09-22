@@ -3,13 +3,13 @@
 #include <collection.h>
 
 class QProcess;
-class Remark : public QObject
+class Remarc : public QObject
 {
   Q_OBJECT
   
 public:  
-  Remark(soft::Collection *, QString remarcPath, QObject *parent = nullptr);
-  virtual ~Remark();
+  Remarc(soft::Collection *, QString remarcPath, QObject *parent = nullptr);
+  virtual ~Remarc();
 
 public slots:
   void run();
