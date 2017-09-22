@@ -28,7 +28,7 @@ filtered models etc.
 
 ![NanoSim Platform \label{nanoplat}](./nanosim-platform.png "The NanoSim Platform")
 
-The meta-data module is important, as all data that will be shared
+The metadata module is important, as all data that will be shared
 between different processes and applications needs to be well
 defined. The data storage module is the central database storage
 system and the existing tool; MongoDB ( http://www.mongodb.org/), will

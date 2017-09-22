@@ -1,8 +1,8 @@
 TEMPLATE = app
-TARGET = remark-wrap
+TARGET = remarc-wrap
 INCLUDEPATH += .
 CONFIG += c++11
 
 # Input
-HEADERS += remark.h
-SOURCES += main.cpp remark.cpp
+HEADERS += remarc.h
+SOURCES += main.cpp remarc.cpp

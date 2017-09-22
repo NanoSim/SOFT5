@@ -231,7 +231,7 @@ expectancy per person living anywhere. We know statistical data exists
 somewhere, but we do not need to worry about the format and syntax of
 the data. Our main goal is express exactly how the data is to be
 represented in _our_ system. We do this be declaring information about
-the data we want to use (meta-data). In SOFT5, this formal metadata is
+the data we want to use (metadata). In SOFT5, this formal metadata is
 described using the schema of SOFT5 Entities written in JSON notation.
 
 We start the work by defining an entity with the fields we want to use:
@@ -270,7 +270,7 @@ The first 3 fields (name, version and namespace) is uniquely
 identifying our Entity. The dimensions field defines labels for array
 sizes used in properties. The property field defines the different
 elements of the data structure, with data types, units, dimensionality
-etc. The main reason for declaring this as part of the meta-data and
+etc. The main reason for declaring this as part of the metadata and
 not as part of the source code is the ability to re-use this
 information. One thing is that we document clearly what the data
 should be, but it can also instruct a file-reader/writer about how to

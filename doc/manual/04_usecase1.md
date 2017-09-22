@@ -5,8 +5,8 @@ in the generation of a FLUENT UDF utilizing offline coupling with
 Porto. This simple demo uses some important fundamental features of
 Porto:
 
-  1. The ability to work with Entities and MetaData independent of storage mechanisms.
-  2. Make use of the Porto internal storage for storing both meta-data and data.
+  1. The ability to work with entities and metadata independent of storage mechanisms.
+  2. Make use of the Porto internal storage for storing both metadata and data.
   3. Work with Collections for building Domain Specific Relationships.
   4. Utilize custom external plugins for retrieving data from proprietary formats.
   5. Seamless mixing of compiled and scripted languages (C++/JavaScript).
@@ -83,6 +83,7 @@ that this interaction can be replaced with using Porto scripting and an
 entity for REMARC Setup.
 
 The REMARC-wrapper consist of three distinct parts.
+
   1. Porto Input
   2. REMARC Simulation
   3. Porto Output
@@ -104,10 +105,8 @@ used to read CHEMKIN-II data into a set of Chemkin-Entities that will
 be stored in the internal storage (mongodb). This data can be further
 used to reproduce the original CHEMKIN-II data files if needed.
 
-Screenshot:
-
 ```bash
-$ ./remarc-wrapper remark/ {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+$ ./remarc-wrapper remarc/ {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
 bin size: == 1
 started
 Extracting VASP data from: /home/user/nanosim-demo/dft/Fe2O3
@@ -270,9 +269,9 @@ DEFINE_HET_RXN_RATE(NiO_CH4,c,t,r,mw,yi,rr,rr_t)
 
 In this use case we saw how a Collection was instanciated from a C++
 code and how instances of other entities was attached to it. The
-remark wrapper used the generated collection as input ran the remark
+REMARC-wrapper used the generated collection as input ran the REMARC
 (Python) code as an embedded process. The generated ChemkinII files
 was then read and its contents written into the database and attached
 to the collection. In the final step we saw how JavaScript could be
-employed to search within a collection and use the code generator.
-
+employed to search for registered entities within a collection and use
+the code generator to generate source code.
