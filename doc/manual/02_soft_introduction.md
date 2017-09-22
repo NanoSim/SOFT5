@@ -18,7 +18,7 @@ utilize reusable software components that handle all this, or develop
 new reusable software components that can be used by others in the
 same framework.
 
-![SOFT5 Architecture highlighting the key components also used by Porto \label{softarch}]./SOFT-Architecture.png "The SOFT5 Architecture"
+![SOFT5 Architecture highlighting the key components also used by Porto \label{softarch}]( ./SOFT-Architecture.png "The SOFT5 Architecture")
 
 
 SOFT5 contains a core library with plugin support. The library also
@@ -145,19 +145,19 @@ describes. The entity does not contain the actual data, but describes
 what the different data fields are, in terms of name, data types,
 units, dimensionality etc. Information about data is often called meta
 data. Formal meta data enables for the correct interpretation of a set
-of data, which otherwise would be unreadable if not serialized in the
-correct and often undocumented way.
+of data, which otherwise would be unreadable.
 
-An example of an entity is a 'Atom', which can be defined as something
+An example of an entity is 'Atom', which can be defined as something
 that has a position, an atomic number (which characterizes the
-chemical element), mass, charge, etc. Another entity can simply be a
-reference-entity with properties such as name, description, license,
-access-url, media-type, format, etc). The first entity is suitable as
-an object in a simulation code, while the latter is more suitable for
-a data catalog distribution description (see dcat:Distribution).
-SOFT5 entities allows for describing many aspects of the domain. While
-each entity describes a single unit of information, a collection of
-entities can describe the complete domain. See collections below.
+chemical element), mass, charge, etc. Another example of a completely
+different kind of entity can be a data reference-entity with
+properties such as name, description, license, access-url, media-type,
+format, etc). The first entity is suitable as an object in a
+simulation code, while the latter is more suitable for a data catalog
+distribution description (see dcat:Distribution).  Entities allows for
+describing many aspects of the domain. While each entity describes a
+single unit of information, a collection of entities can describe the
+complete domain. See collections below.
 
 ### Uniqueness
 Each published entity needs to be uniquely identified in order to

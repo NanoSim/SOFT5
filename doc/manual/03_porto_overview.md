@@ -19,9 +19,14 @@ A key feature of Porto is to enable offline-coupling of physical
 processes occurring on different scales.
 
 ## Key Features of the Porto platform.
-The structure of the NanoSim platform is shown in Figure 1, where also the components of the two software platforms are visible. The Porto Core is a system that includes generic tools such as a code generator that allow for rapid development of interfaces, wrappers, and automatic programming of filtered models etc. 
+The structure of the NanoSim platform is shown in Figure
+\ref{nanoplat}, where also the components of the two software
+platforms are visible. The Porto Core is a system that includes
+generic tools such as a code generator that allow for rapid
+development of interfaces, wrappers, and automatic programming of
+filtered models etc.
 
-![NanoSim Platform](./nanosim-platform.png "The NanoSim Platform")
+![NanoSim Platform \label{nanoplat}](./nanosim-platform.png "The NanoSim Platform")
 
 The meta-data module is important, as all data that will be shared
 between different processes and applications needs to be well
@@ -37,20 +42,20 @@ included in the user interface system of Porto to support 3rd party
 data formats. When using the data interface module of Porto, the data
 stored in separate formats are searchable and available through the
 same interfaces as the data stored in the central data storage
-system. . To further simplify the usage of these tools, the user
+system. To further simplify the usage of these tools, the user
 interface of Porto includes a scripting shell that can access all the
-functionalities of the Porto framework. The scripting shell will also
-be the central interface of the NanoSim platform. In addition, users
-and developers will be able to interface with specific tools on the
-NanoSim platform in ways they are familiar with (e.g., existing
-graphical user interfaces for computational fluid dynamics software,
-etc.). Future extensions of Porto might include a graphical user
-interface in addition to the scripting shell.
-
+functionalities of the Porto framework. The scripting shell is the
+central interface of the NanoSim platform. In addition, users and
+developers are able to interface with specific tools on the NanoSim
+platform in ways they are familiar with (e.g., existing graphical user
+interfaces for computational fluid dynamics software, etc.). 
 
 # Demonstrated Use Cases using Porto
 
-In order to demonstrate how Porto is used, three use cases are in this document demonstrated. Connections between different scales are in practice making simulation software able to pass information to each other.
+In order to demonstrate how Porto is used, three use cases are in this
+document demonstrated. Connections between different scales are in
+practice making simulation software able to pass information to each
+other.
 
 The three use cases are:
 
