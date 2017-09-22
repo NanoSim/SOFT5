@@ -58,6 +58,8 @@ The three use cases are:
 2. Coupling from atmomistic modeling (REMARC) to particle modeling (parScale)
 3. Coupling from atmomistic modeling (REMARC) to particle modeling (parScale), then the particle modeling to CFD modeling (Ansys FLUENT)
 
+_Note: Use case 3 is not yet complete and will be completed at a later stage._
+
 ![Use cases overview](./use_cases_overview.png "Use cases overview")
 
 For all practical purposes, the coupling from REMARC to parScale are identical between use case 2 and 3.
