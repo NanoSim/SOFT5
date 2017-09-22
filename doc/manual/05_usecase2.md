@@ -68,7 +68,9 @@ reactionDataIds.forEach(function (reactionId) {
    var reaction = new porto.ChemkinReaction(reactionId);
    reaction.read(storage);
    // Print out the details
-   print("+--- " + reaction["reactants"] + " => " + reaction["products"] + ", " + reaction["A"] + ", " + reaction["b"] + ", " + reaction["Ea"]);
+   print("+--- " + reaction["reactants"] + " => " 
+	+ reaction["products"] + ", " + reaction["A"] 
+	+ ", " + reaction["b"] + ", " + reaction["Ea"]);
 });
 
 ...
@@ -110,7 +112,8 @@ The list of reactants and products, species and elements are then generated:
 ```js
 // Collects all species, for example H2O, FeO3, CH4, etc.
 var species = [];
-// Collects all reaction lines, on the form <reactants> => <product> <pre.exp.factor> <b> <activation energy>
+// Collects all reaction lines, on the form 
+// <reactants> => <product> <pre.exp.factor> <b> <activation energy>
 var all_reactions = []
 reactionDataIds.forEach(function (reactionId) {
    var reaction = new porto.ChemkinReaction(reactionId);
@@ -129,7 +132,9 @@ reactionDataIds.forEach(function (reactionId) {
 
    // Construct the reactions
    if (products.length > 0 && reactants.length > 0) {
-      all_reactions.push(reactants.join(" + ") + " => " + products.join(" + ") + " " + reaction.A + " " + reaction.b + " " + reaction.Ea);
+      all_reactions.push(reactants.join(" + ") + " => " 
+		  + products.join(" + ") + " " + reaction.A + " " 
+		  + reaction.b + " " + reaction.Ea);
    }
 });
 
