@@ -3,7 +3,7 @@
 This User Manual is a part of the NanoSim delivery and is intended to
 be read by students and researchers developing software with/or based
 on Porto. As Porto is build on the SOFT5 framework it is essential to
-also become familiar with SOFT5. This manual will also cover some
+also become familiar with SOFT5. This manual will therefore cover some
 introduction to the ideas and concepts in SOFT5.
 
 ![Porto Architecture](./porto-architecture.png "Porto architecture")
@@ -20,8 +20,8 @@ Many ideas of SOFT5 aligns with the concepts of Linked Open Data and
 the semantic web, however SOFT5 sacrifises the richness and dynamic
 flexibility of the Resource Description Framework (RDF) with a
 pragmatic and minimalistic approach that is suitable for representing
-data and "state" in scientific software, and related this to
-persistant storage.
+data and "state" in scientific software, and how this relates to
+persistant storage (i.e. physical data storage on a harddisk in a given file format).
 
 Porto extends SOFT5 to target different use cases in scope of the
 NanoSim project. The different software packages developed as part of

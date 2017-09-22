@@ -1,9 +1,8 @@
 
 # Porto/SOFT5
 
-SOFT5 is an acronym for SINTEF Open Framework and Tools no.5. SOFT5 is
-a set of libraries and tools to support scientific software
-development. 
+SOFT is an acronym for SINTEF Open Framework and Tools. SOFT5 is a set
+of libraries and tools to support scientific software development.
 
 The development of SOFT5 was motivated by many years of experience
 with developing scientific software, where it was observed that a lot
@@ -13,12 +12,14 @@ different software engineering tasks, such as code design, the
 handling of I/O, correct memory handling of the program state and
 writing import and export filters in order to use data from different
 sources. In addition comes the code maintenance with support of legacy
-formats and the introduction of new features and data states. With
-SOFT5 it is possible to use reusable software components that handle
-all this, or develop new reusable software components that can be used
-by others in the same framework.
+formats and the introduction of new features and changes to internal
+data state in the scientific software. With SOFT5 it is possible to
+utilize reusable software components that handle all this, or develop
+new reusable software components that can be used by others in the
+same framework.
 
-![SOFT5 Architecture](./SOFT-Architecture.png "SOFT5 Architecture")
+![SOFT5 Architecture highlighting the key components also used by Porto \label{softarch}]./SOFT-Architecture.png "The SOFT5 Architecture"
+
 
 SOFT5 contains a core library with plugin support. The library also
 comes with set of interfaces (API) to create extensions and custom
@@ -48,14 +49,21 @@ version handling, data import/export and interoperability can be
 handled by reusable components in the SOFT5-framework, thus reducing
 risk and development time.
 
+The main components of SOFT5 is shown in Figure \ref{softarch}. The
+key modules are the tools, storage support and plugin framework. The
+key tools are the scripting utility and the code generator. The main
+Storage module used by Porto is MongoDB. Different plugins that
+extends the scripting shell includes a state machine based workflow
+runner.
+
 # Installation
 
-This chapter describes how to install the SOFT5 system. SOFT5 is
-available on [github.com/nanosim/porto][github.com/nanosim/porto]. The
-code is currently only distributed as source code, and requires some
-preparation, compilation and installation steps. Here we will show the
-necessary steps for installing the software on Ubuntu 16.04.3 LTS
-(Xenial Xerus). 
+This chapter describes how to install the SOFT5/Porto system. The
+software is available on github: https://github.com/nanosim/porto. The
+software is currently only distributed as source code, and requires
+some preparation, compilation and installation steps. Here we will
+show the necessary steps for installing the software on Ubuntu 16.04
+LTS.
 
 ## Preparation
 The software is available as a Git repository, and a local
@@ -87,8 +95,8 @@ In order to use MongoDB, we need to add the official repository.
 
 	$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
 	  --recv 0C49F3730359A14518585931BC711F9BA15703C6
-	$ echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" \
-	  | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+	$ echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 \
+	  multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 	$ sudo apt-get update
 	$ sudo apt-get install -y mongodb-org libmongoc-1.0.0
 
@@ -130,13 +138,15 @@ with curses interface) when configuring the build process.
 # SOFT5 Features
 
 ## Entities
-An entity contains information about data. It does not contain the
-actual data, but describes what the different data fields are, in
-terms of name, data types, units, dimensionality etc. Information about
-data is often called meta data. Formal meta data enables for the
-correct interpretation of a set of data, which otherwise would be
-unreadable if not serialized in the correct and often undocumented
-way.
+An entity can be a single thing or object that represents something
+physical or nonphysical, concretely or abstract. The entity contains
+information about the data that constitutes the state of thing it
+describes. The entity does not contain the actual data, but describes
+what the different data fields are, in terms of name, data types,
+units, dimensionality etc. Information about data is often called meta
+data. Formal meta data enables for the correct interpretation of a set
+of data, which otherwise would be unreadable if not serialized in the
+correct and often undocumented way.
 
 An example of an entity is a 'Atom', which can be defined as something
 that has a position, an atomic number (which characterizes the
