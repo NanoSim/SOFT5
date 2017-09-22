@@ -80,7 +80,7 @@ collection.attachEntity("dftBoundayFile", &file);
 REMARC consist of a set of Pyhon-scripts. REMARC requires an
 interactive session that has been automated for this demo. We can show
 that this interaction can be replaced with using Porto scriping and an
-entity for Remarc Setup.
+entity for REMARC Setup.
 
 The REMARC-wrapper consist of three distinct parts.
   1. Porto Input
@@ -197,7 +197,9 @@ Running the genudf utility gives the following:
 ```bash
 $ ./genudf.js {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
 ```
+
 This produces the two UDFs
+
 ```c++
 /* Fluent UDF using id{fcf0db6f-3961-4f67-920a-8c5f4733994f}*/ 
 

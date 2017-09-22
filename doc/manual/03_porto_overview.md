@@ -55,17 +55,18 @@ interface in addition to the scripting shell.
 In order to demonstrate how Porto is used, three use cases are in this document demonstrated. Connections between different scales are in practice making simulation software able to pass information to each other.
 
 The three use cases are:
-1. Coupling from Remarc to Ansys FLUENT
-2. Coupling from Remarc to parScale
-3. Coupling from Remarc to parScale, then parScale to Ansys FLUENT
+
+1. Coupling from atmomistic modeling (REMARC) to CFD modeling (Ansys FLUENT)
+2. Coupling from atmomistic modeling (REMARC) to particle modeling (parScale)
+3. Coupling from atmomistic modeling (REMARC) to particle modeling (parScale), then the particle modeling to CFD modeling (Ansys FLUENT)
 
 ![Use cases overview](./use_cases_overview.png "Use cases overview")
 
-For all practical purposes, the coupling from Remarc to parScale are identical between use case 2 and 3.
+For all practical purposes, the coupling from REMARC to parScale are identical between use case 2 and 3.
 
 By introducing Porto as the framework for coupling, this problem is transformed. Instead of attempting to make each different software communicate with each other, each software should communicate with Porto. The data communicated in stored in a MongoDB back-end.
 
 ![Use cases connected through Porto](./use_cases_overview_porto_connection.png "Use cases connected through Porto")
 
-These use cases demonstrate different techniques supported by Porto and should be regarded as tutorials on how to build coupling between any software. 
+These use cases demonstrate different techniques supported by Porto and should be regarded as tutorials on how to build coupling between any software.
 
