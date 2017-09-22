@@ -5,8 +5,6 @@ the major elements from SOFT5 such as the MongoDB storage module, the
 scripting tools, code generation framework and APIs to extend with
 custom datareaders/writers.
 
-![SOFT/Porto](./SOFT-Porto-Architecture.png "SOFT Architecture")
-
 ## Modularity and reusability
 
 The Porto framework encourages a data driven approach to application

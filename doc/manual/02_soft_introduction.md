@@ -1,3 +1,4 @@
+
 # Porto/SOFT5
 
 SOFT5 is an acronym for SINTEF Open Framework and Tools no.5. SOFT5 is
@@ -16,6 +17,8 @@ formats and the introduction of new features and data states. With
 SOFT5 it is possible to use reusable software components that handle
 all this, or develop new reusable software components that can be used
 by others in the same framework.
+
+![SOFT5 Architecture](./SOFT-Architecture.png "SOFT5 Architecture")
 
 SOFT5 contains a core library with plugin support. The library also
 comes with set of interaces (API) to create extensions and custom
@@ -107,6 +110,7 @@ bash, add the following to your .bashrc
 
 here <platform> will typically be gcc_64 on GNU/Linux.
 
+## Configuration, compilation and installation
 The next step is to configure and install SOFT5.
 
 	$ mkdir build-soft5
@@ -159,12 +163,6 @@ solution to handle how properties of an Entity might evolve during the
 developmen process. In order to handle different versions of a
 software, the entity version number can be used to identify the
 necessary transformation between two data sets.
-
-### Instances
-When entities are instanciated, they are assigned a universally unique
-identifier (UUID). This identifier is a 128-bit number that is used to
-identify a specific piece of data/information.
-
 
 ## Collections
 A collection is defined as a set of entities and relationships between

@@ -241,8 +241,8 @@ real min_cutoff = 0.000001;			/* Adjust to ensure stability */
 real dp = 0.00001;					/* Grain diameter */
 real Temp = 1173;					/* Adjust to experimental run */
 real Gas_Const = 8.314; 
-real k0 = 2.5;						/* Pre-exponential factor */
-real EA = 0;					/* Activation energy */
+real k0 = 2.5;                      /* Pre-exponential factor */
+real EA = 0;                        /* Activation energy */
 
 DEFINE_HET_RXN_RATE(NiO_CH4,c,t,r,mw,yi,rr,rr_t)
 {
