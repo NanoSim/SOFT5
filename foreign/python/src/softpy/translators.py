@@ -11,7 +11,7 @@ from the environment variable SOFT_TRANSLATORS.  Like SOFTSTORAGE,
 this search path is colon-separated.
 
 A plugin *.pyt file should provide one or more sub-classes of Translator.
-For details, see the docstring for Translator.  When a
+For details, see the docstring for Translator.
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -27,6 +27,7 @@ else:
     import importlib.util
 
 from . import softpy
+from .metadata import Metadata
 from .errors import SoftError
 
 # FIXME: should be implemented in C++?
@@ -177,21 +178,25 @@ def _translation_tree(output, inputs):
 
 
 def translate(output, input_instances):
-    """Returns a new instance of type `output` from `input_instances`.
+    """Returns a new instance of type `output` populated from `input_instances`.
 
-    Args:
-        output: A (name, version, namespace)-tuple specifying the desired
-            type.
-        input_instances: Sequence of input entity instances.
+    Parameters
+    ----------
+    output : metadata_like
+        A (name, version, namespace)-tuple (or any other type accepted as
+        the first argument to Metadata) specifying the entity type to
+        return.
+    input_instances : entity instance | sequence of entity instances
+        Sequence of input entity instances.
 
-    Returns:
-        New instance of the desired type populated from `input_instances`.
-
-    Raises:
-        SoftMissingTranslatorError: If none of the installed
-            translators can translate `input_instances` to an instance
-            of the desired type.
+    Notes
+    -----
+    SoftMissingTranslatorError is raised if none of the installed
+    translators can translate `input_instances` to an instance of the
+    desired type.
     """
+    if not isinstance(output, tuple):
+        output = Metadata(output).mtype
     if hasattr(input_instances, 'soft_get_id'):
         instances = [input_instances]
     inputdict = get_instancedict(input_instances)

@@ -50,7 +50,7 @@ class Collection(object):
         # added to this collection.  This makes it possible to:
         #   - store the content of the collection together with the collection
         #   - retrieve elements added in this session without having their
-        #     metadata in a in a metadata database
+        #     metadata in a metadata database
         self._cache = {}
 
         if driver:
@@ -95,6 +95,9 @@ class Collection(object):
     #    collection_add_dim(self.__soft_entity__, label, description)
 
     def add_relation(self, subject, predicate, object_):
+        """Adds a relation, where `subject`, `predicate` and `object_` are
+        strings, with `subject` and `object_` normally referring to
+        labels in this collection."""
         softpy.collection_add_relation(self.__soft_entity__, asStr(subject),
                                        asStr(predicate), asStr(object_))
 
@@ -172,7 +175,7 @@ class Collection(object):
         This method depends on that the metadata for `label` exists in
         a metadata database registered with softpy.register_metadb().
         """
-        if label in self._cache:
+        if label in self._cache and expected_entity is None:
             return self._cache[label]
         if label not in self.get_labels():
             raise SoftLabelError(
@@ -198,7 +201,8 @@ class Collection(object):
                 expected_entity = (name, version, namespace)
             cls = entity(expected_entity)
             instance = cls(uuid=uuid, driver=driver, uri=uri, options=options)
-        self._cache[label] = instance
+        if expected_entity is None:
+            self._cache[label] = instance
         return instance
 
     name = property(
@@ -293,7 +297,15 @@ class Collection(object):
     # These methods are implemented because of urgent need and lack of
     # a working json storage...
     def soft_as_dict(self):
-        """Returns a dict representation of this instance."""
+        """Returns a dict representation of this instance.
+
+        Note
+        ----
+        Only relations associated with entities are returned, not relations
+        added with the add_relation() method.  This is a bug, that can only
+        be resolved by adding a method for iterating over all triplets in
+        the C++ API.
+        """
         triplets = []
         for label in self.get_labels():
             name = self.get_name(label)

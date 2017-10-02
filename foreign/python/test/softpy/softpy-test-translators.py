@@ -67,3 +67,12 @@ assert a.length == 160.0
 a2 = softpy.translate(ma, [a])
 assert a2.s == a.s
 assert a2.length == a.length
+
+
+a = b.translate_to(ma, d)
+assert a.s == 'd'
+assert a.length == 120.0
+
+a2 = e.translate_to(ma)
+assert a2.s == a.s
+assert a2.length == a.length
