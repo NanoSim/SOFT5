@@ -198,7 +198,7 @@ def translate(output, input_instances):
     if not isinstance(output, tuple):
         output = Metadata(output).mtype
     if hasattr(input_instances, 'soft_get_id'):
-        instances = [input_instances]
+        input_instances = [input_instances]
     inputdict = get_instancedict(input_instances)
     if len(inputdict) != len(input_instances):
         raise SoftTranslatorError(
