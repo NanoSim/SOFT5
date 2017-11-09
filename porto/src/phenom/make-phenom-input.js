@@ -2,6 +2,18 @@
 var entity = require('porto.entity');
 porto.ChemkinReaction = entity.using('chemkinReaction', 'eu.nanosim.vasp', '0.1');
 
+println = function(args) {
+    console.raw(JSON.stringify(args, null, 2) + "\n");
+}
+
+has = function(a, v) {
+    for (i in a) {
+        if (a[i] === v)
+            return i;
+    }
+    return false;
+}
+
 __main__ = function (args)
 {
     try {
@@ -15,30 +27,75 @@ __main__ = function (args)
         var uuid = args[1];
         collection = new porto.Collection(uuid);
         storage.load(collection);
+        
+        var reactants = ["CH4", "CO", "CO2", "H2", "H2O", "N2"];
+        println("reactants: " + reactants);
+
+        var Stoich = [];
+        var A = [];
+        var E = [];
 
         var reactionDataIds = collection.findRelations("reactiondata", "has-id");
         reactionDataIds.forEach(function(reactionId){
             var reaction = new porto.ChemkinReaction(reactionId);
             reaction.read(storage);
 
-            console.raw("/* Fluent UDF using id" + reactionId + "*/ \n\n");
-	    var controller = require('soft.mvc').create({
-	        model: {
-		    min_cutoff: 1e-6,
-		    dp : 0.00001,
-		    k0 : 2.5,
-		    Temp: 1173.,
-		    EA: reaction.Ea, /* Read value from coming for the Porto database */
-		    Gas_Const: 8.314,
-		    S0Eq: "6.0 * 0.2066 * vol_frac_solid / dp", 
-		    kEq: "k0 * exp(-EA/(Gas_Const*Temp))",
-		    RrateEq: "k * S0 * pow((C_R(c,gas_thread) * X_CH4 / MW_CH4 * 1000.0 ),0.6)"
-	        },
-	        view: "./templates/phenom-input.m.js"
-	    });
-            console.raw(controller());            
+            var StoichLine =  [0, 0, 0, 0, 0, 0];
+
+            reaction.reactants.map(function(r) {
+                i = has(reactants, r);
+                if (i !== false) { 
+                    StoichLine[i] = 1;
+                }
+            });
+
+            reaction.products.map(function(r) {
+                i = has(reactants, r);
+                if (i !== false) { 
+                    StoichLine[i] = -1;
+                }
+            });
+            
+            Stoich = Stoich.concat([StoichLine]);
+
+            A = A.concat([reaction.A]);
+            E = E.concat([reaction.Ea]);
+
         }); 
-	
+
+        StoichString = "";
+        for (var i = 0; i <  Stoich[0].length; ++i) {
+            var line = [];
+            for (var j = 0; j < Stoich.length; ++j) {
+                line = line.concat([Stoich[j][i]]);
+            }
+            StoichString += line.join(" ") + "\n";
+        }
+        println(StoichString)
+
+        println(Stoich);
+
+        console.raw("/* Phenom input, using entity uuid " + uuid + " */ \n\n");
+        var controller = require('soft.mvc').create({
+            model: {
+                par: {
+                    eqType_g: 3,
+                    eqType_s: "",
+                    Stoich: StoichString,
+                    Stoich_s: "",
+                    Ireactants: "", // [3 4] = CO2 + H2
+                    Iproducts: "", // [2 5] = CO + H20
+                    nreactants: "", // [1 1]
+                    nproducts: "", // [1 1]
+                    A: "[" + A.join(" ") + "]",
+                    E: "[" + E.join(" ") + "]"
+                }
+            },
+            view: "./templates/phenom-input.m.js"
+        });
+        
+        console.raw(controller());            
+            
     } catch (err) {
 	console.raw("failed with" + err);
     }
