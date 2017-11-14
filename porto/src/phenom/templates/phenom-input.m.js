@@ -1,59 +1,73 @@
-% Definisjoner:
-% 
-% 
-% Struct:
-% eqType for solid
-% eqtype for gas
-% parameters for eqType 
+function par = ReactionParams
+    par.Nads = @{soft.model.Nads};
+    par.Ncomp = @{soft.model.Ncomp};
+    par.Ncomp_T = @{soft.model.Ncomp_T};
+    par.Nrx_g = @{soft.model.Nrx_g};
+    par.Nrx_s = @{soft.model.Nrx_s};
 
-function par=ReactionParams
-    % par.eqType_g = 3;
-    par.eqType_g = @{soft.model.par.eqType_g};
+    par.Ac = @{soft.model.Ac}
+    par.ADENT = @{soft.model.ADENT};
+    par.B = @{soft.model.B};
+    par.BET_a0 = @{soft.model.BET_a0};
+    par.CP = @{soft.model.CP};
+    par.CP_s = @{soft.model.CP_s};
+    par.deltaHf = @{soft.model.deltaHf};
+    par.deltaHf_s = @{soft.model.deltaHf_s};
+    par.Dt = @{soft.model.Dt};
+    par.E = @{soft.model.E};
+    par.Ea_s = @{soft.model.Ea_s};
+    par.ENT298 = @{soft.model.ENT298};
+    par.F_sol_w = @{soft.model.F_sol_w};
+    par.Flowin_w = @{soft.model.Flowin_w};
+    par.Fluxin_w = @{soft.model.Fluxin_w};
+    par.FRACin = @{soft.model.FRACin};
+    par.FRACin_s = @{soft.model.FRACin_s};
+    par.Fw = @{soft.model.Fw};
+    par.Gs0 = @{soft.model.Gs0};
+    par.Heq = @{soft.model.Heq};
+    par.K_0i = @{soft.model.K_0i};
+    par.k_0j = @{soft.model.k_0j};
+    par.k0_s = @{soft.model.k0_s};
+    par.Keq_j = @{soft.model.Keq_j};
+    par.MW = @{soft.model.MW};
+    par.MW_O2 = @{soft.model.MW_O2};
+    par.MW_s = @{soft.model.MW_s};
+    par.n_rx = @{soft.model.n_rx};
 
-    % par.eqType_s = 2;
-    
-    % Stoichiometric matrices: One for solid rx (Nrx*Nspec_solid) (CH4 CO H2 H2O) , 1 for gas rx (Nrx_gas*Nspec_gas) (CH4 CO CO2 H2 H2O N2)
-    % One row per rx
-    % One column per specie in Phenom order
-    par.Stoich = [
-        @{soft.model.par.Stoich}
-	];
+    par.Pin = @{soft.model.Pin};
+    par.R0_NiAl2O4 = @{soft.model.R0_NiAl2O4};
+    par.R0_NiO = @{soft.model.R0_NiO};
+    par.rhogm = @{soft.model.rhogm};
+    par.rhogmWin = @{soft.model.rhogmWin};
+    par.RHOin = @{soft.model.RHOin};
+    par.rhos0 = @{soft.model.rhos0};
+    par.Smu = @{soft.model.Smu};
+    par.Stoich = @{soft.model.Stoich};
+    par.Stoich_s = @{soft.model.Stoich_s};
+    par.Tin = @{soft.model.Tin};
+    par.Uin = @{soft.model.Uin};
+    par.Yin = @{soft.model.Yin};
 
-    %     -1     0    -1     0
-    %     1    -1     0     0
-    %     0     1     1     0
-    %     3     1     4    -1
-    %    -1    -1    -2     0
-    %     0     0     0     0
-	 
-	 % par.Stoich_s=[%(Nsolidspec(3)+Ngasspec(6))*Nrx_solid
-	 % -1     0     0     0
-     % 0     0    -1     0
-     % 1     0     1     0
-     % 0    -1     0     0
-     % 2     1     0     0
-     % 0     0     0     0
-     % 4     1     1     0
-     % -4    -1    -1     0
-     % 0     0     0     0
-	 % ];
-	 
-    % par.??=?? %Whatever eqType_g/s requires
-    % ...	 
-    % eqType3dummy: f(T,p,x)=par.A*exp(-par.E/R/T)*(prod(p(par.Ireactants(:)).^par.nreactants(:))-prod(p(par.Iproducts(:)).^par.nproducts(:)));
+    par.Param.g = @{soft.model.g};
+    par.Param.R = @{soft.model.R};
+    par.Param.C1 = @{soft.model.C1};
+    par.Param.C2 = @{soft.model.C2};
+    par.Param.A0 = @{soft.model.A0};
+    par.Param.dg = @{soft.model.dg};
+    par.Param.dp = @{soft.model.dp};
+    par.Param.mug = @{soft.model.mug};
+    par.Param.rhog = @{soft.model.rhog};
 
-    % par.Ireactants=[3 4]; %CO2+H2
-    par.Ireactants = @{soft.model.par.Ireactants};
-    % par.Iproducts=[2 5]; %CO + H2O
-    par.Iproducts = @{soft.model.par.Iproducts};
-    % par.nreactants=[1 1];
-    par.nreactants = @{soft.model.par.nreactants};
-    % par.nproducts=[1 1];
-    par.nproducts = @{soft.model.par.nproducts};
- 
-    % par.A=12345;
-    % par.E=343454;
-    par.A = @{soft.model.par.A};
-    par.E = @{soft.model.par.E};
+    par.membrane.P0 = @{soft.model.P0};
+    par.membrane.Ea = @{soft.model.Ea};
+    par.membrane.tm = @{soft.model.tm};
+    par.membrane.dm = @{soft.model.dm};
+    par.membrane.Nm = @{soft.model.Nm};
+
+    par.Param.memb.P0 = @{soft.model.P0};
+    par.Param.memb.Ea = @{soft.model.Ea};
+    par.Param.memb.tm = @{soft.model.tm};
+    par.Param.memb.dm = @{soft.model.dm};
+    par.Param.memb.Nm = @{soft.model.Nm};
 
 end
