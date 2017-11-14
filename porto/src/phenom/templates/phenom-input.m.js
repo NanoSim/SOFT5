@@ -1,8 +1,5 @@
 % Definisjoner:
 % 
-% Stoichiometric matrices: One for solid rx (Nrx*Nspec_solid) (CH4 CO H2 H2O) , 1 for gas rx (Nrx_gas*Nspec_gas) (CH4 CO CO2 H2 H2O N2)
-% One row per rx
-% One column per specie in Phenom order
 % 
 % Struct:
 % eqType for solid
@@ -15,7 +12,9 @@ function par=ReactionParams
 
     % par.eqType_s = 2;
     
-    %Ngasspecies*Nrx
+    % Stoichiometric matrices: One for solid rx (Nrx*Nspec_solid) (CH4 CO H2 H2O) , 1 for gas rx (Nrx_gas*Nspec_gas) (CH4 CO CO2 H2 H2O N2)
+    % One row per rx
+    % One column per specie in Phenom order
     par.Stoich = [
         @{soft.model.par.Stoich}
 	];
