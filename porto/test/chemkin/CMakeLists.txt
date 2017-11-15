@@ -2,6 +2,7 @@ project(porto-chemkin-test CXX)
 
 find_package(GTest)
 
+configure_file("config.h.in" "config.h")
 if(GTEST_FOUND)
 
   set(CMAKE_INCLUDE_CURRENT_DIR ON)

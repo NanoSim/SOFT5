@@ -263,12 +263,15 @@ TEST_F(MongoTest, collection_find)
    ASSERT_TRUE (cur->more());
    
    int count = 0;
-   
-   while((!cur->error()) && cur->more())
+
+   ASSERT_TRUE(!cur->error());
+      
+   while(!cur->error() && cur->more())
    {
       auto next = cur->next();
-      if(next)
+      if (next)
          count++;
+      else break;
    }
    ASSERT_EQ(count, 2);
 }
@@ -317,6 +320,7 @@ TEST_F(MongoTest, lastError)
       auto next = cur->next();
       if(next)
          count++;
+      else break;
    }
    ASSERT_EQ(count, 1);
    delete reply;
@@ -384,6 +388,8 @@ TEST_F(MongoTest, DISABLED_collection_insertBulk)
       auto next = cur->next();
       if(next)
          count++;
+      else
+	break;
    }
    for(int i = 0; i < N; ++i)
       delete bulk[i];
@@ -459,6 +465,8 @@ TEST_F(MongoTest, collection_update)
       auto next = cur->next();
       if(next)
          count++;
+      else
+	break;
    }
    ASSERT_EQ(count, 1);
 }
@@ -515,6 +523,8 @@ TEST_F(MongoTest, cursor_current)
      if(next) {
         count++;
         ASSERT_TRUE(next->asString() == curr->asString());
+     } else {
+       break;
      }
   }
   ASSERT_EQ(count, N);
@@ -561,6 +571,8 @@ TEST_F(MongoTest, cursor_isAlive)
      auto next = cur->next();
      if(next)
           count++;
+     else
+       break;
   }
   ASSERT_EQ(count, N);
   ASSERT_TRUE(!cur->isAlive());
@@ -601,6 +613,8 @@ TEST_F(MongoTest, cursor_next)
      if(next) {
 //	ASSERT_TRUE(next->asString() == "{ \"foo\" : \"bar\" }");
 	count++;
+     } else {
+       break;
      }
   }
   ASSERT_EQ(count, N);
@@ -716,7 +730,7 @@ TEST_F(MongoTest,DISABLED_gridFS_createFileFromStream)
   FAIL();
 }
 
-TEST_F(MongoTest,gridFS_drop)
+TEST_F(MongoTest,DISABLED_gridFS_drop)
 {
    auto gridfs = client->gridFS("test", "testprefix");
    ASSERT_TRUE(gridfs != nullptr);
