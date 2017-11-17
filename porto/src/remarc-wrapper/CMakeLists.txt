@@ -1,4 +1,4 @@
-project (remark-wrapper CXX)
+project (remarc-wrapper CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR    ON)

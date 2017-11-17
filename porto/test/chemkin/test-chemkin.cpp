@@ -8,6 +8,7 @@ TEST (ChemkinTest, Construct)
 {
   std::ostringstream ss;
   ss << "chemkin:" << DATA_DIR << "?chem=SurfaceChemkin.inp&thermo=thermo.dat";
+  std::cout << DATA_DIR << std::endl;
   auto storage = new soft::Storage("external", ss.str().c_str(), "");
   ASSERT_TRUE(nullptr != storage);
   auto collection = new soft::Collection();

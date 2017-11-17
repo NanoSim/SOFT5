@@ -2,7 +2,7 @@
 #include <QtCore>
 
 #include "common.h"
-#include "remark.h"
+#include "remarc.h"
 #include "portoinput.h"
 #include "portooutput.h"
 
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
   storage.load(&collection);
 
   PortoInput *input = new PortoInput(&collection);
-  Remark *remarc = new Remark(&collection);
+  Remarc *remarc = new Remarc(&collection);
   PortoOutput *output = new PortoOutput(&collection);
 
   QObject::connect(input, SIGNAL(finished()), remarc, SLOT(run()));
