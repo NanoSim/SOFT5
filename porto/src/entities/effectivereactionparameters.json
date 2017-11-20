@@ -12,10 +12,34 @@
         {
             "name": "narguments",
             "description": "Number of additional arguments passed to the functional form."
-        }
+        },
+        {
+            "name": "nreactants",
+            "description": "Number of reactants (Chemkin requires 0 < nreactants < 4)."
+        },
+        {
+            "name": "nproducts",
+            "description": "Number of products (Chemkin requires 0 < nreactants < 4)."
+        },
     ],
     "properties": 
 	[
+        {
+            "name": "reactants",
+            "type": "string",
+            "dims": [
+                "nreactants"
+            ],
+            "description": "Name of each reactant species."
+        },
+        {
+            "name": "products",
+            "type": "string",
+            "dims": [
+                "nproducts"
+            ],
+            "description": "Name of each product species."
+        },
         {
             "name": "multiplyByParticleVolumeFraction",
             "type": "int",
