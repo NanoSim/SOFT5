@@ -354,4 +354,10 @@ int Collection :: getDimensionSize(std::string const &dim) const
   NOT_IMPLEMENTED
 }
 
+std::string Collection::allRelations() const
+{
+  // @TODO Hack for now, should use the triplet->allRelations and output a struct list.
+  return d->tripletStore.toCSV();
+}
+
 SOFT_END_NAMESPACE

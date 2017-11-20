@@ -55,10 +55,13 @@ public slots:
   void addDimMap(QString const &label,
                  QString const &entityDim,
                  QString const &collectionDim);
-
+  
   QStringList findRelations(QString const &subject, QString const &object);
   int numEntities() const;
   int numRelations() const;
+
+  QString allRelations() const;
+
 };
 
 #endif

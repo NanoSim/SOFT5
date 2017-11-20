@@ -56,7 +56,7 @@ public:
                    std::string const &object);
 
   std::list<std::string> findRelations(std::string const &subject,
-				       std::string const &predicate);
+                                       std::string const &predicate);
 
   void addDimMap(std::string const &label,
                  std::string const &entityDim,
@@ -68,6 +68,8 @@ public:
   IEntity const *findInstance(std::string const &label) const;
   virtual void save (IDataModel *) const override;
   virtual void load (IDataModel const *) override;
+
+  std::string allRelations() const;
 
   virtual std::vector<std::string> dimensions() const override;
   virtual int getDimensionSize(std::string const &dim) const override;
