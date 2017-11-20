@@ -37,7 +37,7 @@ TEST(PortoRemarcInitTest, WriteAndReadFromEntity)
 
   storage->save(remarcConfig);
 
-  QFileInfo info("/tmp/generated.in");
+  QFileInfo info(QDir::tempPath() + "/generated.in");
   ASSERT_TRUE(info.exists());
 
   delete remarcConfig;
