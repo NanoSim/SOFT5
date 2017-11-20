@@ -1,4 +1,4 @@
-project (porto-remarkinit-test C CXX)
+project (porto-remarcinit-test C CXX)
 
 find_package(GTest)
 
@@ -9,25 +9,25 @@ if(GTEST_FOUND)
   aux_source_directory(. SRC_LIST)
   add_executable(${PROJECT_NAME} ${SRC_LIST})
   include_directories(
-    ${porto-remarkinit_INCLUDE_DIRS}
+    ${porto-remarcinit_INCLUDE_DIRS}
     ${GTEST_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME}
-    ${porto-remarkinit_LIBS}
+    ${porto-remarcinit_LIBS}
     ${GTEST_LIBRARIES})
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
     add_test(${PROJECT_NAME}
-    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${porto-entities_BINARY_DIR})
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH} ${porto-entities_BINARY_DIR}")
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${porto-entities_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
+      ENVIRONMENT "PATH=${PATH};$ENV{PATH};${porto-entities_BINARY_DIR}")
   endif()
 
   set_property(TEST ${PROJECT_NAME} APPEND PROPERTY
-    ENVIRONMENT "SOFTSTORAGE=${SOFTSTORAGE}:${porto-remarkinit_BINARY_DIR}:$ENV{SOFTSTORAGE}")
+    ENVIRONMENT "SOFTSTORAGE=${SOFTSTORAGE}:${porto-remarcinit_BINARY_DIR}:$ENV{SOFTSTORAGE}")
 
  
 else(GTEST_FOUND)

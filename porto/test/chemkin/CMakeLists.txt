@@ -2,6 +2,7 @@ project(porto-chemkin-test CXX)
 
 find_package(GTest)
 
+configure_file("config.h.in" "config.h")
 if(GTEST_FOUND)
 
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -30,7 +31,7 @@ if(GTEST_FOUND)
       ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH} ${porto-entities_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "PATH=${PATH}:$ENV{PATH}")
+      ENVIRONMENT "PATH=${PATH};$ENV{PATH};${porto-entities_BINARY_DIR}")
   endif()
 
   set_property(TEST ${PROJECT_NAME} APPEND PROPERTY

@@ -1,4 +1,4 @@
-project (porto-remarkinit C CXX)
+project (porto-remarcinit C CXX)
 
 set (CMAKE_THREAD_PREFER_PTHREAD  TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
