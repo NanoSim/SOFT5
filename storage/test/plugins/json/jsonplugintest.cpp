@@ -12,34 +12,33 @@ TEST(JSONPluginTest, driverAvailability)
   ASSERT_TRUE(findIter != drivers.end());  
 }
 
-TEST(JSONPluginTest, writeData)
+TEST(JSONPluginTest, readWriteData)
 {
-  soft::Storage storage("json", "output.json");
-  auto strategy = storage.strategy();
-  ASSERT_TRUE(strategy != nullptr);
-  auto model = strategy->dataModel();
-  ASSERT_TRUE(model != nullptr);
-  model->setId("49176f0a-24bb-4595-b109-5767169691b8");
-  model->setMetaName("Quazz");
-  model->setMetaVersion("2.0");
-  model->setMetaNamespace("http://www.sintef.no/ontology#");
-  model->appendDouble("d", 3.14);
-  strategy->store(model);
-}
+  
+  soft::Storage writeStorage("json", "output.json");
+  auto writeStrategy = writeStorage.strategy();
+  ASSERT_TRUE(writeStrategy != nullptr);
+  auto writeModel = writeStrategy->dataModel();
+  ASSERT_TRUE(writeModel != nullptr);
+  writeModel->setId("49176f0a-24bb-4595-b109-5767169691b8");
+  writeModel->setMetaName("Quazz");
+  writeModel->setMetaVersion("2.0");
+  writeModel->setMetaNamespace("http://www.sintef.no/ontology#");
+  writeModel->appendDouble("d", 3.14);
+  writeStrategy->store(writeModel);
 
-TEST(JSONPluginTest, readData)
-{
-  soft::Storage storage("json", "output.json");
-  auto strategy = storage.strategy();
-  ASSERT_TRUE(strategy != nullptr);
+  soft::Storage readStorage("json", "output.json");
+  auto readStrategy = readStorage.strategy();
+  ASSERT_TRUE(readStrategy != nullptr);
 
-  auto model = strategy->dataModel();
-  ASSERT_TRUE(model != nullptr);
+  auto readModel = readStrategy->dataModel();
+  ASSERT_TRUE(readModel != nullptr);
 
-  model->setId("49176f0a-24bb-4595-b109-5767169691b8");
-  strategy->startRetrieve(model);
+  readModel->setId("49176f0a-24bb-4595-b109-5767169691b8");
+  readStrategy->startRetrieve(readModel);
   double compare_d;
-  model->getDouble("d", compare_d);
+  readModel->getDouble("d", compare_d);
+  readStrategy->endRetrieve(readModel);
 
   ASSERT_DOUBLE_EQ(compare_d, 3.14);
 }

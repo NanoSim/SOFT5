@@ -1,4 +1,3 @@
-#if 0
 #include <memory>
 #include <gtest/gtest.h>
 #include <soft.h>
@@ -156,22 +155,22 @@ TEST(Collection, instanciateFromDataModel) {
 TEST_F(CollectionTest, saveAndLoadWithEntities) {
   soft::Collection c;
   soft::Collection e;
-
+  soft::Storage storage("json", "collectiontest.json");
+  auto strategy = storage.strategy();
+  auto dm = strategy->dataModel();
+  
   e.setName("My-sub-entity");
   e.setVersion("1.0");
   c.setName("My-collection");
   c.setVersion("2.0");
-
   c.attachEntity("sub-entity", &e);
-
-  soft::JSONModel dm;
-  c.save(&dm);
+  c.save(dm);
 
   soft::Collection e2;
   soft::Collection c2;
   c2.attachEntity("sub-entity", &e2);
 
-  c2.load(&dm);
+  c2.load(dm);
 
   ASSERT_EQ("My-collection", c2.name());
   ASSERT_EQ("2.0", c2.version());
@@ -201,4 +200,3 @@ TEST_F(CollectionTest, findEntity)
   ASSERT_STREQ(ns.c_str(), "home");
   ASSERT_STREQ(uuid.c_str(), "d1f68e22-919d-44bc-a915-ad3436342b0a");
 }
-#endif

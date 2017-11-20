@@ -58,24 +58,24 @@ void JSONStorage :: store (IDataModel const *model) const
   QFile file(uri.path());
   QJsonDocument doc;
   QJsonObject baseObj;
-  
+
   if (fileExists) { //Read old data if the file already existed
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
       QTextStream(stderr) << "Cannot open file " << uri.path() << " for reading: " << file.errorString() << endl;
       throw std::runtime_error(file.errorString().toStdString());
     }
     if (file.size() > 0) {
-        QJsonParseError jsonError;
-        doc = QJsonDocument::fromJson(file.readAll(), &jsonError);
-        if (jsonError.error != QJsonParseError::NoError) {
+      QJsonParseError jsonError;
+      doc = QJsonDocument::fromJson(file.readAll(), &jsonError);
+      if (jsonError.error != QJsonParseError::NoError) {
         QTextStream(stderr) << jsonError.errorString() << endl;
         throw std::runtime_error(jsonError.errorString().toStdString());
-        }
+      }
     }
     file.close();
   }
   baseObj = doc.object();
-   
+
   QJsonObject idObj;
   QJsonObject metaObject;
   metaObject.insert("name", storage->metaName().c_str());
@@ -93,7 +93,7 @@ void JSONStorage :: store (IDataModel const *model) const
     QTextStream(stderr) << "Cannot open file " << uri.path() << " for writing: " << file.errorString() << endl;
     throw std::runtime_error(file.errorString().toStdString());      
   }
-      
+
   if (-1 == file.write(doc.toJson())) { // Write new contents
     QTextStream(stderr) << "Failed to write data :" << file.errorString() << endl;
     throw std::runtime_error(file.errorString().toStdString());
@@ -108,13 +108,13 @@ void JSONStorage :: startRetrieve (IDataModel *model)
     QTextStream(stderr) << "Failed to store data. Incompatible model!" << endl;
     throw std::runtime_error("Failed to store data");
   }
-  
+
   QUrl uri(d->uri);
   if (!QFile::exists(uri.path())) {
     QTextStream(stderr) << "Illegal filename: " << uri.path() << endl;
     throw (std::runtime_error("Illegal filename"));
   }
-    
+
   QFile jsonFile(uri.path());
   if (!jsonFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QTextStream(stderr) << "Illegal filename" << jsonFile.errorString() << endl;
@@ -135,7 +135,7 @@ void JSONStorage :: startRetrieve (IDataModel *model)
     QTextStream(stderr) << "Requested UUID not in dataset" << endl;
     throw (std::runtime_error("Requested UUID not in dataset"));
   }
-  
+
   QJsonObject const entityObj = (*it).toObject();
   storage->d->propertyObject = entityObj.value("properties").toObject();
   storage->d->dimsObject = entityObj.value("dimensions").toObject();
@@ -336,7 +336,7 @@ bool JSONStorage :: appendDoubleArray3D (const char *key, const StdDoubleArray3D
     for (auto &a: v) {
       QJsonArray array;
       for (auto &d: a) {
-  array.append(QJsonValue(d));
+        array.append(QJsonValue(d));
       }
       aa.append(array);
     }
@@ -350,6 +350,7 @@ bool JSONStorage :: appendDoubleArray3D (const char *key, const StdDoubleArray3D
 
 bool JSONStorage :: appendByteArray  (const char *, const std::vector<unsigned char> &)
 {
+  NOT_IMPLEMENTED;
   return false;
 }
 
@@ -366,6 +367,7 @@ bool JSONStorage :: appendStringArray(const char *key, const std::vector<StdStri
 
 bool JSONStorage :: appendArray      (const char *key, const IDataModel *dm)
 {
+  NOT_IMPLEMENTED;
   return false;
 }
 
@@ -373,7 +375,7 @@ bool JSONStorage :: getDimension(const char *key, StdUInt &retValue) const
 {
   QJsonValue value = d->dimsObject.value(key);
   if (!value.isDouble()) {
-    throw std::runtime_error(QString("Error reading %1").arg(key).toStdString());
+    throw std::runtime_error(QString("Error reading %1").arg(key).toStdString());    
     return false;
   }
   retValue = (StdUInt)value.toInt();
@@ -399,7 +401,7 @@ bool JSONStorage :: getString(const char *key, StdString &retValue) const
 
 bool JSONStorage :: getInt8(const char *key, StdInt8 &retValue) const
 {
-    QJsonValue value = d->propertyObject.value(key);
+  QJsonValue value = d->propertyObject.value(key);
   if (!value.isDouble()) {
     throw std::runtime_error(QString("Error reading %1").arg(key).toStdString());
     return false;
@@ -528,7 +530,7 @@ bool JSONStorage :: getInt32Array(const char *key, StdIntArray &retValue) const
   std::transform(array.begin(), array.end(), retValue.begin(), [](QJsonValue const &v){
       return v.toInt();
     });
-		 
+
   return true;
 }
 
@@ -542,7 +544,7 @@ bool JSONStorage :: getDoubleArray(const char *key, StdDoubleArray &retValue) co
   std::transform(array.begin(), array.end(), retValue.begin(), [](QJsonValue const &v){
       return v.toDouble();
     });
-		 
+
   return true;
 }
 
@@ -559,8 +561,8 @@ bool JSONStorage :: getDoubleArray2D(const char *key, StdDoubleArray2D &retValue
       QJsonArray jsonArray = arrayValue.toArray();
       StdDoubleArray insideArray(jsonArray.size());
       std::transform(jsonArray.begin(), jsonArray.end(), insideArray.begin(),[](QJsonValue const &v) {
-	  return v.toDouble();
-	});
+          return v.toDouble();
+        });
       return insideArray;
     });
   return true;
@@ -579,15 +581,15 @@ bool JSONStorage :: getDoubleArray3D(const char *key, StdDoubleArray3D &retValue
       QJsonArray jsonArray = arrayValue.toArray();
       StdDoubleArray2D insideArray(jsonArray.size());
       std::transform(jsonArray.begin(), jsonArray.end(), insideArray.begin(),[](QJsonValue const &arrayValue2) {
-	  if (!arrayValue2.isArray()) throw std::runtime_error("Illegal array");
-	  QJsonArray jsonArray2 = arrayValue2.toArray();
-	  StdDoubleArray insideArray2(jsonArray2.size());
-	  std::transform(jsonArray2.begin(), jsonArray2.end(), insideArray2.begin(), [](QJsonValue const &v) {
-	      if (!v.isDouble()) throw std::runtime_error("Illegal array");
-	      return v.toDouble();
-	    });
-	  return insideArray2;
-	});
+          if (!arrayValue2.isArray()) throw std::runtime_error("Illegal array");
+          QJsonArray jsonArray2 = arrayValue2.toArray();
+          StdDoubleArray insideArray2(jsonArray2.size());
+          std::transform(jsonArray2.begin(), jsonArray2.end(), insideArray2.begin(), [](QJsonValue const &v) {
+              if (!v.isDouble()) throw std::runtime_error("Illegal array");
+              return v.toDouble();
+            });
+          return insideArray2;
+        });
       return insideArray;
     });
   return true;
@@ -604,14 +606,14 @@ bool JSONStorage :: getStringArray(const char *key, StdStringList &retValue) con
   auto it = d->propertyObject.find(key);
   if (it == d->propertyObject.end()) return false;
   if (!(*it).isArray()) return false;
-  
+
   QJsonArray array = (*it).toArray();
   retValue.resize(array.size());
   std::transform(array.begin(), array.end(), retValue.begin(), [](QJsonValue const &v){
       if (!v.isString()) throw std::runtime_error("Illegal value");
       return v.toString().toStdString();
     });
-  
+
   return true;  
 }
 
@@ -645,10 +647,10 @@ StdStringList JSONStorage :: getModelLabels() const
   StdStringList ret(d->dataModelMap.size());
   auto keys = d->dataModelMap.keys();
   std::transform(keys.begin(), keys.end(), ret.begin(),
-		 [](QString &key) -> std::string {
-		   return key.toStdString();
-		 });
-  
+                 [](QString &key) -> std::string {
+                   return key.toStdString();
+                 });
+
   return ret;
 }
 
