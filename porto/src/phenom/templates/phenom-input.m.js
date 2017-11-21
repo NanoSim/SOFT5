@@ -1,4 +1,4 @@
-function par = ReactionParams
+function par = ReactionParams %#ok<FNDEF>
     par.Nads = @{soft.model.Nads};
     par.Ncomp = @{soft.model.Ncomp};
     par.Ncomp_T = @{soft.model.Ncomp_T};
@@ -29,7 +29,7 @@ function par = ReactionParams
     par.k_0j = @{arraySpan(soft.model.k_0j)};
     par.k0_s = @{arraySpan(soft.model.k0_s)};
     par.Keq_j = @{arraySpan(soft.model.Keq_j)};
-    par.MW = @{arraySpan(soft.model.MW)};
+    par.MW = @{arraySpan(soft.model.MW)}';
     par.MW_O2 = @{soft.model.MW_O2};
     par.MW_s = @{arraySpan(soft.model.MW_s)};
     par.n_rx = @{arraySpan(soft.model.n_rx)};
