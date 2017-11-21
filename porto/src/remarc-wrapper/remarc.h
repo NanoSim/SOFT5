@@ -8,7 +8,7 @@ class Remarc : public QObject
   Q_OBJECT
   
 public:  
-  Remarc(soft::Collection *, QString remarcPath, QObject *parent = nullptr);
+  Remarc(soft::Collection *, QString const &remarcPath, QObject *parent = nullptr);
   virtual ~Remarc();
 
 public slots:
@@ -22,7 +22,7 @@ signals:
   void finished();
   
 private:
-  QString remarcPath;
   QProcess *process;
+  QString remarcPath;
   soft::Collection *collection;
 };
