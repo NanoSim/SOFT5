@@ -5,14 +5,14 @@ function par = ReactionParams
     par.Nrx_g = @{soft.model.Nrx_g};
     par.Nrx_s = @{soft.model.Nrx_s};
 
-    par.Ac = @{soft.model.Ac}
+    par.Ac = @{soft.model.Ac};
     par.ADENT = @{arraySpan(soft.model.ADENT)};
     par.B = @{arraySpan(soft.model.B)};
     par.BET_a0 = @{soft.model.BET_a0};
     par.CP = @{table(soft.model.CP, 4, 6)};
     par.CP_s = @{soft.model.CP_s};
-    par.deltaHf = @{arraySpan(soft.model.deltaHf)};
-    par.deltaHf_s = @{arraySpan(soft.model.deltaHf_s)};
+    par.deltaHf = @{arraySpan(soft.model.deltaHf)}';
+    par.deltaHf_s = @{arraySpan(soft.model.deltaHf_s)}';
     par.Dt = @{soft.model.Dt};
     par.E = @{arraySpan(soft.model.E)};
     par.Ea_s = @{arraySpan(soft.model.Ea_s)};
