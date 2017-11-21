@@ -16,11 +16,11 @@ if(GTEST_FOUND)
     ${GTEST_LIBRARIES})
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_constexpr)
     add_test(${PROJECT_NAME}
-    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${porto-entities_BINARY_DIR})
+    ${RUNNER} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} "${soft-storage-plugins-external_BINARY_DIR}")
 
   if(UNIX)
     set_property(TEST ${PROJECT_NAME} PROPERTY
-      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${porto-entities_BINARY_DIR}")
+      ENVIRONMENT "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}:${porto-entities_BINARY_DIR}:${soft-storage-plugins-external_BINARY_DIR}")
   else()
     set_property(TEST ${PROJECT_NAME} PROPERTY
       ENVIRONMENT "PATH=${PATH};$ENV{PATH};${porto-entities_BINARY_DIR}")
