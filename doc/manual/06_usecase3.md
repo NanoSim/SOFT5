@@ -17,9 +17,19 @@ double constantEffectivenessFactor(double c) {
 }
 ```
 
-To simplify this use case, we are considering only the case of the constant effectiveness factor.
-
 Since the choice of functional form that best represents the different parameters (effectiveness factor and effective reaction parameters) are expressed by parScale, we can use this information to generate an Ansys FLUENT UDF which takes this into account. Generation of the UDF is similar to the UDF generation done in Use Case 1.
+
+To simplify this use case, we are from now on considering only the case of the constant effectiveness factor.
+
+The output from ParScale in the form of `json` files can be read and stored in Porto. To do this we need to define the entities describing this data and registering these entities with Porto:
+
+```bash
+$ soft-register-entity ~/source/soft5/porto/src/entities/effectivenessfactor.json
+$ soft-register-entity ~/source/soft5/porto/src/entities/effectivereactionparameters.json
+```
+
+Note that these two `json` files describe the structure of the entities and are not the same `json` files that ParScale produces.
+
 
 In order to store the output from ParScale to Porto, we run the following tool:
 
