@@ -12,6 +12,7 @@ from .arithmetic_eval import arithmetic_eval
 from .errors import SoftError, SoftMetadataError
 from .storage import Storage
 from .metadata import Metadata
+from .translators import translate
 from .utils import json_loads, json_dumps, json_load, json_dump
 
 
@@ -88,8 +89,10 @@ class MetaEntity(type):
                        doc='Entity version string.')
     namespace = property(lambda self: str(self.soft_metadata['namespace']),
                          doc='Entity namespace.')
-    description = property(lambda self: str(self.soft_metadata['description']),
-                           doc='Entity description.')
+    description = property(
+        lambda self: str(self.soft_metadata['description'])
+            if 'description' in self.soft_metadata else '',
+        doc='Entity description.')
     dimensions = property(lambda self: [
         str(d['name']) for d in self.soft_metadata['dimensions']],
                           doc='List of dimension labels.')
@@ -216,8 +219,8 @@ class BaseEntity(with_metaclass(MetaEntity)):
                     except SettingDerivedPropertyError:
                         pass
 
-    def __repr__(self):
-        return '%s(%s)' % (self.soft_get_meta_name(), self.soft_to_json())
+    #def __repr__(self):
+    #    return '%s(%s)' % (self.soft_get_meta_name(), self.soft_to_json())
 
     def soft_internal_dimension_size(self, e, label):
         """Returns the size of dimension `label`.
@@ -385,7 +388,7 @@ class BaseEntity(with_metaclass(MetaEntity)):
             ptype = self.soft_get_property_type(name)
             if   (not isinstance(value, ptype) and
                   not value is Uninitialized and
-                  not ptype == str):
+                  not ptype is str):
                 value = ptype(value)
             setattr(self, name, value)
 
@@ -475,9 +478,9 @@ class BaseEntity(with_metaclass(MetaEntity)):
                  for label in softpy.get_dimensions(self.__soft_entity__)]
         dim_sizes = []
         for sizeexpr in self.soft_get_property_dims(asStr(name)):
-             for label, size in sizes:
-                 sizeexpr = sizeexpr.replace(label, str(size))
-             dim_sizes.append(arithmetic_eval(sizeexpr))
+            for label, size in sizes:
+                sizeexpr = sizeexpr.replace(label, str(size))
+            dim_sizes.append(arithmetic_eval(sizeexpr))
         return dim_sizes
 
     def soft_update(self, other):
@@ -491,6 +494,17 @@ class BaseEntity(with_metaclass(MetaEntity)):
         for pname in self.soft_get_property_names():
             self.soft_set_property(pname, other.soft_get_property(pname))
 
+    def soft_translate_to(self, metadata, additional_instances=None):
+        """Returns `self` translated to an instance of `metadata`, where
+        `metadata` is any type accepted as the first argument to Metadata.
+
+        `additional_instances` may be used to provide additional input
+        instances needed for the translation."""
+        if additional_instances is None:
+            return translate(metadata, self)
+        if hasattr(additional_instances, 'soft_get_id'):
+            additional_instances = [additional_instances]
+        return translate(metadata, [self] + list(additional_instances))
 
 
     #-----------------------------------------------------------------------
@@ -537,7 +551,7 @@ class BaseEntity(with_metaclass(MetaEntity)):
         d = json_loads(s)
         self.soft_from_dict(d)
 
-    #-----------------------------------------------------------------------
+#=======================================================================
 
 
 def _get_prop_info(cls, name, field, default=None):

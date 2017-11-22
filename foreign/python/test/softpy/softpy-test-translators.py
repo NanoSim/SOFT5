@@ -33,18 +33,18 @@ def transD2C(d):
     dt = softpy.get_instancedict(d)
     return C(s=dt[md].s)
 
-#def transE2A(e):
-#    """Translates entities of type E to A."""
-#    dt = softpy.get_instancedict(e)
-#    return A(s=dt[me].s, length=100.0 * dt[me].length)
-#
+def transE2A(e):
+    """Translates entities of type E to A."""
+    dt = softpy.get_instancedict(e)
+    return A(s=dt[me].s, length=100.0 * dt[me].length)
+
 def transBC2A(bc):
     """Translates entities of type B, C to A."""
     dt = softpy.get_instancedict(bc)
     return A(s=dt[mc].s, length=100.0 * dt[mb].length)
 
 softpy.register_translator(transD2C, [md], [mc])
-#softpy.register_translator(transE2A, [me], [ma])
+softpy.register_translator(transE2A, [me], [ma])
 softpy.register_translator(transBC2A, [mb, mc], [ma])
 
 b = B(length=1.2)
@@ -67,3 +67,12 @@ assert a.length == 160.0
 a2 = softpy.translate(ma, [a])
 assert a2.s == a.s
 assert a2.length == a.length
+
+
+a = b.soft_translate_to(ma, d)
+assert a.s == 'd'
+assert a.length == 120.0
+
+a = e.soft_translate_to(ma)
+assert a.s == 'e'
+assert a.length == 160.0

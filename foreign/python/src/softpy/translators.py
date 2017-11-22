@@ -6,12 +6,12 @@ Translators can be registered as plugins and invoked transparently by
 SOFT.  For this to work, softpy search the current directory and all
 directories listed in the module `path` variable for *.pyt files.
 
-When this module is imported, the plugin search path is initialised
+When this module is imported, the translator search path is initialised
 from the environment variable SOFT_TRANSLATORS.  Like SOFTSTORAGE,
 this search path is colon-separated.
 
 A plugin *.pyt file should provide one or more sub-classes of Translator.
-For details, see the docstring for Translator.  When a
+For details, see the docstring for Translator.
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -27,6 +27,7 @@ else:
     import importlib.util
 
 from . import softpy
+from .metadata import Metadata
 from .errors import SoftError
 
 # FIXME: should be implemented in C++?
@@ -143,6 +144,12 @@ def register_translator(translator, inputs, outputs):
     outputs : sequence
         A sequence (name, version, namespace) tuples describing the
         entities the translator returns as output.
+
+    Note
+    ----
+    You normally don't need to call this function if you save your
+    translator in a *.pyt file saved somewhere listed in the
+    SOFT_TRANSLATORS environtment variable.
     """
     Translator._translators.append((translator, inputs, outputs))
 
@@ -177,23 +184,27 @@ def _translation_tree(output, inputs):
 
 
 def translate(output, input_instances):
-    """Returns a new instance of type `output` from `input_instances`.
+    """Returns a new instance of type `output` populated from `input_instances`.
 
-    Args:
-        output: A (name, version, namespace)-tuple specifying the desired
-            type.
-        input_instances: Sequence of input entity instances.
+    Parameters
+    ----------
+    output : metadata_like
+        A (name, version, namespace)-tuple (or any other type accepted as
+        the first argument to Metadata) specifying the entity type to
+        return.
+    input_instances : entity instance | sequence of entity instances
+        Sequence of input entity instances.
 
-    Returns:
-        New instance of the desired type populated from `input_instances`.
-
-    Raises:
-        SoftMissingTranslatorError: If none of the installed
-            translators can translate `input_instances` to an instance
-            of the desired type.
+    Notes
+    -----
+    SoftMissingTranslatorError is raised if none of the installed
+    translators can translate `input_instances` to an instance of the
+    desired type.
     """
+    if not isinstance(output, tuple):
+        output = Metadata(output).mtype
     if hasattr(input_instances, 'soft_get_id'):
-        instances = [input_instances]
+        input_instances = [input_instances]
     inputdict = get_instancedict(input_instances)
     if len(inputdict) != len(input_instances):
         raise SoftTranslatorError(
