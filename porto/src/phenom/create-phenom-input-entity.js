@@ -6,7 +6,7 @@ println = function (args) {
 }
 
 try {
-   porto.ChemkinReaction = entity.using('phenom-input', 'eu.nanosim.phenom', '1');
+   porto.PhenomInput = entity.using('phenom-input', 'eu.nanosim.phenom', '1');
 }
 catch (err) {
    println(err);
@@ -17,7 +17,7 @@ __main__ = function (args) {
    try {
       var storage = new porto.Storage("mongo2", "mongodb://localhost", "db=porto;coll=demo");
 
-      entity = new porto.ChemkinReaction();
+      entity = new porto.PhenomInput();
 
       entity.Nads = 4; // Number of adsorbing species
       entity.Ncomp = 6; // Number of gas species
