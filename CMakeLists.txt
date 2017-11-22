@@ -375,7 +375,6 @@ if (WITH_PORTO)
   add_subdirectory(porto/src/dft-prepare)
   add_subdirectory(porto/src/remarc-wrapper)
   add_subdirectory(porto/src/parscale-effectiveness-factor)
-#  add_subdirectory(porto/src/phenom)
   
  if (WITH_TESTS)
    add_subdirectory(porto/test/json)
