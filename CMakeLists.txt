@@ -13,25 +13,17 @@ set (SOFT_PATCH_VERSION 5)
 #       why this is at the start.
 include(CMakeToolsHelpers OPTIONAL)
 
-# FIXME - clean up dependencies between options
-#   * TESTS depends on: FOREIGN_C, STORAGE_JSON
-#   * PYTHON depends on: FOREIGN_C
-#   * +++
+#OPTION(BUILD_SHARED_LIBS "Build package with shared libraries." ON)
 option (WITH_TESTS "Compile tests"                        OFF)
 option (WITH_STORAGE_JSON "JSON storage support"          OFF)
 option (WITH_PLUGIN_SOFT_KERNEL "Compile kernel plugin"   OFF)
 option (WITH_STORAGE_EXTERNAL "External storage support"  OFF)
-option (WITH_FOREIGN_C "Compile with C API"               OFF)
 option (WITH_STORAGE_MONGO "MongoDB storage support"      OFF)
 option (WITH_WEB "Compile with Web support"               OFF)
 option (WITH_HSM "Compile with HSM plugin"                OFF)
 option (WITH_STORAGE_HD5 "HDF5 storage support"           OFF)
-option (WITH_PLUGIN_GSL "Compile GSL plugin"              OFF)
-option (WITH_PLUGIN_NLOPT "Compile NLOpt plugin"          OFF)
 option (WITH_PLUGIN_HD5 "Compile HDF5 plugin"             OFF)
 option (WITH_PLUGIN_MONGO "Compile MongoDB plugin"        OFF)
-option (WITH_STORAGE_CSV "Compile CSV plugin (experimental)" OFF)
-option (WITH_FOREIGN_FORTRAN "Compile with Fortran API"   OFF)
 option (WITH_FOREIGN_PYTHON "Compile with Python API"     OFF)
 option (WITH_NUMERICS "Compile with SOFT Numerics"        OFF)
 option (USE_PYTHON3 "Create Python 3 bindings instead of Python 2" OFF)
@@ -39,8 +31,26 @@ option (WITH_PORTO "Compile porto plugins"                OFF)
 option (BUILD_HD5 "Download and build HDF5"               OFF)
 option (BUILD_MONGOC "Download and build mongo C driver"  OFF)
 option (BUILD_GTEST "Download and build Google Test"      OFF)
+set(WITH_FOREIGN_C ON)
 
 set (SOFT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+mark_as_advanced(WITH_FOREIGN_C)
+mark_as_advanced(WITH_STORAGE_HD5)
+mark_as_advanced(WITH_STORAGE_MONGO)
+mark_as_advanced(WITH_STORAGE_EXTERNAL)
+mark_as_advanced(WITH_STORAGE_JSON)
+mark_as_advanced(WITH_HSM)
+mark_as_advanced(WITH_WEB)
+mark_as_advanced(WITH_PLUGIN_SOFT_KERNEL)
+mark_as_advanced(WITH_PLUGIN_HD5)
+mark_as_advanced(WITH_PLUGIN_MONGO)
+mark_as_advanced(WITH_PLUGIN_SOFT_KERNEL)
+
+if(BUILD_SHARED_LIBS)
+  set(BUILD_TYPE SHARED)
+else()
+  set(BUILD_TYPE STATIC)
+endif()
 
 # If we have Porto selected, this has some implications to which other plugins we also need
 if (WITH_PORTO)
@@ -137,6 +147,7 @@ if (WITH_TESTS)
 
   # Add a "memcheck" target that runs all checks with valgrind
   find_program(VALGRIND valgrind)
+  mark_as_advanced(VALGRIND)
   if(VALGRIND)
     set(MEMORYCHECK_COMMAND ${VALGRIND})
     set(MEMORYCHECK_COMMAND_OPTIONS
@@ -203,8 +214,6 @@ set (SCRIPT_PLUGINS_INSTALL_DIR ${SOFTBASE}/plugins)
 set (SIMUDF_PLUGINS_DIR ${SOFTBASE}/udf)
 set (INCLUDE_INSTALL_DIR include/${PROJECT_NAME})
 
-
-
 # Platform-dependent file extensions
 if(WIN32)
   set(EXEEXT ".exe")
@@ -270,11 +279,10 @@ endif (WITH_STORAGE_MONGO)
 
 if (WITH_STORAGE_JSON)
   add_subdirectory(storage/src/plugins/json)
+  if (WITH_TESTS)
+    add_subdirectory(storage/test/plugins/json)
+  endif (WITH_TESTS)
 endif (WITH_STORAGE_JSON)
-
-if (WITH_STORAGE_CSV)
-  add_subdirectory(storage/src/plugins/csv)
-endif (WITH_STORAGE_CSV)
 
 if (WITH_STORAGE_EXTERNAL)
   add_subdirectory(storage/src/plugins/external)
@@ -321,15 +329,13 @@ endif(WITH_WEB)
 
 # Foreign
 if (WITH_FOREIGN_C)
-  if (WITH_TESTS)
-    add_subdirectory(foreign/c/test/softc)
-    add_subdirectory(foreign/c/test/storage)
+  if (WITH_TESTS)    
+    if (WITH_STORAGE_HD5)
+      add_subdirectory(foreign/c/test/softc)
+      add_subdirectory(foreign/c/test/storage)
+    endif (WITH_STORAGE_HD5)
   endif (WITH_TESTS)
 endif (WITH_FOREIGN_C)
-
-if (WITH_FOREIGN_FORTRAN)
-  add_subdirectory(foreign/fortran/src/softf)
-endif (WITH_FOREIGN_FORTRAN)
 
 if (WITH_FOREIGN_PYTHON)
   if (USE_PYTHON3)

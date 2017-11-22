@@ -116,7 +116,7 @@ IDataModel *ExternalStrategy::dataModel () const
   return ret;
 }
 
-void ExternalStrategy::store (IDataModel const *model)
+void ExternalStrategy::store (IDataModel const *model) const
 {
   typedef int(*SavePrototype)(const struct _softc_datamodel_t*, const char*, const char*);
   ExternalModel const* extModel = dynamic_cast<ExternalModel const*>(model);
@@ -130,7 +130,7 @@ void ExternalStrategy::store (IDataModel const *model)
 void ExternalStrategy::endRetrieve (IDataModel *model) const
 {}
 
-void ExternalStrategy::startRetrieve (IDataModel *model) const
+void ExternalStrategy::startRetrieve (IDataModel *model)
 {
   typedef int(*LoadPrototype)(struct _softc_datamodel_t*, const char*, const char*);
   ExternalModel *extModel = dynamic_cast<ExternalModel*>(model);
