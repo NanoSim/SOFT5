@@ -166,6 +166,7 @@ void QCollection :: addDimMap(QString const &label,
   ref->addDimMap(label.toStdString(), entityDim.toStdString(), collectionDim.toStdString());
 }
 
+
 int QCollection :: numRelations() const
 {
   soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
@@ -182,10 +183,4 @@ QStringList QCollection :: findRelations(QString const &subject, QString const &
     ret << QString::fromStdString(relation);
   }
   return ret;
-}
-
-QString QCollection::allRelations() const 
-{
-  soft::Collection *ref = dynamic_cast<soft::Collection*>(entity.data());
-  return QString::fromStdString(ref->allRelations());
 }
