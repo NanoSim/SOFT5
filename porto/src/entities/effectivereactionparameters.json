@@ -1,6 +1,6 @@
 {
     "name": "effectivereactionparameters",
-    "version": "0.2",
+    "version": "0.1",
     "namespace": "eu.nanosim.parscale",
     "description": "Description of an effective reaction to be used in a continuum simulation. This function uses the reaction rate constant k (that might be calculated using a different expression) as the first argument.",
     "dimensions": 
@@ -12,34 +12,10 @@
         {
             "name": "narguments",
             "description": "Number of additional arguments passed to the functional form."
-        },
-        {
-            "name": "nreactants",
-            "description": "Number of reactants (Chemkin requires 0 < nreactants < 4)."
-        },
-        {
-            "name": "nproducts",
-            "description": "Number of products (Chemkin requires 0 < nreactants < 4)."
-        },
+        }
     ],
     "properties": 
 	[
-        {
-            "name": "reactants",
-            "type": "string",
-            "dims": [
-                "nreactants"
-            ],
-            "description": "Name of each reactant species."
-        },
-        {
-            "name": "products",
-            "type": "string",
-            "dims": [
-                "nproducts"
-            ],
-            "description": "Name of each product species."
-        },
         {
             "name": "multiplyByParticleVolumeFraction",
             "type": "int",
