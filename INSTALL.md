@@ -130,39 +130,58 @@ with curses interface) when configuring the build process. Hence, one may want t
 
 Ccmake offers the following configuration options (note, some of these options do not work on OpenSUSE, e.g., the GSL plugin):
 
- BUILD_GTEST                      OFF
- BUILD_HD5                        OFF
- BUILD_MONGOC                     OFF
- CMAKE_BUILD_TYPE                 Debug
- CMAKE_INSTALL_PREFIX             /usr/local
- Qt5Concurrent_DIR                /usr/lib64/cmake/Qt5Concurrent
- Qt5Core_DIR                      /usr/lib64/cmake/Qt5Core
- Qt5Network_DIR                   /usr/lib64/cmake/Qt5Network
- Qt5Script_DIR                    /usr/lib64/cmake/Qt5Script
- USE_PYTHON3                      OFF
- WITH_FOREIGN_C                   OFF
- WITH_FOREIGN_FORTRAN             OFF
- WITH_FOREIGN_PYTHON              OFF
- WITH_HSM                         OFF
- WITH_NUMERICS                    OFF
- WITH_PLUGIN_GSL                  OFF
- WITH_PLUGIN_HD5                  OFF
- WITH_PLUGIN_MONGO                OFF
- WITH_PLUGIN_NLOPT                OFF
- WITH_PLUGIN_SOFT_KERNEL          OFF
- WITH_PORTO                       OFF
- WITH_STORAGE_EXTERNAL            OFF
- WITH_STORAGE_HD5                 OFF
- WITH_STORAGE_JSON                OFF
- WITH_STORAGE_MONGO               OFF
- WITH_TESTS                       OFF
- WITH_WEB                         OFF 
-
+	BUILD_GTEST                      OFF                                          
+	BUILD_HD5                        OFF                                          
+	BUILD_MONGOC                     OFF                                          
+	CMAKE_BUILD_TYPE                 Debug                                        
+	CMAKE_INSTALL_PREFIX             /usr/local                                   
+	Qt5Concurrent_DIR                /<path-to>/Qt5Concurrent
+	Qt5Core_DIR                      /<path-to>/Qt5Core
+	Qt5Network_DIR                   /<path-to>/Qt5Network
+	Qt5Script_DIR                    /<path-to>/Qt5Script
+	WITH_PORTO                       ON                                           
+	WITH_TESTS                       ON      
 Note, that the "BUILD_*" options lead to the download and compilation of additional pieces of software (e.g., the mongoc library). These additional pieces of software will be installed in the build-soft5/usr directory.
 
 The "WITH_*" options may have additional dependencies, as described below.
 
-### WITH_STORAGE_HD5
+#### BUILD_GTEST
+Fetch and build the GTest framework. Use this option if you do not have GTest installed
+
+#### BUILD_HD5
+Fetch and build the HDF5 driver. Use this option if you do not have HDF5 libraries installed.
+
+#### BUILD_MONGOC
+Fetch and build the MongoDB C driver.
+
+#### WITH_PORTO
+Enables all options that is used to build and run the NanoSim/Porto toolkit
+
+#### WITH_TESTS
+Enable to allow for running SOFT5 unit tests (make test). __Recommended!__
+
+
+### Advanced options
+By typing 't' in ccmake, the advanced options are toggled on and off.
+
+	WITH_FOREIGN_PYTHON              OFF 
+	WITH_HSM                         OFF 
+	WITH WITH_NUMERICS               OFF 
+	WITH_PLUGIN_HD5                  OFF 
+	WITH_PLUGIN_MONGO                OFF 
+	WITH_PLUGIN_SOFT_KERNEL          OFF 
+	WITH_STORAGE_EXTERNAL            OFF 
+	WITH_STORAGE_HD5                 OFF 
+	WITH_STORAGE_JSON                OFF 
+	WITH_STORAGE_MONGO               OFF 
+	WITH_WEB                         OFF 
+	WITH_HSM                         OFF 
+
+#### WITH_FOREIGN_PYTHON
+
+Enable Python interfaces
+
+#### WITH_STORAGE_HD5
 
 This option enables HDF5 as a storage back-end.
 
