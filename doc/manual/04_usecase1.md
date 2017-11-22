@@ -13,6 +13,19 @@ Porto:
 
 ## Prerequisite
 
+This section contains prerequisites that needs to be resolved before
+running the examples.
+
+### Run a local installation of MongoDB
+In the case where mongodb is installed, but not currently running it
+is possible to run the service from the shell:
+
+	sudo mongod --dbpath=/<path-to-data>/data --smallfiles
+	
+The `--smallfiles` option allows for mongodb to run on a computer with
+limited resources, as each journal file is reduced from 1GB to 128MB.
+
+### DFT data preparations
 In order to run this workflow, it is assumed that there already exists
 DFT data coming from VASP simulations. This includes
 
@@ -23,6 +36,25 @@ We will demonstrate the use of a 'Reference' entity to simply store the
 location of the Gas Phase Species Data. For the accompanying
 thermo-properties we want to store the entire file in our database for
 later use.
+
+### Register entities in the database
+The scripts in this UseCase utilizes the automatic runtime generation
+of types and objects in JavaScript. For this to work we need to
+register the entities that we will use. In this first Use Case we are
+only using the chemkinReaction. Register the entity by issuing the
+following command
+
+	soft-register-entity <soft-source-directory>/porto/src/entities/chemkinreaction.json
+
+### Python dependencies
+Remarc uses the Python library YAML. This module can be installed with pip
+	
+	pip install pyyaml 
+	
+Or system-wide using apt/yum
+
+	sudo apt-get install python-yaml # For Debian-based systems
+	sudo yum install python-yaml # For RedHat-based systems
 
 ## Create an initial collection with DFT-data
 The dft-prepare is a tool written in C++ that takes the Gas Phase
@@ -106,7 +138,10 @@ be stored in the internal storage (mongodb). This data can be further
 used to reproduce the original CHEMKIN-II data files if needed.
 
 ```bash
-$ ./remarc-wrapper remarc/ {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+$ # note that the uuid "cc3bc435-159c-4e96-b53f-1b97a526d5ce" will be different 
+$ # for each time dft-prepare is run. Replace the statement below with the the 
+$ # correct uuid.
+$ remarc-wrapper remarc/ cc3bc435-159c-4e96-b53f-1b97a526d5ce
 bin size: == 1
 started
 Extracting VASP data from: /home/user/nanosim-demo/dft/Fe2O3
@@ -194,13 +229,13 @@ calculations.
 Running the genudf utility gives the following:
 
 ```bash
-$ ./genudf.js {cc3bc435-159c-4e96-b53f-1b97a526d5ce}
+$ cd udfgen && ./genudf.js cc3bc435-159c-4e96-b53f-1b97a526d5ce
 ```
 
 This produces the two UDFs
 
 ```c++
-/* Fluent UDF using id{fcf0db6f-3961-4f67-920a-8c5f4733994f}*/ 
+/* Fluent UDF using id{cc3bc435-159c-4e96-b53f-1b97a526d5ce}*/ 
 
 #include "udf.h"
 

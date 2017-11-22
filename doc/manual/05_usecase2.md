@@ -10,6 +10,7 @@ We assume that a simulation in REMARC has already been run and the simulation re
 Before we do the actual connection, we run the tool `inspectChemkinReactionEntity.js` which takes an uuid of a collection as argument. This allows us to inspect the contents of the Collection. In this example walkthrough we do this visual inspection in order to verify that the data is in place and that we are using the correct uuid. The following output is produced:
 
 ```bash
+$ cd porto/examples/chemkin_generator
 $ ./inspectChemkinReactionEntity.js a6a71841-139a-4310-a9e6-ef7a6f161a6f
 Collection (uuid = a6a71841-139a-4310-a9e6-ef7a6f161a6f)
 |    Reactants => Products, A, b, Ea
