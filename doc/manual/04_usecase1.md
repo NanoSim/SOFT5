@@ -23,7 +23,7 @@ is possible to run the service from the shell:
 	sudo mongod --dbpath=/<path-to-data>/data --smallfiles
 	
 The `--smallfiles` option allows for mongodb to run on a computer with
-limited resources, as each journal file is reduced freom 1GB to 128MB.
+limited resources, as each journal file is reduced from 1GB to 128MB.
 
 ### DFT data preparations
 In order to run this workflow, it is assumed that there already exists
