@@ -18,16 +18,16 @@ static std::list<std::string> findEntityLabels(soft::Collection const &collectio
 					       std::string const &version)
 {
   std::list<std::string> entityLabels;
-  auto const registeredEntities = collection.findRelations("Entity", "^is-a");
-  for (auto const entity : registeredEntities) {    
-    auto names = collection.findRelations(entity, "name");
-    auto nss = collection.findRelations(entity, "namespace");
-    auto versions = collection.findRelations(entity, "version");
+  auto const registeredEntityLabels = collection.findRelations("Entity", "^is-a");
+  for (std::string const entityLabel : registeredEntityLabels) {    
+    auto const names    = collection.findRelations(entityLabel, "name");
+    auto const nss      = collection.findRelations(entityLabel, "namespace");
+    auto const versions = collection.findRelations(entityLabel, "version");
     if (names.size() > 0 && nss.size() > 0 && version.size() > 0) {
       if (names.front() == name
 	  && nss.front() == ns
 	  && versions.front() == version){	
-	entityLabels.push_back(entity);
+	entityLabels.push_back(entityLabel);
       }
     }
   }
