@@ -1,5 +1,7 @@
 #include <system_error>
 #include <cassert>
+#include <string>
+#include <stdexcept>
 #include <QtCore>
 #include <Soft>
 #include "portooutput.h"
@@ -7,6 +9,41 @@
 #include "file.hxx"
 #include "chemkinreaction.hxx"
 #include "common.h"
+
+//! Helper function to fetch entity labels of a given type (name,
+//! namespace, version) from a \a collection
+static std::list<std::string> findEntityLabels(soft::Collection const &collection,
+					       std::string const &name,
+					       std::string const &ns,
+					       std::string const &version)
+{
+  std::list<std::string> entityLabels;
+  auto const registeredEntityLabels = collection.findRelations("Entity", "^is-a");
+  for (std::string const entityLabel : registeredEntityLabels) {    
+    auto const names    = collection.findRelations(entityLabel, "name");
+    auto const nss      = collection.findRelations(entityLabel, "namespace");
+    auto const versions = collection.findRelations(entityLabel, "version");
+    if (names.size() > 0 && nss.size() > 0 && version.size() > 0) {
+      if (names.front() == name
+	  && nss.front() == ns
+	  && versions.front() == version){	
+	entityLabels.push_back(entityLabel);
+      }
+    }
+  }
+  return entityLabels;
+}
+
+//! Helper function to look up the ID of a given \a label in a \a
+//! collection
+static std::string findUuid(soft::Collection const &collection, std::string const &label)
+{
+  auto const uuid = collection.findRelations(label, "id");
+  if (uuid.size() != 1)
+    throw std::runtime_error("Illegal collection");
+  return uuid.front();
+}
+					       
 
 PortoOutput :: PortoOutput(soft::Collection *collection, QObject *parent)
   : QObject(parent)
@@ -54,27 +91,19 @@ void PortoOutput :: run()
     .arg(thermoFileInfo.absolutePath())
     .arg(chemicalInfo.fileName())
     .arg(thermoFileInfo.fileName());
+
+  // Read the reactions from ChemkinCollection and register the relations in the collection
+  soft::Collection chemkinCollection;
   QScopedPointer<soft::Storage> chemkinStorage (new soft::Storage("external", qPrintable(url), ""));
+  chemkinCollection.setName("ChemkinCollection");
+  chemkinCollection.setVersion("1.0-DEMO");
+  chemkinStorage->load(&chemkinCollection);
+  auto labels = findEntityLabels(chemkinCollection, "chemkinreaction", "eu.nanosim.vasp", "0.1");
 
-  // Read collection from the external storage
-  QScopedPointer<soft::Collection> chemkinCollection(new soft::Collection());
-  auto chemkinReaction0 = new soft::Chemkinreaction(0,0,0,0,0);
-  auto chemkinReaction1 = new soft::Chemkinreaction(0,0,0,0,0);
-  chemkinCollection->attachEntity("reaction_0", chemkinReaction0);
-  chemkinCollection->attachEntity("reaction_1", chemkinReaction1);
-  chemkinCollection->setName("ChemkinCollection");
-  chemkinCollection->setVersion("1.0-DEMO");
-  chemkinStorage->load(chemkinCollection.data());
-  storage.save(chemkinReaction0);
-  storage.save(chemkinReaction1);
-  storage.save(chemkinCollection.data());
-  collection->addRelation("reactiondata", "has-id", chemkinReaction0->id());
-  collection->addRelation("reactiondata", "has-id", chemkinReaction1->id());
-
-  // Attach the chemkin collection to out main collection and write back all changes
-  collection->registerEntity("chemkinCollection", chemkinCollection.data());
-  storage.save(collection);  
-  
+  for (auto l : labels) {
+    auto id = findUuid(chemkinCollection, l);
+    collection->addRelation("reactiondata", "has-id", id);    
+  }
   emit finished();
 }
 
