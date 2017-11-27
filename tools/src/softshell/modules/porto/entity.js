@@ -8,7 +8,8 @@
 			  function(err)
 			  {
 			      if (err) throw (err);
-			  });       
+			  });
+	/*
         A.prototype.generic = generic;
         
         
@@ -16,14 +17,6 @@
             this.generic.setSchema(arg);
         };
         
-        A.prototype.create = function(arg){
-            if (typeof arg !== "undefined") {
-                this.generic = new soft.Entity(arg);
-            } else {
-                this.generic = new soft.Entity();
-            }
-        };
-
         A.prototype.id = function(){
             return this.generic.id();
         }
@@ -37,7 +30,7 @@
             storage.load(this.generic);
             this.getAll();
 	};
-	
+	*/
 	return A.prototype.constructor;
     };                
     

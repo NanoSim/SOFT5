@@ -1,5 +1,5 @@
 function quote( str ) {
-    return str.replace(/\n/g,'\\n').replace(/\"/g,'\\\"').replace(/\'/g,'\\\'')
+    return str.replace(/\n/g,'\\n').replace(/\"/g,'\\\"').replace(/\'/g,'\\\'');
 }
 
 (function (entityfactory){   
@@ -29,40 +29,41 @@ function quote( str ) {
 	var obj = JSON.parse(bson.asString());
         obj["_id"] = undefined;
         var schema = JSON.stringify(obj);
-        var def = "(function(){function b(arg){";
+        var def = "(function(){function b(id){";
+	def += "if (id !== undefined && id != null && id.length > 0) {this.setId(id);}";
         
         obj.properties.forEach (function (property){
 	    if(property.dims != undefined) {
 		def += "this."+property.name+"=[];";
 	    }});
 
-        def += "this.create(arg);";
         def += "this.setSchema(\"" + quote(schema)+ "\");";
 
         obj.properties.forEach (function (property) {
 	    var pname = property.name.charAt(0).toUpperCase() + property.name.slice(1),
 		setter = "set" + pname,
 		getter = "get" + pname;
-	    def += "b.prototype." + setter + " = function(a) {this." + property.name + "=a;};" +
-		"b.prototype." + getter + " = function() {return this." + property.name + ";};";	
+	    def += "this." + setter + " = function(a) {this.setProperty('"+property.name+"',a);};" +
+		"this." + getter + " = function() {return this.getProperty('"+property.name+"');};";	
 	});
 
         var sets = [];
         var gets = [];
         obj.properties.forEach (function (property) {
-            var setline = "this.generic.setProperty('"+property.name+"', this."+property.name+");";
-            var getline = "this."+property.name+" = this.generic.property('"+property.name+"');";
+            var setline = "this.setProperty('"+property.name+"', this."+property.name+");";
+            var getline = "this."+property.name+" = this.property('"+property.name+"');";
             sets.push(setline);
             gets.push(getline);
         });
 
-        def += "b.prototype.setAll=function(){"+sets.join("")+"};";
-        def += "b.prototype.getAll=function(){"+gets.join("")+"};";
-        def += "};return b.prototype.constructor;})();";
-	
+        def += "this.setAll=function(){"+sets.join("")+"};";
+        def += "this.getAll=function(){"+gets.join("")+"};";
+	def += "}";
+	def += "b.prototype = new soft.Entity;";
+	def += "b.prototype.constructor=b;";
+        def += "return b.prototype.constructor;})();";
+	print (def);
         return eval(def);
-        
-
     };
     return entityfactory;
 })(exports);
