@@ -9,28 +9,7 @@
 			  {
 			      if (err) throw (err);
 			  });
-	/*
-        A.prototype.generic = generic;
-        
-        
-        A.prototype.setSchema = function(arg){
-            this.generic.setSchema(arg);
-        };
-        
-        A.prototype.id = function(){
-            return this.generic.id();
-        }
-        
-	A.prototype.save = function(storage){
-            this.setAll();
-	    storage.save(this.generic);
-	};
-	
-	A.prototype.read = function(storage){            
-            storage.load(this.generic);
-            this.getAll();
-	};
-	*/
+
 	return A.prototype.constructor;
     };                
     

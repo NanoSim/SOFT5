@@ -1,3 +1,8 @@
+function DatabaseException(message) {
+    this.message = message;
+    this.name = 'DatabaseException';
+}
+
 function quote( str ) {
     return str.replace(/\n/g,'\\n').replace(/\"/g,'\\\"').replace(/\'/g,'\\\'');
 }
@@ -11,7 +16,8 @@ function quote( str ) {
 	var coll    = mclient.collection(META_DATABASE, META_COLLECTION);
 	var cursor  = coll.find({
 	    name: entityName,
-	    version: entityVersion
+	    version: entityVersion,
+	    namespace: entityNamespace
 	});
 	
 	var bson = cursor.next();
@@ -22,9 +28,9 @@ function quote( str ) {
 	    } else {
 		console.error(errormsg);
 	    }
+	    throw new DatabaseException(errormsg);
 	    return undefined;
 	}
-
         
 	var obj = JSON.parse(bson.asString());
         obj["_id"] = undefined;
@@ -44,14 +50,14 @@ function quote( str ) {
 		setter = "set" + pname,
 		getter = "get" + pname;
 	    def += "this." + setter + " = function(a) {this.setProperty('"+property.name+"',a);};" +
-		"this." + getter + " = function() {return this.getProperty('"+property.name+"');};";	
+		"this." + getter + " = function() {return this.property('"+property.name+"');};";	
 	});
 
         var sets = [];
         var gets = [];
         obj.properties.forEach (function (property) {
             var setline = "this.setProperty('"+property.name+"', this."+property.name+");";
-            var getline = "this."+property.name+" = this.property('"+property.name+"');";
+            var getline = "this." + property.name+"= this.property('"+property.name+"');";
             sets.push(setline);
             gets.push(getline);
         });
@@ -62,7 +68,6 @@ function quote( str ) {
 	def += "b.prototype = new soft.Entity;";
 	def += "b.prototype.constructor=b;";
         def += "return b.prototype.constructor;})();";
-	print (def);
         return eval(def);
     };
     return entityfactory;

@@ -22,9 +22,10 @@
 	return this.collection.find(expr);
     };
     
-    Container.prototype.find = function(entityName, entityVersion) {
+    Container.prototype.find = function(entityName, entityVersion, entityNamespace) {
 	var query = {
 	    name: entityName,
+	    namespace: entityNamespace,
 	    version: entityVersion
 	};
 	

@@ -363,6 +363,8 @@ qWarn = function (message) {
 
 	if (QTest._loggerImplements("end"))
             QTest.logger.end(testcase);
+
+	return (QTest.failCount == 0);
     };
     
     /*!
