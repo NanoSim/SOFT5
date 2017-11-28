@@ -19,7 +19,7 @@ public:
   virtual ~GenericEntity();
 
   void setSchema(std::string const &json);
-  void setId(std::string const &);
+  void setId(std::string const &) override;
   void save(IDataModel *) const override;
   void load(IDataModel const *) override;
   static IEntity* create (const std::string &uuid = std::string());

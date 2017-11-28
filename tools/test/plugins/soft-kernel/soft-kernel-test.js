@@ -1,39 +1,15 @@
 #!/usr/bin/env softshell
 
-// This array comparison code has been borrows from stackoverflow.com
-// https://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript
-if(!Array.prototype.equals) {
-    // attach the .equals method to Array's prototype to call it on any array
-    Array.prototype.equals = function (array) {
-	// if the other array is a falsy value, return
-	if (!array)
-            return false;
-	
-	// compare lengths - can save a lot of time 
-	if (this.length != array.length)
-            return false;
-	
-	for (var i = 0, l=this.length; i < l; i++) {
-            // Check if we have nested arrays
-            if (this[i] instanceof Array && array[i] instanceof Array) {
-		// recurse into the nested arrays
-		if (!this[i].equals(array[i]))
-                    return false;       
-            }           
-            else if (this[i] != array[i]) { 
-		// Warning - two different object instances will never be equal: {x:20} != {x:20}
-		return false;   
-            }           
-	}       
-	return true;
-    };
-    // Hide method from for-in loops
-    Object.defineProperty(Array.prototype, "equals", {enumerable: false});
-}
-
+if(!Array.prototype.equals) Array.prototype.equals = function (array) {
+    if (this.length != array.length) return false;
+    for (var i = 0; i < array.length; ++i) {
+        if (this[i] != array[i]) return false;
+    }
+    return true;
+};
 
 readEntities = {
-    name: "soft-kernel-test",    
+    name: "soft-kernel-test",
     create_reaction: function() {
 	// Write a set of reactants to the output file
 	var reactants = ["C", "O"];
