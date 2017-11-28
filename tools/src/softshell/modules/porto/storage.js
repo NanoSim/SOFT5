@@ -1,6 +1,5 @@
 (function (storageFactory){
     storageFactory.createStorage = function(driver, uri, opts) {
-	print ("Creating storage!");
 	this.storage = new soft.Storage(driver, uri, opts);
 
 	this.save = function(entity) {
