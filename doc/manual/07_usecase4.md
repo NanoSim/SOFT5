@@ -2,13 +2,17 @@
 
 This use case demonstrates how to use Porto to generate input to the MATLAB program Phenom. The code for this use case can be found in the `porto/src/phenom` folder of the Porto repository.
 
-_TODO: We need some description of Phenom_
+Phenom is a 1-D phenomenological model for fluidized bed reactors, which was developed to simulate the performance of second generation CO<sub>2</sub> capture technologies with focus on chemical looping reforming (CLR) [1]. The model consists of a generic formulation based on an averaging probabilistic approach and can be used under bubbling, turbulent and fast fluidization regimes. The main purpose of using a 1-D phenomenological model instead of a more complex fundamental formulation is to provide valuable and sufficiently accurate information of industrial interest with less computational costs and within simulation times in the order of seconds/minutes. 1-D phenomenological models are effective tools for simulation, design and optimization of complex technologies while fundamental computational fluid dynamics (CFD) models are not so easily accessible by the industry. Phenom is implemented in Matlab.
+
+1. Joana Francisco Morgado, Schalk Cloete, John Morud, Thomas Gurker, Shahriar Amini (2017). Modelling study of two chemical looping reforming reactor configurations: looping vs. switching. Powder Technology 316, 599–613
+
 
 ## Walkthrough
 
 Since MATLAB does not presently directly communicate with Porto, we choose to generate a MATLAB function that will return the full set of input parameters needed to run the Phenom code.
 
-This is done by:
+This is done by: 
+
 * Ensuring that a Porto entity described by `phenom-input.json` is populated with input data.
 * Retrieving an `phenom-input` entity from the database by referring to its uuid.
 * Populating a MATLAB function template with the contents of the `phenom-input` entity.
@@ -22,7 +26,11 @@ $ ./make-phenom-input.js a6a71841-139a-4310-a9e6-ef7a6f161a6f > phenom_input.m
 
 This creates the file `phenom_input.m`.
 
-_TODO: Some description on how to use the file in Matlab with Phenom_
+Call the main program of Phenom in Matlab using the input file as argument: 
+
+`phenom_main_fvm('phenom_input');`
+
+This creates plots of the solution as well as an output file `output_cond.mat` that contains the reactor output streams (pressure, temperature, composition of the gas and solids phases). 
 
 
 
@@ -30,7 +38,7 @@ _TODO: Some description on how to use the file in Matlab with Phenom_
 
 ### `phenom-input.json` entity description
 
-The entity describing the input parametesr to Phenom is structured in the following entity:
+The entity describing the input parameters to Phenom is structured in the following entity:
 
 ```json
 {
@@ -499,4 +507,3 @@ function par = ReactionParams
     par.Param.memb.Nm = @{soft.model.Nm};
 end
 ```
-
