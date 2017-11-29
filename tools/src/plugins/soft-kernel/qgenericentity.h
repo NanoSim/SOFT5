@@ -24,6 +24,7 @@ public slots:
   QString metaVersion() const;
 
   void setSchema(QString const&);
+  void setId(QString const&);
   void debug() const;
   QVariant property(QString const&) const;
   void setProperty(QString const&, QVariant const&);

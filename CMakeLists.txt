@@ -316,7 +316,10 @@ endif(WITH_PLUGIN_HD5)
 if (WITH_PLUGIN_SOFT_KERNEL)
   add_subdirectory(tools/src/plugins/soft-kernel)
   if (WITH_TESTS)
-    add_subdirectory(tools/test/plugins/soft-kernel)
+    # Warning, this test will not run correctly until a make-install has been issued
+    # and SOFTBASE is set.
+    
+    # add_subdirectory(tools/test/plugins/soft-kernel)
   endif (WITH_TESTS)
 endif(WITH_PLUGIN_SOFT_KERNEL)
 
@@ -371,7 +374,6 @@ if (WITH_PORTO)
   add_subdirectory(porto/src/json)
   add_subdirectory(porto/src/chemkin)
   add_subdirectory(porto/src/remarcinit)
-  add_subdirectory(porto/src/xyplot)
   add_subdirectory(porto/src/dft-prepare)
   add_subdirectory(porto/src/remarc-wrapper)
   add_subdirectory(porto/src/parscale-effectiveness-factor)

@@ -23,6 +23,12 @@ void QGenericEntity :: setSchema(QString const& schema)
   ref->setSchema(schema.toStdString());
 }
 
+void QGenericEntity :: setId(QString const& newId)
+{
+  soft::GenericEntity *ref = dynamic_cast<soft::GenericEntity*>(entity.data());
+  ref->setId(newId.toStdString());
+}
+
 QVariant QGenericEntity :: property(QString const &key) const
 {
   soft::GenericEntity *ref = dynamic_cast<soft::GenericEntity*>(entity.data());

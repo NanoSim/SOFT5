@@ -385,6 +385,11 @@ GenericEntity :: GenericEntity(const IEntity *other)
 GenericEntity :: ~GenericEntity()
 {}
 
+void GenericEntity :: setId(std::string const &newId)
+{
+  IEntity::setId(newId);
+}
+
 void GenericEntity :: save(IDataModel *dataModel) const 
 {
   auto obj = d->schema;
