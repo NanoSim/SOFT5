@@ -37,14 +37,22 @@ function quote( str ) {
         var schema = JSON.stringify(obj);
         var def = "(function(){function b(id){";
         def += "if (id !== undefined && id != null && id.length > 0) {this.setId(id);}";
-        
+        def += "this.dim = {};";
         obj.properties.forEach (function (property){
             if(property.dims != undefined) {
                 def += "this."+property.name+"=[];";
             }});
-
+        
         def += "this.setSchema(\"" + quote(schema)+ "\");";
+        obj.dimensions.forEach (function (dimension) {
+            var dname = dimension.name.charAt(0).toUpperCase() + dimension.name.slice(1),
+                setter = "set" + dname,
+                getter = "get" + dname;
+            def += "this.dim." + setter + " = function(a) {this.setDimension('"+dimension.name+"',a);};" +
+                "this.dim." + getter + " = function() {return this.dimension('"+dimension.name+"');};";       
+        });
 
+        
         obj.properties.forEach (function (property) {
             var pname = property.name.charAt(0).toUpperCase() + property.name.slice(1),
                 setter = "set" + pname,
@@ -55,6 +63,13 @@ function quote( str ) {
 
         var sets = [];
         var gets = [];
+        obj.dimensions.forEach (function (dimension) {
+            var setline = "this.setDimension('"+dimension.name+"', this.dim."+dimension.name+");";
+            var getline = "this.dim." + dimension.name+"= this.dimension('"+dimension.name+"');";
+            sets.push(setline);
+            gets.push(getline);
+        });
+       
         obj.properties.forEach (function (property) {
             var setline = "this.setProperty('"+property.name+"', this."+property.name+");";
             var getline = "this." + property.name+"= this.property('"+property.name+"');";
@@ -68,6 +83,7 @@ function quote( str ) {
         def += "b.prototype = new soft.Entity;";
         def += "b.prototype.constructor=b;";
         def += "return b.prototype.constructor;})();";
+        print(def);
         return eval(def);
     };
     return entityfactory;

@@ -1,9 +1,9 @@
 function par = ReactionParams %#ok<FNDEF>
-    par.Nads = @{soft.model.Nads};
-    par.Ncomp = @{soft.model.Ncomp};
-    par.Ncomp_T = @{soft.model.Ncomp_T};
-    par.Nrx_g = @{soft.model.Nrx_g};
-    par.Nrx_s = @{soft.model.Nrx_s};
+    par.Nads = @{soft.model.dim.Nads};
+    par.Ncomp = @{soft.model.dim.Ncomp};
+    par.Ncomp_T = @{soft.model.dim.Ncomp_T};
+    par.Nrx_g = @{soft.model.dim.Nrx_g};
+    par.Nrx_s = @{soft.model.dim.Nrx_s};
 
     par.Ac = @{soft.model.Ac};
     par.ADENT = @{arraySpan(soft.model.ADENT)};
