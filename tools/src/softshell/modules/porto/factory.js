@@ -83,7 +83,6 @@ function quote( str ) {
         def += "b.prototype = new soft.Entity;";
         def += "b.prototype.constructor=b;";
         def += "return b.prototype.constructor;})();";
-        print(def);
         return eval(def);
     };
     return entityfactory;

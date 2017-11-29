@@ -13,14 +13,18 @@ Since MATLAB does not presently directly communicate with Porto, we choose to ge
 
 This is done by: 
 
-* Ensuring that a Porto entity described by `phenom-input.json` is populated with input data.
+* Ensuring that a Porto entity instance described by `phenom-input.json` is populated with input data, and the entity is registered in the metadata database.
 * Retrieving an `phenom-input` entity from the database by referring to its uuid.
 * Populating a MATLAB function template with the contents of the `phenom-input` entity.
 * Writing the MATLAB function to a `.m` file that can be evaluated.
 
-This entire process can be performed by running the `make-phenom-input.js` script with the uuid of the `phenom-input` entity: 
+This entire process can be performed by running the `define-phenom-input.js` and `make-phenom-input.js` script with the uuid of the `phenom-input` entity: 
 
 ```bash
+$ cd porto/src/phenom 
+$ soft-register-entity template/phenom-input.json # Register metadata. (Do this only once!)
+$ ./define-phenom-input.js  # Populate an instance of the PhenomInput Entity and stores the data
+a6a71841-139a-4310-a9e6-ef7a6f161a6f
 $ ./make-phenom-input.js a6a71841-139a-4310-a9e6-ef7a6f161a6f > phenom_input.m
 ```
 
@@ -435,11 +439,11 @@ The template used to generate the Matlab file is given below. This results in a 
 
 ```js
 function par = ReactionParams
-    par.Nads = @{soft.model.Nads};
-    par.Ncomp = @{soft.model.Ncomp};
-    par.Ncomp_T = @{soft.model.Ncomp_T};
-    par.Nrx_g = @{soft.model.Nrx_g};
-    par.Nrx_s = @{soft.model.Nrx_s};
+    par.Nads = @{soft.model.dim.Nads};
+    par.Ncomp = @{soft.model.dim.Ncomp};
+    par.Ncomp_T = @{soft.model.dim.Ncomp_T};
+    par.Nrx_g = @{soft.model.dim.Nrx_g};
+    par.Nrx_s = @{soft.model.dim.Nrx_s};
 
     par.Ac = @{soft.model.Ac}
     par.ADENT = @{arraySpan(soft.model.ADENT)};

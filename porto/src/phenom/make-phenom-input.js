@@ -25,7 +25,8 @@ has = function (a, v) {
 
 __main__ = function (args) {
     if (args.length <= 1) {
-        print("Usage: ", args[0], "<uuid>");
+        print("Usage: ", args[0], "<UUID>");
+        print("Builds a matlab/phenom input file. Assumes that the UUID is a valid data point in a SOFT/JSON storage 'phenom-data.json'.");
         return 1;
     }
     try {
