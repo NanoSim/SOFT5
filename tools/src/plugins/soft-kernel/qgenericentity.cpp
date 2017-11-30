@@ -41,6 +41,18 @@ void QGenericEntity :: setProperty(QString const& key, QVariant const &value)
   ref->setProperty(key,value);
 }
 
+QVariant QGenericEntity :: dimension(QString const& key) const
+{
+  soft::GenericEntity *ref = dynamic_cast<soft::GenericEntity*>(entity.data());
+  return ref->dimension(key);
+}
+
+void QGenericEntity :: setDimension(QString const& key, QVariant const& value)
+{
+  soft::GenericEntity *ref = dynamic_cast<soft::GenericEntity*>(entity.data());
+  ref->setDimension(key, value);
+}
+
 QString QGenericEntity :: id() const
 {
   return QEntity::id();

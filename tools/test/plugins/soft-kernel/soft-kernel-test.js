@@ -21,10 +21,10 @@ readEntities = {
 	}
 	var uuid = "";
 	try {	    
-	    var storage = require('porto.storage')
-		    .createStorage('json', 'output-test.json');
+	    var storage = require('porto.storage').createStorage('json', 'output-test.json');
 
 	    var reaction = new SimpleReaction();
+            reaction.dim.nreactants = 2;
 	    reaction.setReactants(reactants);
 	    uuid = reaction.id();
 	    storage.save(reaction);	    
@@ -48,6 +48,32 @@ readEntities = {
 	} catch (err) {
 	    qFail(err);
 	}
+    },
+
+    property_based: function() {
+        var uuid = "";
+        try {
+            SimpleReaction = require('porto.entity').using('simpleReaction', 'http://www.sintef.no/soft5/schema', '1');
+            var storage = require('porto.storage').createStorage('json', 'reactant-test.json');
+            var reaction = new SimpleReaction();
+            uuid = reaction.id();
+            reaction.dim.nreactants = 3;
+            reaction.reactants = ["A", "B", "C"];
+            reaction.setAll();
+            storage.save(reaction);
+        } catch (err) {
+            qFail(err);
+        }
+
+        try {
+            var readReaction = new SimpleReaction(uuid);
+            storage.load(readReaction);
+            readReaction.getAll();
+            qCompare(readReaction.dim.nreactants, 3);           
+
+        } catch (err) {
+            qFail(err);
+        }
     }
 };
 

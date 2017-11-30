@@ -23,12 +23,15 @@ public:
   void save(IDataModel *) const override;
   void load(IDataModel const *) override;
   static IEntity* create (const std::string &uuid = std::string());
-  
+
   std::vector<std::string> dimensions() const override;
   int getDimensionSize(std::string const &) const override;
   QVariant property(QString const&) const;
   void setProperty(QString const&, QVariant const&);
+  QVariant dimension(QString const &) const;
+  void setDimension(QString const&, QVariant const &);
   void debug();
+
   
 private:  
   struct Private;
